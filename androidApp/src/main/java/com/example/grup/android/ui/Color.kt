@@ -11,48 +11,56 @@ val white = Color(0xFFFFFFFF)
 val red_error = Color(0xffff0033)
 
 class AppColors(
-    background: Color,
-    button: Color,
+    primary: Color,
+    secondary: Color,
     textPrimary: Color,
+    textSecondary: Color,
     error: Color
 ) {
-    var background by mutableStateOf(background)
+    var primary by mutableStateOf(primary)
         private set
-    var button by mutableStateOf(button)
+    var secondary by mutableStateOf(secondary)
         private set
     var textPrimary by mutableStateOf(textPrimary)
+        private set
+    var textSecondary by mutableStateOf(textSecondary)
         private set
     var error by mutableStateOf(error)
         private set
     fun copy(
-        background: Color = this.background,
-        button: Color = this.button,
+        primary: Color = this.primary,
+        secondary: Color = this.secondary,
         textPrimary: Color = this.textPrimary,
+        textSecondary: Color = this.textSecondary,
         error: Color = this.error,
     ): AppColors = AppColors(
-        background,
-        button,
+        primary,
+        secondary,
         textPrimary,
+        textSecondary,
         error,
     )
 
     fun updateColorsFrom(other: AppColors) {
-        background = other.background
-        button = other.button
+        primary = other.primary
+        secondary = other.secondary
         textPrimary = other.textPrimary
+        textSecondary = other.textSecondary
         error = other.error
     }
 }
 
 fun appColors(
-    background: Color = cyan_blue,
-    button: Color = white,
+    primary: Color = cyan_blue,
+    secondary: Color = white,
     textPrimary: Color = white,
+    textSecondary: Color = cyan_blue,
     error: Color = red_error
 ): AppColors = AppColors(
-    background = background,
-    button = button,
+    primary = primary,
+    secondary = secondary,
     textPrimary = textPrimary,
+    textSecondary = textSecondary,
     error = error
 )
 

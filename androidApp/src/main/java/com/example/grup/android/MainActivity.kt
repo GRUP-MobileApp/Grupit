@@ -3,6 +3,7 @@ package com.example.grup.android
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -38,13 +39,13 @@ fun MainLayout() {
     Scaffold(
         topBar = {
             HomeAppBar(
-                AppTheme.colors.background,
+                AppTheme.colors.primary,
                 Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(AppTheme.dimensions.topBarSize)
             )
         },
-        backgroundColor = AppTheme.colors.background,
+        backgroundColor = AppTheme.colors.primary,
         modifier = Modifier.fillMaxSize()
     ) {
         Column (
@@ -72,6 +73,7 @@ fun HomeAppBar(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
+                    tint = AppTheme.colors.secondary,
                     contentDescription = "Menu"
                 )
             }
@@ -83,6 +85,7 @@ fun HomeAppBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
+                        tint = AppTheme.colors.secondary,
                         contentDescription = "Notifications"
                     )
                 }
@@ -128,7 +131,7 @@ fun GroupDetails() {
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_profile_icon),
-                contentDescription = "Profile",
+                contentDescription = "Profile Picture",
                 modifier = Modifier.size(98.dp)
             )
             Text(
@@ -144,12 +147,12 @@ fun GroupDetails() {
             fontSize = 100.sp
         )
         Button(
-            colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.button),
+            colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
             onClick = { /*TODO*/ }
         ) {
             Text(
                 text = "Money Request",
-                color = AppTheme.colors.background,
+                color = AppTheme.colors.textSecondary,
             )
         }
     }
@@ -180,10 +183,12 @@ fun PublicRequestsDetails() {
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
+                    tint = AppTheme.colors.secondary,
                     contentDescription = "Search List"
                 )
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
+                    tint = AppTheme.colors.secondary,
                     contentDescription = "Filter List"
                 )
             }

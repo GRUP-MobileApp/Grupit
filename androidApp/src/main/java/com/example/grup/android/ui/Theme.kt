@@ -27,7 +27,6 @@ fun AppTheme(
     dimensions: AppDimensions = AppTheme.dimensions,
     content: @Composable () -> Unit
 ) {
-    // creating a new object for colors to not mutate the initial colors set when updating the values
     val rememberedColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
     CompositionLocalProvider(
         LocalColors provides rememberedColors,
