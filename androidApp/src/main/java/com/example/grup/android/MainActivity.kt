@@ -3,9 +3,9 @@ package com.example.grup.android
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -20,7 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import com.example.grup.android.ui.AppTheme
+import com.example.grup.android.ui.h1Text
 
 
 class MainActivity : AppCompatActivity() {
@@ -53,7 +55,10 @@ fun MainLayout() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             GroupDetails()
-            Divider(thickness = AppTheme.dimensions.divider)
+            Divider(
+                thickness = AppTheme.dimensions.divider,
+                color = AppTheme.colors.secondary
+            )
             PublicRequestsDetails()
         }
     }
@@ -74,7 +79,8 @@ fun HomeAppBar(
                 Icon(
                     imageVector = Icons.Filled.Menu,
                     tint = AppTheme.colors.secondary,
-                    contentDescription = "Menu"
+                    contentDescription = "Menu",
+                    modifier = Modifier.size(AppTheme.dimensions.iconSize)
                 )
             }
         },
@@ -86,30 +92,14 @@ fun HomeAppBar(
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         tint = AppTheme.colors.secondary,
-                        contentDescription = "Notifications"
+                        contentDescription = "Notifications",
+                        modifier = Modifier.size(AppTheme.dimensions.iconSize)
                     )
                 }
             }
         },
         modifier = modifier
     )
-}
-
-@Composable
-fun PublicRequestsList(content: List<String>) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-        modifier = Modifier.fillMaxHeight()
-    ) {
-        items(content.size) {
-            index ->
-            Text(
-                text = content[index],
-                style = AppTheme.typography.h1,
-                color = AppTheme.colors.textPrimary,
-            )
-        }
-    }
 }
 
 @Composable
@@ -134,16 +124,12 @@ fun GroupDetails() {
                 contentDescription = "Profile Picture",
                 modifier = Modifier.size(98.dp)
             )
-            Text(
-                text = "Group Name",
-                style = AppTheme.typography.h1,
-                color = AppTheme.colors.textPrimary,
+            h1Text(
+                text = "Group Name"
             )
         }
-        Text(
+        h1Text(
             "$10",
-            style = AppTheme.typography.h1,
-            color = AppTheme.colors.textPrimary,
             fontSize = 100.sp
         )
         Button(
@@ -160,7 +146,10 @@ fun GroupDetails() {
 
 @Composable
 fun PublicRequestsDetails() {
-    val sampleList = listOf("test1", "test2", "test3")
+    val sampleList = mapOf(
+        "4/20" to listOf("test1", "test2", "test3", "test4"),
+        "6/9" to listOf("test5", "test6", "test7", "test8")
+    )
 
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -170,12 +159,10 @@ fun PublicRequestsDetails() {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(0.8f)
+            modifier = Modifier.fillMaxWidth(0.9f)
         ) {
-            Text(
+            h1Text(
                 text = "Public Requests",
-                style = AppTheme.typography.h1,
-                color = AppTheme.colors.textPrimary,
             )
             Row(
                 horizontalArrangement = Arrangement.End,
@@ -184,15 +171,45 @@ fun PublicRequestsDetails() {
                 Icon(
                     imageVector = Icons.Default.Search,
                     tint = AppTheme.colors.secondary,
-                    contentDescription = "Search List"
+                    contentDescription = "Search List",
+                    modifier = Modifier.size(AppTheme.dimensions.iconSize)
                 )
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     tint = AppTheme.colors.secondary,
-                    contentDescription = "Filter List"
+                    contentDescription = "Filter List",
+                    modifier = Modifier.size(AppTheme.dimensions.iconSize)
                 )
             }
         }
         PublicRequestsList(content = sampleList)
+    }
+}
+
+@Composable
+fun PublicRequestsList(content: Map<String, List<String>>) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        itemsIndexed(content.keys.toList()) {
+                _: Int, filterGroup: String ->
+            h1Text(
+                text = filterGroup,
+                modifier = Modifier.padding(start = AppTheme.dimensions.paddingExtraLarge)
+            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                content[filterGroup]!!.forEach {
+                        request ->
+                    h1Text(
+                        text = request,
+                    )
+                }
+            }
+        }
     }
 }
