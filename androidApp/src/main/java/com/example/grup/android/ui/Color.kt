@@ -1,9 +1,7 @@
 package com.example.grup.android.ui
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.material.Colors
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 
 val cyan_blue = Color(0xFF0092E3)
@@ -13,54 +11,62 @@ val red_error = Color(0xffff0033)
 class AppColors(
     primary: Color,
     secondary: Color,
-    textPrimary: Color,
-    textSecondary: Color,
+    onPrimary: Color,
+    onSecondary: Color,
     error: Color
 ) {
     var primary by mutableStateOf(primary)
         private set
     var secondary by mutableStateOf(secondary)
         private set
-    var textPrimary by mutableStateOf(textPrimary)
+    var onPrimary by mutableStateOf(onPrimary)
         private set
-    var textSecondary by mutableStateOf(textSecondary)
+    var onSecondary by mutableStateOf(onSecondary)
         private set
     var error by mutableStateOf(error)
         private set
     fun copy(
         primary: Color = this.primary,
         secondary: Color = this.secondary,
-        textPrimary: Color = this.textPrimary,
-        textSecondary: Color = this.textSecondary,
+        onPrimary: Color = this.onPrimary,
+        onSecondary: Color = this.onSecondary,
         error: Color = this.error,
     ): AppColors = AppColors(
         primary,
         secondary,
-        textPrimary,
-        textSecondary,
+        onPrimary,
+        onSecondary,
         error,
     )
 
     fun updateColorsFrom(other: AppColors) {
         primary = other.primary
         secondary = other.secondary
-        textPrimary = other.textPrimary
-        textSecondary = other.textSecondary
+        onPrimary = other.onPrimary
+        onSecondary = other.onSecondary
         error = other.error
+    }
+
+    fun Colors.contentColorFor(backgroundColor: Color): Color {
+        return when (backgroundColor) {
+            primary -> onPrimary
+            secondary -> onSecondary
+            else -> Color.Unspecified
+        }
     }
 }
 
 fun appColors(
     primary: Color = cyan_blue,
     secondary: Color = white,
-    textPrimary: Color = white,
-    textSecondary: Color = cyan_blue,
+    onPrimary: Color = white,
+    onSecondary: Color = cyan_blue,
     error: Color = red_error
 ): AppColors = AppColors(
     primary = primary,
     secondary = secondary,
-    textPrimary = textPrimary,
-    textSecondary = textSecondary,
+    onPrimary = onPrimary,
+    onSecondary = onSecondary,
     error = error
 )
 

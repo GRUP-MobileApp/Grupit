@@ -7,6 +7,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.grup.android.R
+private val proxima_nova = FontFamily(
+    Font(R.font.proxima_nova, FontWeight.Normal)
+)
+
 
 private val montserrat = FontFamily(
     Font(R.font.montserrat, FontWeight.Normal)
@@ -14,12 +18,12 @@ private val montserrat = FontFamily(
 
 data class AppTypography(
     val h1: TextStyle = TextStyle(
-        fontFamily = montserrat,
-        fontWeight = FontWeight.ExtraBold,
+        fontFamily = proxima_nova,
+        fontWeight = FontWeight.Normal,
         fontSize = 24.sp
     ),
     val button: TextStyle = TextStyle(
-        fontFamily = montserrat,
+        fontFamily = proxima_nova,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     )

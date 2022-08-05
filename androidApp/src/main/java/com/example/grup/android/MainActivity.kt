@@ -138,7 +138,7 @@ fun GroupDetails() {
         ) {
             Text(
                 text = "Money Request",
-                color = AppTheme.colors.textSecondary,
+                color = AppTheme.colors.onSecondary,
             )
         }
     }
