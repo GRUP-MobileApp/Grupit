@@ -22,6 +22,11 @@ data class AppTypography(
         fontWeight = FontWeight.Normal,
         fontSize = 24.sp
     ),
+    val smallFont: TextStyle = TextStyle(
+        fontFamily = proxima_nova,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp
+    ),
     val button: TextStyle = TextStyle(
         fontFamily = proxima_nova,
         fontWeight = FontWeight.Normal,

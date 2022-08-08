@@ -18,17 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import com.example.grup.android.ui.AppTheme
+import com.example.grup.android.ui.caption
 import com.example.grup.android.ui.h1Text
+import com.example.grup.android.ui.smallIcon
 
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            MaterialTheme
             AppTheme {
                 MainLayout()
             }
@@ -54,12 +58,12 @@ fun MainLayout() {
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            GroupDetails()
-            Divider(
-                thickness = AppTheme.dimensions.divider,
-                color = AppTheme.colors.secondary
-            )
-            PublicRequestsDetails()
+            CompositionLocalProvider(
+                LocalContentColor provides AppTheme.colors.onPrimary
+            ) {
+                GroupDetails()
+                PublicRequestsDetails()
+            }
         }
     }
 }
@@ -76,26 +80,20 @@ fun HomeAppBar(
             IconButton(
                 onClick = { /* TODO: Open search */ }
             ) {
-                Icon(
+                smallIcon(
                     imageVector = Icons.Filled.Menu,
-                    tint = AppTheme.colors.secondary,
-                    contentDescription = "Menu",
-                    modifier = Modifier.size(AppTheme.dimensions.iconSize)
+                    contentDescription = "Menu"
                 )
             }
         },
         actions = {
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                IconButton(
-                    onClick = { /* TODO: Open notifications */ }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        tint = AppTheme.colors.secondary,
-                        contentDescription = "Notifications",
-                        modifier = Modifier.size(AppTheme.dimensions.iconSize)
-                    )
-                }
+            IconButton(
+                onClick = { /* TODO: Open notifications */ }
+            ) {
+                smallIcon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications"
+                )
             }
         },
         modifier = modifier
@@ -105,40 +103,56 @@ fun HomeAppBar(
 @Composable
 fun GroupDetails() {
     Column (
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()
             .size(AppTheme.dimensions.groupDetailsSize)
             .padding(top = AppTheme.dimensions.paddingLarge)
     ) {
-        Row (
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AppTheme.dimensions.paddingLarge)
+                .padding(top = AppTheme.dimensions.paddingLarge)
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_profile_icon),
-                contentDescription = "Profile Picture",
-                modifier = Modifier.size(98.dp)
-            )
+            Row (
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = AppTheme.dimensions.paddingLarge)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_profile_icon),
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier.size(98.dp)
+                )
+                h1Text(
+                    text = "Group Name",
+                    modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
+                )
+            }
             h1Text(
-                text = "Group Name"
+                "$10",
+                fontSize = 90.sp
             )
         }
-        h1Text(
-            "$10",
-            fontSize = 100.sp
-        )
         Button(
             colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
+            modifier = Modifier
+                .padding(bottom = AppTheme.dimensions.paddingMedium)
+                .width(250.dp)
+                .height(40.dp),
+            shape = AppTheme.shapes.large,
             onClick = { /*TODO*/ }
         ) {
             Text(
                 text = "Money Request",
-                color = AppTheme.colors.onSecondary,
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = AppTheme.typography.h1.fontFamily,
+                color = AppTheme.colors.primary,
             )
         }
     }
@@ -154,7 +168,8 @@ fun PublicRequestsDetails() {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -162,23 +177,18 @@ fun PublicRequestsDetails() {
             modifier = Modifier.fillMaxWidth(0.9f)
         ) {
             h1Text(
-                text = "Public Requests",
+                text = "Public Requests"
             )
             Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
             ) {
-                Icon(
+                smallIcon(
                     imageVector = Icons.Default.Search,
-                    tint = AppTheme.colors.secondary,
-                    contentDescription = "Search List",
-                    modifier = Modifier.size(AppTheme.dimensions.iconSize)
+                    contentDescription = "Search List"
                 )
-                Icon(
+                smallIcon(
                     imageVector = Icons.Default.KeyboardArrowDown,
-                    tint = AppTheme.colors.secondary,
-                    contentDescription = "Filter List",
-                    modifier = Modifier.size(AppTheme.dimensions.iconSize)
+                    contentDescription = "Filter List"
                 )
             }
         }
@@ -194,10 +204,11 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
     ) {
         itemsIndexed(content.keys.toList()) {
                 _: Int, filterGroup: String ->
-            h1Text(
-                text = filterGroup,
+            caption(
+                text = "Completed - $filterGroup",
                 modifier = Modifier.padding(start = AppTheme.dimensions.paddingExtraLarge)
             )
+            Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing / 2))
             Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
