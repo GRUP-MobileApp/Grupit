@@ -3,6 +3,7 @@ package com.example.grup.android
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -16,23 +17,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-import com.example.grup.android.ui.AppTheme
-import com.example.grup.android.ui.caption
-import com.example.grup.android.ui.h1Text
-import com.example.grup.android.ui.smallIcon
+import com.example.grup.android.ui.*
 
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme
             AppTheme {
                 MainLayout()
             }
@@ -50,6 +47,9 @@ fun MainLayout() {
                     .fillMaxWidth()
                     .fillMaxHeight(AppTheme.dimensions.topBarSize)
             )
+        },
+        bottomBar = {
+            /* TODO */
         },
         backgroundColor = AppTheme.colors.primary,
         modifier = Modifier.fillMaxSize()
@@ -136,23 +136,23 @@ fun GroupDetails() {
             }
             h1Text(
                 "$10",
-                fontSize = 90.sp
+                fontSize = 100.sp
             )
         }
-        Button(
-            colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
+        TextButton(
+            colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
             modifier = Modifier
                 .padding(bottom = AppTheme.dimensions.paddingMedium)
                 .width(250.dp)
-                .height(40.dp),
+                .height(45.dp),
             shape = AppTheme.shapes.large,
             onClick = { /*TODO*/ }
         ) {
             Text(
                 text = "Money Request",
-                fontWeight = FontWeight.ExtraBold,
-                fontFamily = AppTheme.typography.h1.fontFamily,
-                color = AppTheme.colors.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                color = AppTheme.colors.onPrimary,
             )
         }
     }
@@ -165,34 +165,46 @@ fun PublicRequestsDetails() {
         "6/9" to listOf("test5", "test6", "test7", "test8")
     )
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
         modifier = Modifier
             .fillMaxSize()
+            .clip(AppTheme.shapes.large)
+            .background(AppTheme.colors.secondary)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(0.9f)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
         ) {
-            h1Text(
-                text = "Public Requests"
-            )
             Row(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(top = AppTheme.dimensions.paddingMedium)
             ) {
-                smallIcon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search List"
-                )
-                smallIcon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Filter List"
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
+                ) {
+                    IconButton(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                    ) {
+
+                    }
+                    smallIconButton(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search List"
+                    )
+                    smallIconButton(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Filter List"
+                    )
+                }
             }
+            PublicRequestsList(content = sampleList)
         }
-        PublicRequestsList(content = sampleList)
     }
 }
 
@@ -202,8 +214,7 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = Modifier.fillMaxSize()
     ) {
-        itemsIndexed(content.keys.toList()) {
-                _: Int, filterGroup: String ->
+        itemsIndexed(content.keys.toList()) { _: Int, filterGroup: String ->
             caption(
                 text = "Completed - $filterGroup",
                 modifier = Modifier.padding(start = AppTheme.dimensions.paddingExtraLarge)
@@ -214,8 +225,7 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                content[filterGroup]!!.forEach {
-                        request ->
+                content[filterGroup]!!.forEach { request ->
                     h1Text(
                         text = request,
                     )
