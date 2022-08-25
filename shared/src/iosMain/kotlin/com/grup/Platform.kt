@@ -1,4 +1,4 @@
-package com.example.grup
+package com.grup
 
 import platform.UIKit.UIDevice
 

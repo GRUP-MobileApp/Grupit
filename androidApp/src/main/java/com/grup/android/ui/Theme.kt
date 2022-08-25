@@ -1,4 +1,4 @@
-package com.example.grup.android.ui
+package com.grup.android.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider

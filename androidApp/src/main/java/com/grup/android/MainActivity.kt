@@ -1,4 +1,4 @@
-package com.example.grup.android
+package com.grup.android
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.grup.android.ui.*
+import com.grup.android.ui.*
 
 
 class MainActivity : AppCompatActivity() {

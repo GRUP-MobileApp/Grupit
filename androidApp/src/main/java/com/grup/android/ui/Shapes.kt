@@ -1,4 +1,4 @@
-package com.example.grup.android.ui
+package com.grup.android.ui
 
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape

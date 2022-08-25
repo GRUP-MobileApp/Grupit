@@ -6,7 +6,7 @@ plugins {
 android {
     compileSdk = 32
     defaultConfig {
-        applicationId = "com.example.grup.android"
+        applicationId = "com.grup.android"
         minSdk = 21
         targetSdk = 32
         versionCode = 1
