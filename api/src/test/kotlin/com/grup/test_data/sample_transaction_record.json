@@ -1,0 +1,12 @@
+{
+    "id": "633e67787bcad774e8ed752e",
+    "groupId": "633de103152f502ea43b2e9b",
+    "date": 1665034103823,
+    "transactionType": "DEBT_ACTION",
+    "balanceChanges": [
+        {
+            "userId": "633de0f2152f502ea43b2e9a",
+            "balanceChange": "0"
+        }
+    ]
+}
