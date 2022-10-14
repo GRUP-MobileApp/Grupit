@@ -21,8 +21,8 @@ fun Route.userRouting() {
             } else {
                 val user = User(username = username)
                 userService.createUser(user)
-                    ?.let {
-                        call.respond(user)
+                    ?.let { createdUser ->
+                        call.respond(createdUser)
                     } ?: call.respond(HttpStatusCode.BadRequest, ErrorResponse.BAD_REQUEST_RESPONSE)
             }
         }
@@ -30,7 +30,7 @@ fun Route.userRouting() {
         get("/{username}") {
             val username = call.parameters["username"].toString()
 
-            userService.getByUsername(username)
+            userService.getUserByUsername(username)
                 ?.let { foundUser ->
                     call.respond(foundUser)
                 } ?: call.respond(HttpStatusCode.NotFound, ErrorResponse.NOT_FOUND_RESPONSE)

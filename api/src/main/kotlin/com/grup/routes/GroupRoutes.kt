@@ -18,8 +18,8 @@ fun Route.groupRouting() {
             val group = Group(groupName = groupName)
 
             groupService.createGroup(group)
-                ?.let {
-                    call.respond(group)
+                ?.let { createdGroup ->
+                    call.respond(createdGroup)
                 } ?: call.respond(HttpStatusCode.BadRequest, ErrorResponse.BAD_REQUEST_RESPONSE)
         }
 
@@ -27,8 +27,8 @@ fun Route.groupRouting() {
             val groupId = call.parameters["groupId"].toString()
 
             groupService.getByGroupId(groupId)
-                ?.let { group ->
-                    call.respond(group)
+                ?.let { foundGroup ->
+                    call.respond(foundGroup)
                 } ?: call.respond(HttpStatusCode.NotFound, ErrorResponse.NOT_FOUND_RESPONSE)
         }
     }

@@ -1,6 +1,7 @@
 val ktorVersion: String by project
 val logbackVersion: String by project
 val kmongoVersion: String by project
+val realmVersion: String by project
 val koinVersion: String by project
 val koinKtor: String by project
 val testcontainersVersion: String by project
@@ -10,6 +11,7 @@ plugins {
     kotlin("jvm")
     id("io.ktor.plugin") version "2.1.2"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
+    id("io.realm.kotlin")
 }
 
 group = "com.grup"
@@ -42,6 +44,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.testcontainers:mongodb:$testcontainersVersion")
 
+    // Ktor
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -50,9 +53,13 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
+    // MongoDB and Realm
     implementation("org.litote.kmongo:kmongo:$kmongoVersion")
     implementation("org.litote.kmongo:kmongo-id-serialization:$kmongoVersion")
+    implementation("io.realm.kotlin:library-base:$realmVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
+    // Koin
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinKtor")
     testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")

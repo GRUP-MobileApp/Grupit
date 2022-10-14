@@ -1,8 +1,8 @@
 package com.grup.routes
 
-import com.grup.models.User
 import com.grup.objects.ErrorResponse
 import com.grup.models.UserBalance
+import com.grup.objects.Id
 import com.grup.service.GroupService
 import com.grup.service.UserBalanceService
 import com.grup.service.UserService
@@ -11,7 +11,6 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import org.litote.kmongo.Id
 
 fun Route.userBalanceRouting() {
     val userBalanceService: UserBalanceService by inject()
@@ -32,8 +31,8 @@ fun Route.userBalanceRouting() {
                 val userBalance: UserBalance = userBalanceService.createZeroUserBalance(groupId, userId)
 
                 userBalanceService.createUserBalance(userBalance)
-                    ?.let {
-                        call.respond(userBalance)
+                    ?.let { createdUserBalance ->
+                        call.respond(createdUserBalance)
                     } ?: call.respond(HttpStatusCode.BadRequest, ErrorResponse.BAD_REQUEST_RESPONSE)
             }
         }
@@ -52,7 +51,7 @@ fun Route.userBalanceRouting() {
         get("/get_users") {
             val groupId = call.parameters["groupId"].toString()
 
-            val userIds: List<Id<User>> = userBalanceService.getUserIdsByGroupId(groupId)
+            val userIds: List<Id> = userBalanceService.getUserIdsByGroupId(groupId)
             if (userIds.isEmpty()) {
                 call.respond(HttpStatusCode.NotFound, ErrorResponse.NOT_FOUND_RESPONSE)
             } else {

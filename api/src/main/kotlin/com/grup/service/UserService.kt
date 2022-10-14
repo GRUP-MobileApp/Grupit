@@ -1,35 +1,27 @@
 package com.grup.service
 
 import com.grup.models.User
-import com.mongodb.client.MongoClient
-import org.bson.types.ObjectId
+import com.grup.interfaces.IUserRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.litote.kmongo.*
-import org.litote.kmongo.id.toId
 
 class UserService : KoinComponent {
-    private val client: MongoClient by inject()
-    private val database = client.getDatabase("user")
-    private val userCollection = database.getCollection<User>()
+    private val userRepository: IUserRepository by inject()
 
-    fun createUser(user: User): Id<User>? {
-        userCollection.insertOne(user)
-        return user.id
+    fun createUser(user: User): User? {
+        return userRepository.insertUser(user)
     }
 
-    fun getByUsername(username: String): User? {
-        return userCollection.findOne { User::username eq username }
+    fun getUserByUsername(username: String): User? {
+        return userRepository.findUserByUserName(username)
     }
 
     fun getUserById(userId: String): User? {
-        val userBsonId: Id<User> = ObjectId(userId).toId()
-
-        return userCollection.findOne { User::id eq userBsonId }
+        return userRepository.findUserById(userId)
     }
 
     fun usernameExists(username: String): Boolean {
-        return getByUsername(username) != null
+        return getUserByUsername(username) != null
     }
 
     fun userIdExists(userId: String): Boolean {

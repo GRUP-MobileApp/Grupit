@@ -1,16 +1,27 @@
 package com.grup
 
-import com.grup.service.GroupService
-import com.grup.service.TransactionRecordService
-import com.grup.service.UserBalanceService
-import com.grup.service.UserService
+import com.grup.repositories.*
 import org.koin.dsl.module
-import org.litote.kmongo.KMongo
 
-val serviceModule = module {
-    single { KMongo.createClient() }
+import com.grup.service.UserService
+import com.grup.service.GroupService
+import com.grup.service.UserBalanceService
+import com.grup.service.TransactionRecordService
+
+val servicesModule = module {
     single { UserService() }
     single { GroupService() }
     single { UserBalanceService() }
     single { TransactionRecordService() }
+}
+
+val repositoriesModule = module {
+    single { UserRepository() }
+}
+
+val testRepositoriesModule = module {
+    single { TestUserRepository() }
+    single { TestGroupRepository() }
+    single { TestUserBalanceRepository() }
+    single { TestTransactionRecordRepository() }
 }

@@ -3,6 +3,7 @@ package com.grup.itest
 import com.grup.plugins.configureSerialization
 import com.grup.routes.userRouting
 import com.grup.service.UserService
+import com.grup.testRepositoriesModule
 import io.ktor.client.request.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
@@ -42,12 +43,13 @@ class UserTest : KoinTest {
     @RegisterExtension
     val koinTestExtension = KoinTestExtension.create {
         slf4jLogger()
-        modules(
+        modules(listOf(
+            testRepositoriesModule,
             module {
                 single { KMongo.createClient(container.replicaSetUrl) }
                 single { UserService() }
             }
-        )
+        ))
     }
 
     @Nested
@@ -76,7 +78,6 @@ class UserTest : KoinTest {
             val testName = "test"
             val response = client.post("user/create/$testName")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            // This shit makes no sense bruddah
             val user: JsonObject = Json.decodeFromString(response.json)
             Assertions.assertNotNull(user["id"])
             Assertions.assertEquals(testName, user["username"])
