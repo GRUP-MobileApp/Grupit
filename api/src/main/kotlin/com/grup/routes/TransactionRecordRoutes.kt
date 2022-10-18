@@ -21,7 +21,9 @@ fun Route.transactionRouting() {
         post("/add") {
             val transactionRecord = call.receive<TransactionRecord>()
             val groupId = transactionRecord.groupId.toString()
-
+            if(transactionRecord.balanceChanges == null) {
+                return@post
+            }
             groupService.getByGroupId(groupId)
                 ?.let {
                     if (!userBalanceService.getUserIdsByGroupId(groupId).containsAll(

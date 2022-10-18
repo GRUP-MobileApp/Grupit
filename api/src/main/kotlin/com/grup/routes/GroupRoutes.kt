@@ -15,7 +15,9 @@ fun Route.groupRouting() {
     route("/group") {
         post("/create/{groupName}") {
             val groupName = call.parameters["groupName"].toString()
-            val group = Group(groupName = groupName)
+            val group = Group().apply {
+                this.groupName = groupName
+            }
 
             groupService.createGroup(group)
                 ?.let { createdGroup ->

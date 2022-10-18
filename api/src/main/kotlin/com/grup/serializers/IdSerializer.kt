@@ -1,3 +1,5 @@
+package com.grup.serializers
+
 import com.grup.objects.Id
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

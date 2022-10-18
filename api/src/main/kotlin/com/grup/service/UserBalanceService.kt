@@ -15,7 +15,11 @@ class UserBalanceService : KoinComponent {
     }
 
     fun createZeroUserBalance(groupId: String, userId: String): UserBalance {
-        return UserBalance(groupId = Id(groupId), userId = Id(userId), balance = BigDecimal.ZERO)
+        return UserBalance().apply {
+            this.groupId = Id(groupId)
+            this.userId = Id(userId)
+            this.balance = BigDecimal.ZERO
+        }
     }
 
     fun getUserBalancesByGroupId(groupId: String): List<UserBalance> {
@@ -23,7 +27,7 @@ class UserBalanceService : KoinComponent {
     }
 
     fun getUserIdsByGroupId(groupId: String): List<Id> {
-        return getUserBalancesByGroupId(groupId).map { userBalance -> userBalance.userId }
+        return getUserBalancesByGroupId(groupId).map { userBalance -> userBalance.userId!! }
     }
 
     fun userBalanceExists(groupId: String, userId: String): Boolean {

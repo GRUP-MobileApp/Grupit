@@ -19,7 +19,9 @@ fun Route.userRouting() {
             if (userService.usernameExists(username)) {
                 call.respond(HttpStatusCode.Conflict, ErrorResponse.USER_ALREADY_EXISTS)
             } else {
-                val user = User(username = username)
+                val user = User().apply {
+                    this.username = username
+                }
                 userService.createUser(user)
                     ?.let { createdUser ->
                         call.respond(createdUser)

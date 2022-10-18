@@ -1,5 +1,9 @@
 package com.grup
 
+import com.grup.interfaces.IGroupRepository
+import com.grup.interfaces.ITransactionRecordRepository
+import com.grup.interfaces.IUserBalanceRepository
+import com.grup.interfaces.IUserRepository
 import com.grup.repositories.*
 import org.koin.dsl.module
 
@@ -16,12 +20,12 @@ val servicesModule = module {
 }
 
 val repositoriesModule = module {
-    single { UserRepository() }
+    single<IUserRepository> { UserRepository() }
 }
 
 val testRepositoriesModule = module {
-    single { TestUserRepository() }
-    single { TestGroupRepository() }
-    single { TestUserBalanceRepository() }
-    single { TestTransactionRecordRepository() }
+    single<IUserRepository> { TestUserRepository() }
+    single<IGroupRepository> { TestGroupRepository() }
+    single<IUserBalanceRepository> { TestUserBalanceRepository() }
+    single<ITransactionRecordRepository> { TestTransactionRecordRepository() }
 }

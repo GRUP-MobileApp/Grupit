@@ -9,8 +9,8 @@ val testcontainersVersion: String by project
 plugins {
     application
     kotlin("jvm")
-    id("io.ktor.plugin") version "2.1.2"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
+    id("io.ktor.plugin") version "2.1.2"
     id("io.realm.kotlin")
 }
 
@@ -40,9 +40,6 @@ repositories {
 dependencies {
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
-    testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
-    testImplementation("org.testcontainers:mongodb:$testcontainersVersion")
 
     // Ktor
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
@@ -50,7 +47,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
     // MongoDB and Realm
@@ -62,6 +59,6 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinKtor")
-    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinKtor")
+    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
 }

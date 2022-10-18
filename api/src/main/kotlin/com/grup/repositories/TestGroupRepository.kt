@@ -16,6 +16,6 @@ class TestGroupRepository : IGroupRepository {
     }
 
     override fun findGroupById(groupId: String): Group? {
-        return groupRealm.query(Group::class, "id == $groupId").first().find()
+        return groupRealm.query(Group::class, "id == $0", groupId).first().find()
     }
 }

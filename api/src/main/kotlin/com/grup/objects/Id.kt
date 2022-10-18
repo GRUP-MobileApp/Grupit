@@ -1,7 +1,8 @@
 package com.grup.objects
 
-import IdSerializer
+import com.grup.serializers.IdSerializer
 import io.realm.kotlin.types.ObjectId
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable(with = IdSerializer::class)
