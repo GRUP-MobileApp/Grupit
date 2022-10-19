@@ -5,6 +5,7 @@ import com.grup.plugins.configureSerialization
 import com.grup.routes.groupRouting
 import com.grup.service.GroupService
 import com.grup.testRepositoriesModule
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -36,32 +37,32 @@ class GroupIt : KoinTest {
         ))
     }
 
-    fun groupTestApplication(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {
+    fun groupTestApplication(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
         application {
             configureSerialization()
         }
         routing {
             groupRouting()
         }
-        block()
+        val client = createClient {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        ignoreUnknownKeys = true
+                        isLenient = true
+                        prettyPrint = true
+                    },
+                    contentType = ContentType.Application.Json
+                )
+            }
+        }
+        block(client)
     }
 
     @Nested
     inner class CreateGroup {
         @Test
-        fun testCreateBasicGroup() = groupTestApplication {
-            val client = createClient {
-                install(ContentNegotiation) {
-                    json(
-                        Json {
-                            ignoreUnknownKeys = true
-                            isLenient = true
-                            prettyPrint = true
-                        },
-                        contentType = ContentType.Application.Json
-                    )
-                }
-            }
+        fun testCreateBasicGroup() = groupTestApplication { client ->
             val testGroupName = "test_group"
             val response = client.post("group/create/$testGroupName")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
@@ -76,21 +77,8 @@ class GroupIt : KoinTest {
     @Nested
     inner class GetGroup {
         @Test
-        fun testGetUserByUsername() = groupTestApplication {
+        fun testGetUserByUsername() = groupTestApplication { client ->
             CreateGroup().testCreateBasicGroup()
-
-            val client = createClient {
-                install(ContentNegotiation) {
-                    json(
-                        Json {
-                            ignoreUnknownKeys = true
-                            isLenient = true
-                            prettyPrint = true
-                        },
-                        contentType = ContentType.Application.Json
-                    )
-                }
-            }
             val testGroupName = "test_group"
             var response = client.post("group/create/$testGroupName")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)

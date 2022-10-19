@@ -5,6 +5,7 @@ import com.grup.plugins.configureSerialization
 import com.grup.routes.userRouting
 import com.grup.service.UserService
 import com.grup.testRepositoriesModule
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -36,32 +37,33 @@ class UserIT : KoinTest {
         ))
     }
 
-    fun userTestApplication(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {
+    fun userTestApplication(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
         application {
             configureSerialization()
         }
         routing {
             userRouting()
         }
-        block()
+
+        val client = createClient {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        ignoreUnknownKeys = true
+                        isLenient = true
+                        prettyPrint = true
+                    },
+                    contentType = ContentType.Application.Json
+                )
+            }
+        }
+        block(client)
     }
 
     @Nested
     inner class CreateUser {
         @Test
-        fun testCreateBasicUser() = userTestApplication {
-            val client = createClient {
-                install(ContentNegotiation) {
-                    json(
-                        Json {
-                            ignoreUnknownKeys = true
-                            isLenient = true
-                            prettyPrint = true
-                        },
-                        contentType = ContentType.Application.Json
-                    )
-                }
-            }
+        fun testCreateBasicUser() = userTestApplication { client ->
             val testUsername = "test_username"
             val response = client.post("user/create/$testUsername")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
@@ -75,19 +77,7 @@ class UserIT : KoinTest {
     @Nested
     inner class GetUser {
         @Test
-        fun testGetUserByUsername() = userTestApplication {
-            val client = createClient {
-                install(ContentNegotiation) {
-                    json(
-                        Json {
-                            ignoreUnknownKeys = true
-                            isLenient = true
-                            prettyPrint = true
-                        },
-                        contentType = ContentType.Application.Json
-                    )
-                }
-            }
+        fun testGetUserByUsername() = userTestApplication { client ->
             val testUsername = "test_username"
             var response = client.post("user/create/$testUsername")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
