@@ -5,7 +5,7 @@ import com.grup.models.TransactionRecord
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class TransactionRecordService : KoinComponent {
+internal class TransactionRecordService : KoinComponent {
     private val transactionRecordRepository: ITransactionRecordRepository by inject()
 
     fun createTransactionRecord(transactionRecord: TransactionRecord): TransactionRecord? {

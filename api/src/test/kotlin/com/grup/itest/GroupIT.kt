@@ -67,9 +67,9 @@ class GroupIt : KoinTest {
             val response = client.post("group/create/$testGroupName")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             val group: Group = response.body()
-            Assertions.assertNotNull(group.id)
+            Assertions.assertNotNull(group._id)
             Assertions.assertEquals(testGroupName, group.groupName)
-            println("TESTING CREATE ${group.id} ${group.groupName}")
+            println("TESTING CREATE ${group._id} ${group.groupName}")
             client.close()
         }
     }
@@ -88,8 +88,8 @@ class GroupIt : KoinTest {
             response = client.get("group/$groupId")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             val group: Group = response.body()
-            Assertions.assertNotNull(group.id)
-            Assertions.assertEquals(groupId, group.id)
+            Assertions.assertNotNull(group._id)
+            Assertions.assertEquals(groupId, group._id)
             Assertions.assertEquals(testGroupName, group.groupName)
             client.close()
         }

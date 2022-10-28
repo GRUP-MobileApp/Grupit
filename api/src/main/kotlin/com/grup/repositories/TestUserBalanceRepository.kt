@@ -6,7 +6,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import java.math.BigDecimal
 
-class TestUserBalanceRepository : IUserBalanceRepository {
+internal class TestUserBalanceRepository : IUserBalanceRepository {
     private val config = RealmConfiguration.Builder(schema = setOf(UserBalance::class)).build()
     private val userBalanceRealm: Realm = Realm.open(config)
 

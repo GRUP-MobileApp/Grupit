@@ -3,7 +3,7 @@ package com.grup.repositories
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
 
-class UserRepository : IUserRepository {
+internal class UserRepository : IUserRepository {
     override fun insertUser(user: User): User? {
         TODO("Not yet implemented")
     }

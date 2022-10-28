@@ -5,7 +5,7 @@ import com.grup.interfaces.IUserRepository
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-class TestUserRepository : IUserRepository {
+internal class TestUserRepository : IUserRepository {
     private val config = RealmConfiguration.Builder(schema = setOf(User::class)).build()
     private val userRealm: Realm = Realm.open(config)
 
@@ -16,7 +16,7 @@ class TestUserRepository : IUserRepository {
     }
 
     override fun findUserById(userId: String): User? {
-        return userRealm.query(User::class, "id == $0", userId).first().find()
+        return userRealm.query(User::class, "_id == $0", userId).first().find()
     }
 
     override fun findUserByUserName(username: String): User? {

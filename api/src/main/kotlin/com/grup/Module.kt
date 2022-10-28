@@ -12,18 +12,18 @@ import com.grup.service.GroupService
 import com.grup.service.UserBalanceService
 import com.grup.service.TransactionRecordService
 
-val servicesModule = module {
+internal val servicesModule = module {
     single { UserService() }
     single { GroupService() }
     single { UserBalanceService() }
     single { TransactionRecordService() }
 }
 
-val repositoriesModule = module {
+internal val repositoriesModule = module {
     single<IUserRepository> { UserRepository() }
 }
 
-val testRepositoriesModule = module {
+internal val testRepositoriesModule = module {
     single<IUserRepository> { TestUserRepository() }
     single<IGroupRepository> { TestGroupRepository() }
     single<IUserBalanceRepository> { TestUserBalanceRepository() }

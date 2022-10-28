@@ -8,7 +8,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.math.BigDecimal
 
-class BigDecimalSerializer: KSerializer<BigDecimal> {
+internal class BigDecimalSerializer: KSerializer<BigDecimal> {
     override fun deserialize(decoder: Decoder): BigDecimal {
         return moneyRound(decoder.decodeString().toBigDecimal())
     }

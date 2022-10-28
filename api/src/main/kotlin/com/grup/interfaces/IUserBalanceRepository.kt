@@ -3,7 +3,7 @@ package com.grup.interfaces
 import com.grup.models.UserBalance
 import java.math.BigDecimal
 
-interface IUserBalanceRepository {
+internal interface IUserBalanceRepository {
     fun createUserBalance(userBalance: UserBalance): UserBalance?
 
     fun findUserBalanceByUserAndGroupId(userId: String, groupId: String): UserBalance?

@@ -68,7 +68,7 @@ class UserIT : KoinTest {
             val response = client.post("user/create/$testUsername")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             val user: User = response.body()
-            Assertions.assertNotNull(user.id)
+            Assertions.assertNotNull(user._id)
             Assertions.assertEquals(testUsername, user.username)
             client.close()
         }
@@ -85,7 +85,7 @@ class UserIT : KoinTest {
             response = client.get("user/$testUsername")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             val user: User = response.body()
-            Assertions.assertNotNull(user.id)
+            Assertions.assertNotNull(user._id)
             Assertions.assertEquals(testUsername, user.username)
             client.close()
         }

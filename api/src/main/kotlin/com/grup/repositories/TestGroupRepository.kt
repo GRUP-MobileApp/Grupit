@@ -5,7 +5,7 @@ import com.grup.interfaces.IGroupRepository
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-class TestGroupRepository : IGroupRepository {
+internal class TestGroupRepository : IGroupRepository {
     private val config = RealmConfiguration.Builder(schema = setOf(Group::class)).build()
     private val groupRealm: Realm = Realm.open(config)
 
@@ -16,6 +16,6 @@ class TestGroupRepository : IGroupRepository {
     }
 
     override fun findGroupById(groupId: String): Group? {
-        return groupRealm.query(Group::class, "id == $0", groupId).first().find()
+        return groupRealm.query(Group::class, "_id == $0", groupId).first().find()
     }
 }

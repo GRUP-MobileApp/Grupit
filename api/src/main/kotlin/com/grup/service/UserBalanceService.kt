@@ -3,11 +3,12 @@ package com.grup.service
 import com.grup.interfaces.IUserBalanceRepository
 import com.grup.models.UserBalance
 import com.grup.objects.Id
+import com.grup.objects.createIdFromString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.math.BigDecimal
 
-class UserBalanceService : KoinComponent {
+internal class UserBalanceService : KoinComponent {
     private val userBalanceRepository: IUserBalanceRepository by inject()
 
     fun createUserBalance(userBalance: UserBalance): UserBalance? {
@@ -16,8 +17,8 @@ class UserBalanceService : KoinComponent {
 
     fun createZeroUserBalance(groupId: String, userId: String): UserBalance {
         return UserBalance().apply {
-            this.groupId = Id(groupId)
-            this.userId = Id(userId)
+            this.groupId = createIdFromString(groupId)
+            this.userId = createIdFromString(userId)
             this.balance = BigDecimal.ZERO
         }
     }

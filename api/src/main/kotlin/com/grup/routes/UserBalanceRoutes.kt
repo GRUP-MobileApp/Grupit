@@ -12,7 +12,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
-fun Route.userBalanceRouting() {
+internal fun Route.userBalanceRouting() {
     val userBalanceService: UserBalanceService by inject()
     val userService: UserService by inject()
     val groupService: GroupService by inject()

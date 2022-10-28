@@ -5,7 +5,7 @@ import com.grup.models.TransactionRecord
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-class TestTransactionRecordRepository : ITransactionRecordRepository {
+internal class TestTransactionRecordRepository : ITransactionRecordRepository {
     private val config = RealmConfiguration.Builder(schema = setOf(TransactionRecord::class)).build()
     private val transactionRecordRealm: Realm = Realm.open(config)
 

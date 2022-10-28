@@ -5,7 +5,7 @@ import com.grup.interfaces.IGroupRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class GroupService : KoinComponent {
+internal class GroupService : KoinComponent {
     private val groupRepository: IGroupRepository by inject()
 
     fun createGroup(group: Group): Group? {

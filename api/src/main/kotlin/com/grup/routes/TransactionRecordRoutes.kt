@@ -12,7 +12,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
-fun Route.transactionRouting() {
+internal fun Route.transactionRouting() {
     val transactionRecordService: TransactionRecordService by inject()
     val groupService: GroupService by inject()
     val userBalanceService: UserBalanceService by inject()

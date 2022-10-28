@@ -1,10 +1,8 @@
 val ktorVersion: String by project
 val logbackVersion: String by project
-val kmongoVersion: String by project
 val realmVersion: String by project
 val koinVersion: String by project
 val koinKtor: String by project
-val testcontainersVersion: String by project
 
 plugins {
     application
@@ -44,15 +42,13 @@ dependencies {
     // Ktor
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-cio-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
-    // MongoDB and Realm
-    implementation("org.litote.kmongo:kmongo:$kmongoVersion")
-    implementation("org.litote.kmongo:kmongo-id-serialization:$kmongoVersion")
+    // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 

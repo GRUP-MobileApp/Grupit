@@ -9,7 +9,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import org.koin.ktor.ext.inject
 
-fun Route.userRouting() {
+internal fun Route.userRouting() {
     val userService: UserService by inject()
 
     route("/user") {

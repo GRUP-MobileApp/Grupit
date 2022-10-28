@@ -9,7 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
-fun Route.groupRouting() {
+internal fun Route.groupRouting() {
     val groupService: GroupService by inject()
 
     route("/group") {

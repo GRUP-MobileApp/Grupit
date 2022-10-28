@@ -5,7 +5,7 @@ import com.grup.interfaces.IUserRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class UserService : KoinComponent {
+internal class UserService : KoinComponent {
     private val userRepository: IUserRepository by inject()
 
     fun createUser(user: User): User? {
