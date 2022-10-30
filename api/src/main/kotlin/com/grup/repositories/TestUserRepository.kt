@@ -2,6 +2,7 @@ package com.grup.repositories
 
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
+import com.grup.objects.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
@@ -16,7 +17,7 @@ internal class TestUserRepository : IUserRepository {
     }
 
     override fun findUserById(userId: String): User? {
-        return userRealm.query(User::class, "_id == $0", userId).first().find()
+        return userRealm.query(User::class, "$idSerialName == $0", userId).first().find()
     }
 
     override fun findUserByUserName(username: String): User? {

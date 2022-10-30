@@ -6,7 +6,6 @@ import com.grup.objects.Id
 import com.grup.objects.createIdFromString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.math.BigDecimal
 
 internal class UserBalanceService : KoinComponent {
     private val userBalanceRepository: IUserBalanceRepository by inject()
@@ -19,7 +18,7 @@ internal class UserBalanceService : KoinComponent {
         return UserBalance().apply {
             this.groupId = createIdFromString(groupId)
             this.userId = createIdFromString(userId)
-            this.balance = BigDecimal.ZERO
+            this.balance = 0.0
         }
     }
 
@@ -35,7 +34,7 @@ internal class UserBalanceService : KoinComponent {
         return userBalanceRepository.findUserBalanceByUserAndGroupId(userId, groupId) != null
     }
 
-    fun updateUserBalance(groupId: String, userId: String, balanceChange: BigDecimal): UserBalance? {
+    fun updateUserBalance(groupId: String, userId: String, balanceChange: Double): UserBalance? {
         TODO("Not yet implemented")
     }
 }

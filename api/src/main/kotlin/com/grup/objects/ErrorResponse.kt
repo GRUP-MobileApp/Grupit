@@ -1,8 +1,5 @@
 package com.grup.objects
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class ErrorResponse(val message: String) {
     companion object {
         val NOT_FOUND_RESPONSE = ErrorResponse("User/Group not found")

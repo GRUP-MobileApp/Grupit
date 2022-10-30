@@ -4,7 +4,6 @@ import com.grup.interfaces.IUserBalanceRepository
 import com.grup.models.UserBalance
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import java.math.BigDecimal
 
 internal class TestUserBalanceRepository : IUserBalanceRepository {
     private val config = RealmConfiguration.Builder(schema = setOf(UserBalance::class)).build()
@@ -25,7 +24,7 @@ internal class TestUserBalanceRepository : IUserBalanceRepository {
         return userBalanceRealm.query(UserBalance::class, "groupId == $groupId").find()
     }
 
-    override fun updateUserBalance(newBalance: BigDecimal): UserBalance? {
+    override fun updateUserBalance(newBalance: Double): UserBalance? {
         TODO("Not yet implemented")
     }
 }

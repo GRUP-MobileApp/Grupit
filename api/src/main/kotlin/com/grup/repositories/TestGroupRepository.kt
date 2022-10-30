@@ -2,6 +2,7 @@ package com.grup.repositories
 
 import com.grup.models.Group
 import com.grup.interfaces.IGroupRepository
+import com.grup.objects.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
@@ -16,6 +17,6 @@ internal class TestGroupRepository : IGroupRepository {
     }
 
     override fun findGroupById(groupId: String): Group? {
-        return groupRealm.query(Group::class, "_id == $0", groupId).first().find()
+        return groupRealm.query(Group::class, "$idSerialName == $0", groupId).first().find()
     }
 }

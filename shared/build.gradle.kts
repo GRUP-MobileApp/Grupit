@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.5.0"
+    kotlin("plugin.serialization") version "1.7.20"
     kotlin("native.cocoapods")
     id("com.android.library")
 }
@@ -34,7 +34,7 @@ kotlin {
     }
     
     sourceSets {
-        val ktorVersion = "1.6.7"
+        val ktorVersion: String by project
         val napierVersion = "2.4.0"
 
         val commonMain by getting {
@@ -42,10 +42,8 @@ kotlin {
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
 
-                // Ktor
-                implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("io.ktor:ktor-client-logging:$ktorVersion")
-                implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+                // API
+                implementation(project(":api"))
             }
         }
         val commonTest by getting {
