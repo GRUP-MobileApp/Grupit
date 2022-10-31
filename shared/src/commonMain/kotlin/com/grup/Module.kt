@@ -19,13 +19,9 @@ internal val servicesModule = module {
     single { TransactionRecordService() }
 }
 
-internal val repositoriesModule = module {
-    single<IUserRepository> { UserRepository() }
-}
-
 internal val testRepositoriesModule = module {
-    single<IUserRepository> { TestUserRepository() }
-    single<IGroupRepository> { TestGroupRepository() }
-    single<IUserBalanceRepository> { TestUserBalanceRepository() }
-    single<ITransactionRecordRepository> { TestTransactionRecordRepository() }
+    single<IUserRepository> { UserRepository() }
+    single<IGroupRepository> { GroupRepository() }
+    single<IUserBalanceRepository> { UserBalanceRepository() }
+    single<ITransactionRecordRepository> { TransactionRecordRepository() }
 }

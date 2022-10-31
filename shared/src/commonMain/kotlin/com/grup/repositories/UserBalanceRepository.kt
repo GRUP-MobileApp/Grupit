@@ -5,8 +5,9 @@ import com.grup.models.UserBalance
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-internal class TestUserBalanceRepository : IUserBalanceRepository {
-    private val config = RealmConfiguration.Builder(schema = setOf(UserBalance::class)).build()
+internal class UserBalanceRepository(
+    config: RealmConfiguration = RealmConfiguration.Builder(schema = setOf(UserBalance::class)).build()
+) : IUserBalanceRepository {
     private val userBalanceRealm: Realm = Realm.open(config)
 
     override fun createUserBalance(userBalance: UserBalance): UserBalance? {
@@ -26,5 +27,9 @@ internal class TestUserBalanceRepository : IUserBalanceRepository {
 
     override fun updateUserBalance(newBalance: Double): UserBalance? {
         TODO("Not yet implemented")
+    }
+
+    override fun close() {
+        userBalanceRealm.close()
     }
 }

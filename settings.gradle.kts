@@ -9,4 +9,3 @@ pluginManagement {
 rootProject.name = "GRUP"
 include(":androidApp")
 include(":shared")
-include(":api")

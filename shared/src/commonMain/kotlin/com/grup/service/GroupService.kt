@@ -2,6 +2,7 @@ package com.grup.service
 
 import com.grup.models.Group
 import com.grup.interfaces.IGroupRepository
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

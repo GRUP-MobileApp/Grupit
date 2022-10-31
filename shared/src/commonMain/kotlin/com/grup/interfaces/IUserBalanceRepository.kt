@@ -2,7 +2,7 @@ package com.grup.interfaces
 
 import com.grup.models.UserBalance
 
-internal interface IUserBalanceRepository {
+internal interface IUserBalanceRepository : IRepository {
     fun createUserBalance(userBalance: UserBalance): UserBalance?
 
     fun findUserBalanceByUserAndGroupId(userId: String, groupId: String): UserBalance?

@@ -2,7 +2,7 @@ package com.grup.interfaces
 
 import com.grup.models.User
 
-internal interface IUserRepository {
+internal interface IUserRepository : IRepository {
     fun insertUser(user: User): User?
 
     fun findUserById(userId: String): User?

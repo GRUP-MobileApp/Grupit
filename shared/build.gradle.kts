@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "1.7.20"
     kotlin("native.cocoapods")
     id("com.android.library")
+    id("io.realm.kotlin")
 }
 
 // CocoaPods requires the podspec to have a version.
@@ -35,6 +36,8 @@ kotlin {
     
     sourceSets {
         val ktorVersion: String by project
+        val realmVersion: String by project
+        val koinVersion: String by project
         val napierVersion = "2.4.0"
 
         val commonMain by getting {
@@ -42,14 +45,23 @@ kotlin {
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
 
-                // API
-                implementation(project(":api"))
+                // Realm
+                implementation("io.realm.kotlin:library-base:$realmVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+                // Realm Sync
+                implementation("io.realm.kotlin:library-sync:1.4.0")
+
+                // Koin
+                implementation("io.insert-koin:koin-core:$koinVersion")
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+
+                implementation("io.insert-koin:koin-test:$koinVersion")
             }
         }
         val androidMain by getting {

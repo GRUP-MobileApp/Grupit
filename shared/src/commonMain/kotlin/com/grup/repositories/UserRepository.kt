@@ -6,8 +6,9 @@ import com.grup.objects.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-internal class TestUserRepository : IUserRepository {
-    private val config = RealmConfiguration.Builder(schema = setOf(User::class)).build()
+internal class UserRepository(
+    config: RealmConfiguration = RealmConfiguration.Builder(schema = setOf(User::class)).build()
+) : IUserRepository {
     private val userRealm: Realm = Realm.open(config)
 
     override fun insertUser(user: User): User? {
@@ -22,5 +23,9 @@ internal class TestUserRepository : IUserRepository {
 
     override fun findUserByUserName(username: String): User? {
         return userRealm.query(User::class, "username == $0", username).first().find()
+    }
+
+    override fun close() {
+        userRealm.close()
     }
 }

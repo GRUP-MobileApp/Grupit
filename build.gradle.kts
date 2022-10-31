@@ -2,7 +2,6 @@ buildscript {
     val kotlinVersion: String by project
 
     repositories {
-        gradlePluginPortal()
         google()
         mavenCentral()
     }
@@ -15,7 +14,6 @@ buildscript {
 
 allprojects {
     repositories {
-        gradlePluginPortal()
         google()
         mavenCentral()
     }
