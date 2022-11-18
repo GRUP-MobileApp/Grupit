@@ -30,9 +30,9 @@ import com.grup.android.ui.*
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val apiServer = APIServer.registerAnonymous("JUTIN")
-        val group = apiServer.createGroup("JUTIN GROUP")
-        //apiServer.addUserToGroup(group.getId(), "JUTIN")
+//        val apiServer = APIServer.registerAnonymous("JUTIN")
+//        val group = apiServer.createGroup("JUTIN GROUP")
+//        apiServer.addUserToGroup(group.getId(), "JUTIN")
         setContent {
             AppTheme {
                 MainLayout()
