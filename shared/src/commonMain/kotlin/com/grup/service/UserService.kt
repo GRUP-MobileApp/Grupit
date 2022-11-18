@@ -1,7 +1,10 @@
 package com.grup.service
 
+import com.grup.exceptions.UserAlreadyInGroupException
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
+import com.grup.models.Group
+import com.grup.objects.throwIf
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -20,11 +23,18 @@ internal class UserService : KoinComponent {
         return userRepository.findUserById(userId)
     }
 
-    fun usernameExists(username: String): Boolean {
-        return getUserByUsername(username) != null
+    fun addGroupToUser(user: User, group: Group) {
+        throwIf(user.groups.contains(group._id)) {
+            UserAlreadyInGroupException("User with id ${user.getId()} is already in " +
+                    "Group with id ${group.getId()}")
+        }
+        user.apply {
+            groups.add(group._id)
+        }
+        userRepository.updateUser(user)
     }
 
-    fun userIdExists(userId: String): Boolean {
-        return getUserById(userId) != null
+    fun usernameExists(username: String): Boolean {
+        return getUserByUsername(username) != null
     }
 }

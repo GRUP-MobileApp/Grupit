@@ -1,8 +1,14 @@
 package com.grup.service
 
+import com.grup.exceptions.DoesNotExistException
+import com.grup.exceptions.InvalidTransactionRecordException
+import com.grup.exceptions.UserAlreadyInGroupException
 import com.grup.models.Group
 import com.grup.interfaces.IGroupRepository
-import kotlinx.coroutines.runBlocking
+import com.grup.models.TransactionRecord
+import com.grup.models.User
+import com.grup.models.UserInfo
+import com.grup.objects.throwIf
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -17,7 +23,37 @@ internal class GroupService : KoinComponent {
         return groupRepository.findGroupById(groupId)
     }
 
-    fun groupIdExists(groupId: String): Boolean {
-        return getByGroupId(groupId) != null
+    fun addUserToGroup(user: User, group: Group) {
+        throwIf(group.userInfo.find { it.userId == user._id } != null) {
+            UserAlreadyInGroupException("User with id ${user.getId()} is already in " +
+                    "Group with id ${group.getId()}")
+        }
+        group.userInfo.add(
+            UserInfo().apply {
+                this.userId = user._id
+                this.username = user.username
+                this.userBalance = 0.0
+            }
+        )
+        groupRepository.updateGroup(group)
+    }
+
+    fun applyTransactionRecord(transactionRecord: TransactionRecord) {
+        val groupId = transactionRecord.groupId.toString()
+        val group: Group = getByGroupId(groupId)
+            ?: throw DoesNotExistException("Error posting transaction, " +
+                    "Group with id $groupId doesn't exist")
+
+        try {
+            transactionRecord.balanceChanges.forEach { balanceChangeRecord ->
+                group.userInfo.find { it.userId == balanceChangeRecord.userId }!!.apply {
+                    this.userBalance = this.userBalance!! + balanceChangeRecord.balanceChange
+                }
+            }
+        } catch (e: NullPointerException) {
+            throw InvalidTransactionRecordException("Group with id $groupId does not contain " +
+                    "all Users in transaction with id ${transactionRecord.getId()}")
+        }
+        groupRepository.updateGroup(group)
     }
 }

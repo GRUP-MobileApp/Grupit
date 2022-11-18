@@ -23,12 +23,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.grup.APIServer
 import com.grup.android.ui.*
 
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val apiServer = APIServer.registerAnonymous("JUTIN")
+        val group = apiServer.createGroup("JUTIN GROUP")
+        //apiServer.addUserToGroup(group.getId(), "JUTIN")
         setContent {
             AppTheme {
                 MainLayout()

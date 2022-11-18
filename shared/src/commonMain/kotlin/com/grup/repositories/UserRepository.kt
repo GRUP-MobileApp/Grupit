@@ -1,14 +1,16 @@
 package com.grup.repositories
 
+import com.grup.exceptions.DoesNotExistException
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
+import com.grup.objects.createIdFromString
 import com.grup.objects.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.UpdatePolicy
 
-internal class UserRepository(
-    config: RealmConfiguration = RealmConfiguration.Builder(schema = setOf(User::class)).build()
-) : IUserRepository {
+internal class UserRepository : IUserRepository {
+    private val config = RealmConfiguration.Builder(schema = setOf(User::class)).build()
     private val userRealm: Realm = Realm.open(config)
 
     override fun insertUser(user: User): User? {
@@ -18,11 +20,22 @@ internal class UserRepository(
     }
 
     override fun findUserById(userId: String): User? {
-        return userRealm.query(User::class, "$idSerialName == $0", userId).first().find()
+        return userRealm.query(User::class,
+            "$idSerialName == $0",
+            createIdFromString(userId)
+        ).first().find()
     }
 
     override fun findUserByUserName(username: String): User? {
         return userRealm.query(User::class, "username == $0", username).first().find()
+    }
+
+    override fun updateUser(user: User): User? {
+        findUserById(user.getId())
+            ?: throw DoesNotExistException("User with id ${user.getId()} does not exist")
+        return userRealm.writeBlocking {
+            copyToRealm(user, UpdatePolicy.ALL)
+        }
     }
 
     override fun close() {

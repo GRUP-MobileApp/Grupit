@@ -34,7 +34,7 @@ class UserTest : KoinTest {
         assertEquals(testUsername, user.username)
     }
 
-        @Test
+    @Test
     fun testGetUserByUsername() {
         val testUsername = "testGetUserByUsername"
         createTestUser(testUsername)

@@ -17,6 +17,6 @@ class TransactionRecord : BaseEntity(), RealmObject {
     val groupId: Id? = null
     val date: String? = null
     val transactionType: TransactionType? = null
-    val balanceChanges: List<BalanceChangeRecord>? = null
+    val balanceChanges: List<BalanceChangeRecord> = emptyList()
 }
 

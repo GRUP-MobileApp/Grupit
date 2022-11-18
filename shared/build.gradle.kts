@@ -50,7 +50,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
                 // Realm Sync
-                implementation("io.realm.kotlin:library-sync:1.4.0")
+                implementation("io.realm.kotlin:library-sync:$realmVersion")
 
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
@@ -58,9 +58,11 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
+                implementation(kotlin("test-junit"))
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
 
+                // Koin Test
                 implementation("io.insert-koin:koin-test:$koinVersion")
             }
         }

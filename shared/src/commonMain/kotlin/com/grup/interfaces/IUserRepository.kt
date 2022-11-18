@@ -7,4 +7,6 @@ internal interface IUserRepository : IRepository {
 
     fun findUserById(userId: String): User?
     fun findUserByUserName(username: String): User?
+
+    fun updateUser(user: User): User?
 }
