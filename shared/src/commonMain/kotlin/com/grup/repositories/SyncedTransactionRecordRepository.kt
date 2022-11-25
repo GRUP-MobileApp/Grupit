@@ -4,6 +4,7 @@ import com.grup.models.TransactionRecord
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.notifications.UpdatedObject
+import io.realm.kotlin.ext.query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,8 +29,7 @@ internal class SyncedTransactionRecordRepository(
                             removeAll()
                             changes.obj.groups.forEach { groupId ->
                                 this.add(
-                                    realm.query(
-                                        TransactionRecord::class,
+                                    realm.query<TransactionRecord>(
                                         "groupId == $0",
                                         groupId),
                                     groupId

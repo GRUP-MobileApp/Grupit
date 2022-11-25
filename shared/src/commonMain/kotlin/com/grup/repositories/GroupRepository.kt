@@ -3,18 +3,16 @@ package com.grup.repositories
 import com.grup.exceptions.DoesNotExistException
 import com.grup.models.Group
 import com.grup.interfaces.IGroupRepository
-import com.grup.models.UserInfo
 import com.grup.objects.createIdFromString
 import com.grup.objects.idSerialName
 import io.realm.kotlin.Configuration
-import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.UpdatePolicy
-import io.realm.kotlin.ext.asFlow
+import io.realm.kotlin.ext.query
 
 internal open class GroupRepository : BaseRealmRepository(), IGroupRepository {
     override val config: Configuration =
-        RealmConfiguration.Builder(schema = setOf(Group::class, UserInfo::class)).build()
+        RealmConfiguration.Builder(schema = setOf(Group::class, Group.UserInfo::class)).build()
 
     override fun createGroup(group: Group): Group? {
         return realm.writeBlocking {
@@ -23,8 +21,7 @@ internal open class GroupRepository : BaseRealmRepository(), IGroupRepository {
     }
 
     override fun findGroupById(groupId: String): Group? {
-        return realm.query(
-            Group::class,
+        return realm.query<Group>(
             "$idSerialName == $0",
             createIdFromString(groupId)
         ).first().find()

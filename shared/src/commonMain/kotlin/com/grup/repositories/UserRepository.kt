@@ -8,6 +8,7 @@ import com.grup.objects.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.ext.query
 
 internal class UserRepository : IUserRepository {
     private val config = RealmConfiguration.Builder(schema = setOf(User::class)).build()
@@ -20,14 +21,14 @@ internal class UserRepository : IUserRepository {
     }
 
     override fun findUserById(userId: String): User? {
-        return userRealm.query(User::class,
+        return userRealm.query<User>(
             "$idSerialName == $0",
             createIdFromString(userId)
         ).first().find()
     }
 
     override fun findUserByUserName(username: String): User? {
-        return userRealm.query(User::class, "username == $0", username).first().find()
+        return userRealm.query<User>("username == $0", username).first().find()
     }
 
     override fun updateUser(user: User): User? {

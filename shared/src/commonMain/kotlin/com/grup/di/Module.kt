@@ -1,4 +1,4 @@
-package com.grup
+package com.grup.di
 
 import com.grup.interfaces.IGroupRepository
 import com.grup.interfaces.ITransactionRecordRepository

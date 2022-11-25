@@ -7,7 +7,6 @@ import com.grup.models.Group
 import com.grup.interfaces.IGroupRepository
 import com.grup.models.TransactionRecord
 import com.grup.models.User
-import com.grup.models.UserInfo
 import com.grup.objects.throwIf
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,13 +23,13 @@ internal class GroupService : KoinComponent {
     }
 
     fun addUserToGroup(user: User, group: Group) {
-        throwIf(group.userInfo.find { it.userId == user._id } != null) {
+        throwIf(group.userInfo.find { it.userId == user.getId() } != null) {
             UserAlreadyInGroupException("User with id ${user.getId()} is already in " +
                     "Group with id ${group.getId()}")
         }
         group.userInfo.add(
-            UserInfo().apply {
-                this.userId = user._id
+            Group.UserInfo().apply {
+                this.userId = user.getId()
                 this.username = user.username
                 this.userBalance = 0.0
             }
@@ -47,7 +46,7 @@ internal class GroupService : KoinComponent {
         try {
             transactionRecord.balanceChanges.forEach { balanceChangeRecord ->
                 group.userInfo.find { it.userId == balanceChangeRecord.userId }!!.apply {
-                    this.userBalance = this.userBalance!! + balanceChangeRecord.balanceChange
+                    this.userBalance = this.userBalance + balanceChangeRecord.balanceChange
                 }
             }
         } catch (e: NullPointerException) {

@@ -24,12 +24,12 @@ internal class UserService : KoinComponent {
     }
 
     fun addGroupToUser(user: User, group: Group) {
-        throwIf(user.groups.contains(group._id)) {
+        throwIf(user.groups.contains(group.getId())) {
             UserAlreadyInGroupException("User with id ${user.getId()} is already in " +
                     "Group with id ${group.getId()}")
         }
         user.apply {
-            groups.add(group._id)
+            groups.add(group.getId())
         }
         userRepository.updateUser(user)
     }

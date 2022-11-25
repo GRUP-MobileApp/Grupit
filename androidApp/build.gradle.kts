@@ -1,6 +1,8 @@
+val realmVersion: String by project
 plugins {
     id("com.android.application")
     kotlin("android")
+    id("io.realm.kotlin")
 }
 
 android {
@@ -40,6 +42,9 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+
+    // Realm
+    implementation("io.realm.kotlin:library-base:$realmVersion")
 
     // Jetpack Compose
     val composeVersion = "1.0.5"

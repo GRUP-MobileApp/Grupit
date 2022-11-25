@@ -9,3 +9,5 @@ const val idSerialName = "_id"
 fun createId(): Id = RealmUUID.random().toString()
 
 fun createIdFromString(stringId: String): Id = RealmUUID.from(stringId).toString()
+
+fun Id.asString() = Id.toString()

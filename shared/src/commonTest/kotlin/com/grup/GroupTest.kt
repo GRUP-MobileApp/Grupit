@@ -1,6 +1,7 @@
 package com.grup
 
 import com.grup.controllers.GroupController
+import com.grup.di.testRepositoriesModule
 import com.grup.models.Group
 import com.grup.service.GroupService
 import org.koin.core.context.startKoin
@@ -30,7 +31,7 @@ class GroupTest : KoinTest {
     fun testCreateBasicGroup() {
         val testGroupName = "testCreateBasicGroup"
         val group: Group = createTestGroup(testGroupName)
-        assertNotNull(group._id)
+        assertNotNull(group.getId())
         assertEquals(testGroupName, group.groupName)
     }
 
@@ -40,8 +41,8 @@ class GroupTest : KoinTest {
         val testGroupId: String = createTestGroup(testGroupName).getId()
 
         val group: Group = groupController.getGroupById(testGroupId)
-        assertNotNull(group._id)
-        assertEquals(testGroupId, group._id)
+        assertNotNull(group.getId())
+        assertEquals(testGroupId, group.getId())
         assertEquals(testGroupName, group.groupName)
     }
 

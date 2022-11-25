@@ -3,18 +3,21 @@ package com.grup
 import com.grup.controllers.GroupController
 import com.grup.controllers.TransactionRecordController
 import com.grup.controllers.UserController
+import com.grup.di.servicesModule
 import com.grup.interfaces.IGroupRepository
 import com.grup.interfaces.ITransactionRecordRepository
 import com.grup.interfaces.IUserRepository
 import com.grup.models.Group
 import com.grup.models.User
+import com.grup.repositories.*
 import com.grup.repositories.LoggedInUserManager
-import com.grup.repositories.SyncedGroupRepository
 import com.grup.repositories.SyncedTransactionRecordRepository
 import com.grup.repositories.UserRepository
+//import com.grup.repositories.SyncedGroupRepository
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.Credentials
 import kotlinx.coroutines.runBlocking
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -37,30 +40,28 @@ class APIServer private constructor(
         }
 
         fun registerAnonymous(username: String): APIServer {
-            return loginAnonymous().apply {
-                this.userManager.registerUser(
-                    User().apply {
-                        this.username = username
-                    }
-                )
-            }
+            return loginAnonymous().registerUser(username)
         }
 
         fun registerEmailPassword(email: String, password: String, username: String): APIServer {
             runBlocking {
                 app.emailPasswordAuth.registerUser(email, password)
             }
-            return loginWithEmailPassword(email, password).apply {
+            return loginWithEmailPassword(email, password).registerUser(username)
+        }
+
+        fun loginWithEmailPassword(email: String, password: String): APIServer {
+            return APIServer(Credentials.emailPassword(email, password))
+        }
+
+        private fun APIServer.registerUser(username: String): APIServer {
+            return this.apply {
                 this.userManager.registerUser(
                     User().apply {
                         this.username = username
                     }
                 )
             }
-        }
-
-        fun loginWithEmailPassword(email: String, password: String): APIServer {
-            return APIServer(Credentials.emailPassword(email, password))
         }
     }
 
@@ -94,6 +95,7 @@ class APIServer private constructor(
     private val transactionRecordController: TransactionRecordController = TransactionRecordController()
 
     fun createGroup(groupName: String) = groupController.createGroup(groupName)
+    fun findGroupById(groupId: String) = groupController.getGroupById(groupId)
     fun addUserToGroup(group: Group, username: String) =
         groupController.addUserToGroup(group, username)
 

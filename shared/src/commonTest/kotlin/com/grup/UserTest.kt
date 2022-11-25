@@ -1,6 +1,7 @@
 package com.grup
 
 import com.grup.controllers.UserController
+import com.grup.di.testRepositoriesModule
 import com.grup.models.User
 import com.grup.service.UserService
 import org.koin.core.context.startKoin
@@ -30,7 +31,7 @@ class UserTest : KoinTest {
     fun testCreateBasicUser() {
         val testUsername = "testCreateBasicUser"
         val user: User = createTestUser(testUsername)
-        assertNotNull(user._id)
+        assertNotNull(user.getId())
         assertEquals(testUsername, user.username)
     }
 
@@ -40,7 +41,7 @@ class UserTest : KoinTest {
         createTestUser(testUsername)
 
         val user: User = userController.getUserByUsername(testUsername)
-        assertNotNull(user._id)
+        assertNotNull(user.getId())
         assertEquals(testUsername, user.username)
     }
 
