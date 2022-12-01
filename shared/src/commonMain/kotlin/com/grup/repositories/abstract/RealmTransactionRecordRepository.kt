@@ -1,14 +1,11 @@
-package com.grup.repositories
+package com.grup.repositories.abstract
 
 import com.grup.interfaces.ITransactionRecordRepository
 import com.grup.models.TransactionRecord
-import io.realm.kotlin.Configuration
-import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.Realm
 
-internal open class TransactionRecordRepository :
-    BaseRealmRepository(), ITransactionRecordRepository {
-    override val config: Configuration =
-        RealmConfiguration.Builder(schema = setOf(TransactionRecord::class)).build()
+internal abstract class RealmTransactionRecordRepository : ITransactionRecordRepository {
+    protected abstract val realm: Realm
 
     override fun createTransactionRecord(transactionRecord: TransactionRecord): TransactionRecord? {
         return realm.writeBlocking {

@@ -1,8 +1,7 @@
 package com.grup.models
 
-import com.grup.objects.Id
-import com.grup.objects.createId
-import com.grup.objects.TransactionType
+import com.grup.other.Id
+import com.grup.other.createId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
@@ -11,6 +10,10 @@ class TransactionRecord : BaseEntity(), RealmObject {
         val userId: Id,
         val balanceChange: Double
     )
+    enum class TransactionType {
+        DEBT_ACTION,
+        SETTLE_ACTION
+    }
 
     @PrimaryKey
     override var _id: Id = createId()

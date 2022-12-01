@@ -3,26 +3,22 @@ package com.grup
 import com.grup.controllers.GroupController
 import com.grup.controllers.TransactionRecordController
 import com.grup.controllers.UserController
+import com.grup.di.createSyncedRealmModule
+import com.grup.di.registerUserObject
+import com.grup.di.repositoriesModule
 import com.grup.di.servicesModule
-import com.grup.interfaces.IGroupRepository
-import com.grup.interfaces.ITransactionRecordRepository
-import com.grup.interfaces.IUserRepository
+import com.grup.di.user
+import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.models.Group
 import com.grup.models.User
-import com.grup.repositories.*
-import com.grup.repositories.LoggedInUserManager
-import com.grup.repositories.SyncedTransactionRecordRepository
+import com.grup.other.Id
+import com.grup.other.RealmUser
 import com.grup.repositories.UserRepository
-//import com.grup.repositories.SyncedGroupRepository
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.Credentials
+import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import kotlinx.coroutines.runBlocking
-import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
-import org.koin.dsl.module
-
-
-typealias RealmUser = io.realm.kotlin.mongodb.User
 
 class APIServer private constructor(
     private val credentials: Credentials = Credentials.anonymous()
@@ -40,52 +36,50 @@ class APIServer private constructor(
         }
 
         fun registerAnonymous(username: String): APIServer {
-            return loginAnonymous().registerUser(username)
+            return loginAnonymous().also { apiServer ->
+                apiServer.registerUser(username)
+            }
         }
 
         fun registerEmailPassword(email: String, password: String, username: String): APIServer {
-            runBlocking {
-                app.emailPasswordAuth.registerUser(email, password)
+            try {
+                runBlocking {
+                    app.emailPasswordAuth.registerUser(email, password)
+                }
+            } catch (e: UserAlreadyExistsException) {
+                throw EntityAlreadyExistsException("Email already exists")
             }
-            return loginWithEmailPassword(email, password).registerUser(username)
+            return loginWithEmailPassword(email, password).also { apiServer ->
+                apiServer.registerUser(username)
+            }
         }
 
         fun loginWithEmailPassword(email: String, password: String): APIServer {
-            return APIServer(Credentials.emailPassword(email, password))
-        }
-
-        private fun APIServer.registerUser(username: String): APIServer {
-            return this.apply {
-                this.userManager.registerUser(
-                    User().apply {
-                        this.username = username
-                    }
-                )
-            }
+//            try {
+                return APIServer(Credentials.emailPassword(email, password))
+//            } catch (e: Exception) {
+//                // TODO: INVALID EMAIL PASS EXCEPTION
+//                throw Exception()
+//            }
         }
     }
 
-    private val user: RealmUser = runBlocking {
+    private val realmUser: RealmUser = runBlocking {
         app.login(credentials)
     }
 
-    private val userManager: LoggedInUserManager = LoggedInUserManager(user)
+    private fun registerUser(username: String) {
+        registerUserObject(User(realmUser.id).apply {
+            this.username = username
+        })
+    }
 
     init {
         startKoin {
             modules(listOf(
-                // Regular Repositories
-                module {
-                    single<IUserRepository> { userRepository }
-                },
-                // Synced Repositories
-                module {
-                    single<IGroupRepository> { SyncedGroupRepository(userManager) }
-                    single<ITransactionRecordRepository> {
-                        SyncedTransactionRecordRepository(userManager)
-                    }
-                },
-                servicesModule
+                createSyncedRealmModule(realmUser),
+                servicesModule,
+                repositoriesModule
             ))
         }
     }
@@ -94,14 +88,16 @@ class APIServer private constructor(
     private val groupController: GroupController = GroupController()
     private val transactionRecordController: TransactionRecordController = TransactionRecordController()
 
-    fun createGroup(groupName: String) = groupController.createGroup(groupName)
-    fun findGroupById(groupId: String) = groupController.getGroupById(groupId)
-    fun addUserToGroup(group: Group, username: String) =
-        groupController.addUserToGroup(group, username)
+    fun createGroup(groupName: String) = groupController.createGroup(groupName, user)
+    fun getGroupById(groupId: Id) = groupController.getGroupById(groupId)
+    fun getAllGroupsAsFlow() = groupController.getAllGroupsAsFlow()
+    // TODO: NEED TO ADD BY USERNAME VIA USER SERVICE
+    fun addUserToGroup(group: Group, user: User) =
+        groupController.addUserToGroup(user, group)
 
     fun logOut() {
         runBlocking {
-            user.logOut()
+            realmUser.logOut()
         }
     }
 }

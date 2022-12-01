@@ -1,30 +1,18 @@
 package com.grup.repositories
 
+import com.grup.di.addGroup
 import com.grup.models.Group
-import io.realm.kotlin.mongodb.sync.SyncConfiguration
-import io.realm.kotlin.ext.query
+import com.grup.repositories.abstract.RealmGroupRepository
+import io.realm.kotlin.Realm
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-internal class SyncedGroupRepository(
-    private val userManager: LoggedInUserManager
-) : GroupRepository() {
-    override val config =
-        SyncConfiguration.Builder(userManager.realmUser, setOf(Group::class, Group.UserInfo::class))
-            .initialSubscriptions(rerunOnOpen = true) { realm ->
-                add(realm.query<Group>("$0 IN users", userManager.user()._id))
-            }
-            .waitForInitialRemoteData()
-            .name("groupRealm")
-            .build()
+internal class SyncedGroupRepository : RealmGroupRepository(), KoinComponent {
+    override val realm: Realm by inject()
 
     override fun createGroup(group: Group): Group? {
-        // Add yourself to the group
-        group.apply {
-            this.users.add(userManager.user()._id)
-            this.userInfo.add(Group.UserInfo().apply {
-                this.userId = userManager.user()._id
-                this.username = userManager.user().username
-            })
+        return realm.addGroup(group._id).run {
+            super.createGroup(group)
         }
-        return super.createGroup(group)
     }
 }

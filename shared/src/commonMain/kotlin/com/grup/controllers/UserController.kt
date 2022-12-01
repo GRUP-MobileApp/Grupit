@@ -4,7 +4,6 @@ import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.NotCreatedException
 import com.grup.exceptions.NotFoundException
 import com.grup.models.User
-import com.grup.objects.throwIf
 import com.grup.service.UserService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -12,9 +11,10 @@ import org.koin.core.component.inject
 class UserController : KoinComponent {
     private val userService: UserService by inject()
 
+    // Don't need this
     fun createUser(username: String): User {
-        throwIf(userService.usernameExists(username)) {
-            EntityAlreadyExistsException("User with username $username already exists")
+        if (userService.usernameExists(username)) {
+            throw EntityAlreadyExistsException("User with username $username already exists")
         }
 
         val user = User().apply {

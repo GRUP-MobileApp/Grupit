@@ -3,8 +3,8 @@ package com.grup.repositories
 import com.grup.exceptions.DoesNotExistException
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
-import com.grup.objects.createIdFromString
-import com.grup.objects.idSerialName
+import com.grup.other.Id
+import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.UpdatePolicy
@@ -20,17 +20,15 @@ internal class UserRepository : IUserRepository {
         }
     }
 
-    override fun findUserById(userId: String): User? {
-        return userRealm.query<User>(
-            "$idSerialName == $0",
-            createIdFromString(userId)
-        ).first().find()
+    override fun findUserById(userId: Id): User? {
+        return userRealm.query<User>("$idSerialName == $0", userId).first().find()
     }
 
     override fun findUserByUserName(username: String): User? {
         return userRealm.query<User>("username == $0", username).first().find()
     }
 
+    // TODO: Change
     override fun updateUser(user: User): User? {
         findUserById(user.getId())
             ?: throw DoesNotExistException("User with id ${user.getId()} does not exist")
