@@ -1,5 +1,6 @@
 package com.grup.android
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -9,23 +10,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.grup.APIServer
+import com.grup.android.MoneyRequestActivity
+import com.grup.android.R
 import com.grup.android.ui.*
-
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,13 +41,52 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun MainLayout() {
+    val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             HomeAppBar(
-                AppTheme.colors.primary,
-                Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(AppTheme.dimensions.topBarSize)
+                onNavigationIconClick = {
+                    scope.launch {
+                        scaffoldState.drawerState.open()
+                    }
+                }
+            )
+        },
+        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+        drawerContent = {
+            DrawerHeader()
+            DrawerBody(
+                items = listOf(
+                    MenuItem(
+                        id = "home",
+                        title = "Home",
+                        contentDescription = "Go to the home screen",
+                        icon = Icons.Default.Home
+                    ),
+                    MenuItem(
+                        id = "groups",
+                        title = "Groups",
+                        contentDescription = "Go to the home screen",
+                        icon = Icons.Default.Home
+                    ),
+                    MenuItem(
+                        id = "settings",
+                        title = "Settings",
+                        contentDescription = "Go to the settings screen",
+                        icon = Icons.Default.Home
+                    ),
+                    MenuItem(
+                        id = "help",
+                        title = "Help",
+                        contentDescription = "",
+                        icon = Icons.Default.Home
+                    )
+                ),
+                onItemClick = {
+                    println("Clicked on ${it.title}")
+                }
             )
         },
         bottomBar = {
@@ -71,15 +111,14 @@ fun MainLayout() {
 
 @Composable
 fun HomeAppBar(
-    backgroundColor: Color,
-    modifier: Modifier = Modifier
+    onNavigationIconClick: () -> Unit
 ) {
     TopAppBar(
         title = {},
-        backgroundColor = backgroundColor,
+        backgroundColor = AppTheme.colors.primary,
         navigationIcon = {
             IconButton(
-                onClick = { /* TODO: Open search */ }
+                onClick = onNavigationIconClick
             ) {
                 smallIcon(
                     imageVector = Icons.Filled.Menu,
@@ -96,8 +135,7 @@ fun HomeAppBar(
                     contentDescription = "Notifications"
                 )
             }
-        },
-        modifier = modifier
+        }
     )
 }
 
@@ -131,7 +169,7 @@ fun GroupDetails() {
                     modifier = Modifier.size(98.dp)
                 )
                 h1Text(
-                    text = "GROUP NAME",
+                    text = "Group Name",
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
                 )
             }
@@ -140,6 +178,8 @@ fun GroupDetails() {
                 fontSize = 100.sp
             )
         }
+
+        val context = LocalContext.current
         TextButton(
             colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
             modifier = Modifier
@@ -147,7 +187,7 @@ fun GroupDetails() {
                 .width(250.dp)
                 .height(45.dp),
             shape = AppTheme.shapes.large,
-            onClick = { /*TODO*/ }
+            onClick = { context.startActivity(Intent(context, MoneyRequestActivity::class.java))}
         ) {
             Text(
                 text = "Money Request",
