@@ -10,7 +10,7 @@ import com.grup.service.UserInfoService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class TransactionRecordController : KoinComponent {
+object TransactionRecordController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
     private val transactionRecordService: TransactionRecordService by inject()
     private val groupService: GroupService by inject()

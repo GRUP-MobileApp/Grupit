@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class GroupController : KoinComponent {
+object GroupController : KoinComponent {
     private val userService: UserService by inject()
     private val groupService: GroupService by inject()
     private val userInfoService: UserInfoService by inject()

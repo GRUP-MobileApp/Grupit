@@ -49,7 +49,7 @@ fun RequestLayout() {
             RequestTopAppBar()
         }
     ) {
-        Column() {
+        Column {
             RequestBody()
         }
     }

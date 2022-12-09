@@ -2,7 +2,6 @@ package com.grup.android
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.activity.compose.setContent
@@ -27,18 +26,18 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.grup.android.*
 import com.grup.android.ui.*
 
 import androidx.compose.material.*
 import androidx.compose.ui.platform.LocalContext
+import com.grup.APIServer
+import com.grup.exceptions.APIException
+import kotlinx.coroutines.runBlocking
 
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler())
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
@@ -46,20 +45,31 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-
 }
 
 @Composable
 fun LoginPage() {
+    val username = remember { mutableStateOf(TextFieldValue()) }
+    val password = remember { mutableStateOf(TextFieldValue()) }
     Box(modifier = Modifier
         .fillMaxSize()
         .background(AppTheme.colors.primary)) {
+        val context = LocalContext.current
         ClickableText(
             text = AnnotatedString("Sign up here"),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
-            onClick = { },
+            onClick = {
+                try {
+                    APIServer.Login
+                        .registerEmailAndPassword(username.value.text, password.value.text)
+                    APIServer.registerUser(username.value.text)
+                } catch (e: APIException) {
+                    print(e.message)
+                }
+                context.startActivity(Intent(context, MainActivity::class.java))
+            },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
@@ -74,10 +84,6 @@ fun LoginPage() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        val username = remember { mutableStateOf(TextFieldValue()) }
-        val password = remember { mutableStateOf(TextFieldValue()) }
-
         Text(text = "Login",
             style = TextStyle(
                 fontSize = 40.sp,
@@ -113,7 +119,14 @@ fun LoginPage() {
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             val context = LocalContext.current
             Button(
-                    onClick = {context.startActivity(Intent(context, MainActivity::class.java)) },
+                onClick = {
+                    try {
+                        APIServer.Login.emailAndPassword(username.value.text, password.value.text)
+                    } catch (e: APIException) {
+                        print(e.message)
+                    }
+                    context.startActivity(Intent(context, MainActivity::class.java))
+                },
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),

@@ -8,7 +8,7 @@ import com.grup.service.UserService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class UserController : KoinComponent {
+object UserController : KoinComponent {
     private val userService: UserService by inject()
 
     // Don't need this

@@ -7,7 +7,7 @@ import com.grup.service.UserInfoService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class UserInfoController : KoinComponent {
+object UserInfoController : KoinComponent {
     private val groupService: GroupService by inject()
     private val userInfoService: UserInfoService by inject()
 

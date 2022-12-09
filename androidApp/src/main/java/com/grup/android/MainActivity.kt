@@ -17,20 +17,26 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.grup.android.MoneyRequestActivity
-import com.grup.android.R
+import com.grup.APIServer
 import com.grup.android.ui.*
+import com.grup.exceptions.login.UserObjectNotFoundException
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // TODO: Prompt user for user info like username, etc
+        try {
+            val username = APIServer.user.username
+        } catch (e: UserObjectNotFoundException) {
+            APIServer.registerUser("TEST NEW USER")
+        }
         setContent {
             AppTheme {
                 MainLayout()
@@ -141,6 +147,7 @@ fun HomeAppBar(
 
 @Composable
 fun GroupDetails() {
+    val group = APIServer.getGroupById("c17f824b-e6df-44dd-bdd3-5fbf303eab43")
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -169,7 +176,7 @@ fun GroupDetails() {
                     modifier = Modifier.size(98.dp)
                 )
                 h1Text(
-                    text = "Group Name",
+                    text = "${group.groupName}",
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
                 )
             }

@@ -17,7 +17,6 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 internal lateinit var realm: Realm
-internal lateinit var user: User
 
 internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
     realm = Realm.open(SyncConfiguration.Builder(realmUser,
@@ -32,7 +31,6 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
         .build()
     ).also { createdRealm ->
         realm = createdRealm
-        realm.query<User>().first().find()?.let { user = it }
         createdRealm.query<UserInfo>().find().toList().let { userInfos ->
             runBlocking {
                 createdRealm.subscriptions.update { realm ->
@@ -68,7 +66,7 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
 }
 
 internal fun registerUserObject(newUser: User) {
-    user = realm.writeBlocking {
+    realm.writeBlocking {
         copyToRealm(newUser)
     }
 }
