@@ -15,11 +15,9 @@ class TransactionRecord : BaseEntity(), RealmObject {
         SETTLE_ACTION
     }
 
-    @PrimaryKey
-    override var _id: Id = createId()
+    @PrimaryKey override var _id: Id = createId()
     val groupId: Id? = null
     val date: String? = null
     val transactionType: TransactionType? = null
     val balanceChanges: List<BalanceChangeRecord> = emptyList()
 }
-

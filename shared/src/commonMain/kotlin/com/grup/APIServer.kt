@@ -1,6 +1,7 @@
 package com.grup
 
 import com.grup.controllers.GroupController
+import com.grup.controllers.PendingRequestController
 import com.grup.di.createSyncedRealmModule
 import com.grup.di.realm
 import com.grup.di.registerUserObject
@@ -11,6 +12,7 @@ import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.Group
+import com.grup.models.PendingRequest
 import com.grup.models.User
 import com.grup.other.Id
 import com.grup.other.RealmUser
@@ -27,7 +29,7 @@ object APIServer {
     private val app: App = App.create("")
     private val userRepository: UserRepository by lazy { UserRepository() }
 
-    val realmUser: RealmUser
+    private val realmUser: RealmUser
         get() = app.currentUser ?: throw NotLoggedInException()
 
     val user: User
@@ -37,9 +39,12 @@ object APIServer {
     fun createGroup(groupName: String) = GroupController.createGroup(groupName, user)
     fun getGroupById(groupId: Id) = GroupController.getGroupById(groupId)
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
-    // TODO: NEED TO ADD BY USERNAME VIA USER SERVICE
-    fun addUserToGroup(group: Group, user: User) =
-        GroupController.addUserToGroup(user, group)
+    fun inviteUserToGroup(username: String, group: Group) =
+        GroupController.inviteUserToGroup(username, group)
+    fun testInviteUser(group: Group) = GroupController.inviteUserTest(user, group)
+    fun acceptInviteToGroup(pendingRequest: PendingRequest) =
+        GroupController.acceptInviteToGroup(pendingRequest, user)
+    fun getAllPendingRequestsAsFlow() = PendingRequestController.getAllPendingRequestsAsFlow()
 
     object Login {
         private fun login(credentials: Credentials) {

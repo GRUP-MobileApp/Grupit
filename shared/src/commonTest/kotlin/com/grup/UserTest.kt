@@ -21,7 +21,6 @@ class UserTest : KoinTest {
                 testRepositoriesModule,
                 module {
                     single { UserService() }
-                    single { UserController() }
                 }
             ))
         }

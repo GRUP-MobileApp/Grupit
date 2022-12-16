@@ -10,6 +10,4 @@ internal interface IUserInfoRepository : IRepository {
     fun findUserInfosByGroup(groupId: Id): List<UserInfo>
 
     fun updateUserInfo(userInfo: UserInfo): UserInfo?
-
-    fun deleteUserInfo(userInfoId: Id)
 }

@@ -31,10 +31,6 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
         }
     }
 
-    override fun deleteUserInfo(userInfoId: Id) {
-        TODO("Not yet implemented")
-    }
-
     override fun close() {
         realm.close()
     }

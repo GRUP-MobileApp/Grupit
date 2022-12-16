@@ -6,8 +6,7 @@ import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
 class User() : BaseEntity(), RealmObject {
-    @PrimaryKey
-    override var _id: Id = createId()
+    @PrimaryKey override var _id: Id = createId()
     var username: String? = null
 
     constructor(realmId: String) : this() {

@@ -1,9 +1,7 @@
 package com.grup.di
 
-import com.grup.models.Group
-import com.grup.models.TransactionRecord
-import com.grup.models.User
-import com.grup.models.UserInfo
+import com.grup.exceptions.MissingFieldException
+import com.grup.models.*
 import com.grup.other.Id
 import com.grup.other.RealmUser
 import com.grup.other.asString
@@ -19,8 +17,13 @@ import org.koin.dsl.module
 internal lateinit var realm: Realm
 
 internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
-    realm = Realm.open(SyncConfiguration.Builder(realmUser,
-        setOf(User::class, Group::class, UserInfo::class, TransactionRecord::class))
+    realm = Realm.open(
+        SyncConfiguration.Builder(realmUser,
+            setOf(
+                User::class, Group::class, UserInfo::class, TransactionRecord::class,
+                PendingRequest::class
+            )
+        )
         .initialSubscriptions(rerunOnOpen = true) { realm ->
             add(realm.query<User>("$idSerialName == $0", realmUser.id))
             // Used to get initial user membership, this subscription is deleted afterwards
@@ -35,8 +38,15 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
             runBlocking {
                 createdRealm.subscriptions.update { realm ->
                     remove("UserInfos")
+                    add(
+                        realm.query<PendingRequest>(
+                            "requester == $0 OR target == $0",
+                            realmUser.id
+                        ),
+                        "PendingRequests"
+                    )
                     userInfos.forEach { userInfo ->
-                        userInfo.groupId!!.let { groupId ->
+                        userInfo.groupId?.let { groupId ->
                             add(
                                 realm.query<Group>("$idSerialName == $0", groupId),
                                 "${groupId.asString()}_Group"
@@ -49,7 +59,7 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
                                 realm.query<TransactionRecord>("groupId == $0", groupId),
                                 "${groupId.asString()}_TransactionRecord"
                             )
-                        }
+                        } ?: throw MissingFieldException("UserInfo missing groupId")
                     }
                 }
             }

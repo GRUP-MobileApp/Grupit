@@ -8,23 +8,27 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.grup.APIServer
 import com.grup.android.ui.*
 import com.grup.exceptions.login.UserObjectNotFoundException
+import com.grup.models.PendingRequest
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -119,6 +123,7 @@ fun MainLayout() {
 fun HomeAppBar(
     onNavigationIconClick: () -> Unit
 ) {
+    var popupState by remember { mutableStateOf(false) }
     TopAppBar(
         title = {},
         backgroundColor = AppTheme.colors.primary,
@@ -134,12 +139,39 @@ fun HomeAppBar(
         },
         actions = {
             IconButton(
-                onClick = { /* TODO: Open notifications */ }
+                onClick = { popupState = !popupState }
             ) {
                 smallIcon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications"
                 )
+                if (popupState) {
+                    Popup(
+                        alignment = Alignment.BottomEnd,
+                        offset = IntOffset(0, 100)
+                    ) {
+                        val notifications: List<PendingRequest>
+                        by APIServer.getAllPendingRequestsAsFlow().collectAsState(
+                            initial = emptyList()
+                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.background(Color.White)
+                        ) {
+                            Text(text = "NOTIFICATIONS LIST")
+                            notifications.forEach { pendingRequest ->
+                                if (pendingRequest.requestType == PendingRequest.RequestType.GROUP_INVITE) {
+                                    ClickableText(
+                                        text = AnnotatedString("Group Invite to ${pendingRequest.requester}"),
+                                        onClick = {
+                                            APIServer.acceptInviteToGroup(pendingRequest)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     )
@@ -147,7 +179,8 @@ fun HomeAppBar(
 
 @Composable
 fun GroupDetails() {
-    val group = APIServer.getGroupById("c17f824b-e6df-44dd-bdd3-5fbf303eab43")
+    val group = APIServer.createGroup("${APIServer.user.username}'s GROUP")
+    APIServer.testInviteUser(group)
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
