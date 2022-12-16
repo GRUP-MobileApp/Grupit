@@ -147,7 +147,6 @@ fun HomeAppBar(
 
 @Composable
 fun GroupDetails() {
-    val group = APIServer.getGroupById("c17f824b-e6df-44dd-bdd3-5fbf303eab43")
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -176,7 +175,7 @@ fun GroupDetails() {
                     modifier = Modifier.size(98.dp)
                 )
                 h1Text(
-                    text = "${group.groupName}",
+                    text = "GROUP NAME",
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
                 )
             }

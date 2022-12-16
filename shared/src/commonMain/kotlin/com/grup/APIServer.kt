@@ -1,6 +1,7 @@
 package com.grup
 
 import com.grup.controllers.GroupController
+import com.grup.controllers.UserController
 import com.grup.di.createSyncedRealmModule
 import com.grup.di.realm
 import com.grup.di.registerUserObject
@@ -14,6 +15,7 @@ import com.grup.models.Group
 import com.grup.models.User
 import com.grup.other.Id
 import com.grup.other.RealmUser
+import com.grup.repositories.API_KEY
 import com.grup.repositories.UserRepository
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
@@ -24,7 +26,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 
 object APIServer {
-    private val app: App = App.create("")
+    private val app: App = App.create(API_KEY)
     private val userRepository: UserRepository by lazy { UserRepository() }
 
     val realmUser: RealmUser
@@ -33,7 +35,7 @@ object APIServer {
     val user: User
         get() = realm.query<User>().first().find() ?: throw UserObjectNotFoundException()
 
-
+    fun testVerifyUsername(username: String) = UserController.getUserByUsername(username)
     fun createGroup(groupName: String) = GroupController.createGroup(groupName, user)
     fun getGroupById(groupId: Id) = GroupController.getGroupById(groupId)
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
