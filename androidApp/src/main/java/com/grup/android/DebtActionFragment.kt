@@ -1,5 +1,6 @@
 package com.grup.android
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -40,6 +42,7 @@ class DebtActionFragment : Fragment() {
     }
 }
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RequestLayout(
     mainViewModel: MainViewModel
@@ -329,7 +332,7 @@ fun SettleButton() {
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
         modifier = Modifier
             .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(150.dp)
+            .width(175.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
         onClick = { /*TODO*/ }
@@ -344,10 +347,10 @@ fun SettleButton() {
 @Composable
 fun RequestButton() {
     Button(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
+        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.caption),
         modifier = Modifier
             .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(150.dp)
+            .width(175.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
         onClick = { /*TODO*/ }
