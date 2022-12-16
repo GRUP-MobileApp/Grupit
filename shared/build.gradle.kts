@@ -8,7 +8,6 @@ plugins {
 
 // CocoaPods requires the podspec to have a version.
 version = "1.0"
-
 kotlin {
     android()
     iosX64()
@@ -33,7 +32,6 @@ kotlin {
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
         xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
     }
-    
     sourceSets {
         val ktorVersion: String by project
         val realmVersion: String by project
@@ -44,7 +42,6 @@ kotlin {
             dependencies {
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
-
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -54,6 +51,11 @@ kotlin {
 
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
+                //Ktor
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("org.json:json:20220924")
+
             }
         }
         val commonTest by getting {
