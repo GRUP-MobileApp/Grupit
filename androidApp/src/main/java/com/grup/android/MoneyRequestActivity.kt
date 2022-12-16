@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import com.grup.android.ui.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -72,12 +73,14 @@ fun RequestBody() {
             TextField(
                 label = {
                     Text(
-                        text = "0",
+                        text = "",
                         color = AppTheme.colors.onSecondary
                     ) },
                 textStyle = TextStyle(color = AppTheme.colors.onSecondary),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 value = requestValue.value,
-                onValueChange = { requestValue.value = it }
+                onValueChange = { requestValue.value = it },
+                singleLine = true
             )
             h1Text(
                 text = "$5",
@@ -302,7 +305,7 @@ fun SettleButton() {
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
         modifier = Modifier
             .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(150.dp)
+            .width(175.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
         onClick = { /*TODO*/ }
@@ -317,10 +320,10 @@ fun SettleButton() {
 @Composable
 fun RequestButton() {
     Button(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
+        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.caption),
         modifier = Modifier
             .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(150.dp)
+            .width(175.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
         onClick = { /*TODO*/ }

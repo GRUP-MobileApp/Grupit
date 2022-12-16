@@ -54,19 +54,21 @@ fun LoginPage() {
     Box(modifier = Modifier
         .fillMaxSize()
         .background(AppTheme.colors.primary)) {
+
+        val context = LocalContext.current
         ClickableText(
-            text = AnnotatedString("Sign up here"),
+            text = AnnotatedString("Forgot Password?"),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
-            onClick = { },
+            onClick = {context.startActivity(Intent(context, RegisterActivity::class.java)) },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
-                textDecoration = TextDecoration.Underline,
                 color = AppTheme.colors.onSecondary
             )
         )
+
     }
     Column(
         modifier = Modifier
@@ -85,7 +87,7 @@ fun LoginPage() {
             ),
             color = AppTheme.colors.onSecondary)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(50.dp))
         TextField(
             label = {
                 Text(
@@ -93,6 +95,7 @@ fun LoginPage() {
                     color = AppTheme.colors.onSecondary
                 ) },
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
+            singleLine = true,
             value = username.value,
             onValueChange = { username.value = it })
 
@@ -104,6 +107,7 @@ fun LoginPage() {
                     color = AppTheme.colors.onSecondary
                 ) },
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
+            singleLine = true,
             value = password.value,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -112,31 +116,50 @@ fun LoginPage() {
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             val context = LocalContext.current
-            Button(
-                    onClick = {context.startActivity(Intent(context, MainActivity::class.java)) },
-                shape = RoundedCornerShape(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
+
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .padding(top = 20.dp, bottom = 40.dp)
             ) {
-                Text(
-                    text = "Login",
-                    color = AppTheme.colors.onSecondary
-                )
+                Button(
+                    onClick = {
+                        context.startActivity(Intent(context, RegisterActivity::class.java))
+                    },
+                    shape = AppTheme.shapes.large,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = AppTheme.colors.secondary
+                    ),
+                    modifier = Modifier
+                        .width(125.dp)
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = "Sign Up",
+                        color = AppTheme.colors.onSecondary
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Button(
+                    onClick = {
+                        context.startActivity(Intent(context, MainActivity::class.java))
+                    },
+                    shape = AppTheme.shapes.large,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = AppTheme.colors.confirm
+                    ),
+                    modifier = Modifier
+                        .width(125.dp)
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = "Login",
+                        color = AppTheme.colors.onSecondary
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { },
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default,
-                color = AppTheme.colors.onSecondary
-            )
-        )
     }
 }

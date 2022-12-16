@@ -13,7 +13,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.grup.android.MoneyRequestActivity
 import com.grup.android.R
 import com.grup.android.ui.*
@@ -45,6 +48,7 @@ fun MainLayout() {
     val scope = rememberCoroutineScope()
     Scaffold(
         scaffoldState = scaffoldState,
+        backgroundColor = AppTheme.colors.primary,
         topBar = {
             HomeAppBar(
                 onNavigationIconClick = {
@@ -54,35 +58,56 @@ fun MainLayout() {
                 }
             )
         },
+        drawerBackgroundColor = AppTheme.colors.secondary,
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         drawerContent = {
             DrawerHeader()
             DrawerBody(
                 items = listOf(
-                    MenuItem(
-                        id = "home",
-                        title = "Home",
-                        contentDescription = "Go to the home screen",
+                    GroupItem(
+                        id = "group1",
+                        title = "Group 1",
+                        contentDescription = "",
                         icon = Icons.Default.Home
                     ),
-                    MenuItem(
-                        id = "groups",
-                        title = "Groups",
-                        contentDescription = "Go to the home screen",
+                    GroupItem(
+                        id = "group2",
+                        title = "Group 2",
+                        contentDescription = "",
                         icon = Icons.Default.Home
                     ),
-                    MenuItem(
-                        id = "settings",
-                        title = "Settings",
-                        contentDescription = "Go to the settings screen",
-                        icon = Icons.Default.Home
-                    ),
-                    MenuItem(
-                        id = "help",
-                        title = "Help",
+                    GroupItem(
+                        id = "group3",
+                        title = "Group 3",
                         contentDescription = "",
                         icon = Icons.Default.Home
                     )
+                ),
+                onItemClick = {
+                    println("Clicked on ${it.title}")
+                }
+            )
+            Spacer(modifier = Modifier.weight(1.0f))
+            DrawerSettings(
+                items = listOf(
+                    MenuItem(
+                        id = "home",
+                        title = "Create New Group",
+                        contentDescription = "Go to the home screen",
+                        icon = Icons.Default.AddCircle
+                    ),
+                    MenuItem(
+                        id = "home",
+                        title = "Settings",
+                        contentDescription = "Go to the settings screen",
+                        icon = Icons.Default.Settings
+                    ),
+                    MenuItem(
+                        id = "home",
+                        title = "Sign Out",
+                        contentDescription = "Go to the home screen",
+                        icon = Icons.Default.ExitToApp
+                    ),
                 ),
                 onItemClick = {
                     println("Clicked on ${it.title}")
@@ -92,8 +117,9 @@ fun MainLayout() {
         bottomBar = {
             /* TODO */
         },
-        backgroundColor = AppTheme.colors.primary,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppTheme.colors.primary)
     ) {
         Column (
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -190,7 +216,7 @@ fun GroupDetails() {
             onClick = { context.startActivity(Intent(context, MoneyRequestActivity::class.java))}
         ) {
             Text(
-                text = "Money Request",
+                text = "Make a Transaction",
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 color = AppTheme.colors.onPrimary,
