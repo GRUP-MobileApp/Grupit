@@ -37,7 +37,6 @@ import kotlinx.coroutines.runBlocking
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler())
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {

@@ -2,6 +2,7 @@ package com.grup
 
 import com.grup.controllers.GroupController
 import com.grup.controllers.PendingRequestController
+import com.grup.controllers.UserController
 import com.grup.di.createSyncedRealmModule
 import com.grup.di.realm
 import com.grup.di.registerUserObject
@@ -16,7 +17,7 @@ import com.grup.models.PendingRequest
 import com.grup.models.User
 import com.grup.other.Id
 import com.grup.other.RealmUser
-import com.grup.repositories.UserRepository
+import com.grup.repositories.APP_ID
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.Credentials
@@ -26,15 +27,13 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 
 object APIServer {
-    private val app: App = App.create("")
-    private val userRepository: UserRepository by lazy { UserRepository() }
+    private val app: App = App.create(APP_ID)
 
     private val realmUser: RealmUser
         get() = app.currentUser ?: throw NotLoggedInException()
 
     val user: User
         get() = realm.query<User>().first().find() ?: throw UserObjectNotFoundException()
-
 
     fun createGroup(groupName: String) = GroupController.createGroup(groupName, user)
     fun getGroupById(groupId: Id) = GroupController.getGroupById(groupId)
@@ -45,6 +44,8 @@ object APIServer {
     fun acceptInviteToGroup(pendingRequest: PendingRequest) =
         GroupController.acceptInviteToGroup(pendingRequest, user)
     fun getAllPendingRequestsAsFlow() = PendingRequestController.getAllPendingRequestsAsFlow()
+
+    fun getUserByUsername(username: String) = UserController.getUserByUsername(username)
 
     object Login {
         private fun login(credentials: Credentials) {
@@ -74,12 +75,9 @@ object APIServer {
         }
     }
 
-    private fun verifyUsername(username: String): Boolean {
-        return userRepository.findUserByUserName(username) == null
-    }
-
     fun registerUser(username: String) {
-        registerUserObject(User(realmUser.id).apply {
+        registerUserObject(User().apply {
+            this._id = realmUser.id
             this.username = username
         })
     }
@@ -89,7 +87,6 @@ object APIServer {
             realmUser.logOut()
         }
     }
-
 
     private fun initKoin() {
         startKoin {

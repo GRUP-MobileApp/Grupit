@@ -37,9 +37,9 @@ class MainActivity : AppCompatActivity() {
 
         // TODO: Prompt user for user info like username, etc
         try {
-            val username = APIServer.user.username
+            APIServer.user
         } catch (e: UserObjectNotFoundException) {
-            APIServer.registerUser("TEST NEW USER")
+            TODO("Welcome slideshow")
         }
         setContent {
             AppTheme {
@@ -179,8 +179,6 @@ fun HomeAppBar(
 
 @Composable
 fun GroupDetails() {
-    val group = APIServer.createGroup("${APIServer.user.username}'s GROUP")
-    APIServer.testInviteUser(group)
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -209,7 +207,7 @@ fun GroupDetails() {
                     modifier = Modifier.size(98.dp)
                 )
                 h1Text(
-                    text = "${group.groupName}",
+                    text = "GROUP NAME",
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
                 )
             }
