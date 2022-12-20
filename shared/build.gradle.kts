@@ -1,3 +1,8 @@
+val ktorVersion: String by project
+val realmVersion: String by project
+val koinVersion: String by project
+val napierVersion = "2.4.0"
+
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "1.7.20"
@@ -33,11 +38,6 @@ kotlin {
         xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
     }
     sourceSets {
-        val ktorVersion: String by project
-        val realmVersion: String by project
-        val koinVersion: String by project
-        val napierVersion = "2.4.0"
-
         val commonMain by getting {
             dependencies {
                 // Logger
@@ -51,11 +51,12 @@ kotlin {
 
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
+
                 //Ktor
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("org.json:json:20220924")
-
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
             }
         }
         val commonTest by getting {

@@ -33,9 +33,9 @@ class MainActivity : AppCompatActivity() {
 
         // TODO: Prompt user for user info like username, etc
         try {
-            val username = APIServer.user.username
+            APIServer.user
         } catch (e: UserObjectNotFoundException) {
-            APIServer.registerUser("TEST NEW USER")
+            TODO("Welcome slideshow")
         }
         setContent {
             AppTheme {
@@ -147,6 +147,7 @@ fun HomeAppBar(
 
 @Composable
 fun GroupDetails() {
+    val jutin = APIServer.getUserByUsername("JUTIN")!!
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -175,7 +176,7 @@ fun GroupDetails() {
                     modifier = Modifier.size(98.dp)
                 )
                 h1Text(
-                    text = "GROUP NAME",
+                    text = "${jutin._id} : ${jutin.username}",
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
                 )
             }

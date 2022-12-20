@@ -15,7 +15,7 @@ import com.grup.models.Group
 import com.grup.models.User
 import com.grup.other.Id
 import com.grup.other.RealmUser
-import com.grup.repositories.API_KEY
+import com.grup.repositories.APP_ID
 import com.grup.repositories.UserRepository
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
@@ -23,25 +23,26 @@ import io.realm.kotlin.mongodb.Credentials
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import kotlinx.coroutines.runBlocking
+import org.koin.core.component.get
 import org.koin.core.context.startKoin
 
 object APIServer {
-    private val app: App = App.create(API_KEY)
-    private val userRepository: UserRepository by lazy { UserRepository() }
+    private val app: App = App.create(APP_ID)
 
-    val realmUser: RealmUser
+    private val realmUser: RealmUser
         get() = app.currentUser ?: throw NotLoggedInException()
 
     val user: User
         get() = realm.query<User>().first().find() ?: throw UserObjectNotFoundException()
 
-    fun testVerifyUsername(username: String) = UserController.getUserByUsername(username)
     fun createGroup(groupName: String) = GroupController.createGroup(groupName, user)
     fun getGroupById(groupId: Id) = GroupController.getGroupById(groupId)
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
     // TODO: NEED TO ADD BY USERNAME VIA USER SERVICE
     fun addUserToGroup(group: Group, user: User) =
         GroupController.addUserToGroup(user, group)
+
+    fun getUserByUsername(username: String) = UserController.getUserByUsername(username)
 
     object Login {
         private fun login(credentials: Credentials) {
@@ -71,12 +72,9 @@ object APIServer {
         }
     }
 
-    private fun verifyUsername(username: String): Boolean {
-        return userRepository.findUserByUserName(username) == null
-    }
-
     fun registerUser(username: String) {
-        registerUserObject(User(realmUser.id).apply {
+        registerUserObject(User().apply {
+            this._id = realmUser.id
             this.username = username
         })
     }

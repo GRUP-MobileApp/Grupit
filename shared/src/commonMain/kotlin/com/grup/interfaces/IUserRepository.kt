@@ -1,9 +1,8 @@
 package com.grup.interfaces
 
 import com.grup.models.User
-import com.grup.other.Id
 
 internal interface IUserRepository : IRepository {
-    //fun findUserById(userId: Id): User?
+    fun findUserById(realmUserId: String): User?
     fun findUserByUserName(username: String): User?
 }
