@@ -1,7 +1,7 @@
 package com.grup
 
 import com.grup.controllers.GroupController
-import com.grup.controllers.PendingRequestController
+import com.grup.controllers.GroupInviteController
 import com.grup.controllers.UserController
 import com.grup.di.createSyncedRealmModule
 import com.grup.di.realm
@@ -13,7 +13,7 @@ import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.Group
-import com.grup.models.PendingRequest
+import com.grup.models.GroupInvite
 import com.grup.models.User
 import com.grup.other.Id
 import com.grup.other.RealmUser
@@ -35,17 +35,19 @@ object APIServer {
     val user: User
         get() = realm.query<User>().first().find() ?: throw UserObjectNotFoundException()
 
+    // User
+    fun getUserByUsername(username: String) = UserController.getUserByUsername(username)
+
+    // Group
     fun createGroup(groupName: String) = GroupController.createGroup(groupName, user)
     fun getGroupById(groupId: Id) = GroupController.getGroupById(groupId)
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
     fun inviteUserToGroup(username: String, group: Group) =
-        GroupController.inviteUserToGroup(username, group)
-    fun testInviteUser(group: Group) = GroupController.inviteUserTest(user, group)
-    fun acceptInviteToGroup(pendingRequest: PendingRequest) =
-        GroupController.acceptInviteToGroup(pendingRequest, user)
-    fun getAllPendingRequestsAsFlow() = PendingRequestController.getAllPendingRequestsAsFlow()
+        GroupController.inviteUserToGroup(username, group, user)
+    fun acceptInviteToGroup(groupInvite: GroupInvite) =
+        GroupController.acceptInviteToGroup(groupInvite, user)
+    fun getAllGroupInvitesAsFlow() = GroupInviteController.getAllGroupInvitesAsFlow()
 
-    fun getUserByUsername(username: String) = UserController.getUserByUsername(username)
 
     object Login {
         private fun login(credentials: Credentials) {

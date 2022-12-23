@@ -4,12 +4,12 @@ import com.grup.exceptions.MissingFieldException
 import com.grup.exceptions.NotCreatedException
 import com.grup.exceptions.NotFoundException
 import com.grup.models.Group
-import com.grup.models.PendingRequest
+import com.grup.models.GroupInvite
 import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.other.Id
 import com.grup.service.GroupService
-import com.grup.service.PendingRequestService
+import com.grup.service.GroupInviteService
 import com.grup.service.UserInfoService
 import com.grup.service.UserService
 import kotlinx.coroutines.flow.Flow
@@ -20,14 +20,14 @@ object GroupController : KoinComponent {
     private val userService: UserService by inject()
     private val groupService: GroupService by inject()
     private val userInfoService: UserInfoService by inject()
-    private val pendingRequestService: PendingRequestService by inject()
+    private val groupInviteService: GroupInviteService by inject()
 
-    fun createGroup(groupName: String, user: User? = null): Group {
+    fun createGroup(groupName: String, activeUser: User? = null): Group {
         val group = Group().apply {
             this.groupName = groupName
         }
 
-        user?.let { creator ->
+        activeUser?.let { creator ->
             // Although Group object doesn't exist in Realm yet, this must be called first to
             // update Realm sync subscriptions so that createGroup creates a group that still lies
             // within bounds of realm sync subscriptions
@@ -47,21 +47,17 @@ object GroupController : KoinComponent {
         return groupService.getAllGroupsAsFlow()
     }
 
-    fun inviteUserToGroup(username: String, group: Group) {
+    fun inviteUserToGroup(username: String, group: Group, activeUser: User? = null) {
         userService.getUserByUsername(username)?.let { foundUser ->
-            pendingRequestService.createGroupInviteRequest(foundUser, group)
+            groupInviteService.createGroupInvite(activeUser, foundUser, group)
         } ?: throw NotFoundException("User with username $username not found")
     }
 
-    fun inviteUserTest(user: User, group: Group) {
-        pendingRequestService.createGroupInviteRequest(user, group)
-    }
-
-    fun acceptInviteToGroup(pendingRequest: PendingRequest, user: User) {
-        pendingRequest.requester?.let { groupId ->
+    fun acceptInviteToGroup(groupInvite: GroupInvite, user: User) {
+        groupInvite.groupId?.let { groupId ->
             addUserToGroup(user, groupId)
-        } ?: throw MissingFieldException("Group invite missing requester's Id")
-        pendingRequestService.acceptPendingRequest(pendingRequest)
+        } ?: throw MissingFieldException("Group invite missing groupId")
+        groupInviteService.acceptGroupInvite(groupInvite)
     }
 
     private fun addUserToGroup(user: User, groupId: Id) {

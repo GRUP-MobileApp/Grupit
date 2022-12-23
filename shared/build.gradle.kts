@@ -40,6 +40,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                // Kotlin Libraries
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
                 // Realm

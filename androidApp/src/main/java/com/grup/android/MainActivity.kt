@@ -20,7 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +30,7 @@ import androidx.compose.ui.window.Popup
 import com.grup.APIServer
 import com.grup.android.ui.*
 import com.grup.exceptions.login.UserObjectNotFoundException
-import com.grup.models.PendingRequest
+import com.grup.models.GroupInvite
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -49,81 +51,100 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainLayout() {
     val scaffoldState = rememberScaffoldState()
+    val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            HomeAppBar(
-                onNavigationIconClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.open()
+
+    AddToGroupBottomSheetLayout(state = addToGroupBottomSheetState) {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                HomeAppBar(
+                    onNavigationIconClick = {
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            scope.launch { addToGroupBottomSheetState.show() }
+                        }) {
+                            smallIcon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add to Group"
+                            )
+                        }
+                        GroupNotificationsButton()
                     }
-                }
-            )
-        },
-        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
-        drawerContent = {
-            DrawerHeader()
-            DrawerBody(
-                items = listOf(
-                    MenuItem(
-                        id = "home",
-                        title = "Home",
-                        contentDescription = "Go to the home screen",
-                        icon = Icons.Default.Home
-                    ),
-                    MenuItem(
-                        id = "groups",
-                        title = "Groups",
-                        contentDescription = "Go to the home screen",
-                        icon = Icons.Default.Home
-                    ),
-                    MenuItem(
-                        id = "settings",
-                        title = "Settings",
-                        contentDescription = "Go to the settings screen",
-                        icon = Icons.Default.Home
-                    ),
-                    MenuItem(
-                        id = "help",
-                        title = "Help",
-                        contentDescription = "",
-                        icon = Icons.Default.Home
-                    )
-                ),
-                onItemClick = {
-                    println("Clicked on ${it.title}")
-                }
-            )
-        },
-        bottomBar = {
-            /* TODO */
-        },
-        backgroundColor = AppTheme.colors.primary,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column (
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally
+                )
+            },
+            drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+            drawerContent = { GroupNavigationMenu() },
+            bottomBar = {
+                /* TODO */
+            },
+            backgroundColor = AppTheme.colors.primary,
+            modifier = Modifier.fillMaxSize()
         ) {
-            CompositionLocalProvider(
-                LocalContentColor provides AppTheme.colors.onPrimary
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                GroupDetails()
-                PublicRequestsDetails()
+                CompositionLocalProvider(
+                    LocalContentColor provides AppTheme.colors.onPrimary
+                ) {
+                    GroupDetails()
+                    PublicRequestsDetails()
+                }
             }
         }
     }
 }
 
 @Composable
+fun GroupNavigationMenu() {
+    DrawerHeader()
+    DrawerBody(
+        items = listOf(
+            MenuItem(
+                id = "home",
+                title = "Home",
+                contentDescription = "Go to the home screen",
+                icon = Icons.Default.Home
+            ),
+            MenuItem(
+                id = "groups",
+                title = "Groups",
+                contentDescription = "Go to the home screen",
+                icon = Icons.Default.Home
+            ),
+            MenuItem(
+                id = "settings",
+                title = "Settings",
+                contentDescription = "Go to the settings screen",
+                icon = Icons.Default.Home
+            ),
+            MenuItem(
+                id = "help",
+                title = "Help",
+                contentDescription = "",
+                icon = Icons.Default.Home
+            )
+        ),
+        onItemClick = {
+            println("Clicked on ${it.title}")
+        }
+    )
+}
+
+@Composable
 fun HomeAppBar(
-    onNavigationIconClick: () -> Unit
+    onNavigationIconClick: () -> Unit,
+    actions: @Composable RowScope.() -> Unit
 ) {
-    var popupState by remember { mutableStateOf(false) }
     TopAppBar(
         title = {},
         backgroundColor = AppTheme.colors.primary,
@@ -137,44 +158,92 @@ fun HomeAppBar(
                 )
             }
         },
-        actions = {
-            IconButton(
-                onClick = { popupState = !popupState }
+        actions = actions
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AddToGroupBottomSheetLayout(
+    state: ModalBottomSheetState,
+    content: @Composable () -> Unit
+) {
+    val username = remember { mutableStateOf(TextFieldValue()) }
+    val group = APIServer.getGroupById("6234c5ab-5244-4f6d-a93a-314f3113b9a2")
+
+    ModalBottomSheetLayout(
+        sheetState = state,
+        sheetContent = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppTheme.dimensions.paddingMedium)
             ) {
-                smallIcon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications"
+                TextField(
+                    label = {
+                        Text(
+                            text = "Username to add",
+                            color = AppTheme.colors.onSecondary
+                        )
+                    },
+                    textStyle = TextStyle(color = AppTheme.colors.onSecondary),
+                    value = username.value,
+                    onValueChange = { username.value = it }
                 )
-                if (popupState) {
-                    Popup(
-                        alignment = Alignment.BottomEnd,
-                        offset = IntOffset(0, 100)
-                    ) {
-                        val notifications: List<PendingRequest>
-                        by APIServer.getAllPendingRequestsAsFlow().collectAsState(
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { APIServer.inviteUserToGroup(username.value.text, group) }
+                ) {
+                    Text("Add to group")
+                }
+            }
+        },
+        sheetBackgroundColor = AppTheme.colors.secondary,
+        content = content
+    )
+}
+
+@Composable
+fun GroupNotificationsButton() {
+    var popupState by remember { mutableStateOf(false) }
+    IconButton(
+        onClick = { popupState = !popupState }
+    ) {
+        smallIcon(
+            imageVector = Icons.Default.Notifications,
+            contentDescription = "Notifications"
+        )
+        if (popupState) {
+            Popup(
+                alignment = Alignment.BottomEnd,
+                offset = IntOffset(0, 100),
+            ) {
+                val notifications: List<GroupInvite>
+                        by APIServer.getAllGroupInvitesAsFlow().collectAsState(
                             initial = emptyList()
                         )
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.background(Color.White)
-                        ) {
-                            Text(text = "NOTIFICATIONS LIST")
-                            notifications.forEach { pendingRequest ->
-                                if (pendingRequest.requestType == PendingRequest.RequestType.GROUP_INVITE) {
-                                    ClickableText(
-                                        text = AnnotatedString("Group Invite to ${pendingRequest.requester}"),
-                                        onClick = {
-                                            APIServer.acceptInviteToGroup(pendingRequest)
-                                        }
-                                    )
-                                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(AppTheme.dimensions.paddingMedium)
+                        .background(Color.White)
+                ) {
+                    Text(text = "NOTIFICATIONS LIST")
+                    notifications.forEach { groupInvite ->
+                        ClickableText(
+                            text = AnnotatedString(
+                                "Group Invite to ${groupInvite.groupName!!}"
+                            ),
+                            onClick = {
+                                APIServer.acceptInviteToGroup(groupInvite)
                             }
-                        }
+                        )
                     }
                 }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -202,7 +271,7 @@ fun GroupDetails() {
                     .padding(horizontal = AppTheme.dimensions.paddingLarge)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_profile_icon),
+                    imageVector = Icons.Default.Face,
                     contentDescription = "Profile Picture",
                     modifier = Modifier.size(98.dp)
                 )

@@ -17,7 +17,7 @@ internal val servicesModule = module {
     single { GroupService() }
     single { UserInfoService() }
     single { TransactionRecordService() }
-    single { PendingRequestService() }
+    single { GroupInviteService() }
 }
 
 internal val repositoriesModule = module {
@@ -25,7 +25,7 @@ internal val repositoriesModule = module {
     single<IGroupRepository> { SyncedGroupRepository() }
     single<IUserInfoRepository> { SyncedUserInfoRepository() }
     single<ITransactionRecordRepository> { SyncedTransactionRecordRepository() }
-    single<IPendingRequestRepository> { SyncedPendingRequestRepository() }
+    single<IGroupInviteRepository> { SyncedGroupInviteRepository() }
 }
 
 internal val testRepositoriesModule = module {

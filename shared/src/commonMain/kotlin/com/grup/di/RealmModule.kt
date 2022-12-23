@@ -21,7 +21,7 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
         SyncConfiguration.Builder(realmUser,
             setOf(
                 User::class, Group::class, UserInfo::class, TransactionRecord::class,
-                PendingRequest::class
+                GroupInvite::class
             )
         )
         .initialSubscriptions(rerunOnOpen = true) { realm ->
@@ -39,24 +39,21 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
                 createdRealm.subscriptions.update { realm ->
                     remove("UserInfos")
                     add(
-                        realm.query<PendingRequest>(
-                            "requester == $0 OR target == $0",
+                        realm.query<GroupInvite>(
+                            "inviter == $0 OR invitee == $0",
                             realmUser.id
                         ),
-                        "PendingRequests"
+                        "GroupInvites"
                     )
                     userInfos.forEach { userInfo ->
                         userInfo.groupId?.let { groupId ->
-                            add(
-                                realm.query<Group>("$idSerialName == $0", groupId),
+                            add(realm.query<Group>("$idSerialName == $0", groupId),
                                 "${groupId.asString()}_Group"
                             )
-                            add(
-                                realm.query<UserInfo>("groupId == $0", groupId),
+                            add(realm.query<UserInfo>("groupId == $0", groupId),
                                 "${groupId.asString()}_UserInfo"
                             )
-                            add(
-                                realm.query<TransactionRecord>("groupId == $0", groupId),
+                            add(realm.query<TransactionRecord>("groupId == $0", groupId),
                                 "${groupId.asString()}_TransactionRecord"
                             )
                         } ?: throw MissingFieldException("UserInfo missing groupId")
