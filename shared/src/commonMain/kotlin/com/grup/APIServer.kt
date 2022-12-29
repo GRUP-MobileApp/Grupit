@@ -21,6 +21,7 @@ import com.grup.repositories.APP_ID
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.Credentials
+import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import kotlinx.coroutines.runBlocking
@@ -50,14 +51,12 @@ object APIServer {
 
 
     object Login {
-        private fun login(credentials: Credentials) {
-            runBlocking {
-                app.login(credentials)
-            }
+        private suspend fun login(credentials: Credentials) {
+            app.login(credentials)
             initKoin()
         }
 
-        fun emailAndPassword(email: String, password: String) {
+        suspend fun emailAndPassword(email: String, password: String) {
             try {
                 login(Credentials.emailPassword(email, password))
             } catch (e: InvalidCredentialsException) {
@@ -65,13 +64,13 @@ object APIServer {
             }
         }
 
-        fun registerEmailAndPassword(email: String, password: String) {
+        suspend fun registerEmailAndPassword(email: String, password: String) {
             try {
-                runBlocking {
-                    app.emailPasswordAuth.registerUser(email, password)
-                }
+                app.emailPasswordAuth.registerUser(email, password)
             } catch (e: UserAlreadyExistsException) {
                 throw EntityAlreadyExistsException("Email already exists")
+            } catch (e: BadRequestException) {
+                // TODO: Bad email/bad password exception
             }
             emailAndPassword(email, password)
         }

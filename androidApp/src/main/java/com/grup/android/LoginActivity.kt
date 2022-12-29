@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +15,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -30,45 +31,42 @@ import com.grup.android.ui.*
 
 import androidx.compose.material.*
 import androidx.compose.ui.platform.LocalContext
-import com.grup.APIServer
-import com.grup.exceptions.APIException
-import kotlinx.coroutines.runBlocking
+import com.grup.android.viewmodels.login.LoginResult
+import com.grup.android.viewmodels.login.LoginViewModel
 
 
 class LoginActivity : AppCompatActivity() {
+    private val loginViewModel by viewModels<LoginViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
+
         setContent {
             AppTheme {
-                LoginPage()
+                LoginPage(loginViewModel)
             }
         }
     }
 }
 
 @Composable
-fun LoginPage() {
-    val username = remember { mutableStateOf(TextFieldValue()) }
-    val password = remember { mutableStateOf(TextFieldValue()) }
+fun LoginPage(
+    loginViewModel: LoginViewModel
+) {
+    var email: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
+    var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
+    val context = LocalContext.current
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(AppTheme.colors.primary)) {
-        val context = LocalContext.current
         ClickableText(
             text = AnnotatedString("Sign up here"),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
-            onClick = {
-                try {
-                    APIServer.Login
-                        .registerEmailAndPassword(username.value.text, password.value.text)
-                    APIServer.registerUser(username.value.text)
-                } catch (e: APIException) {
-                    print(e.message)
-                }
-                context.startActivity(Intent(context, MainActivity::class.java))
-            },
+            onClick = { loginViewModel.registerEmailPassword(email.text, password.text) },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
@@ -83,49 +81,56 @@ fun LoginPage() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Login",
-            style = TextStyle(
-                fontSize = 40.sp,
-                fontFamily = FontFamily.Monospace
-            ),
-            color = AppTheme.colors.onSecondary)
+        Text(
+            text = "Login",
+            style = TextStyle(fontSize = 40.sp, fontFamily = FontFamily.Monospace),
+            color = AppTheme.colors.onSecondary
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
+
         TextField(
-            label = {
-                Text(
-                    text = "Username",
-                    color = AppTheme.colors.onSecondary
-                ) },
+            label = { Text(text = "Username", color = AppTheme.colors.onSecondary) },
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
-            value = username.value,
-            onValueChange = { username.value = it })
+            value = email,
+            onValueChange = { email = it }
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
+
         TextField(
-            label = {
-                Text(
-                    text = "Password",
-                    color = AppTheme.colors.onSecondary
-                ) },
+            label = { Text(text = "Password", color = AppTheme.colors.onSecondary) },
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
-            value = password.value,
+            value = password,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            onValueChange = { password.value = it })
+            onValueChange = { password = it }
+        )
 
-        Spacer(modifier = Modifier.height(20.dp))
-        Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
-            val context = LocalContext.current
-            Button(
-                onClick = {
-                    try {
-                        APIServer.Login.emailAndPassword(username.value.text, password.value.text)
-                    } catch (e: APIException) {
-                        print(e.message)
-                    }
+        // Error message
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .height(30.dp)
+                .padding(5.dp)
+                .fillMaxWidth()
+        ) {
+            val loginResult: LoginResult by loginViewModel.loginResult.collectAsState()
+            when(loginResult.status) {
+                LoginResult.LoginStatus.SUCCESS -> {
                     context.startActivity(Intent(context, MainActivity::class.java))
-                },
+                }
+                LoginResult.LoginStatus.ERROR ->
+                    loginResult.error?.message?.let {
+                        Text(text = it, color = AppTheme.colors.onSecondary)
+                    }
+                null -> {}
+            }
+        }
+
+        Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
+            Button(
+                onClick = { loginViewModel.loginEmailPassword(email.text, password.text) },
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),

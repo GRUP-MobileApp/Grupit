@@ -25,6 +25,7 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
             )
         )
         .initialSubscriptions(rerunOnOpen = true) { realm ->
+            removeAll()
             add(realm.query<User>("$idSerialName == $0", realmUser.id))
             // Used to get initial user membership, this subscription is deleted afterwards
             add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
@@ -59,14 +60,11 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
                         } ?: throw MissingFieldException("UserInfo missing groupId")
                     }
                 }
+                // Wait for subscriptions to sync
+                realm.subscriptions.waitForSynchronization()
             }
         }
     }
-    // Wait for subscriptions to sync
-    runBlocking {
-        realm.subscriptions.waitForSynchronization()
-    }
-
     return module {
         single { realm }
     }
@@ -88,6 +86,7 @@ internal fun Realm.addGroup(groupId: Id) {
             add(realm.query<TransactionRecord>("groupId == $0", groupId),
                 "${groupId.asString()}_TransactionRecord")
         }
+        realm.subscriptions.waitForSynchronization()
     }
 }
 
@@ -98,5 +97,6 @@ internal fun Realm.removeGroup(groupId: Id) {
             remove("${groupId.asString()}_UserInfo")
             remove("${groupId.asString()}_TransactionRecord")
         }
+        realm.subscriptions.waitForSynchronization()
     }
 }

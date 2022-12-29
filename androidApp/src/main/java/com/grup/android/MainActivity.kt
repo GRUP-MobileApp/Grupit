@@ -4,11 +4,11 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,36 +28,99 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.grup.APIServer
 import com.grup.android.ui.*
+import com.grup.android.viewmodels.GroupsViewModel
 import com.grup.exceptions.login.UserObjectNotFoundException
+import com.grup.models.Group
 import com.grup.models.GroupInvite
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    private val groupsViewModel by viewModels<GroupsViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
         // TODO: Prompt user for user info like username, etc
         try {
             APIServer.user
         } catch (e: UserObjectNotFoundException) {
-            TODO("Welcome slideshow")
+            // TODO: Welcome slideshow
         }
         setContent {
             AppTheme {
-                MainLayout()
+                MainLayout(groupsViewModel)
             }
         }
     }
 }
 
+@Composable
+fun MainLayout(
+    groupsViewModel: GroupsViewModel
+) {
+    val groups: List<Group> by groupsViewModel.groupsList.collectAsState()
+
+    if (groups.isEmpty()) {
+        // TODO: Page for zero groups
+        NoGroupPage()
+    } else {
+        MainGroupPage(groups)
+    }
+
+    
+}
+
+// TODO: Technically redundant code with MainGroupPage()
+@Composable
+fun NoGroupPage() {
+    val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
+
+    Scaffold(
+        scaffoldState = scaffoldState,
+        topBar = {
+            HomeAppBar(
+                onNavigationIconClick = {
+                    scope.launch {
+                        scaffoldState.drawerState.open()
+                    }
+                }
+            )
+        },
+        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+        drawerContent = { GroupNavigationMenu() },
+        bottomBar = {
+            /* TODO */
+        },
+        backgroundColor = AppTheme.colors.primary,
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Text(
+            text = "Yaint in any groups bozo",
+            color = AppTheme.colors.onPrimary,
+            modifier = Modifier.padding(padding)
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainLayout() {
+fun MainGroupPage(
+    groups: List<Group>
+) {
     val scaffoldState = rememberScaffoldState()
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
-    AddToGroupBottomSheetLayout(state = addToGroupBottomSheetState) {
+    val selectedGroup: Group by remember { mutableStateOf(groups[0]) }
+
+    AddToGroupBottomSheetLayout(
+        state = addToGroupBottomSheetState,
+        inviteUsernameToGroupOnClick = { username ->
+            APIServer.inviteUserToGroup(username, selectedGroup)
+        }
+    ) {
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
@@ -88,15 +150,16 @@ fun MainLayout() {
             },
             backgroundColor = AppTheme.colors.primary,
             modifier = Modifier.fillMaxSize()
-        ) {
+        ) { padding ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(padding)
             ) {
                 CompositionLocalProvider(
                     LocalContentColor provides AppTheme.colors.onPrimary
                 ) {
-                    GroupDetails()
+                    GroupDetails(selectedGroup)
                     PublicRequestsDetails()
                 }
             }
@@ -138,12 +201,15 @@ fun GroupNavigationMenu() {
             println("Clicked on ${it.title}")
         }
     )
+    Button(onClick = { APIServer.createGroup("${APIServer.user.username}'s Group") }) {
+        Text(text = "Create new group")
+    }
 }
 
 @Composable
 fun HomeAppBar(
     onNavigationIconClick: () -> Unit,
-    actions: @Composable RowScope.() -> Unit
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
         title = {},
@@ -165,11 +231,11 @@ fun HomeAppBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddToGroupBottomSheetLayout(
+    inviteUsernameToGroupOnClick: (String) -> Unit,
     state: ModalBottomSheetState,
     content: @Composable () -> Unit
 ) {
     val username = remember { mutableStateOf(TextFieldValue()) }
-    val group = APIServer.getGroupById("6234c5ab-5244-4f6d-a93a-314f3113b9a2")
 
     ModalBottomSheetLayout(
         sheetState = state,
@@ -193,7 +259,7 @@ fun AddToGroupBottomSheetLayout(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { APIServer.inviteUserToGroup(username.value.text, group) }
+                    onClick = { inviteUsernameToGroupOnClick(username.value.text) }
                 ) {
                     Text("Add to group")
                 }
@@ -231,14 +297,14 @@ fun GroupNotificationsButton() {
                 ) {
                     Text(text = "NOTIFICATIONS LIST")
                     notifications.forEach { groupInvite ->
-                        ClickableText(
+                        Text(
                             text = AnnotatedString(
                                 "Group Invite to ${groupInvite.groupName!!}"
-                            ),
-                            onClick = {
-                                APIServer.acceptInviteToGroup(groupInvite)
-                            }
+                            )
                         )
+                        Button(onClick = { APIServer.acceptInviteToGroup(groupInvite) }) {
+                            Text(text = "Join ${groupInvite.groupName!!}")
+                        }
                     }
                 }
             }
@@ -247,7 +313,9 @@ fun GroupNotificationsButton() {
 }
 
 @Composable
-fun GroupDetails() {
+fun GroupDetails(
+    group: Group
+) {
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -276,7 +344,7 @@ fun GroupDetails() {
                     modifier = Modifier.size(98.dp)
                 )
                 h1Text(
-                    text = "GROUP NAME",
+                    text = "${group.groupName}",
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
                 )
             }

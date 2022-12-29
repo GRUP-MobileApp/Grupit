@@ -12,10 +12,8 @@ internal class SyncedUserInfoRepository: RealmUserInfoRepository(), KoinComponen
     override val realm: Realm by inject()
 
     override fun createUserInfo(userInfo: UserInfo): UserInfo? {
-        return realm.addGroup(
-            userInfo.groupId ?: throw MissingFieldException("UserInfo missing groupId")
-        ).run {
-            super.createUserInfo(userInfo)
-        }
+        realm.addGroup(userInfo.groupId
+            ?: throw MissingFieldException("UserInfo missing groupId"))
+        return super.createUserInfo(userInfo)
     }
 }
