@@ -27,21 +27,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.grup.APIServer
-import com.grup.android.ui.*
-import com.grup.android.viewmodels.GroupsViewModel
+import com.grup.android.ui.apptheme.*
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.Group
 import com.grup.models.GroupInvite
+import com.grup.models.UserInfo
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 
 class MainActivity : AppCompatActivity() {
-    private val groupsViewModel by viewModels<GroupsViewModel>()
+    private val mainViewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
-        // TODO: Prompt user for user info like username, etc
         try {
             APIServer.user
         } catch (e: UserObjectNotFoundException) {
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         }
         setContent {
             AppTheme {
-                MainLayout(groupsViewModel)
+                MainLayout(mainViewModel)
             }
         }
     }
@@ -57,97 +58,80 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun MainLayout(
-    groupsViewModel: GroupsViewModel
+    mainViewModel: MainViewModel
 ) {
-    val groups: List<Group> by groupsViewModel.groupsList.collectAsState()
-
-    if (groups.isEmpty()) {
-        // TODO: Page for zero groups
-        NoGroupPage()
-    } else {
-        MainGroupPage(groups)
-    }
-
+    val groups: List<Group> by mainViewModel.groupsList.collectAsState()
+    val groupInvites: List<GroupInvite> by mainViewModel.groupInvitesList.collectAsState()
     
+    MainGroupPage(
+        groups = groups,
+        userInfosByGroup = { group -> mainViewModel.getUserInfosByGroup(group) },
+        groupInvites = groupInvites
+    )
 }
 
-// TODO: Technically redundant code with MainGroupPage()
-@Composable
-fun NoGroupPage() {
-    val scaffoldState = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
-
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            HomeAppBar(
-                onNavigationIconClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.open()
-                    }
-                }
-            )
-        },
-        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
-        drawerContent = { GroupNavigationMenu() },
-        bottomBar = {
-            /* TODO */
-        },
-        backgroundColor = AppTheme.colors.primary,
-        modifier = Modifier.fillMaxSize()
-    ) { padding ->
-        Text(
-            text = "Yaint in any groups bozo",
-            color = AppTheme.colors.onPrimary,
-            modifier = Modifier.padding(padding)
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainGroupPage(
-    groups: List<Group>
+    groups: List<Group>,
+    userInfosByGroup: (Group) -> StateFlow<List<UserInfo>>,
+    groupInvites: List<GroupInvite>
 ) {
     val scaffoldState = rememberScaffoldState()
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
-    val selectedGroup: Group by remember { mutableStateOf(groups[0]) }
+    fun openDrawer() = scope.launch { scaffoldState.drawerState.open() }
+    fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
 
-    AddToGroupBottomSheetLayout(
-        state = addToGroupBottomSheetState,
-        inviteUsernameToGroupOnClick = { username ->
-            APIServer.inviteUserToGroup(username, selectedGroup)
-        }
-    ) {
+    var selectedGroup: Group? by remember { mutableStateOf(groups.getOrNull(0)) }
+
+    val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
+        selectedGroup?.let {
+            AddToGroupBottomSheetLayout(
+                selectedGroup = it,
+                state = addToGroupBottomSheetState,
+                inviteUsernameToGroup = { username, group ->
+                    APIServer.inviteUserToGroup(username, group)
+                    closeDrawer()
+                },
+                content = content
+            )
+        } ?: content()
+    }
+
+    modalSheets {
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
-                HomeAppBar(
-                    onNavigationIconClick = {
-                        scope.launch {
-                            scaffoldState.drawerState.open()
-                        }
-                    },
+                TopBar(
+                    onNavigationIconClick = { openDrawer() },
                     actions = {
-                        IconButton(onClick = {
-                            scope.launch { addToGroupBottomSheetState.show() }
-                        }) {
-                            smallIcon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add to Group"
-                            )
-                        }
-                        GroupNotificationsButton()
+                        AddToGroupButton(
+                            addToGroupOnClick = {
+                                scope.launch { addToGroupBottomSheetState.show() }
+                            }
+                        )
+                        GroupNotificationsButton(groupInvites = groupInvites)
                     }
                 )
             },
             drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
-            drawerContent = { GroupNavigationMenu() },
-            bottomBar = {
-                /* TODO */
+            drawerContent = {
+                GroupNavigationMenu(
+                    groups = groups,
+                    onItemClick = { menuItem ->
+                        selectedGroup = groups[menuItem.index]
+                        closeDrawer()
+                    },
+                    createGroup = { username ->
+                        APIServer.createGroup("$username's Group")
+                        closeDrawer()
+                    }
+                )
             },
+            bottomBar = { /* TODO */ },
             backgroundColor = AppTheme.colors.primary,
             modifier = Modifier.fillMaxSize()
         ) { padding ->
@@ -159,8 +143,11 @@ fun MainGroupPage(
                 CompositionLocalProvider(
                     LocalContentColor provides AppTheme.colors.onPrimary
                 ) {
-                    GroupDetails(selectedGroup)
-                    PublicRequestsDetails()
+                    selectedGroup?.let { group ->
+                        val userInfos: List<UserInfo> by userInfosByGroup(group).collectAsState()
+                        GroupDetails(group = group, userInfos = userInfos)
+                        PublicRequestsDetails()
+                    } ?: NoGroupsDisplay()
                 }
             }
         }
@@ -168,46 +155,40 @@ fun MainGroupPage(
 }
 
 @Composable
-fun GroupNavigationMenu() {
+fun NoGroupsDisplay() {
+    Text(text = "Yaint in any groups bozo", color = AppTheme.colors.onPrimary)
+}
+
+@Composable
+fun GroupNavigationMenu(
+    groups: List<Group>,
+    onItemClick: (MenuItem) -> Unit,
+    createGroup: (String) -> Unit
+) {
     DrawerHeader()
     DrawerBody(
-        items = listOf(
+        items = groups.mapIndexed { index, group ->
             MenuItem(
-                id = "home",
-                title = "Home",
-                contentDescription = "Go to the home screen",
-                icon = Icons.Default.Home
-            ),
-            MenuItem(
-                id = "groups",
-                title = "Groups",
-                contentDescription = "Go to the home screen",
-                icon = Icons.Default.Home
-            ),
-            MenuItem(
-                id = "settings",
-                title = "Settings",
-                contentDescription = "Go to the settings screen",
-                icon = Icons.Default.Home
-            ),
-            MenuItem(
-                id = "help",
-                title = "Help",
-                contentDescription = "",
+                id = group.getId(),
+                index = index,
+                title = group.groupName!!,
+                contentDescription = "Open ${group.groupName}'s details",
                 icon = Icons.Default.Home
             )
-        ),
+        },
         onItemClick = {
-            println("Clicked on ${it.title}")
+            onItemClick(it)
         }
     )
-    Button(onClick = { APIServer.createGroup("${APIServer.user.username}'s Group") }) {
+    Button(
+        onClick = { createGroup(APIServer.user.username!!) }
+    ) {
         Text(text = "Create new group")
     }
 }
 
 @Composable
-fun HomeAppBar(
+fun TopBar(
     onNavigationIconClick: () -> Unit,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
@@ -231,7 +212,8 @@ fun HomeAppBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddToGroupBottomSheetLayout(
-    inviteUsernameToGroupOnClick: (String) -> Unit,
+    selectedGroup: Group,
+    inviteUsernameToGroup: (String, Group) -> Unit,
     state: ModalBottomSheetState,
     content: @Composable () -> Unit
 ) {
@@ -259,7 +241,7 @@ fun AddToGroupBottomSheetLayout(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { inviteUsernameToGroupOnClick(username.value.text) }
+                    onClick = { inviteUsernameToGroup(username.value.text, selectedGroup) }
                 ) {
                     Text("Add to group")
                 }
@@ -271,7 +253,22 @@ fun AddToGroupBottomSheetLayout(
 }
 
 @Composable
-fun GroupNotificationsButton() {
+fun AddToGroupButton(
+    addToGroupOnClick: () -> Unit
+) {
+    IconButton(onClick = addToGroupOnClick) {
+        smallIcon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add to Group"
+        )
+    }
+}
+
+@Composable
+fun GroupNotificationsButton(
+    groupInvites: List<GroupInvite>
+) {
+    // TODO: Make look better lol
     var popupState by remember { mutableStateOf(false) }
     IconButton(
         onClick = { popupState = !popupState }
@@ -285,10 +282,6 @@ fun GroupNotificationsButton() {
                 alignment = Alignment.BottomEnd,
                 offset = IntOffset(0, 100),
             ) {
-                val notifications: List<GroupInvite>
-                        by APIServer.getAllGroupInvitesAsFlow().collectAsState(
-                            initial = emptyList()
-                        )
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
@@ -296,7 +289,7 @@ fun GroupNotificationsButton() {
                         .background(Color.White)
                 ) {
                     Text(text = "NOTIFICATIONS LIST")
-                    notifications.forEach { groupInvite ->
+                    groupInvites.forEach { groupInvite ->
                         Text(
                             text = AnnotatedString(
                                 "Group Invite to ${groupInvite.groupName!!}"
@@ -314,8 +307,10 @@ fun GroupNotificationsButton() {
 
 @Composable
 fun GroupDetails(
-    group: Group
+    group: Group,
+    userInfos: List<UserInfo>
 ) {
+    val myUserInfo: UserInfo = userInfos.find { it.userId == APIServer.user.getId() }!!
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -349,7 +344,7 @@ fun GroupDetails(
                 )
             }
             h1Text(
-                "$10",
+                "$${myUserInfo.userBalance}",
                 fontSize = 100.sp
             )
         }

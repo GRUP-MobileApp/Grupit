@@ -1,4 +1,4 @@
-package com.grup.android.ui
+package com.grup.android.ui.apptheme
 
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape

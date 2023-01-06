@@ -3,6 +3,7 @@ package com.grup
 import com.grup.controllers.GroupController
 import com.grup.controllers.GroupInviteController
 import com.grup.controllers.UserController
+import com.grup.controllers.UserInfoController
 import com.grup.di.createSyncedRealmModule
 import com.grup.di.realm
 import com.grup.di.registerUserObject
@@ -15,7 +16,6 @@ import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.Group
 import com.grup.models.GroupInvite
 import com.grup.models.User
-import com.grup.other.Id
 import com.grup.other.RealmUser
 import com.grup.repositories.APP_ID
 import io.realm.kotlin.ext.query
@@ -24,6 +24,7 @@ import io.realm.kotlin.mongodb.Credentials
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 
@@ -40,13 +41,18 @@ object APIServer {
     fun getUserByUsername(username: String) = UserController.getUserByUsername(username)
 
     // Group
-    fun createGroup(groupName: String) = GroupController.createGroup(groupName, user)
-    fun getGroupById(groupId: Id) = GroupController.getGroupById(groupId)
+    fun createGroup(groupName: String) = GroupController.createGroup(user, groupName)
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
+
+    // UserInfo
+    fun getUserInfosByGroupIdAsFlow(group: Group) =
+        UserInfoController.getUserInfosByGroupIdAsFlow(group)
+
+    // GroupInvite
     fun inviteUserToGroup(username: String, group: Group) =
-        GroupController.inviteUserToGroup(username, group, user)
+        GroupInviteController.createGroupInvite(user, username, group)
     fun acceptInviteToGroup(groupInvite: GroupInvite) =
-        GroupController.acceptInviteToGroup(groupInvite, user)
+        GroupInviteController.acceptInviteToGroup(groupInvite, user)
     fun getAllGroupInvitesAsFlow() = GroupInviteController.getAllGroupInvitesAsFlow()
 
 
@@ -77,8 +83,7 @@ object APIServer {
     }
 
     fun registerUser(username: String) {
-        registerUserObject(User().apply {
-            this._id = realmUser.id
+        registerUserObject(User(realmUser.id).apply {
             this.username = username
         })
     }
@@ -89,10 +94,11 @@ object APIServer {
         }
     }
 
-    private fun initKoin() {
+    private suspend fun initKoin() {
+        val realmModule = createSyncedRealmModule(realmUser)
         startKoin {
             modules(listOf(
-                createSyncedRealmModule(realmUser),
+                realmModule,
                 servicesModule,
                 repositoriesModule
             ))

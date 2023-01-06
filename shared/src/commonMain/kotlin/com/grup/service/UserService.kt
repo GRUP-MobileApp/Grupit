@@ -13,6 +13,6 @@ internal class UserService : KoinComponent {
     }
 
     fun getUserByUsername(username: String): User? {
-        return userRepository.findUserByUserName(username)
+        return userRepository.findUserByUsername(username)
     }
 }

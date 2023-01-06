@@ -46,7 +46,7 @@ internal class UserRepository : IUserRepository {
         return responseUser
     }
 
-    override fun findUserByUserName(username: String): User? {
+    override fun findUserByUsername(username: String): User? {
         var responseUser: User? = null
         runBlocking {
             val response: HttpResponse = client.get(

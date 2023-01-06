@@ -1,4 +1,4 @@
-package com.grup.android.viewmodels.login
+package com.grup.android.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +12,7 @@ class LoginViewModel : ViewModel() {
     val loginResult: StateFlow<LoginResult> = _loginResult
 
     fun loginEmailPassword(email: String, password: String) = viewModelScope.launch {
+        pendingLoginResult()
         try {
             APIServer.Login.emailAndPassword(email, password).also { successLoginResult() }
         } catch (e: Exception) {
@@ -20,12 +21,19 @@ class LoginViewModel : ViewModel() {
     }
 
     fun registerEmailPassword(email: String, password: String) = viewModelScope.launch {
+        pendingLoginResult()
         try {
             APIServer.Login.registerEmailAndPassword(email, password).also { successLoginResult() }
             // TODO: Put this in welcome slideshow
             APIServer.registerUser(email)
         } catch (e: Exception) {
             errorLoginResult(e)
+        }
+    }
+
+    private fun pendingLoginResult() {
+        _loginResult.value = LoginResult().apply {
+            this.status = LoginResult.LoginStatus.PENDING
         }
     }
 

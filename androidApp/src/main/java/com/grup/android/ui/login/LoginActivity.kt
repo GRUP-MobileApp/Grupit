@@ -1,4 +1,4 @@
-package com.grup.android
+package com.grup.android.ui.login
 
 import android.content.Intent
 import android.os.Bundle
@@ -27,12 +27,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.grup.android.ui.*
 
 import androidx.compose.material.*
 import androidx.compose.ui.platform.LocalContext
-import com.grup.android.viewmodels.login.LoginResult
-import com.grup.android.viewmodels.login.LoginViewModel
+import com.grup.android.ExceptionHandler
+import com.grup.android.MainActivity
+import com.grup.android.ui.apptheme.AppTheme
 
 
 class LoginActivity : AppCompatActivity() {
@@ -124,6 +124,7 @@ fun LoginPage(
                     loginResult.error?.message?.let {
                         Text(text = it, color = AppTheme.colors.onSecondary)
                     }
+                LoginResult.LoginStatus.PENDING -> {}
                 null -> {}
             }
         }

@@ -8,6 +8,5 @@ internal interface IGroupInviteRepository : IRepository {
 
     fun findAllGroupInvitesAsFlow(): Flow<List<GroupInvite>>
 
-    fun updateGroupInviteStatus(groupInvite: GroupInvite,
-                                status: GroupInvite.RequestStatus): GroupInvite
+    fun updateGroupInviteStatus(groupInvite: GroupInvite, status: String): GroupInvite
 }

@@ -1,12 +1,11 @@
 package com.grup.models
 
 import com.grup.interfaces.IEntity
-import com.grup.other.Id
-import com.grup.other.asString
 
-abstract class BaseEntity: IEntity {
-    abstract var _id: Id
+abstract class BaseEntity : IEntity {
+    protected abstract var _id: String
+
     override fun getId(): String {
-        return _id.asString()
+        return _id
     }
 }

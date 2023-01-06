@@ -2,7 +2,6 @@ package com.grup.repositories.abstract
 
 import com.grup.models.Group
 import com.grup.interfaces.IGroupRepository
-import com.grup.other.Id
 import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
@@ -18,19 +17,17 @@ internal abstract class RealmGroupRepository : IGroupRepository {
         }
     }
 
-    override fun findGroupById(groupId: Id): Group? {
+    override fun findGroupById(groupId: String): Group? {
         return realm.query<Group>("$idSerialName == $0", groupId).first().find()
     }
 
     override fun findAllGroupsAsFlow(): Flow<List<Group>> {
-        return realm.query<Group>().find().asFlow().map { changes ->
-            changes.list.toList()
-        }
+        return realm.query<Group>().find().asFlow().map { it.list }
     }
 
     override fun updateGroup(group: Group, block: (Group) -> Unit): Group? {
         return realm.writeBlocking {
-            findLatest(group)!!.apply {
+            findLatest(group)?.apply {
                 block(this)
             }
         }

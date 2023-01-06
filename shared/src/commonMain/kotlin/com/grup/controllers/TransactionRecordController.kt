@@ -3,7 +3,6 @@ package com.grup.controllers
 import com.grup.exceptions.NotCreatedException
 import com.grup.exceptions.NotFoundException
 import com.grup.models.TransactionRecord
-import com.grup.other.asString
 import com.grup.service.GroupService
 import com.grup.service.TransactionRecordService
 import com.grup.service.UserInfoService
@@ -17,11 +16,11 @@ object TransactionRecordController : KoinComponent {
 
     fun createTransactionRecord(transactionRecord: TransactionRecord): TransactionRecord {
         groupService.getByGroupId(transactionRecord.groupId!!)
-            ?: throw NotFoundException("Group with id ${transactionRecord.groupId.asString()} " +
+            ?: throw NotFoundException("Group with id ${transactionRecord.groupId} " +
                     "does not exist")
-        userInfoService.applyTransactionRecord(transactionRecord)
+        //userInfoService.applyTransactionRecord(transactionRecord)
         return transactionRecordService.createTransactionRecord(transactionRecord)
             ?: throw NotCreatedException("Error creating TransactionRecord with id " +
-                    transactionRecord._id.asString())
+                    transactionRecord.getId())
     }
 }
