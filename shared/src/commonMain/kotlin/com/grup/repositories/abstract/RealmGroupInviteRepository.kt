@@ -22,8 +22,8 @@ internal abstract class RealmGroupInviteRepository : IGroupInviteRepository {
 
     override fun updateGroupInviteStatus(groupInvite: GroupInvite, status: String): GroupInvite {
         return realm.writeBlocking {
-            findLatest(groupInvite)!!.apply {
-                groupInvite.status = status
+            this.findLatest(groupInvite)!!.apply {
+                this.status = status
             }
         }
     }

@@ -27,7 +27,7 @@ object GroupInviteController : KoinComponent {
     }
 
     fun acceptInviteToGroup(groupInvite: GroupInvite, user: User) {
-        userInfoService.createUserInfo(user, groupInvite.groupId!!)
         groupInviteService.acceptGroupInvite(groupInvite)
+        userInfoService.createUserInfo(user, groupInvite.groupId!!)
     }
 }

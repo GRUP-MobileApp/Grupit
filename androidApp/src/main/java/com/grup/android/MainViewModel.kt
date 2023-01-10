@@ -9,6 +9,7 @@ import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import kotlin.properties.Delegates
 
 class MainViewModel : ViewModel() {
     private companion object {
@@ -59,6 +60,8 @@ class MainViewModel : ViewModel() {
 
     fun createGroup(groupName: String) = APIServer.createGroup(groupName)
     fun acceptInviteToGroup(groupInvite: GroupInvite) = APIServer.acceptInviteToGroup(groupInvite)
+    fun inviteUserToGroup(username: String, group: Group) =
+        APIServer.inviteUserToGroup(username, group)
 
     private fun <T> Flow<List<T>>.asNotifications() =
         this.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

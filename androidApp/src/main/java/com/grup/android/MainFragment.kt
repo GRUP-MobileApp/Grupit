@@ -86,14 +86,17 @@ fun MainLayout(
         GroupNotificationsBottomSheet(
             groupInvites = groupInvites,
             state = groupNotificationsBottomSheetState,
-            groupInviteOnClick = { groupInvite -> mainViewModel.acceptInviteToGroup(groupInvite) }
+            groupInviteOnClick = { groupInvite ->
+                mainViewModel.acceptInviteToGroup(groupInvite)
+                selectedGroupOnValueChange(groups.find { it.getId() == groupInvite.groupId }!!)
+            }
         ) {
             selectedGroup?.let {
                 AddToGroupBottomSheetLayout(
                     selectedGroup = it,
                     state = addToGroupBottomSheetState,
                     inviteUsernameToGroup = { username, group ->
-                        APIServer.inviteUserToGroup(username, group)
+                        mainViewModel.inviteUserToGroup(username, group)
                         closeDrawer()
                     },
                     content = content
@@ -134,7 +137,7 @@ fun MainLayout(
                         closeDrawer()
                     },
                     createGroup = { groupName ->
-                        mainViewModel.createGroup(groupName)
+                        selectedGroupOnValueChange(mainViewModel.createGroup(groupName))
                         closeDrawer()
                     }
                 )
@@ -361,61 +364,63 @@ fun GroupDetails(
     userInfos: List<UserInfo>,
     moneyRequestOnClick: () -> Unit
 ) {
-    val myUserInfo: UserInfo = userInfos.find { it.userId == APIServer.user.getId() }!!
-    Column (
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .size(AppTheme.dimensions.groupDetailsSize)
-            .padding(top = AppTheme.dimensions.paddingLarge)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+    userInfos.find { it.userId == APIServer.user.getId() }?.let { myUserInfo ->
+        Column (
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
+                .size(AppTheme.dimensions.groupDetailsSize)
                 .padding(top = AppTheme.dimensions.paddingLarge)
         ) {
-            Row (
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                verticalAlignment = Alignment.Top,
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = AppTheme.dimensions.paddingLarge)
+                    .padding(top = AppTheme.dimensions.paddingLarge)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier.size(98.dp)
-                )
+                Row (
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = AppTheme.dimensions.paddingLarge)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Face,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier.size(98.dp)
+                    )
+                    h1Text(
+                        text = "${group.groupName}",
+                        modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
+                    )
+                }
                 h1Text(
-                    text = "${group.groupName}",
-                    modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
+                    "$${myUserInfo.userBalance}",
+                    fontSize = 100.sp
                 )
             }
-            h1Text(
-                "$${myUserInfo.userBalance}",
-                fontSize = 100.sp
-            )
+            TextButton(
+                colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+                modifier = Modifier
+                    .padding(bottom = AppTheme.dimensions.paddingMedium)
+                    .width(250.dp)
+                    .height(45.dp),
+                shape = AppTheme.shapes.large,
+                onClick = moneyRequestOnClick
+            ) {
+                Text(
+                    text = "Money Request",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = AppTheme.colors.onPrimary,
+                )
+            }
         }
-        TextButton(
-            colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-            modifier = Modifier
-                .padding(bottom = AppTheme.dimensions.paddingMedium)
-                .width(250.dp)
-                .height(45.dp),
-            shape = AppTheme.shapes.large,
-            onClick = moneyRequestOnClick
-        ) {
-            Text(
-                text = "Money Request",
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = AppTheme.colors.onPrimary,
-            )
-        }
-    }
+    } ?: Text(text = "Loading group...", color = AppTheme.colors.onPrimary)
+
 }
 
 @Composable
