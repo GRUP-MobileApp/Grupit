@@ -55,4 +55,11 @@ dependencies {
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.navigation:navigation-compose:2.4.1")
 
+    // Splash API
+    implementation("androidx.core:core-splashscreen:1.0.0-beta01")
+
+    val accompanist_version = "0.15.0"
+    // Pager and Indicators - Accompanist
+    implementation ("com.google.accompanist:accompanist-pager:$accompanist_version")
+    implementation ("com.google.accompanist:accompanist-pager-indicators:$accompanist_version")
 }
