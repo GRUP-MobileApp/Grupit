@@ -1,6 +1,5 @@
 package com.grup.controllers
 
-import com.grup.exceptions.NotCreatedException
 import com.grup.models.Group
 import com.grup.models.User
 import com.grup.service.GroupService
@@ -19,7 +18,6 @@ object GroupController : KoinComponent {
 
         userInfoService.createUserInfo(creator, group.getId())
         return groupService.createGroup(group)
-            ?: throw NotCreatedException("Error creating group $groupName")
     }
 
     fun getAllGroupsAsFlow() = groupService.getAllGroupsAsFlow()

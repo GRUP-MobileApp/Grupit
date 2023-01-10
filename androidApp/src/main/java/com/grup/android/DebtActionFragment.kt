@@ -1,57 +1,68 @@
 package com.grup.android
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.compose.setContent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.grup.android.ui.apptheme.h1Text
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import com.grup.APIServer
 import com.grup.android.ui.apptheme.AppTheme
+import com.grup.android.ui.apptheme.h1Text
+import com.grup.models.UserInfo
 
-class MoneyRequestActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                RequestLayout()
+class DebtActionFragment : Fragment() {
+    private val mainViewModel: MainViewModel by viewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                RequestLayout(mainViewModel = mainViewModel)
             }
         }
     }
 }
 
 @Composable
-fun RequestLayout() {
+fun RequestLayout(
+    mainViewModel: MainViewModel
+) {
+    val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsState()
     Scaffold(
         topBar = {
             RequestTopAppBar()
         }
     ) {
         Column {
-            RequestBody()
+            RequestBody(userInfos = userInfos)
         }
     }
 
 }
 
 @Composable
-fun RequestBody() {
+fun RequestBody(
+    userInfos: List<UserInfo>
+) {
+    val myUserInfo: UserInfo = userInfos.find { it.userId == APIServer.user.getId() }!!
+    var debtActionAmount: String by remember { mutableStateOf("0") }
     CompositionLocalProvider(
         LocalContentColor provides AppTheme.colors.onPrimary
     ) {
@@ -62,22 +73,42 @@ fun RequestBody() {
                 .fillMaxHeight()
                 .background(AppTheme.colors.primary)
         ) {
-            val requestValue = remember { mutableStateOf(TextFieldValue()) }
-            TextField(
-                label = {
-                    Text(
-                        text = "0",
-                        color = AppTheme.colors.onSecondary
-                    ) },
-                textStyle = TextStyle(color = AppTheme.colors.onSecondary),
-                value = requestValue.value,
-                onValueChange = { requestValue.value = it }
-            )
             h1Text(
-                text = "$5",
+                text = "Balance: $${myUserInfo.userBalance}",
                 fontSize = 50.sp
             )
-            KeyPad()
+            h1Text(
+                text = "$$debtActionAmount",
+                fontSize = 65.sp
+            )
+            KeyPad(
+                onKeyPress = { key ->
+                    when(key) {
+                        '.' -> {
+                            if (!debtActionAmount.contains('.')) {
+                                debtActionAmount += key
+                            }
+                        }
+                        '<' -> {
+                            debtActionAmount = if (debtActionAmount.length > 1) {
+                                debtActionAmount.substring(0, debtActionAmount.length - 1)
+                            } else {
+                                "0"
+                            }
+                        }
+                        else -> {
+                            if (key.isDigit() &&
+                                (debtActionAmount.length < 3 ||
+                                        debtActionAmount[debtActionAmount.length - 3] != '.')) {
+                                if (debtActionAmount == "0") {
+                                    debtActionAmount = ""
+                                }
+                                debtActionAmount += key
+                            }
+                        }
+                    }
+                }
+            )
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
@@ -93,7 +124,9 @@ fun RequestBody() {
 }
 
 @Composable
-fun KeyPad(){
+fun KeyPad(
+    onKeyPress: (Char) -> Unit
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -104,7 +137,7 @@ fun KeyPad(){
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
         ) {
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('1') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -118,7 +151,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('2') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -132,7 +165,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('3') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -151,7 +184,7 @@ fun KeyPad(){
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
         ) {
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('4') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -165,7 +198,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('5') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -179,7 +212,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('6') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -198,7 +231,7 @@ fun KeyPad(){
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
         ) {
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('7') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -212,7 +245,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('8') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -226,7 +259,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('9') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -245,7 +278,7 @@ fun KeyPad(){
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
         ) {
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('.') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -259,7 +292,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('0') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier
@@ -273,7 +306,7 @@ fun KeyPad(){
                 )
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onKeyPress('<') },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = AppTheme.colors.secondary),
                 modifier = Modifier

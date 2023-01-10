@@ -3,6 +3,7 @@ package com.grup.android.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
+import com.grup.exceptions.login.LoginException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,7 +16,7 @@ class LoginViewModel : ViewModel() {
         pendingLoginResult()
         try {
             APIServer.Login.emailAndPassword(email, password).also { successLoginResult() }
-        } catch (e: Exception) {
+        } catch (e: LoginException) {
             errorLoginResult(e)
         }
     }
@@ -26,7 +27,7 @@ class LoginViewModel : ViewModel() {
             APIServer.Login.registerEmailAndPassword(email, password).also { successLoginResult() }
             // TODO: Put this in welcome slideshow
             APIServer.registerUser(email)
-        } catch (e: Exception) {
+        } catch (e: LoginException) {
             errorLoginResult(e)
         }
     }

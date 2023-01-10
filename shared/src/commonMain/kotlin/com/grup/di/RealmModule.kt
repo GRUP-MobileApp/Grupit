@@ -1,6 +1,5 @@
 package com.grup.di
 
-import com.grup.exceptions.MissingFieldException
 import com.grup.models.*
 import com.grup.other.RealmUser
 import com.grup.other.idSerialName
@@ -18,8 +17,8 @@ internal suspend fun createSyncedRealmModule(realmUser: RealmUser): Module {
     realm = Realm.open(
         SyncConfiguration.Builder(realmUser,
             setOf(
-                User::class, Group::class, UserInfo::class, TransactionRecord::class,
-                GroupInvite::class
+                User::class, Group::class, UserInfo::class, GroupInvite::class, DebtAction::class,
+                TransactionRecord::class
             )
         )
         .initialSubscriptions(rerunOnOpen = true) { realm ->
@@ -44,17 +43,17 @@ internal suspend fun createSyncedRealmModule(realmUser: RealmUser): Module {
                     "GroupInvites"
                 )
                 userInfos.forEach { userInfo ->
-                    userInfo.groupId?.let { groupId ->
+                    userInfo.groupId!!.let { groupId ->
                         add(realm.query<Group>("$idSerialName == $0", groupId),
                             "${groupId}_Group"
                         )
                         add(realm.query<UserInfo>("groupId == $0", groupId),
                             "${groupId}_UserInfo"
                         )
-                        add(realm.query<TransactionRecord>("groupId == $0", groupId),
-                            "${groupId}_TransactionRecord"
+                        add(realm.query<DebtAction>("groupId == $0", groupId),
+                            "${groupId}_DebtAction"
                         )
-                    } ?: throw MissingFieldException("UserInfo missing groupId")
+                    }
                 }
             }
             // Wait for subscriptions to sync
@@ -77,8 +76,8 @@ internal fun Realm.addGroup(groupId: String) {
         subscriptions.update { realm ->
             add(realm.query<Group>("$idSerialName == $0", groupId), "${groupId}_Group")
             add(realm.query<UserInfo>("groupId == $0", groupId), "${groupId}_UserInfo")
-            add(realm.query<TransactionRecord>("groupId == $0", groupId),
-                "${groupId}_TransactionRecord")
+            add(realm.query<DebtAction>("groupId == $0", groupId),
+                "${groupId}_DebtAction")
         }
         realm.subscriptions.waitForSynchronization()
     }
@@ -89,7 +88,7 @@ internal fun Realm.removeGroup(groupId: String) {
         subscriptions.update {
             remove("${groupId}_Group")
             remove("${groupId}_UserInfo")
-            remove("${groupId}_TransactionRecord")
+            remove("${groupId}_DebtAction")
         }
         realm.subscriptions.waitForSynchronization()
     }

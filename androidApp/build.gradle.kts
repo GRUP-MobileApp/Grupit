@@ -1,7 +1,8 @@
 val realmVersion: String by project
 val kotlinVersion: String by project
-val koinAndroidVersion: String by project
 val composeVersion: String by project
+val lifecycleVersion: String by project
+val navigationVersion: String by project
 
 plugins {
     id("com.android.application")
@@ -10,11 +11,11 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
     defaultConfig {
         applicationId = "com.grup.android"
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
     }
@@ -46,8 +47,15 @@ dependencies {
     implementation("com.google.android.material:material:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.0-alpha03")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+
+    // Navigation
+    implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
 
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:$composeVersion")
@@ -59,7 +67,4 @@ dependencies {
 
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
-
-    // Koin
-    implementation("io.insert-koin:koin-androidx-compose:$koinAndroidVersion")
 }

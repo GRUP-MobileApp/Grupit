@@ -1,9 +1,6 @@
 package com.grup
 
-import com.grup.controllers.GroupController
-import com.grup.controllers.GroupInviteController
-import com.grup.controllers.UserController
-import com.grup.controllers.UserInfoController
+import com.grup.controllers.*
 import com.grup.di.createSyncedRealmModule
 import com.grup.di.realm
 import com.grup.di.registerUserObject
@@ -15,6 +12,7 @@ import com.grup.exceptions.login.NotLoggedInException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.Group
 import com.grup.models.GroupInvite
+import com.grup.models.TransactionRecord
 import com.grup.models.User
 import com.grup.other.RealmUser
 import com.grup.repositories.APP_ID
@@ -24,7 +22,6 @@ import io.realm.kotlin.mongodb.Credentials
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 
@@ -45,8 +42,7 @@ object APIServer {
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
 
     // UserInfo
-    fun getUserInfosByGroupIdAsFlow(group: Group) =
-        UserInfoController.getUserInfosByGroupIdAsFlow(group)
+    fun getAllUserInfosAsFlow() = UserInfoController.getAllUserInfosAsFlow()
 
     // GroupInvite
     fun inviteUserToGroup(username: String, group: Group) =
@@ -54,6 +50,11 @@ object APIServer {
     fun acceptInviteToGroup(groupInvite: GroupInvite) =
         GroupInviteController.acceptInviteToGroup(groupInvite, user)
     fun getAllGroupInvitesAsFlow() = GroupInviteController.getAllGroupInvitesAsFlow()
+
+    // DebtAction
+    fun createDebtAction(transactionRecords: List<TransactionRecord>, group: Group) =
+        DebtActionController.createDebtAction(transactionRecords, group)
+    fun getAllDebtActionsAsFlow() = DebtActionController.getAllDebtActionsAsFlow()
 
 
     object Login {

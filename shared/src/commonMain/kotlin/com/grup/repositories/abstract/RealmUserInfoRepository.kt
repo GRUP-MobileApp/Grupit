@@ -21,8 +21,8 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
             .first().find()
     }
 
-    override fun findUserInfosByGroupIdAsFlow(groupId: String): Flow<List<UserInfo>> {
-        return realm.query<UserInfo>("groupId == $0", groupId).find().asFlow().map { it.list }
+    override fun findAllUserInfosAsFlow(): Flow<List<UserInfo>> {
+        return realm.query<UserInfo>().find().asFlow().map { it.list }
     }
 
     override fun updateUserInfo(userInfo: UserInfo, block: (UserInfo) -> Unit): UserInfo? {
