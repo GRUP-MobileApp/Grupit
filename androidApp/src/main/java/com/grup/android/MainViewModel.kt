@@ -5,10 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.ViewModel
 import com.grup.APIServer
-import com.grup.models.DebtAction
-import com.grup.models.Group
-import com.grup.models.GroupInvite
-import com.grup.models.UserInfo
+import com.grup.exceptions.login.UserObjectNotFoundException
+import com.grup.models.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 
@@ -16,6 +14,14 @@ class MainViewModel : ViewModel() {
     private companion object {
         private const val STOP_TIMEOUT_MILLIS: Long = 5000
     }
+
+    val hasUserObject: Boolean
+        get() = try {
+            APIServer.user
+            true
+        } catch (e: UserObjectNotFoundException) {
+            false
+        }
 
     val groupsList: StateFlow<List<Group>> = APIServer.getAllGroupsAsFlow().asState()
 
@@ -50,6 +56,9 @@ class MainViewModel : ViewModel() {
             }
         }
     }.asNotifications()
+
+    fun createGroup(groupName: String) = APIServer.createGroup(groupName)
+    fun acceptInviteToGroup(groupInvite: GroupInvite) = APIServer.acceptInviteToGroup(groupInvite)
 
     private fun <T> Flow<List<T>>.asNotifications() =
         this.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

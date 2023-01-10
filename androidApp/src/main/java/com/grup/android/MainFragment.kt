@@ -28,7 +28,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
+import androidx.navigation.fragment.findNavController
 import com.grup.APIServer
 import com.grup.android.ui.apptheme.*
 import com.grup.models.Group
@@ -48,8 +48,12 @@ class MainFragment : Fragment() {
             setContent {
                 MainLayout(
                     mainViewModel = mainViewModel,
-                    navController = findNavController(this@MainFragment)
+                    navController = findNavController()
                 )
+            }.also {
+                if (!mainViewModel.hasUserObject) {
+                    findNavController().navigate(R.id.startWelcomeSlideshow)
+                }
             }
         }
     }
@@ -80,7 +84,9 @@ fun MainLayout(
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         GroupNotificationsBottomSheet(
-            groupInvites = groupInvites, state = groupNotificationsBottomSheetState
+            groupInvites = groupInvites,
+            state = groupNotificationsBottomSheetState,
+            groupInviteOnClick = { groupInvite -> mainViewModel.acceptInviteToGroup(groupInvite) }
         ) {
             selectedGroup?.let {
                 AddToGroupBottomSheetLayout(
@@ -119,6 +125,7 @@ fun MainLayout(
                 )
             },
             drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+            drawerBackgroundColor = AppTheme.colors.secondary,
             drawerContent = {
                 GroupNavigationMenu(
                     groups = groups,
@@ -126,8 +133,8 @@ fun MainLayout(
                         selectedGroupOnValueChange(groups[menuItem.index])
                         closeDrawer()
                     },
-                    createGroup = { username ->
-                        APIServer.createGroup("$username's Group")
+                    createGroup = { groupName ->
+                        mainViewModel.createGroup(groupName)
                         closeDrawer()
                     }
                 )
@@ -168,16 +175,16 @@ fun NoGroupsDisplay() {
 @Composable
 fun GroupNavigationMenu(
     groups: List<Group>,
-    onItemClick: (MenuItem) -> Unit,
+    onItemClick: (GroupItem) -> Unit,
     createGroup: (String) -> Unit
 ) {
     DrawerHeader()
     DrawerBody(
         items = groups.mapIndexed { index, group ->
-            MenuItem(
+            GroupItem(
                 id = group.getId(),
                 index = index,
-                title = group.groupName!!,
+                groupName = group.groupName!!,
                 contentDescription = "Open ${group.groupName}'s details",
                 icon = Icons.Default.Home
             )
@@ -187,10 +194,35 @@ fun GroupNavigationMenu(
         }
     )
     Button(
-        onClick = { createGroup(APIServer.user.username!!) }
+        onClick = { createGroup("SAMPLE GROUP NAME") }
     ) {
         Text(text = "Create new group")
     }
+    DrawerSettings(
+        items = listOf(
+            MenuItem(
+                id = "home",
+                title = "Create New Group",
+                contentDescription = "Go to the home screen",
+                icon = Icons.Default.AddCircle
+            ),
+            MenuItem(
+                id = "home",
+                title = "Settings",
+                contentDescription = "Go to the settings screen",
+                icon = Icons.Default.Settings
+            ),
+            MenuItem(
+                id = "home",
+                title = "Sign Out",
+                contentDescription = "Go to the home screen",
+                icon = Icons.Default.ExitToApp
+            ),
+        ),
+        onItemClick = {
+            println("Clicked on ${it.title}")
+        }
+    )
 }
 
 @Composable
@@ -276,6 +308,7 @@ fun AddToGroupButton(
 @Composable
 fun GroupNotificationsBottomSheet(
     groupInvites: List<GroupInvite>,
+    groupInviteOnClick: (GroupInvite) -> Unit,
     state: ModalBottomSheetState,
     backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
@@ -299,7 +332,7 @@ fun GroupNotificationsBottomSheet(
                         ),
                         color = textColor
                     )
-                    Button(onClick = { APIServer.acceptInviteToGroup(groupInvite) }) {
+                    Button(onClick = { groupInviteOnClick(groupInvite) }) {
                         Text(text = "Join ${groupInvite.groupName!!}")
                     }
                 }

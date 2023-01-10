@@ -1,4 +1,4 @@
-package com.grup.android.ui.login
+package com.grup.android.login
 
 class LoginResult {
     enum class LoginStatus {

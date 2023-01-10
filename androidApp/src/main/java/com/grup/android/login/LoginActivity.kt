@@ -1,4 +1,4 @@
-package com.grup.android.ui.login
+package com.grup.android.login
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,13 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,11 +22,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import androidx.compose.material.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
@@ -36,7 +33,7 @@ import com.grup.android.ui.apptheme.AppTheme
 
 
 class LoginActivity : AppCompatActivity() {
-    private val loginViewModel by viewModels<LoginViewModel>()
+    private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +41,11 @@ class LoginActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
-                LoginPage(loginViewModel)
+                LoginPage(loginViewModel = loginViewModel)
             }
         }
     }
+
 }
 
 @Composable
@@ -61,19 +59,20 @@ fun LoginPage(
     Box(modifier = Modifier
         .fillMaxSize()
         .background(AppTheme.colors.primary)) {
+
         ClickableText(
-            text = AnnotatedString("Sign up here"),
+            text = AnnotatedString("Forgot Password?"),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
-            onClick = { loginViewModel.registerEmailPassword(email.text, password.text) },
+            onClick = { /* TODO */ },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
-                textDecoration = TextDecoration.Underline,
                 color = AppTheme.colors.onSecondary
             )
         )
+
     }
     Column(
         modifier = Modifier
@@ -87,7 +86,7 @@ fun LoginPage(
             color = AppTheme.colors.onSecondary
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         TextField(
             label = { Text(text = "Username", color = AppTheme.colors.onSecondary) },
@@ -107,7 +106,6 @@ fun LoginPage(
             onValueChange = { password = it }
         )
 
-        // Error message
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -130,31 +128,45 @@ fun LoginPage(
         }
 
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
-            Button(
-                onClick = { loginViewModel.loginEmailPassword(email.text, password.text) },
-                shape = RoundedCornerShape(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .padding(top = 20.dp, bottom = 40.dp)
             ) {
-                Text(
-                    text = "Login",
-                    color = AppTheme.colors.onSecondary
-                )
+                Button(
+                    onClick = { loginViewModel.registerEmailPassword(email.text, password.text) },
+                    shape = AppTheme.shapes.large,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = AppTheme.colors.secondary
+                    ),
+                    modifier = Modifier
+                        .width(125.dp)
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = "Sign Up",
+                        color = AppTheme.colors.onSecondary
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Button(
+                    onClick = { loginViewModel.loginEmailPassword(email.text, password.text) },
+                    shape = AppTheme.shapes.large,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = AppTheme.colors.confirm
+                    ),
+                    modifier = Modifier
+                        .width(125.dp)
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = "Login",
+                        color = AppTheme.colors.onSecondary
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { },
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default,
-                color = AppTheme.colors.onSecondary
-            )
-        )
     }
 }

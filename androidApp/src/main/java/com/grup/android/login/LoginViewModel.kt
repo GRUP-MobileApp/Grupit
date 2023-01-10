@@ -1,4 +1,4 @@
-package com.grup.android.ui.login
+package com.grup.android.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,8 +25,6 @@ class LoginViewModel : ViewModel() {
         pendingLoginResult()
         try {
             APIServer.Login.registerEmailAndPassword(email, password).also { successLoginResult() }
-            // TODO: Put this in welcome slideshow
-            APIServer.registerUser(email)
         } catch (e: LoginException) {
             errorLoginResult(e)
         }
