@@ -69,7 +69,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.4.0")
     implementation("androidx.ui:ui-tooling:1.0.0-alpha07")
     implementation("androidx.navigation:navigation-compose:2.4.1")
-
+    
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
 
