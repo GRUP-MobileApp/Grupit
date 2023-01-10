@@ -5,15 +5,15 @@ import com.grup.other.RealmUser
 import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.subscriptions
-import kotlinx.coroutines.runBlocking
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.mongodb.sync.MutableSubscriptionSet
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
-import org.koin.core.module.Module
-import org.koin.dsl.module
+import kotlinx.coroutines.*
 
 internal lateinit var realm: Realm
+private lateinit var subscriptionsJob: Job
 
-internal suspend fun createSyncedRealmModule(realmUser: RealmUser): Module {
+internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
     realm = Realm.open(
         SyncConfiguration.Builder(realmUser,
             setOf(
@@ -23,45 +23,37 @@ internal suspend fun createSyncedRealmModule(realmUser: RealmUser): Module {
         )
         .initialSubscriptions(rerunOnOpen = true) { realm ->
             removeAll()
-            add(realm.query<User>("$idSerialName == $0", realmUser.id))
-            // Used to get initial user membership, this subscription is deleted afterwards
+            add(realm.query<User>("$idSerialName == $0", realmUser.id), "User")
             add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
+            add(
+                realm.query<GroupInvite>("inviter == $0 OR invitee == $0", realmUser.id),
+                "GroupInvites"
+            )
         }
         .waitForInitialRemoteData()
         .name("syncedRealm")
         .build()
-    ).also { createdRealm ->
-        realm = createdRealm
-        createdRealm.query<UserInfo>().find().toList().let { userInfos ->
-            createdRealm.subscriptions.update { realm ->
-                remove("UserInfos")
-                add(
-                    realm.query<GroupInvite>(
-                        "inviter == $0 OR invitee == $0",
-                        realmUser.id
-                    ),
-                    "GroupInvites"
-                )
-                userInfos.forEach { userInfo ->
-                    userInfo.groupId!!.let { groupId ->
-                        add(realm.query<Group>("$idSerialName == $0", groupId),
-                            "${groupId}_Group"
-                        )
-                        add(realm.query<UserInfo>("groupId == $0", groupId),
-                            "${groupId}_UserInfo"
-                        )
-                        add(realm.query<DebtAction>("groupId == $0", groupId),
-                            "${groupId}_DebtAction"
-                        )
-                    }
-                }
+    )
+    subscriptionsJob = subscriptionsSyncGlobalJob()
+    realm.subscriptions.waitForSynchronization()
+    return realm
+}
+
+internal fun closeSyncedRealm() {
+    realm.close()
+    subscriptionsJob.cancel()
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun subscriptionsSyncGlobalJob(): Job = GlobalScope.launch {
+    var prevUserInfoList: List<UserInfo> = emptyList()
+    realm.query<UserInfo>().find().asFlow().collect { resultsChange ->
+        realm.subscriptions.update {
+            resultsChange.list.minus(prevUserInfoList.toSet()).forEach { userInfo ->
+                this.addGroup(userInfo.groupId!!)
             }
-            // Wait for subscriptions to sync
-            realm.subscriptions.waitForSynchronization()
         }
-    }
-    return module {
-        single { realm }
+        prevUserInfoList = resultsChange.list
     }
 }
 
@@ -71,25 +63,13 @@ internal fun registerUserObject(newUser: User) {
     }
 }
 
-internal fun Realm.addGroup(groupId: String) {
-    runBlocking {
-        subscriptions.update { realm ->
-            add(realm.query<Group>("$idSerialName == $0", groupId), "${groupId}_Group")
-            add(realm.query<UserInfo>("groupId == $0", groupId), "${groupId}_UserInfo")
-            add(realm.query<DebtAction>("groupId == $0", groupId),
-                "${groupId}_DebtAction")
-        }
-        realm.subscriptions.waitForSynchronization()
-    }
+internal fun MutableSubscriptionSet.addGroup(groupId: String) {
+    add(realm.query<Group>("$idSerialName == $0", groupId), "${groupId}_Group")
+    add(realm.query<DebtAction>("groupId == $0", groupId),
+        "${groupId}_DebtAction")
 }
 
-internal fun Realm.removeGroup(groupId: String) {
-    runBlocking {
-        subscriptions.update {
-            remove("${groupId}_Group")
-            remove("${groupId}_UserInfo")
-            remove("${groupId}_DebtAction")
-        }
-        realm.subscriptions.waitForSynchronization()
-    }
+internal fun MutableSubscriptionSet.removeGroup(groupId: String) {
+    remove("${groupId}_Group")
+    remove("${groupId}_DebtAction")
 }

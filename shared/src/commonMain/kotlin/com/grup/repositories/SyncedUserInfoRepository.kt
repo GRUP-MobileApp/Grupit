@@ -10,10 +10,4 @@ import org.koin.core.component.inject
 
 internal class SyncedUserInfoRepository: RealmUserInfoRepository(), KoinComponent {
     override val realm: Realm by inject()
-
-    override fun createUserInfo(userInfo: UserInfo): UserInfo? {
-        realm.addGroup(userInfo.groupId
-            ?: throw MissingFieldException("UserInfo missing groupId"))
-        return super.createUserInfo(userInfo)
-    }
 }

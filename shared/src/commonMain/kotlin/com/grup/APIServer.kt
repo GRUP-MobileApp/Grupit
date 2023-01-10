@@ -1,7 +1,8 @@
 package com.grup
 
 import com.grup.controllers.*
-import com.grup.di.createSyncedRealmModule
+import com.grup.di.closeSyncedRealm
+import com.grup.di.openSyncedRealm
 import com.grup.di.realm
 import com.grup.di.registerUserObject
 import com.grup.di.repositoriesModule
@@ -24,6 +25,7 @@ import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
+import org.koin.dsl.module
 
 object APIServer {
     private val app: App = App.create(APP_ID)
@@ -93,13 +95,16 @@ object APIServer {
         runBlocking {
             realmUser.logOut()
         }
+        closeSyncedRealm()
     }
 
     private suspend fun initKoin() {
-        val realmModule = createSyncedRealmModule(realmUser)
+        val realm = openSyncedRealm(realmUser)
         startKoin {
             modules(listOf(
-                realmModule,
+                module {
+                    single { realm }
+                },
                 servicesModule,
                 repositoriesModule
             ))

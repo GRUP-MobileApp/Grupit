@@ -5,13 +5,18 @@ import com.grup.interfaces.IGroupRepository
 import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.mongodb.subscriptions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 internal abstract class RealmGroupRepository : IGroupRepository {
     protected abstract val realm: Realm
 
     override fun createGroup(group: Group): Group? {
+        runBlocking {
+            realm.subscriptions.waitForSynchronization()
+        }
         return realm.writeBlocking {
             copyToRealm(group)
         }
