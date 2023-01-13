@@ -68,12 +68,9 @@ dependencies {
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
 
-    // Splash API
-    implementation("androidx.core:core-splashscreen:1.0.0-beta01")
-
-    val accompanist_version = "0.15.0"
-    // Pager and Indicators - Accompanist
-    implementation ("com.google.accompanist:accompanist-pager:$accompanist_version")
-    implementation ("com.google.accompanist:accompanist-pager-indicators:$accompanist_version")
+    val accompanistVersion = "0.28.0"
+    //Accompanist
+    implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
 }
 

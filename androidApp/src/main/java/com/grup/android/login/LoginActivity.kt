@@ -90,6 +90,7 @@ fun LoginPage(
 
         TextField(
             label = { Text(text = "Username", color = AppTheme.colors.onSecondary) },
+            modifier = Modifier.background(AppTheme.colors.secondary),
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
             value = email,
             onValueChange = { email = it }
@@ -99,6 +100,7 @@ fun LoginPage(
 
         TextField(
             label = { Text(text = "Password", color = AppTheme.colors.onSecondary) },
+            modifier = Modifier.background(AppTheme.colors.secondary),
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
             value = password,
             visualTransformation = PasswordVisualTransformation(),

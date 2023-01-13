@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -332,7 +331,7 @@ fun SettleButton() {
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
         modifier = Modifier
             .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(175.dp)
+            .width(150.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
         onClick = { /*TODO*/ }
@@ -347,10 +346,10 @@ fun SettleButton() {
 @Composable
 fun RequestButton() {
     Button(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.caption),
+        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
         modifier = Modifier
             .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(175.dp)
+            .width(150.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
         onClick = { /*TODO*/ }
