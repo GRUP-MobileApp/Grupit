@@ -48,14 +48,13 @@ class WelcomeFragment : Fragment() {
 
 }
 
-
-
 @ExperimentalPagerApi
 @Composable
 fun RegisterPage(
     welcomeViewModel: WelcomeViewModel,
     navController: NavController
 ) {
+
     Box(
         modifier = Modifier
             .fillMaxSize()
