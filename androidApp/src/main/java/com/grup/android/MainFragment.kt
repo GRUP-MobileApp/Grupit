@@ -62,6 +62,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
+
             setContent {
                 MainLayout(
                     mainViewModel = mainViewModel,
