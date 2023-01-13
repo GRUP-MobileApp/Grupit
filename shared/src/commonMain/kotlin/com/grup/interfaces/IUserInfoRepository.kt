@@ -1,15 +1,13 @@
 package com.grup.interfaces
 
 import com.grup.models.UserInfo
-import com.grup.other.Id
+import kotlinx.coroutines.flow.Flow
 
 internal interface IUserInfoRepository : IRepository {
     fun createUserInfo(userInfo: UserInfo): UserInfo?
 
-    fun findUserInfoByUser(userId: Id, groupId: Id): UserInfo?
-    fun findUserInfosByGroup(groupId: Id): List<UserInfo>
+    fun findUserInfoByUser(userId: String, groupId: String): UserInfo?
+    fun findAllUserInfosAsFlow(): Flow<List<UserInfo>>
 
-    fun updateUserInfo(userInfo: UserInfo): UserInfo?
-
-    fun deleteUserInfo(userInfoId: Id)
+    fun updateUserInfo(userInfo: UserInfo, block: (UserInfo) -> Unit): UserInfo?
 }

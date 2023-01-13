@@ -1,43 +1,70 @@
 package com.grup.repositories
 
-import com.grup.exceptions.DoesNotExistException
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
-import com.grup.other.Id
 import com.grup.other.idSerialName
-import io.realm.kotlin.Realm
-import io.realm.kotlin.RealmConfiguration
-import io.realm.kotlin.UpdatePolicy
-import io.realm.kotlin.ext.query
+import kotlinx.coroutines.runBlocking
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.statement.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 
 internal class UserRepository : IUserRepository {
-    private val config = RealmConfiguration.Builder(schema = setOf(User::class)).build()
-    private val userRealm: Realm = Realm.open(config)
-
-    override fun insertUser(user: User): User? {
-        return userRealm.writeBlocking {
-            copyToRealm(user)
+    private val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(
+                Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                    prettyPrint = true
+                },
+                contentType = ContentType.Application.Json
+            )
         }
     }
 
-    override fun findUserById(userId: Id): User? {
-        return userRealm.query<User>("$idSerialName == $0", userId).first().find()
-    }
-
-    override fun findUserByUserName(username: String): User? {
-        return userRealm.query<User>("username == $0", username).first().find()
-    }
-
-    // TODO: Change
-    override fun updateUser(user: User): User? {
-        findUserById(user.getId())
-            ?: throw DoesNotExistException("User with id ${user.getId()} does not exist")
-        return userRealm.writeBlocking {
-            copyToRealm(user, UpdatePolicy.ALL)
+    override fun findUserById(realmUserId: String): User? {
+        var responseUser: User? = null
+        runBlocking {
+            val response: HttpResponse = client.get(
+                "${MONGODB_API_ENDPOINT}/user/findUserByRealmUserId"
+            ) {
+                contentType(ContentType.Application.Json)
+                url {
+                    parameters.append(idSerialName, realmUserId)
+                }
+            }
+            if (response.status.value in 200..299) {
+                responseUser = response.body()
+            }
         }
+        return responseUser
+    }
+
+    override fun findUserByUsername(username: String): User? {
+        var responseUser: User? = null
+        runBlocking {
+            val response: HttpResponse = client.get(
+                "${MONGODB_API_ENDPOINT}/user/findUserByUsername"
+            ) {
+                contentType(ContentType.Application.Json)
+                url {
+                    parameters.append("username", username)
+                }
+            }
+            if (response.status.value in 200..299) {
+                responseUser = response.body()
+            }
+        }
+        return responseUser
     }
 
     override fun close() {
-        userRealm.close()
+         client.close()
     }
 }

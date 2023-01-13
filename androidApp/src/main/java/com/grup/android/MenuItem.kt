@@ -1,6 +1,5 @@
 package com.grup.android
 
-import android.graphics.drawable.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class MenuItem(
@@ -12,7 +11,8 @@ data class MenuItem(
 
 data class GroupItem(
     val id: String,
-    val title: String,
+    val index: Int,
+    val groupName: String,
     val contentDescription: String,
     val icon: ImageVector
 )

@@ -1,12 +1,7 @@
 package com.grup.di
 
-import com.grup.models.Group
-import com.grup.models.TransactionRecord
-import com.grup.models.User
-import com.grup.models.UserInfo
-import com.grup.other.Id
+import com.grup.models.*
 import com.grup.other.RealmUser
-import com.grup.other.asString
 import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.subscriptions
@@ -17,12 +12,17 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 internal lateinit var realm: Realm
-internal lateinit var user: User
 
-internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
-    realm = Realm.open(SyncConfiguration.Builder(realmUser,
-        setOf(User::class, Group::class, UserInfo::class, TransactionRecord::class))
+internal suspend fun createSyncedRealmModule(realmUser: RealmUser): Module {
+    realm = Realm.open(
+        SyncConfiguration.Builder(realmUser,
+            setOf(
+                User::class, Group::class, UserInfo::class, GroupInvite::class, DebtAction::class,
+                TransactionRecord::class
+            )
+        )
         .initialSubscriptions(rerunOnOpen = true) { realm ->
+            removeAll()
             add(realm.query<User>("$idSerialName == $0", realmUser.id))
             // Used to get initial user membership, this subscription is deleted afterwards
             add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
@@ -32,66 +32,64 @@ internal fun createSyncedRealmModule(realmUser: RealmUser): Module {
         .build()
     ).also { createdRealm ->
         realm = createdRealm
-        realm.query<User>().first().find()?.let { user = it }
         createdRealm.query<UserInfo>().find().toList().let { userInfos ->
-            runBlocking {
-                createdRealm.subscriptions.update { realm ->
-                    remove("UserInfos")
-                    userInfos.forEach { userInfo ->
-                        userInfo.groupId!!.let { groupId ->
-                            add(
-                                realm.query<Group>("$idSerialName == $0", groupId),
-                                "${groupId.asString()}_Group"
-                            )
-                            add(
-                                realm.query<UserInfo>("groupId == $0", groupId),
-                                "${groupId.asString()}_UserInfo"
-                            )
-                            add(
-                                realm.query<TransactionRecord>("groupId == $0", groupId),
-                                "${groupId.asString()}_TransactionRecord"
-                            )
-                        }
+            createdRealm.subscriptions.update { realm ->
+                remove("UserInfos")
+                add(
+                    realm.query<GroupInvite>(
+                        "inviter == $0 OR invitee == $0",
+                        realmUser.id
+                    ),
+                    "GroupInvites"
+                )
+                userInfos.forEach { userInfo ->
+                    userInfo.groupId!!.let { groupId ->
+                        add(realm.query<Group>("$idSerialName == $0", groupId),
+                            "${groupId}_Group"
+                        )
+                        add(realm.query<UserInfo>("groupId == $0", groupId),
+                            "${groupId}_UserInfo"
+                        )
+                        add(realm.query<DebtAction>("groupId == $0", groupId),
+                            "${groupId}_DebtAction"
+                        )
                     }
                 }
             }
+            // Wait for subscriptions to sync
+            realm.subscriptions.waitForSynchronization()
         }
     }
-    // Wait for subscriptions to sync
-    runBlocking {
-        realm.subscriptions.waitForSynchronization()
-    }
-
     return module {
         single { realm }
     }
 }
 
 internal fun registerUserObject(newUser: User) {
-    user = realm.writeBlocking {
+    realm.writeBlocking {
         copyToRealm(newUser)
     }
 }
 
-internal fun Realm.addGroup(groupId: Id) {
+internal fun Realm.addGroup(groupId: String) {
     runBlocking {
         subscriptions.update { realm ->
-            add(realm.query<Group>("$idSerialName == $0", groupId),
-                "${groupId.asString()}_Group")
-            add(realm.query<UserInfo>("groupId == $0", groupId),
-                "${groupId.asString()}_UserInfo")
-            add(realm.query<TransactionRecord>("groupId == $0", groupId),
-                "${groupId.asString()}_TransactionRecord")
+            add(realm.query<Group>("$idSerialName == $0", groupId), "${groupId}_Group")
+            add(realm.query<UserInfo>("groupId == $0", groupId), "${groupId}_UserInfo")
+            add(realm.query<DebtAction>("groupId == $0", groupId),
+                "${groupId}_DebtAction")
         }
+        realm.subscriptions.waitForSynchronization()
     }
 }
 
-internal fun Realm.removeGroup(groupId: Id) {
+internal fun Realm.removeGroup(groupId: String) {
     runBlocking {
         subscriptions.update {
-            remove("${groupId.asString()}_Group")
-            remove("${groupId.asString()}_UserInfo")
-            remove("${groupId.asString()}_TransactionRecord")
+            remove("${groupId}_Group")
+            remove("${groupId}_UserInfo")
+            remove("${groupId}_DebtAction")
         }
+        realm.subscriptions.waitForSynchronization()
     }
 }

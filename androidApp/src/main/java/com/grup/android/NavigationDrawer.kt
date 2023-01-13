@@ -10,11 +10,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.grup.android.ui.AppTheme
+import com.grup.android.ui.apptheme.AppTheme
 
 @Composable
 fun DrawerHeader() {
@@ -32,7 +31,6 @@ fun DrawerHeader() {
 @Composable
 fun DrawerBody(
     items: List<GroupItem>,
-    modifier: Modifier = Modifier,
     itemTextStyle: TextStyle = TextStyle(fontSize = 25.sp),
     onItemClick: (GroupItem) -> Unit
 ) {
@@ -40,37 +38,36 @@ fun DrawerBody(
         modifier = Modifier
             .background(AppTheme.colors.secondary)
     )
-        {
-            items(items) { item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onItemClick(item)
-                        }
-                        .padding(20.dp)
-                        .background(AppTheme.colors.secondary)
-                ) {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.contentDescription
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(
-                        text = item.title,
-                        style = itemTextStyle,
-                        color = AppTheme.colors.onPrimary,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+    {
+        items(items) { item ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onItemClick(item)
+                    }
+                    .padding(20.dp)
+                    .background(AppTheme.colors.secondary)
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.contentDescription
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                Text(
+                    text = item.groupName,
+                    style = itemTextStyle,
+                    color = AppTheme.colors.onPrimary,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
+    }
 }
 
 @Composable
 fun DrawerSettings(
     items: List<MenuItem>,
-    modifier: Modifier = Modifier,
     itemTextStyle: TextStyle = TextStyle(fontSize = 15.sp),
     onItemClick: (MenuItem) -> Unit
 ) {

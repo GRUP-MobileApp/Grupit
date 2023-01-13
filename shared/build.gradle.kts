@@ -1,3 +1,8 @@
+val ktorVersion: String by project
+val realmVersion: String by project
+val koinVersion: String by project
+val napierVersion = "2.4.0"
+
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "1.7.20"
@@ -8,7 +13,6 @@ plugins {
 
 // CocoaPods requires the podspec to have a version.
 version = "1.0"
-
 kotlin {
     android()
     iosX64()
@@ -33,18 +37,14 @@ kotlin {
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
         xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
     }
-    
     sourceSets {
-        val ktorVersion: String by project
-        val realmVersion: String by project
-        val koinVersion: String by project
-        val napierVersion = "2.4.0"
-
         val commonMain by getting {
             dependencies {
+                // Kotlin Libraries
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
-
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -54,6 +54,12 @@ kotlin {
 
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
+
+                //Ktor
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
             }
         }
         val commonTest by getting {
@@ -103,10 +109,10 @@ kotlin {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 33
     }
 }

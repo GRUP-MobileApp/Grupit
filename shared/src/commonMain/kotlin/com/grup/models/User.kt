@@ -1,16 +1,21 @@
 package com.grup.models
 
-import com.grup.other.Id
+import com.grup.exceptions.MissingFieldException
 import com.grup.other.createId
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.serialization.Serializable
 
-class User() : BaseEntity(), RealmObject {
+@Serializable
+class User internal constructor() : BaseEntity(), RealmObject {
     @PrimaryKey
-    override var _id: Id = createId()
-    var username: String? = null
+    override var _id: String = createId()
 
-    constructor(realmId: String) : this() {
-        _id = realmId
+    var username: String? = null
+        get() = field ?: throw MissingFieldException("User with id $_id missing username")
+        internal set
+
+    internal constructor(realmId: String) : this() {
+        this._id = realmId
     }
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.grup.android.MainFragment"
+        android:label="MainFragment" >
+        <action
+            android:id="@+id/createDebtAction"
+            app:destination="@id/debtActionFragment" />
+        <action
+            android:id="@+id/startWelcomeSlideshow"
+            app:destination="@id/welcomeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.grup.android.welcome.WelcomeFragment"
+        android:label="WelcomeFragment" >
+        <action
+            android:id="@+id/endWelcomeSlideshow"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/debtActionFragment"
+        android:name="com.grup.android.DebtActionFragment"
+        android:label="DebtActionFragment" >
+    </fragment>
+</navigation>

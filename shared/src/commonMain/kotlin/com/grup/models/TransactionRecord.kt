@@ -1,25 +1,19 @@
 package com.grup.models
 
-import com.grup.other.Id
-import com.grup.other.createId
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
+import com.grup.exceptions.MissingFieldException
+import io.realm.kotlin.types.EmbeddedRealmObject
 
-class TransactionRecord : BaseEntity(), RealmObject {
-    data class BalanceChangeRecord (
-        val userId: Id,
-        val balanceChange: Double
-    )
-    enum class TransactionType {
-        DEBT_ACTION,
-        SETTLE_ACTION
+class TransactionRecord : EmbeddedRealmObject {
+    object TransactionStatus {
+        const val PENDING = "PENDING"
+        const val ACCEPTED = "ACCEPTED"
+        const val REJECTED = "REJECTED"
     }
-
-    @PrimaryKey
-    override var _id: Id = createId()
-    val groupId: Id? = null
-    val date: String? = null
-    val transactionType: TransactionType? = null
-    val balanceChanges: List<BalanceChangeRecord> = emptyList()
+    var debtor: String? = null
+        get() = field
+            ?: throw MissingFieldException("TransactionRecord missing debtor")
+    var balanceChange: Double? = null
+        get() = field
+            ?: throw MissingFieldException("TransactionRecord missing balanceChange")
+    var transactionStatus: String = TransactionStatus.PENDING
 }
-
