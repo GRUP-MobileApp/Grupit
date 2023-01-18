@@ -27,7 +27,6 @@ import com.grup.android.ui.apptheme.AppTheme
 import kotlinx.coroutines.launch
 import com.grup.android.ui.apptheme.*
 
-
 class WelcomeFragment : Fragment() {
     private val welcomeViewModel: WelcomeViewModel by viewModels()
 
