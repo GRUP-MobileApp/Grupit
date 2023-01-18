@@ -87,8 +87,8 @@ fun WelcomeContent(
                 modifier = Modifier
                     .fillMaxWidth(),
                 userScrollEnabled = true
-            ) { pager ->
-                when (pager) {
+            ) { page ->
+                when (page) {
                     0 -> {
                         WelcomeScreen1(welcomeViewModel, navController)
                     }

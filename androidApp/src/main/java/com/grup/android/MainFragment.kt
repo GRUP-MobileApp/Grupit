@@ -4,11 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -23,12 +30,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.google.accompanist.pager.*
 import com.grup.APIServer
 import com.grup.android.ui.apptheme.*
 import com.grup.models.Group
@@ -60,7 +69,7 @@ class MainFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun MainLayout(
     mainViewModel: MainViewModel,
@@ -424,8 +433,19 @@ fun GroupDetails(
 
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun PublicRequestsDetails() {
+
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState()
+
+    val tabItems = listOf(
+        "All",
+        "Personal",
+        "Settle"
+    )
+
     val sampleList = mapOf(
         "4/20" to listOf("test1", "test2", "test3", "test4"),
         "6/9" to listOf("test5", "test6", "test7", "test8")
@@ -453,23 +473,66 @@ fun PublicRequestsDetails() {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
                 ) {
-                    IconButton(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                    ) {
 
+                    val indicator = @Composable { tabPositions: List<TabPosition> ->
+                        CustomIndicator(tabPositions, pagerState)
                     }
-                    smallIconButton(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search List"
-                    )
-                    smallIconButton(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Filter List"
-                    )
+
+                    TabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        backgroundColor = AppTheme.colors.primary,
+                        indicator = indicator,
+                        modifier = Modifier
+                            .padding(all = 5.dp)
+                            .clip(AppTheme.shapes.medium)
+                            .height(30.dp),
+                    ) {
+                        tabItems.forEachIndexed {index, title ->
+                            Tab(
+                                text = {
+                                    Text(
+                                        title,
+                                        style = TextStyle(
+                                            color = AppTheme.colors.onPrimary,
+                                            fontSize = 16.sp)
+                                    )
+                                },
+                                modifier = Modifier
+                                    .zIndex(6f),
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                }
+                            )
+                        }
+                    }
+
                 }
             }
-            PublicRequestsList(content = sampleList)
+            // contains the lists that are scrolled through
+            HorizontalPager(
+                count = 3,
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) { page ->
+
+                when (page) {
+                    0 -> {
+                        PublicRequestsList(content = sampleList)
+                    }
+
+                    1 -> {
+                        PublicRequestsList(content = sampleList)
+                    }
+
+                    2 -> {
+                        PublicRequestsList(content = sampleList)
+                    }
+                }
+            }
         }
     }
 }
@@ -499,4 +562,44 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerState) {
+    val transition = updateTransition(pagerState.currentPage)
+    val indicatorStart by transition.animateDp(
+        transitionSpec = {
+            if (initialState < targetState) {
+                spring(dampingRatio = 1f, stiffness = 50f)
+            } else {
+                spring(dampingRatio = 1f, stiffness = 1000f)
+            }
+        }, label = ""
+    ) {
+        tabPositions[it].left
+    }
+
+    val indicatorEnd by transition.animateDp(
+        transitionSpec = {
+            if (initialState < targetState) {
+                spring(dampingRatio = 1f, stiffness = 1000f)
+            } else {
+                spring(dampingRatio = 1f, stiffness = 50f)
+            }
+        }, label = ""
+    ) {
+        tabPositions[it].right
+    }
+
+    Box(
+        Modifier
+            .offset(x = indicatorStart)
+            .wrapContentSize(align = Alignment.BottomStart)
+            .width(indicatorEnd - indicatorStart)
+            .padding(2.dp)
+            .fillMaxSize()
+            .background(color = AppTheme.colors.caption, AppTheme.shapes.medium)
+            .zIndex(1f)
+    )
 }
