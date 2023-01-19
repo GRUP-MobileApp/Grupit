@@ -6,7 +6,6 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 class TransactionRecord : EmbeddedRealmObject {
     object TransactionStatus {
         const val PENDING = "PENDING"
-        const val ACCEPTED = "ACCEPTED"
         const val REJECTED = "REJECTED"
     }
     var debtor: String? = null

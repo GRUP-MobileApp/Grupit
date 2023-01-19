@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -18,11 +19,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun h1Text(
     text: String,
+    color: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
     fontSize: TextUnit = TextUnit.Unspecified
 ) {
     Text(
         text = text,
+        color = color,
         modifier = modifier,
         style = AppTheme.typography.h1,
         fontSize = fontSize,

@@ -33,22 +33,23 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
         .waitForInitialRemoteData()
         .name("syncedRealm")
         .build()
-    )
-    subscriptionsJob = subscriptionsSyncGlobalJob()
+    ).also { subscriptionsJob = startSubscriptionSyncJob() }
     realm.subscriptions.waitForSynchronization()
     return realm
 }
 
-internal fun closeSyncedRealm() {
-    realm.close()
+internal fun stopSubscriptionSyncJob() {
     subscriptionsJob.cancel()
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-fun subscriptionsSyncGlobalJob(): Job = GlobalScope.launch {
+fun startSubscriptionSyncJob(): Job = GlobalScope.launch {
     var prevUserInfoList: List<UserInfo> = emptyList()
     realm.query<UserInfo>().find().asFlow().collect { resultsChange ->
         realm.subscriptions.update {
+            prevUserInfoList.minus(resultsChange.list).forEach { userInfo ->
+                this.removeGroup(userInfo.groupId!!)
+            }
             resultsChange.list.minus(prevUserInfoList.toSet()).forEach { userInfo ->
                 this.addGroup(userInfo.groupId!!)
             }

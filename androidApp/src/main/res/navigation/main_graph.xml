@@ -9,8 +9,8 @@
         android:name="com.grup.android.MainFragment"
         android:label="MainFragment" >
         <action
-            android:id="@+id/createDebtAction"
-            app:destination="@id/debtActionFragment" />
+            android:id="@+id/enterActionAmount"
+            app:destination="@id/actionAmountFragment" />
         <action
             android:id="@+id/startWelcomeSlideshow"
             app:destination="@id/welcomeFragment" />
@@ -26,8 +26,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/actionAmountFragment"
+        android:name="com.grup.android.ActionAmountFragment"
+        android:label="DebtActionFragment" >
+        <action
+            android:id="@+id/createDebtAction"
+            app:destination="@id/debtActionFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/debtActionFragment"
         android:name="com.grup.android.DebtActionFragment"
-        android:label="DebtActionFragment" >
-    </fragment>
+        android:label="DebtActionFragment" />
 </navigation>

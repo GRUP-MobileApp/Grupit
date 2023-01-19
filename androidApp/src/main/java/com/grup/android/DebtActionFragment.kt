@@ -1,28 +1,38 @@
 package com.grup.android
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.grup.APIServer
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.apptheme.h1Text
+import com.grup.android.ui.apptheme.smallIcon
 import com.grup.models.UserInfo
+import kotlinx.coroutines.launch
 
 class DebtActionFragment : Fragment() {
     private val mainViewModel: MainViewModel by viewModels()
@@ -34,340 +44,109 @@ class DebtActionFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                RequestLayout(mainViewModel = mainViewModel)
+                CompositionLocalProvider(
+                    LocalContentColor provides AppTheme.colors.onSecondary
+                ) {
+                    DebtActionLayout(
+                        debtActionAmount = requireArguments().getDouble("amount"),
+                        mainViewModel = mainViewModel,
+                        navController = findNavController()
+                    )
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun RequestLayout(
-    mainViewModel: MainViewModel
+fun DebtActionLayout(
+    debtActionAmount: Double,
+    mainViewModel: MainViewModel,
+    navController: NavController
 ) {
-    val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsState()
-    Scaffold(
-        topBar = {
-            RequestTopAppBar()
-        }
-    ) {
-        Column {
-            RequestBody(userInfos = userInfos)
-        }
-    }
+    val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val scope = rememberCoroutineScope()
+    val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsStateWithLifecycle()
+    val debtors: MutableList<UserInfo> = remember { mutableStateListOf() }
 
-}
-
-@Composable
-fun RequestBody(
-    userInfos: List<UserInfo>
-) {
-    val myUserInfo: UserInfo = userInfos.find { it.userId == APIServer.user.getId() }!!
-    var debtActionAmount: String by remember { mutableStateOf("0") }
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onPrimary
+    AddDebtorBottomSheet(
+        userInfos = userInfos,
+        addDebtorOnClick = { selectedUsers ->
+            debtors.addAll(selectedUsers)
+            scope.launch { addDebtorBottomSheetState.hide() }
+        },
+        state = addDebtorBottomSheetState
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(AppTheme.colors.primary)
+        Scaffold(
+            topBar = {
+                DebtActionTopBar(
+                    onBackPress = { navController.popBackStack() }
+                )
+            }
         ) {
-            h1Text(
-                text = "Balance: $${myUserInfo.userBalance}",
-                fontSize = 50.sp
-            )
-            h1Text(
-                text = "$$debtActionAmount",
-                fontSize = 65.sp
-            )
-            KeyPad(
-                onKeyPress = { key ->
-                    when(key) {
-                        '.' -> {
-                            if (!debtActionAmount.contains('.')) {
-                                debtActionAmount += key
-                            }
-                        }
-                        '<' -> {
-                            debtActionAmount = if (debtActionAmount.length > 1) {
-                                debtActionAmount.substring(0, debtActionAmount.length - 1)
-                            } else {
-                                "0"
-                            }
-                        }
-                        else -> {
-                            if (key.isDigit() &&
-                                (debtActionAmount.length < 3 ||
-                                        debtActionAmount[debtActionAmount.length - 3] != '.')) {
-                                if (debtActionAmount == "0") {
-                                    debtActionAmount = ""
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(AppTheme.colors.primary)
+            ) {
+                h1Text(
+                    text = "$$debtActionAmount",
+                    color = AppTheme.colors.onSecondary,
+                    fontSize = 65.sp
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(AppTheme.shapes.large)
+                        .background(AppTheme.colors.secondary)
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier
+                                .height(40.dp)
+                                .padding(AppTheme.dimensions.paddingMedium)
+                        ) {
+                            Text(text = "Even split between", color = AppTheme.colors.onSecondary)
+                            AddDebtorButton(
+                                addDebtorOnClick = {
+                                    scope.launch { addDebtorBottomSheetState.show() }
                                 }
-                                debtActionAmount += key
-                            }
+                            )
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SelectedDebtorsList(
+                            debtActionAmount = debtActionAmount,
+                            debtors = debtors,
+                            createDebtActionOnClick = {
+                                mainViewModel.createDebtAction(it)
+                            }
+                        )
                     }
                 }
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = 40.dp)
-            ) {
-                SettleButton()
-
-                RequestButton()
             }
         }
     }
 }
 
 @Composable
-fun KeyPad(
-    onKeyPress: (Char) -> Unit
+fun DebtActionTopBar(
+    onBackPress: () -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(top = 50.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
-        ) {
-            Button(
-                onClick = { onKeyPress('1') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "1",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('2') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "2",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('3') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "3",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
-        ) {
-            Button(
-                onClick = { onKeyPress('4') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "4",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('5') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "5",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('6') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "6",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
-        ) {
-            Button(
-                onClick = { onKeyPress('7') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "7",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('8') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "8",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('9') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "9",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
-        ) {
-            Button(
-                onClick = { onKeyPress('.') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = ".",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('0') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "0",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('<') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "<",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SettleButton() {
-    Button(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
-        modifier = Modifier
-            .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(150.dp)
-            .height(40.dp),
-        shape = AppTheme.shapes.large,
-        onClick = { /*TODO*/ }
-    ) {
-        Text(
-            text = "Settle",
-            color = AppTheme.colors.onSecondary,
-        )
-    }
-}
-
-@Composable
-fun RequestButton() {
-    Button(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
-        modifier = Modifier
-            .padding(bottom = AppTheme.dimensions.paddingMedium)
-            .width(150.dp)
-            .height(40.dp),
-        shape = AppTheme.shapes.large,
-        onClick = { /*TODO*/ }
-    ) {
-        Text(
-            text = "Request",
-            color = AppTheme.colors.onSecondary,
-        )
-    }
-}
-
-@Composable
-fun RequestTopAppBar() {
     TopAppBar(
-        title = { Text("") },
+        title = { },
         backgroundColor = AppTheme.colors.primary,
         navigationIcon = {
-            val context = LocalContext.current
             IconButton(
-                onClick = {context.startActivity(Intent(context, MainActivity::class.java))}
+                onClick = onBackPress
             ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
@@ -376,4 +155,134 @@ fun RequestTopAppBar() {
             }
         }
     )
+}
+
+@Composable
+fun SelectedDebtorsList(
+    debtActionAmount: Double,
+    debtors: List<UserInfo>,
+    createDebtActionOnClick: (Map<String, Double>) -> Unit
+) {
+    val debtAmounts: MutableMap<String, Double> = remember {
+        debtors.map { it.userId!! to (debtActionAmount / debtors.size) }.toMutableStateMap()
+    }
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        itemsIndexed(debtors) { _, userInfo ->
+            Text(
+                text = "${userInfo.nickname} pays $${debtAmounts[userInfo.userId]}",
+                color = AppTheme.colors.onSecondary
+            )
+        }
+    }
+    Button(onClick = { createDebtActionOnClick(debtAmounts) }) {
+        Text(text = "Add selected users")
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AddDebtorBottomSheet(
+    userInfos: List<UserInfo>,
+    addDebtorOnClick: (List<UserInfo>) -> Unit,
+    state: ModalBottomSheetState,
+    backgroundColor: Color = AppTheme.colors.secondary,
+    textColor: Color = AppTheme.colors.onSecondary,
+    content: @Composable () -> Unit
+) {
+    val selectedUsers: MutableList<UserInfo> = remember { mutableStateListOf() }
+    var userSearchQuery: String by remember { mutableStateOf("") }
+
+    ModalBottomSheetLayout(
+        sheetState = state,
+        sheetContent = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.8f)
+                    .padding(AppTheme.dimensions.paddingMedium)
+            ) {
+                Text(text = "Add Debtors", color = textColor)
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = userSearchQuery,
+                    onValueChange = { userSearchQuery = it },
+                    trailingIcon = { Icons.Default.Search },
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .background(color = Color.White)
+                        .clip(shape = AppTheme.shapes.medium)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                SelectDebtorsChecklist(
+                    userSearchQuery = userSearchQuery,
+                    allUsers = userInfos,
+                    selectedUsers = selectedUsers,
+                    onCheckedChange = { userInfo, isSelected ->
+                        if (isSelected) {
+                            selectedUsers.add(userInfo)
+                        } else {
+                            selectedUsers.remove(userInfo)
+                        }
+                    }
+                )
+                Button(onClick = { addDebtorOnClick(selectedUsers) }) {
+                    Text(text = "Add selected users")
+                }
+            }
+        },
+        sheetBackgroundColor = backgroundColor,
+        content = content
+    )
+}
+
+@Composable
+fun SelectDebtorsChecklist(
+    userSearchQuery: String,
+    allUsers: List<UserInfo>,
+    selectedUsers: List<UserInfo>,
+    onCheckedChange: (UserInfo, Boolean) -> Unit
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        itemsIndexed(
+            allUsers.filter {
+                it.nickname!!.contains(userSearchQuery, ignoreCase = true)
+            }
+        ) { _, userInfo ->
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "${userInfo.nickname}: ${userInfo.userBalance}",
+                    color = AppTheme.colors.onSecondary
+                )
+                Checkbox(
+                    checked = selectedUsers.contains(userInfo),
+                    onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AddDebtorButton(
+    addDebtorOnClick: () -> Unit
+) {
+    IconButton(onClick = addDebtorOnClick) {
+        smallIcon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add a debtor"
+        )
+    }
 }

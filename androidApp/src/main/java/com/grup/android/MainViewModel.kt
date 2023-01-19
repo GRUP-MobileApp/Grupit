@@ -1,7 +1,5 @@
 package com.grup.android
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.ViewModel
 import com.grup.APIServer
@@ -9,7 +7,6 @@ import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
-import kotlin.properties.Delegates
 
 class MainViewModel : ViewModel() {
     private companion object {
@@ -24,9 +21,18 @@ class MainViewModel : ViewModel() {
             false
         }
 
-    val groupsList: StateFlow<List<Group>> = APIServer.getAllGroupsAsFlow().asState()
+    var selectedGroup: MutableStateFlow<Group?> = MutableStateFlow(null)
 
-    var selectedGroup: MutableState<Group?> = mutableStateOf(groupsList.value.getOrNull(0))
+    private val _groupsFlow = APIServer.getAllGroupsAsFlow().onEach { newGroups ->
+        selectedGroup.value?.let { nonNullGroup ->
+            selectedGroup.value = newGroups.find { group ->
+                group.getId() == nonNullGroup.getId()
+            }
+        } ?: run {
+            selectedGroup.value = newGroups.getOrNull(0)
+        }
+    }
+    val groups: StateFlow<List<Group>> = _groupsFlow.asState()
 
     private val _userInfosFlow = APIServer.getAllUserInfosAsFlow()
     val userInfos: StateFlow<List<UserInfo>> =
@@ -49,7 +55,7 @@ class MainViewModel : ViewModel() {
                     debtAction.groupId == group.getId()
                 }
             } ?: emptyList()
-        }.asState()
+        }.asNotifications()
     val subscribedDebtActions: StateFlow<List<DebtAction>> = _debtActionsFlow.map { debtActions ->
         debtActions.filter { debtAction ->
             debtAction.debtee == APIServer.user.getId() || debtAction.debtTransactions.any {
@@ -63,10 +69,23 @@ class MainViewModel : ViewModel() {
     fun inviteUserToGroup(username: String, group: Group) =
         APIServer.inviteUserToGroup(username, group)
 
+    fun createDebtAction(debtAmounts: Map<String, Double>) =
+        selectedGroup.value?.let { selectedGroup ->
+            APIServer.createDebtAction(
+                debtAmounts.map { (userId, balanceChange) ->
+                    TransactionRecord().apply {
+                        this.debtor = userId
+                        this.balanceChange = balanceChange
+                    }
+                },
+                selectedGroup
+            )
+        }
+
     private fun <T> Flow<List<T>>.asNotifications() =
         this.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    private fun <T> Flow<List<T>>.asState() =
+    private fun <T> Flow<T>.asState() =
         this.let { flow ->
             runBlocking { flow.first() }.let { initialList ->
                 flow.stateIn(

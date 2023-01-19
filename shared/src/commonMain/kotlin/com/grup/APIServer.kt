@@ -1,7 +1,7 @@
 package com.grup
 
 import com.grup.controllers.*
-import com.grup.di.closeSyncedRealm
+import com.grup.di.stopSubscriptionSyncJob
 import com.grup.di.openSyncedRealm
 import com.grup.di.realm
 import com.grup.di.registerUserObject
@@ -25,6 +25,7 @@ import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
 object APIServer {
@@ -92,10 +93,11 @@ object APIServer {
     }
 
     fun logOut() {
+        stopSubscriptionSyncJob()
+        stopKoin()
         runBlocking {
             realmUser.logOut()
         }
-        closeSyncedRealm()
     }
 
     private suspend fun initKoin() {

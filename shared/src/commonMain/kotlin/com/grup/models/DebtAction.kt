@@ -16,7 +16,7 @@ class DebtAction internal constructor(): BaseEntity(), RealmObject {
         get() = field
             ?: throw MissingFieldException("DebtAction with id $_id missing groupId")
         internal set
-    var date: Instant = Clock.System.now()
+    var date: String = Clock.System.now().toString()
     var debtee: String? = null
         get() = field
             ?: throw MissingFieldException("DebtAction with id $_id missing debtee")

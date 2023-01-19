@@ -1,5 +1,6 @@
 package com.grup.android
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,10 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -30,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.grup.APIServer
+import com.grup.android.login.LoginActivity
 import com.grup.android.ui.apptheme.*
 import com.grup.models.Group
 import com.grup.models.GroupInvite
@@ -71,15 +73,15 @@ fun MainLayout(
         rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
-    val groups: List<Group> by mainViewModel.groupsList.collectAsStateWithLifecycle()
-    val selectedGroup: Group? by mainViewModel.selectedGroup
+    val groups: List<Group> by mainViewModel.groups.collectAsStateWithLifecycle()
+    val selectedGroup: Group? by mainViewModel.selectedGroup.collectAsStateWithLifecycle()
     val groupInvites: List<GroupInvite> by mainViewModel.groupInvitesList.collectAsState()
     val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsStateWithLifecycle()
 
     fun openDrawer() = scope.launch { scaffoldState.drawerState.open() }
     fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
-    fun selectedGroupOnValueChange(group: Group) {
-        mainViewModel.selectedGroup.value = group
+    fun selectedGroupOnValueChange(group: Group): Group {
+        return group.also { mainViewModel.selectedGroup.value = it }
     }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
@@ -154,16 +156,18 @@ fun MainLayout(
                 CompositionLocalProvider(
                     LocalContentColor provides AppTheme.colors.onPrimary
                 ) {
-                    selectedGroup?.let { group ->
+                    if (groups.isNotEmpty()) {
                         GroupDetails(
-                            group = group,
+                            group = selectedGroup ?: selectedGroupOnValueChange(groups[0]),
                             userInfos = userInfos,
                             moneyRequestOnClick = {
-                                navController.navigate(R.id.debtActionFragment)
+                                navController.navigate(R.id.enterActionAmount)
                             }
                         )
                         PublicRequestsDetails()
-                    } ?: NoGroupsDisplay()
+                    } else {
+                        NoGroupsDisplay()
+                    }
                 }
             }
         }
@@ -181,6 +185,8 @@ fun GroupNavigationMenu(
     onItemClick: (GroupItem) -> Unit,
     createGroup: (String) -> Unit
 ) {
+    val context = LocalContext.current
+
     DrawerHeader()
     DrawerBody(
         items = groups.mapIndexed { index, group ->
@@ -196,33 +202,38 @@ fun GroupNavigationMenu(
             onItemClick(it)
         }
     )
-    Button(
-        onClick = { createGroup("SAMPLE GROUP NAME") }
-    ) {
-        Text(text = "Create new group")
-    }
     DrawerSettings(
         items = listOf(
             MenuItem(
                 id = "home",
                 title = "Create New Group",
                 contentDescription = "Go to the home screen",
-                icon = Icons.Default.AddCircle
+                icon = Icons.Default.AddCircle,
+                onClick = { createGroup("SAMPLE GROUP NAME") }
             ),
             MenuItem(
                 id = "home",
                 title = "Settings",
                 contentDescription = "Go to the settings screen",
-                icon = Icons.Default.Settings
+                icon = Icons.Default.Settings,
+                onClick = {}
             ),
             MenuItem(
                 id = "home",
                 title = "Sign Out",
                 contentDescription = "Go to the home screen",
-                icon = Icons.Default.ExitToApp
+                icon = Icons.Default.ExitToApp,
+                onClick = {
+                    APIServer.logOut()
+                    context.startActivity(
+                        Intent(context, LoginActivity::class.java)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    )
+                }
             ),
         ),
         onItemClick = {
+            it.onClick()
             println("Clicked on ${it.title}")
         }
     )
@@ -260,7 +271,7 @@ fun AddToGroupBottomSheetLayout(
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
-    val username = remember { mutableStateOf(TextFieldValue()) }
+    var username: String by remember { mutableStateOf("") }
 
     ModalBottomSheetLayout(
         sheetState = state,
@@ -279,12 +290,12 @@ fun AddToGroupBottomSheetLayout(
                         )
                     },
                     textStyle = TextStyle(color = textColor),
-                    value = username.value,
-                    onValueChange = { username.value = it }
+                    value = username,
+                    onValueChange = { username = it }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { inviteUsernameToGroup(username.value.text, selectedGroup) }
+                    onClick = { inviteUsernameToGroup(username, selectedGroup) }
                 ) {
                     Text(text = "Add to group", color = textColor)
                 }
