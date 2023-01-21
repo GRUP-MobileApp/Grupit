@@ -9,5 +9,5 @@ internal interface IGroupRepository : IRepository {
     fun findGroupById(groupId: String): Group?
     fun findAllGroupsAsFlow(): Flow<List<Group>>
 
-    fun updateGroup(group: Group, block: (Group) -> Unit): Group?
+    fun updateGroup(group: Group, block: Group.() -> Unit): Group?
 }

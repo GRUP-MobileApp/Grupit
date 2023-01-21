@@ -17,15 +17,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import com.grup.APIServer
+import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.apptheme.h1Text
 import com.grup.models.UserInfo
 
 class ActionAmountFragment : Fragment() {
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,8 +50,8 @@ fun ActionAmountLayout(
     mainViewModel: MainViewModel,
     navController: NavController
 ) {
-    val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsState()
-    val myUserInfo: UserInfo = userInfos.find { it.userId == APIServer.user.getId() }!!
+    val nullableUserInfo: UserInfo? = mainViewModel.myUserInfo()
+    val myUserInfo: UserInfo = nullableUserInfo!!
     var actionAmount: String by remember { mutableStateOf("0") }
 
     Scaffold(
@@ -58,12 +60,13 @@ fun ActionAmountLayout(
                 onBackPress = { navController.popBackStack() }
             )
         }
-    ) {
+    ) { padding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
             modifier = Modifier
                 .fillMaxHeight()
+                .padding(padding)
                 .background(AppTheme.colors.primary)
         ) {
             h1Text(
@@ -110,7 +113,7 @@ fun ActionAmountLayout(
                     .fillMaxWidth()
                     .padding(top = 20.dp, bottom = 40.dp)
             ) {
-                SettleButton(
+                RequestButton(
                     onClick = {
                         navController.navigate(
                             R.id.createDebtAction,
@@ -120,7 +123,7 @@ fun ActionAmountLayout(
                         )
                     }
                 )
-                RequestButton()
+                SettleButton()
             }
         }
     }
@@ -328,7 +331,7 @@ fun KeyPad(
 }
 
 @Composable
-fun SettleButton(
+fun RequestButton(
     onClick: () -> Unit
 ) {
     Button(
@@ -348,7 +351,7 @@ fun SettleButton(
 }
 
 @Composable
-fun RequestButton() {
+fun SettleButton() {
     Button(
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
         modifier = Modifier
@@ -359,7 +362,7 @@ fun RequestButton() {
         onClick = { /*TODO*/ }
     ) {
         Text(
-            text = "Request",
+            text = "Settle",
             color = AppTheme.colors.onSecondary,
         )
     }

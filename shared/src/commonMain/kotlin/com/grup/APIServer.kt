@@ -11,10 +11,7 @@ import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.exceptions.login.UserObjectNotFoundException
-import com.grup.models.Group
-import com.grup.models.GroupInvite
-import com.grup.models.TransactionRecord
-import com.grup.models.User
+import com.grup.models.*
 import com.grup.other.RealmUser
 import com.grup.repositories.APP_ID
 import io.realm.kotlin.ext.query
@@ -37,9 +34,6 @@ object APIServer {
     val user: User
         get() = realm.query<User>().first().find() ?: throw UserObjectNotFoundException()
 
-    // User
-    fun getUserByUsername(username: String) = UserController.getUserByUsername(username)
-
     // Group
     fun createGroup(groupName: String) = GroupController.createGroup(user, groupName)
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
@@ -55,8 +49,10 @@ object APIServer {
     fun getAllGroupInvitesAsFlow() = GroupInviteController.getAllGroupInvitesAsFlow()
 
     // DebtAction
-    fun createDebtAction(transactionRecords: List<TransactionRecord>, group: Group) =
-        DebtActionController.createDebtAction(transactionRecords, group)
+    fun createDebtAction(transactionRecords: List<TransactionRecord>, debtee: UserInfo) =
+        DebtActionController.createDebtAction(transactionRecords, debtee)
+    fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
+        DebtActionController.acceptDebtAction(debtAction, myTransactionRecord)
     fun getAllDebtActionsAsFlow() = DebtActionController.getAllDebtActionsAsFlow()
 
 

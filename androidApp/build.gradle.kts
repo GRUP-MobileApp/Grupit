@@ -3,6 +3,7 @@ val kotlinVersion: String by project
 val composeVersion: String by project
 val lifecycleVersion: String by project
 val navigationVersion: String by project
+val accompanistVersion: String by project
 
 plugins {
     id("com.android.application")
@@ -53,6 +54,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.0-alpha03")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
@@ -67,4 +71,9 @@ dependencies {
 
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
+
+    //Accompanist
+    implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
 }
+

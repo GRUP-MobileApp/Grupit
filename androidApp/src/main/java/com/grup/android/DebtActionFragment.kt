@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.apptheme.h1Text
 import com.grup.android.ui.apptheme.smallIcon
@@ -35,7 +36,7 @@ import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
 class DebtActionFragment : Fragment() {
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,6 +68,7 @@ fun DebtActionLayout(
 ) {
     val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
+
     val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsStateWithLifecycle()
     val debtors: MutableList<UserInfo> = remember { mutableStateListOf() }
 
@@ -84,12 +86,13 @@ fun DebtActionLayout(
                     onBackPress = { navController.popBackStack() }
                 )
             }
-        ) {
+        ) { padding ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(padding)
                     .background(AppTheme.colors.primary)
             ) {
                 h1Text(
@@ -126,8 +129,8 @@ fun DebtActionLayout(
                         SelectedDebtorsList(
                             debtActionAmount = debtActionAmount,
                             debtors = debtors,
-                            createDebtActionOnClick = {
-                                mainViewModel.createDebtAction(it)
+                            createDebtActionOnClick = { userInfos, debtAmounts ->
+                                mainViewModel.createDebtAction(userInfos, debtAmounts)
                             }
                         )
                     }
@@ -161,24 +164,23 @@ fun DebtActionTopBar(
 fun SelectedDebtorsList(
     debtActionAmount: Double,
     debtors: List<UserInfo>,
-    createDebtActionOnClick: (Map<String, Double>) -> Unit
+    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit
 ) {
-    val debtAmounts: MutableMap<String, Double> = remember {
-        debtors.map { it.userId!! to (debtActionAmount / debtors.size) }.toMutableStateMap()
-    }
+    val debtAmounts: MutableList<Double> =
+        debtors.map { debtActionAmount / debtors.size }.toMutableStateList()
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        itemsIndexed(debtors) { _, userInfo ->
+        itemsIndexed(debtors) { index, userInfo ->
             Text(
-                text = "${userInfo.nickname} pays $${debtAmounts[userInfo.userId]}",
+                text = "${userInfo.nickname} pays $${debtAmounts[index]}",
                 color = AppTheme.colors.onSecondary
             )
         }
     }
-    Button(onClick = { createDebtActionOnClick(debtAmounts) }) {
+    Button(onClick = { createDebtActionOnClick(debtors, debtAmounts) }) {
         Text(text = "Add selected users")
     }
 }

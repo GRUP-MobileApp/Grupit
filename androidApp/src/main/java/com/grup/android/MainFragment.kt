@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -24,13 +27,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import com.grup.APIServer
+import androidx.navigation.navGraphViewModels
+import com.google.accompanist.pager.*
 import com.grup.android.login.LoginActivity
 import com.grup.android.ui.apptheme.*
 import com.grup.models.Group
@@ -39,7 +43,7 @@ import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,6 +81,9 @@ fun MainLayout(
     val selectedGroup: Group? by mainViewModel.selectedGroup.collectAsStateWithLifecycle()
     val groupInvites: List<GroupInvite> by mainViewModel.groupInvitesList.collectAsState()
     val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsStateWithLifecycle()
+    val myUserInfo: UserInfo? = mainViewModel.myUserInfo(userInfos)
+    val groupActivity: List<TransactionActivity> by
+            mainViewModel.groupActivity.collectAsStateWithLifecycle()
 
     fun openDrawer() = scope.launch { scaffoldState.drawerState.open() }
     fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
@@ -138,10 +145,11 @@ fun MainLayout(
                         selectedGroupOnValueChange(groups[menuItem.index])
                         closeDrawer()
                     },
-                    createGroup = { groupName ->
-                        selectedGroupOnValueChange(mainViewModel.createGroup(groupName))
+                    navigateCreateGroupOnClick = {
                         closeDrawer()
-                    }
+                        navController.navigate(R.id.createGroup)
+                    },
+                    logOutOnClick = { mainViewModel.logOut() }
                 )
             },
             bottomBar = { /* TODO */ },
@@ -157,14 +165,18 @@ fun MainLayout(
                     LocalContentColor provides AppTheme.colors.onPrimary
                 ) {
                     if (groups.isNotEmpty()) {
-                        GroupDetails(
-                            group = selectedGroup ?: selectedGroupOnValueChange(groups[0]),
-                            userInfos = userInfos,
-                            moneyRequestOnClick = {
-                                navController.navigate(R.id.enterActionAmount)
-                            }
-                        )
-                        PublicRequestsDetails()
+                        myUserInfo?.let { myUserInfo ->
+                            GroupDetails(
+                                myUserInfo = myUserInfo,
+                                group = selectedGroup ?: selectedGroupOnValueChange(groups[0]),
+                                navigateActionAmountOnClick = {
+                                    navController.navigate(R.id.enterActionAmount)
+                                }
+                            )
+                            RecentActivityList(
+                                groupActivity = groupActivity
+                            )
+                        }
                     } else {
                         NoGroupsDisplay()
                     }
@@ -183,7 +195,8 @@ fun NoGroupsDisplay() {
 fun GroupNavigationMenu(
     groups: List<Group>,
     onItemClick: (GroupItem) -> Unit,
-    createGroup: (String) -> Unit
+    navigateCreateGroupOnClick: () -> Unit,
+    logOutOnClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -209,7 +222,7 @@ fun GroupNavigationMenu(
                 title = "Create New Group",
                 contentDescription = "Go to the home screen",
                 icon = Icons.Default.AddCircle,
-                onClick = { createGroup("SAMPLE GROUP NAME") }
+                onClick = { navigateCreateGroupOnClick() }
             ),
             MenuItem(
                 id = "home",
@@ -224,7 +237,7 @@ fun GroupNavigationMenu(
                 contentDescription = "Go to the home screen",
                 icon = Icons.Default.ExitToApp,
                 onClick = {
-                    APIServer.logOut()
+                    logOutOnClick()
                     context.startActivity(
                         Intent(context, LoginActivity::class.java)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -371,71 +384,80 @@ fun GroupNotificationsButton(
 
 @Composable
 fun GroupDetails(
+    myUserInfo: UserInfo,
     group: Group,
-    userInfos: List<UserInfo>,
-    moneyRequestOnClick: () -> Unit
+    navigateActionAmountOnClick: () -> Unit
 ) {
-    userInfos.find { it.userId == APIServer.user.getId() }?.let { myUserInfo ->
-        Column (
-            verticalArrangement = Arrangement.SpaceBetween,
+    Column (
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(AppTheme.dimensions.groupDetailsSize)
+            .padding(top = AppTheme.dimensions.paddingLarge)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .size(AppTheme.dimensions.groupDetailsSize)
                 .padding(top = AppTheme.dimensions.paddingLarge)
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                verticalAlignment = Alignment.Top,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = AppTheme.dimensions.paddingLarge)
+                    .padding(horizontal = AppTheme.dimensions.paddingLarge)
             ) {
-                Row (
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                    verticalAlignment = Alignment.Top,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = AppTheme.dimensions.paddingLarge)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Face,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.size(98.dp)
-                    )
-                    h1Text(
-                        text = "${group.groupName}",
-                        modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier.size(98.dp)
+                )
                 h1Text(
-                    "$${myUserInfo.userBalance}",
-                    fontSize = 100.sp
+                    text = "${group.groupName}",
+                    modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
                 )
             }
-            TextButton(
-                colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-                modifier = Modifier
-                    .padding(bottom = AppTheme.dimensions.paddingMedium)
-                    .width(250.dp)
-                    .height(45.dp),
-                shape = AppTheme.shapes.large,
-                onClick = moneyRequestOnClick
-            ) {
-                Text(
-                    text = "Money Request",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    color = AppTheme.colors.onPrimary,
-                )
-            }
+            h1Text(
+                "$${myUserInfo.userBalance}",
+                fontSize = 100.sp
+            )
         }
-    } ?: Text(text = "Loading group...", color = AppTheme.colors.onPrimary)
-
+        TextButton(
+            colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+            modifier = Modifier
+                .padding(bottom = AppTheme.dimensions.paddingMedium)
+                .width(250.dp)
+                .height(45.dp),
+            shape = AppTheme.shapes.large,
+            onClick = navigateActionAmountOnClick
+        ) {
+            Text(
+                text = "Money Request",
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                color = AppTheme.colors.onPrimary,
+            )
+        }
+    }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun PublicRequestsDetails() {
+fun RecentActivityList(
+    groupActivity: List<TransactionActivity>
+) {
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState()
+
+    val tabItems = listOf(
+        "All",
+        "Personal",
+        "Settle"
+    )
+
     val sampleList = mapOf(
         "4/20" to listOf("test1", "test2", "test3", "test4"),
         "6/9" to listOf("test5", "test6", "test7", "test8")
@@ -463,23 +485,87 @@ fun PublicRequestsDetails() {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
                 ) {
-                    IconButton(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                    ) {
 
+                    val indicator = @Composable { tabPositions: List<TabPosition> ->
+                        CustomIndicator(tabPositions, pagerState)
                     }
-                    smallIconButton(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search List"
-                    )
-                    smallIconButton(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Filter List"
-                    )
+
+                    TabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        backgroundColor = AppTheme.colors.primary,
+                        indicator = indicator,
+                        modifier = Modifier
+                            .padding(all = 5.dp)
+                            .clip(AppTheme.shapes.medium)
+                            .height(30.dp),
+                    ) {
+                        tabItems.forEachIndexed {index, title ->
+                            Tab(
+                                text = {
+                                    Text(
+                                        title,
+                                        style = TextStyle(
+                                            color = AppTheme.colors.onPrimary,
+                                            fontSize = 16.sp)
+                                    )
+                                },
+                                modifier = Modifier
+                                    .zIndex(6f),
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                }
+                            )
+                        }
+                    }
+
                 }
             }
-            PublicRequestsList(content = sampleList)
+            // contains the lists that are scrolled through
+            HorizontalPager(
+                count = 3,
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        RecentGroupActivityList(groupActivity = groupActivity)
+                    }
+
+                    1 -> {
+                        PublicRequestsList(content = sampleList)
+                    }
+
+                    2 -> {
+                        PublicRequestsList(content = sampleList)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentGroupActivityList(
+    groupActivity: List<TransactionActivity>
+) {
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        itemsIndexed(groupActivity) { _, transactionActivity ->
+            when(transactionActivity) {
+                is AcceptDebtAction -> {
+                    Text(text = transactionActivity.displayText())
+                }
+                is CreateDebtAction -> {
+                    Text(text = transactionActivity.displayText())
+                }
+            }
         }
     }
 }
@@ -490,7 +576,7 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = Modifier.fillMaxSize()
     ) {
-        itemsIndexed(content.keys.toList()) { _: Int, filterGroup: String ->
+        itemsIndexed(content.keys.toList()) { _, filterGroup ->
             caption(
                 text = "Completed - $filterGroup",
                 modifier = Modifier.padding(start = AppTheme.dimensions.paddingExtraLarge)
@@ -509,4 +595,44 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerState) {
+    val transition = updateTransition(pagerState.currentPage, label = "")
+    val indicatorStart by transition.animateDp(
+        transitionSpec = {
+            if (initialState < targetState) {
+                spring(dampingRatio = 1f, stiffness = 50f)
+            } else {
+                spring(dampingRatio = 1f, stiffness = 1000f)
+            }
+        }, label = ""
+    ) {
+        tabPositions[it].left
+    }
+
+    val indicatorEnd by transition.animateDp(
+        transitionSpec = {
+            if (initialState < targetState) {
+                spring(dampingRatio = 1f, stiffness = 1000f)
+            } else {
+                spring(dampingRatio = 1f, stiffness = 50f)
+            }
+        }, label = ""
+    ) {
+        tabPositions[it].right
+    }
+
+    Box(
+        Modifier
+            .offset(x = indicatorStart)
+            .wrapContentSize(align = Alignment.BottomStart)
+            .width(indicatorEnd - indicatorStart)
+            .padding(2.dp)
+            .fillMaxSize()
+            .background(color = AppTheme.colors.caption, AppTheme.shapes.medium)
+            .zIndex(1f)
+    )
 }

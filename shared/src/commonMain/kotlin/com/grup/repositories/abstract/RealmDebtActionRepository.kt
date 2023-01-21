@@ -16,6 +16,13 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
         }
     }
 
+    override fun updateDebtAction(debtAction: DebtAction,
+                                  block: DebtAction.() -> Unit): DebtAction? {
+        return realm.writeBlocking {
+            findLatest(debtAction)?.apply(block)
+        }
+    }
+
     override fun getAllDebtActionsAsFlow(): Flow<List<DebtAction>> {
         return realm.query<DebtAction>().find().asFlow().map { it.list }
     }

@@ -43,7 +43,7 @@ internal fun stopSubscriptionSyncJob() {
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-fun startSubscriptionSyncJob(): Job = GlobalScope.launch {
+internal fun startSubscriptionSyncJob(): Job = GlobalScope.launch {
     var prevUserInfoList: List<UserInfo> = emptyList()
     realm.query<UserInfo>().find().asFlow().collect { resultsChange ->
         realm.subscriptions.update {

@@ -30,11 +30,9 @@ internal abstract class RealmGroupRepository : IGroupRepository {
         return realm.query<Group>().find().asFlow().map { it.list }
     }
 
-    override fun updateGroup(group: Group, block: (Group) -> Unit): Group? {
+    override fun updateGroup(group: Group, block: Group.() -> Unit): Group? {
         return realm.writeBlocking {
-            findLatest(group)?.apply {
-                block(this)
-            }
+            findLatest(group)?.apply(block)
         }
     }
 

@@ -14,6 +14,9 @@
         <action
             android:id="@+id/startWelcomeSlideshow"
             app:destination="@id/welcomeFragment" />
+        <action
+            android:id="@+id/createGroup"
+            app:destination="@id/createGroupFragment" />
     </fragment>
 
     <fragment
@@ -38,4 +41,9 @@
         android:id="@+id/debtActionFragment"
         android:name="com.grup.android.DebtActionFragment"
         android:label="DebtActionFragment" />
+
+    <fragment
+        android:id="@+id/createGroupFragment"
+        android:name="com.grup.android.CreateGroupFragment"
+        android:label="CreateGroupFragment" />
 </navigation>
