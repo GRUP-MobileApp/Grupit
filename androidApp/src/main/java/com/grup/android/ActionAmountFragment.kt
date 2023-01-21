@@ -344,7 +344,7 @@ fun RequestButton(
         onClick = onClick
     ) {
         Text(
-            text = "Settle",
+            text = "Request",
             color = AppTheme.colors.onSecondary,
         )
     }

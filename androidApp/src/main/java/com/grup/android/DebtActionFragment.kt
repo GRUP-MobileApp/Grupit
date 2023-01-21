@@ -131,6 +131,8 @@ fun DebtActionLayout(
                             debtors = debtors,
                             createDebtActionOnClick = { userInfos, debtAmounts ->
                                 mainViewModel.createDebtAction(userInfos, debtAmounts)
+                                navController.popBackStack()
+                                navController.popBackStack()
                             }
                         )
                     }
@@ -233,7 +235,8 @@ fun AddDebtorBottomSheet(
                         }
                     }
                 )
-                Button(onClick = { addDebtorOnClick(selectedUsers) }) {
+                Button(
+                    onClick = { addDebtorOnClick(selectedUsers) }) {
                     Text(text = "Add selected users")
                 }
             }
