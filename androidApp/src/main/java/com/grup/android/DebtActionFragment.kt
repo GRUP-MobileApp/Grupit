@@ -23,15 +23,14 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.apptheme.h1Text
-import com.grup.android.ui.apptheme.smallIcon
+import com.grup.android.ui.h1Text
+import com.grup.android.ui.smallIcon
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 

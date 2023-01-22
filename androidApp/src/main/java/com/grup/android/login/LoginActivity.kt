@@ -56,6 +56,12 @@ fun LoginPage(
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     val context = LocalContext.current
 
+    val loginResult: LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsState()
+
+    if (loginResult is LoginViewModel.LoginResult.Success) {
+        context.startActivity(Intent(context, MainActivity::class.java))
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(AppTheme.colors.primary)) {
@@ -115,24 +121,21 @@ fun LoginPage(
                 .padding(5.dp)
                 .fillMaxWidth()
         ) {
-            val loginResult: LoginResult by loginViewModel.loginResult.collectAsState()
-            when(loginResult.status) {
-                LoginResult.LoginStatus.SUCCESS -> {
-                    context.startActivity(Intent(context, MainActivity::class.java))
+            if (loginResult is LoginViewModel.LoginResult.Error) {
+                (loginResult as LoginViewModel.LoginResult.Error).exception.message?.let { error ->
+                    Text(text = error, color = AppTheme.colors.onSecondary)
                 }
-                LoginResult.LoginStatus.ERROR ->
-                    loginResult.error?.message?.let {
-                        Text(text = it, color = AppTheme.colors.onSecondary)
-                    }
-                LoginResult.LoginStatus.PENDING -> {}
-                null -> {}
             }
         }
 
-        Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp, 0.dp, 20.dp, 0.dp)
+        ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(top = 20.dp, bottom = 40.dp)
             ) {
                 Button(

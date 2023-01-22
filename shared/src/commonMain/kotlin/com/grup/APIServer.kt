@@ -39,6 +39,7 @@ object APIServer {
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
 
     // UserInfo
+    fun getMyUserInfosAsFlow() = UserInfoController.getMyUserInfosAsFlow(user)
     fun getAllUserInfosAsFlow() = UserInfoController.getAllUserInfosAsFlow()
 
     // GroupInvite

@@ -21,6 +21,10 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
             .first().find()
     }
 
+    override fun findMyUserInfosAsFlow(userId: String): Flow<List<UserInfo>> {
+        return realm.query<UserInfo>("userId == $0", userId).find().asFlow().map { it.list }
+    }
+
     override fun findAllUserInfosAsFlow(): Flow<List<UserInfo>> {
         return realm.query<UserInfo>().find().asFlow().map { it.list }
     }

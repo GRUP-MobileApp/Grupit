@@ -1,4 +1,4 @@
-package com.grup.android.ui.apptheme
+package com.grup.android.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.grup.android.ui.apptheme.AppTheme
 
 @Composable
 fun h1Text(

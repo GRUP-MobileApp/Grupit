@@ -1,18 +1,11 @@
 package com.grup.android
 
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.ViewModel
 import com.grup.APIServer
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
 
 class MainViewModel : ViewModel() {
-    private companion object {
-        private const val STOP_TIMEOUT_MILLIS: Long = 5000
-    }
-
     private val userObject: User
         get() = APIServer.user
 
@@ -25,24 +18,29 @@ class MainViewModel : ViewModel() {
         }
 
     // Selected group in the UI. Other UI flows use this to filter data based on the selected group.
-    var selectedGroup: MutableStateFlow<Group?> = MutableStateFlow(null)
+    private val _selectedGroup: MutableStateFlow<Group?> = MutableStateFlow(null)
+    val selectedGroup: StateFlow<Group?> = _selectedGroup
+
+    fun onSelectedGroupChange(group: Group) = group.also {
+        _selectedGroup.value = group
+    }
 
     // Hot flow containing all Group's the user is in. Updates selectedGroup if it's changed/deleted
     private val _groupsFlow = APIServer.getAllGroupsAsFlow()
     val groups: StateFlow<List<Group>> = _groupsFlow.onEach { newGroups ->
-        selectedGroup.value?.let { nonNullGroup ->
-            selectedGroup.value = newGroups.find { group ->
+        _selectedGroup.value?.let { nonNullGroup ->
+            _selectedGroup.value = newGroups.find { group ->
                 group.getId() == nonNullGroup.getId()
             }
         } ?: run {
-            selectedGroup.value = newGroups.getOrNull(0)
+            _selectedGroup.value = newGroups.getOrNull(0)
         }
     }.asState()
 
     // Hot flow containing UserInfo's belonging to the selectedGroup
     private val _userInfosFlow = APIServer.getAllUserInfosAsFlow()
     val userInfos: StateFlow<List<UserInfo>> =
-        _userInfosFlow.combine(selectedGroup) { userInfos, selectedGroup ->
+        _userInfosFlow.combine(_selectedGroup) { userInfos, selectedGroup ->
             selectedGroup?.let { nonNullGroup ->
                 userInfos.filter { userInfo ->
                     userInfo.groupId == nonNullGroup.getId()
@@ -50,8 +48,10 @@ class MainViewModel : ViewModel() {
             } ?: emptyList()
         }.asState()
 
-    fun myUserInfo(userInfos: List<UserInfo> = this.userInfos.value) =
+    private val _myUserInfos = APIServer.getMyUserInfosAsFlow()
+    val myUserInfo: StateFlow<UserInfo?> = _myUserInfos.map { userInfos ->
         userInfos.find { it.userId == userObject.getId() }
+    }.asState()
 
     val groupInvitesList: StateFlow<List<GroupInvite>> = APIServer.getAllGroupInvitesAsFlow()
         .asNotifications()
@@ -59,7 +59,7 @@ class MainViewModel : ViewModel() {
     // Hot flow containing DebtAction's belonging to the selectedGroup
     private val _debtActionsFlow = APIServer.getAllDebtActionsAsFlow()
     private val debtActions: StateFlow<List<DebtAction>> =
-        _debtActionsFlow.combine(selectedGroup) { debtActions, selectedGroup ->
+        _debtActionsFlow.combine(_selectedGroup) { debtActions, selectedGroup ->
             selectedGroup?.let { group ->
                 debtActions.filter { debtAction ->
                     debtAction.groupId == group.getId()
@@ -117,25 +117,8 @@ class MainViewModel : ViewModel() {
                     this.balanceChange = balanceChange
                 }
             },
-            myUserInfo()!!
+            myUserInfo.value!!
         )
 
     fun logOut() = APIServer.logOut()
-
-    // Turns into hot flow that continues running even in background
-    private fun <T> Flow<List<T>>.asNotifications() =
-        this.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    // Turns into hot flow that runs only in app. Also loads initial data of the flow in a blocking
-    // fashion to be displayed immediately
-    private fun <T> Flow<T>.asState() =
-        this.let { flow ->
-            runBlocking { flow.first() }.let { initialList ->
-                flow.stateIn(
-                    viewModelScope,
-                    SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                    initialList
-                )
-            }
-        }
 }

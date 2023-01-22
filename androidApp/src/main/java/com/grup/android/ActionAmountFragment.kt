@@ -16,14 +16,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.apptheme.h1Text
+import com.grup.android.ui.h1Text
 import com.grup.models.UserInfo
 
 class ActionAmountFragment : Fragment() {
@@ -45,12 +44,13 @@ class ActionAmountFragment : Fragment() {
     }
 }
 
+@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun ActionAmountLayout(
     mainViewModel: MainViewModel,
     navController: NavController
 ) {
-    val nullableUserInfo: UserInfo? = mainViewModel.myUserInfo()
+    val nullableUserInfo: UserInfo? by mainViewModel.myUserInfo.collectAsStateWithLifecycle()
     val myUserInfo: UserInfo = nullableUserInfo!!
     var actionAmount: String by remember { mutableStateOf("0") }
 

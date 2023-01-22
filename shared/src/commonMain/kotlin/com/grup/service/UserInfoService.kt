@@ -22,6 +22,7 @@ class UserInfoService : KoinComponent {
         )
     }
 
+    fun findMyUserInfosAsFlow(user: User) = userInfoRepository.findMyUserInfosAsFlow(user.getId())
     fun findAllUserInfosAsFlow() = userInfoRepository.findAllUserInfosAsFlow()
 
     private fun findUserInfoByUserId(userId: String, groupId: String): UserInfo? {

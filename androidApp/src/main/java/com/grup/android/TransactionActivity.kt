@@ -10,7 +10,7 @@ sealed class TransactionActivity {
     abstract fun displayText(asPersonal: Boolean = false): String
 }
 
-class CreateDebtAction(
+data class CreateDebtAction(
     private val debtAction: DebtAction
 ) : TransactionActivity() {
     override val userId: String
@@ -25,7 +25,7 @@ class CreateDebtAction(
                 " created a transaction with ${debtAction.debtTransactions.size} people"
 }
 
-class AcceptDebtAction(
+data class AcceptDebtAction(
     private val debtAction: DebtAction,
     private val transactionRecord: TransactionRecord
 ): TransactionActivity() {

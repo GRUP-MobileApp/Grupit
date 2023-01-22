@@ -37,6 +37,9 @@ import androidx.navigation.navGraphViewModels
 import com.google.accompanist.pager.*
 import com.grup.android.login.LoginActivity
 import com.grup.android.ui.apptheme.*
+import com.grup.android.ui.caption
+import com.grup.android.ui.h1Text
+import com.grup.android.ui.smallIcon
 import com.grup.models.Group
 import com.grup.models.GroupInvite
 import com.grup.models.UserInfo
@@ -44,6 +47,11 @@ import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
     private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        requireActivity().onBackPressedDispatcher
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,16 +88,13 @@ fun MainLayout(
     val groups: List<Group> by mainViewModel.groups.collectAsStateWithLifecycle()
     val selectedGroup: Group? by mainViewModel.selectedGroup.collectAsStateWithLifecycle()
     val groupInvites: List<GroupInvite> by mainViewModel.groupInvitesList.collectAsState()
-    val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsStateWithLifecycle()
-    val myUserInfo: UserInfo? = mainViewModel.myUserInfo(userInfos)
+    val myUserInfo: UserInfo? by mainViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
             mainViewModel.groupActivity.collectAsStateWithLifecycle()
 
     fun openDrawer() = scope.launch { scaffoldState.drawerState.open() }
     fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
-    fun selectedGroupOnValueChange(group: Group): Group {
-        return group.also { mainViewModel.selectedGroup.value = it }
-    }
+    fun selectedGroupOnValueChange(group: Group) = mainViewModel.onSelectedGroupChange(group)
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         GroupNotificationsBottomSheet(

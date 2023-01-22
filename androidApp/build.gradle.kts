@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    // Shared
     implementation(project(":shared"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
@@ -54,8 +55,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.0-alpha03")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-    // RecyclerView
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    // Animation
+    implementation("androidx.compose.animation:animation:1.3.3")
 
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")

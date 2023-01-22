@@ -9,7 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
-    private val _loginResult = MutableStateFlow(LoginResult())
+    sealed class LoginResult {
+        object Success : LoginResult()
+        object Pending : LoginResult()
+        data class Error(val exception: Exception) : LoginResult()
+        object Empty : LoginResult()
+    }
+
+    private val _loginResult = MutableStateFlow<LoginResult>(LoginResult.Empty)
     val loginResult: StateFlow<LoginResult> = _loginResult
 
     fun loginEmailPassword(email: String, password: String) = viewModelScope.launch {
@@ -31,21 +38,14 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun pendingLoginResult() {
-        _loginResult.value = LoginResult().apply {
-            this.status = LoginResult.LoginStatus.PENDING
-        }
+        _loginResult.value = LoginResult.Pending
     }
 
     private fun successLoginResult() {
-        _loginResult.value = LoginResult().apply {
-            this.status = LoginResult.LoginStatus.SUCCESS
-        }
+        _loginResult.value = LoginResult.Success
     }
 
     private fun errorLoginResult(e: Exception) {
-        _loginResult.value = LoginResult().apply {
-            this.status = LoginResult.LoginStatus.ERROR
-            this.error = e
-        }
+        _loginResult.value = LoginResult.Error(e)
     }
 }

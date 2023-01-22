@@ -59,7 +59,7 @@ fun CreateGroupLayout(
             CreateGroupTopBar(
                 onBackPress = { navController.popBackStack() },
                 createGroupOnClick = {
-                    mainViewModel.selectedGroup.value = mainViewModel.createGroup(groupName)
+                    mainViewModel.onSelectedGroupChange(mainViewModel.createGroup(groupName))
                     navController.popBackStack()
                 }
             )
