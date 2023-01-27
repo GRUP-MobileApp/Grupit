@@ -5,27 +5,40 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grup.android.ui.apptheme.AppTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DrawerHeader() {
-    Box(
+fun DrawerHeader(scope: CoroutineScope,
+                 groupNotificationsBottomSheetState: ModalBottomSheetState) {
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 20.dp, horizontal = 20.dp)
             .background(AppTheme.colors.secondary),
-        contentAlignment = Alignment.TopStart
     ) {
         Text(text = "Groups", fontSize = 40.sp, color = AppTheme.colors.onPrimary)
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        GroupNotificationsButton(
+            groupNotificationsOnClick = {
+                scope.launch { groupNotificationsBottomSheetState.show() }
+            }
+        )
+
     }
 }
 
@@ -35,6 +48,7 @@ fun DrawerBody(
     itemTextStyle: TextStyle = TextStyle(fontSize = 25.sp),
     onItemClick: (GroupItem) -> Unit
 ) {
+
     LazyColumn(
         modifier = Modifier
             .background(AppTheme.colors.secondary)

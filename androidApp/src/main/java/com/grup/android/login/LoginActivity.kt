@@ -140,12 +140,12 @@ fun LoginPage(
             ) {
                 Button(
                     onClick = { loginViewModel.registerEmailPassword(email.text, password.text) },
-                    shape = AppTheme.shapes.large,
+                    shape = AppTheme.shapes.CircleShape,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = AppTheme.colors.secondary
                     ),
                     modifier = Modifier
-                        .width(125.dp)
+                        .width(150.dp)
                         .height(50.dp)
                 ) {
                     Text(
@@ -158,12 +158,12 @@ fun LoginPage(
 
                 Button(
                     onClick = { loginViewModel.loginEmailPassword(email.text, password.text) },
-                    shape = AppTheme.shapes.large,
+                    shape = AppTheme.shapes.CircleShape,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = AppTheme.colors.confirm
                     ),
                     modifier = Modifier
-                        .width(125.dp)
+                        .width(150.dp)
                         .height(50.dp)
                 ) {
                     Text(
