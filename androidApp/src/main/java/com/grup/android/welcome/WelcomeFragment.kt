@@ -48,14 +48,13 @@ class WelcomeFragment : Fragment() {
 
 }
 
-
-
 @ExperimentalPagerApi
 @Composable
 fun RegisterPage(
     welcomeViewModel: WelcomeViewModel,
     navController: NavController
 ) {
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -192,7 +191,6 @@ fun WelcomeScreen1(
             Button(
                 onClick = {
                     welcomeViewModel.registerUserObject(username)
-                    navController.navigate(R.id.endWelcomeSlideshow)
                     scope.launch {
                         pagerState.animateScrollToPage(1)
                     }
@@ -282,10 +280,8 @@ fun WelcomeScreen2(
             Spacer(modifier = Modifier.weight(1.0f))
             Button(
                 onClick = {
-                    welcomeViewModel.registerUserObject(username)
-                    navController.navigate(R.id.endWelcomeSlideshow)
                     scope.launch {
-                        pagerState.animateScrollToPage(1)
+                        pagerState.animateScrollToPage(2)
                     }
                 },
                 shape = AppTheme.shapes.large,

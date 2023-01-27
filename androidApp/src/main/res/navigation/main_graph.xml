@@ -17,6 +17,9 @@
         <action
             android:id="@+id/createGroup"
             app:destination="@id/createGroupFragment" />
+        <action
+            android:id="@+id/viewMembers"
+            app:destination="@id/membersFragment" />
     </fragment>
 
     <fragment
@@ -46,4 +49,8 @@
         android:id="@+id/createGroupFragment"
         android:name="com.grup.android.CreateGroupFragment"
         android:label="CreateGroupFragment" />
+    <fragment
+        android:id="@+id/membersFragment"
+        android:name="com.grup.android.MembersFragment"
+        android:label="MembersFragment" />
 </navigation>

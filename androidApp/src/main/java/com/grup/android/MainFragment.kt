@@ -12,6 +12,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -62,6 +64,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
+
             setContent {
                 MainLayout(
                     mainViewModel = mainViewModel,
@@ -129,6 +132,7 @@ fun MainLayout(
                 TopBar(
                     onNavigationIconClick = { openDrawer() },
                     actions = {
+                        /* TODO remove this button later*/
                         if (selectedGroup != null) {
                             AddToGroupButton(
                                 addToGroupOnClick = {
@@ -139,6 +143,11 @@ fun MainLayout(
                         GroupNotificationsButton(
                             groupNotificationsOnClick = {
                                 scope.launch { groupNotificationsBottomSheetState.show() }
+                            }
+                        )
+                        MembersButton(
+                            membersOnClick = {
+                                navController.navigate(R.id.viewMembers)
                             }
                         )
                     }
@@ -199,6 +208,7 @@ fun NoGroupsDisplay() {
     Text(text = "Yaint in any groups bozo", color = AppTheme.colors.onPrimary)
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun GroupNavigationMenu(
     groups: List<Group>,
@@ -207,8 +217,14 @@ fun GroupNavigationMenu(
     logOutOnClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val groupNotificationsBottomSheetState =
+        rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val scope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
 
-    DrawerHeader()
+    fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
+
+    DrawerHeader(scope, groupNotificationsBottomSheetState)
     DrawerBody(
         items = groups.mapIndexed { index, group ->
             GroupItem(
@@ -223,41 +239,48 @@ fun GroupNavigationMenu(
             onItemClick(it)
         }
     )
-    DrawerSettings(
-        items = listOf(
-            MenuItem(
-                id = "home",
-                title = "Create New Group",
-                contentDescription = "Go to the home screen",
-                icon = Icons.Default.AddCircle,
-                onClick = { navigateCreateGroupOnClick() }
+
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Divider(color = AppTheme.colors.primary, thickness = 3.dp)
+        DrawerSettings(
+            items = listOf(
+                MenuItem(
+                    id = "home",
+                    title = "Create New Group",
+                    contentDescription = "Go to the home screen",
+                    icon = Icons.Default.AddCircle,
+                    onClick = { navigateCreateGroupOnClick() }
+                ),
+                MenuItem(
+                    id = "home",
+                    title = "Settings",
+                    contentDescription = "Go to the settings screen",
+                    icon = Icons.Default.Settings,
+                    onClick = {}
+                ),
+                MenuItem(
+                    id = "home",
+                    title = "Sign Out",
+                    contentDescription = "Go to the home screen",
+                    icon = Icons.Default.ExitToApp,
+                    onClick = {
+                        logOutOnClick()
+                        context.startActivity(
+                            Intent(context, LoginActivity::class.java)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        )
+                    }
+                ),
             ),
-            MenuItem(
-                id = "home",
-                title = "Settings",
-                contentDescription = "Go to the settings screen",
-                icon = Icons.Default.Settings,
-                onClick = {}
-            ),
-            MenuItem(
-                id = "home",
-                title = "Sign Out",
-                contentDescription = "Go to the home screen",
-                icon = Icons.Default.ExitToApp,
-                onClick = {
-                    logOutOnClick()
-                    context.startActivity(
-                        Intent(context, LoginActivity::class.java)
-                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    )
-                }
-            ),
-        ),
-        onItemClick = {
-            it.onClick()
-            println("Clicked on ${it.title}")
-        }
-    )
+            onItemClick = {
+                it.onClick()
+                println("Clicked on ${it.title}")
+            }
+        )
+    }
 }
 
 @Composable
@@ -303,20 +326,12 @@ fun AddToGroupBottomSheetLayout(
                     .fillMaxWidth()
                     .padding(AppTheme.dimensions.paddingMedium)
             ) {
-                TextField(
-                    label = {
-                        Text(
-                            text = "Username to add",
-                            color = textColor
-                        )
-                    },
-                    textStyle = TextStyle(color = textColor),
-                    value = username,
-                    onValueChange = { username = it }
-                )
+                SearchBar()
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { inviteUsernameToGroup(username, selectedGroup) }
+                    onClick = { inviteUsernameToGroup(username, selectedGroup) },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+                    shape = AppTheme.shapes.CircleShape
                 ) {
                     Text(text = "Add to group", color = textColor)
                 }
@@ -339,7 +354,7 @@ fun AddToGroupButton(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun GroupNotificationsBottomSheet(
     groupInvites: List<GroupInvite>,
@@ -349,6 +364,21 @@ fun GroupNotificationsBottomSheet(
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
+
+
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState()
+
+    val tabItems = listOf(
+        "Transactions",
+        "Invites"
+    )
+
+    val sampleList = mapOf(
+        "4/20" to listOf("test1", "test2", "test3", "test4"),
+        "6/9" to listOf("test5", "test6", "test7", "test8")
+    )
+
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
@@ -360,21 +390,119 @@ fun GroupNotificationsBottomSheet(
             ) {
                 Text(text = "NOTIFICATIONS LIST", color = textColor)
                 Spacer(modifier = Modifier.height(8.dp))
-                groupInvites.forEach { groupInvite ->
-                    Text(
-                        text = AnnotatedString(
-                            "Group Invite to ${groupInvite.groupName!!}"
-                        ),
-                        color = textColor
-                    )
-                    Button(onClick = { groupInviteOnClick(groupInvite) }) {
-                        Text(text = "Join ${groupInvite.groupName!!}")
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(top = AppTheme.dimensions.paddingMedium)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
+                    ) {
+
+                        val indicator = @Composable { tabPositions: List<TabPosition> ->
+                            CustomIndicator(tabPositions, pagerState)
+                        }
+
+                        TabRow(
+                            selectedTabIndex = pagerState.currentPage,
+                            backgroundColor = AppTheme.colors.primary,
+                            indicator = indicator,
+                            modifier = Modifier
+                                .padding(all = 5.dp)
+                                .clip(AppTheme.shapes.medium)
+                                .height(30.dp),
+                        ) {
+                            tabItems.forEachIndexed {index, title ->
+                                Tab(
+                                    text = {
+                                        Text(
+                                            title,
+                                            style = TextStyle(
+                                                color = AppTheme.colors.onPrimary,
+                                                fontSize = 16.sp)
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .zIndex(6f),
+                                    selected = pagerState.currentPage == index,
+                                    onClick = {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(index)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
                     }
                 }
+                // contains the lists that are scrolled through
+                HorizontalPager(
+                    count = 2,
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) { page ->
+
+                    when (page) {
+                        0 -> {
+                            PublicRequestsList(content = sampleList)
+                        }
+
+                        1 -> {
+                            groupInvites.forEach { groupInvite ->
+                                Text(
+                                    text = AnnotatedString(
+                                        "Group Invite to ${groupInvite.groupName!!}"
+                                    ),
+                                    color = textColor
+                                )
+                                Button(onClick = { groupInviteOnClick(groupInvite) }) {
+                                    Text(text = "Join ${groupInvite.groupName!!}")
+                                }
+                            }
+                        }
+
+                    }
+                }
+
             }
         },
         sheetBackgroundColor = backgroundColor,
-        content = content
+        content = content,
+        sheetShape = AppTheme.shapes.large
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun MembersListBottomSheet(
+    state: ModalBottomSheetState,
+    backgroundColor: Color = AppTheme.colors.secondary,
+    textColor: Color = AppTheme.colors.onSecondary,
+    content: @Composable () -> Unit
+) {
+
+    ModalBottomSheetLayout(
+        sheetState = state,
+        sheetContent = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppTheme.dimensions.paddingMedium)
+            ) {
+                Text(text = "NOTIFICATIONS LIST", color = textColor)
+                Spacer(modifier = Modifier.height(8.dp))
+
+            }
+        },
+        sheetBackgroundColor = backgroundColor,
+        content = content,
+        sheetShape = AppTheme.shapes.large
     )
 }
 
@@ -383,9 +511,23 @@ fun GroupNotificationsButton(
     groupNotificationsOnClick: () -> Unit
 ) {
     IconButton(onClick = groupNotificationsOnClick) {
-        smallIcon(
+        Icon(
             imageVector = Icons.Default.Notifications,
             contentDescription = "Notifications"
+        )
+    }
+}
+
+@Composable
+fun MembersButton(
+    membersOnClick: () -> Unit
+) {
+    IconButton(
+        onClick = membersOnClick
+    ) {
+        smallIcon(
+            imageVector = Icons.Default.Person,
+            contentDescription = "Members"
         )
     }
 }
@@ -439,7 +581,7 @@ fun GroupDetails(
                 .padding(bottom = AppTheme.dimensions.paddingMedium)
                 .width(250.dp)
                 .height(45.dp),
-            shape = AppTheme.shapes.large,
+            shape = AppTheme.shapes.CircleShape,
             onClick = navigateActionAmountOnClick
         ) {
             Text(
@@ -605,6 +747,42 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
     }
 }
 
+@Composable
+fun SearchBar () {
+
+    var searchText: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TextField(
+            value = searchText,
+            onValueChange = { searchText = it },
+            label = { Text("Search", color = AppTheme.colors.primary) },
+            singleLine = true,
+            shape = RoundedCornerShape(10.dp),
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "SearchIcon"
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.secondary)
+                .padding(all = AppTheme.dimensions.paddingMedium),
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = AppTheme.colors.primary,
+                disabledTextColor = Color.Transparent,
+                backgroundColor = AppTheme.colors.onPrimary,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            )
+        )
+    }
+}
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerState) {
