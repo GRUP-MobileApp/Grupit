@@ -68,7 +68,7 @@ dependencies {
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.ui:ui-tooling:1.0.0-alpha07")
-    
+
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
 
@@ -76,4 +76,3 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
 }
-

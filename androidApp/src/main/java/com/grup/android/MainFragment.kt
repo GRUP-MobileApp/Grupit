@@ -132,24 +132,18 @@ fun MainLayout(
                 TopBar(
                     onNavigationIconClick = { openDrawer() },
                     actions = {
-                        /* TODO remove this button later*/
-                        if (selectedGroup != null) {
-                            AddToGroupButton(
-                                addToGroupOnClick = {
-                                    scope.launch { addToGroupBottomSheetState.show() }
-                                }
-                            )
-                        }
                         GroupNotificationsButton(
                             groupNotificationsOnClick = {
                                 scope.launch { groupNotificationsBottomSheetState.show() }
                             }
                         )
-                        MembersButton(
-                            membersOnClick = {
-                                navController.navigate(R.id.viewMembers)
-                            }
-                        )
+                        if (selectedGroup!= null) {
+                            MembersButton(
+                                membersOnClick = {
+                                    navController.navigate(R.id.viewMembers)
+                                }
+                            )
+                        }
                     }
                 )
             },
@@ -305,54 +299,6 @@ fun TopBar(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun AddToGroupBottomSheetLayout(
-    selectedGroup: Group,
-    inviteUsernameToGroup: (String, Group) -> Unit,
-    state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
-    textColor: Color = AppTheme.colors.onSecondary,
-    content: @Composable () -> Unit
-) {
-    var username: String by remember { mutableStateOf("") }
-
-    ModalBottomSheetLayout(
-        sheetState = state,
-        sheetContent = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppTheme.dimensions.paddingMedium)
-            ) {
-                SearchBar()
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { inviteUsernameToGroup(username, selectedGroup) },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-                    shape = AppTheme.shapes.CircleShape
-                ) {
-                    Text(text = "Add to group", color = textColor)
-                }
-            }
-        },
-        sheetBackgroundColor = backgroundColor,
-        content = content
-    )
-}
-
-@Composable
-fun AddToGroupButton(
-    addToGroupOnClick: () -> Unit
-) {
-    IconButton(onClick = addToGroupOnClick) {
-        smallIcon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "Add to Group"
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
@@ -402,7 +348,7 @@ fun GroupNotificationsBottomSheet(
                         horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
                     ) {
 
-                        val indicator = @Composable { tabPositions: List<TabPosition> ->
+                        val indicator: @Composable (List<TabPosition>) -> Unit = { tabPositions ->
                             CustomIndicator(tabPositions, pagerState)
                         }
 
@@ -748,16 +694,16 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
 }
 
 @Composable
-fun SearchBar () {
-
-    var searchText: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
-
+fun SearchBar (
+    username: String,
+    onUsernameChange: (String) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
         TextField(
-            value = searchText,
-            onValueChange = { searchText = it },
+            value = username,
+            onValueChange = onUsernameChange,
             label = { Text("Search", color = AppTheme.colors.primary) },
             singleLine = true,
             shape = RoundedCornerShape(10.dp),
