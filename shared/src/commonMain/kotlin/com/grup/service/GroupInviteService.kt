@@ -14,9 +14,10 @@ internal class GroupInviteService: KoinComponent {
         return groupInviteRepository.createGroupInvite(
             GroupInvite().apply {
                 this.inviter = inviter.getId()
+                this.inviterUsername = inviter.username!!
                 this.invitee = invitee.getId()
                 this.groupId = group.getId()
-                this.groupName = group.groupName
+                this.groupName = group.groupName!!
             }
         )
     }

@@ -30,6 +30,13 @@ import com.grup.android.ui.apptheme.*
 class WelcomeFragment : Fragment() {
     private val welcomeViewModel: WelcomeViewModel by viewModels()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (welcomeViewModel.hasUserObject) {
+            findNavController().navigate(R.id.startMainFragment)
+        }
+    }
+
     @OptIn(ExperimentalPagerApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -190,7 +197,6 @@ fun WelcomeScreen1(
             Spacer(modifier = Modifier.weight(1.0f))
             Button(
                 onClick = {
-                    welcomeViewModel.registerUserObject(username)
                     scope.launch {
                         pagerState.animateScrollToPage(1)
                     }
@@ -370,7 +376,7 @@ fun WelcomeScreen3(
             Button(
                 onClick = {
                     welcomeViewModel.registerUserObject(username)
-                    navController.navigate(R.id.endWelcomeSlideshow)
+                    navController.navigate(R.id.startMainFragment)
                     scope.launch {
                         pagerState.animateScrollToPage(1)
                     }

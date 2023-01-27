@@ -49,7 +49,7 @@ fun caption(
 }
 
 @Composable
-fun smallIcon(
+fun SmallIcon(
     imageVector: ImageVector,
     contentDescription: String,
     modifier: Modifier = Modifier
@@ -63,7 +63,7 @@ fun smallIcon(
 }
 
 @Composable
-fun smallIconButton(
+fun SmallIconButton(
     imageVector: ImageVector,
     contentDescription: String,
     modifier: Modifier = Modifier
@@ -83,7 +83,7 @@ fun smallIconButton(
                 shape = AppTheme.shapes.CircleShape
             )
     ) {
-        smallIcon(
+        SmallIcon(
             imageVector = imageVector,
             contentDescription = contentDescription,
             modifier = modifier.clip(AppTheme.shapes.CircleShape)

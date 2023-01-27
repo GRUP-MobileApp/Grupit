@@ -3,6 +3,7 @@ package com.grup.service
 import com.grup.exceptions.NegativeBalanceException
 import com.grup.exceptions.NotFoundException
 import com.grup.interfaces.IUserInfoRepository
+import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.models.User
 import com.grup.models.UserInfo
@@ -29,27 +30,28 @@ class UserInfoService : KoinComponent {
         return userInfoRepository.findUserInfoByUser(userId, groupId)
     }
 
-//    fun applyTransactionRecord(transactionRecord: TransactionRecord,
-//                               allowNegative: Boolean = true) {
-//        val debtorUserInfo: UserInfo =
-//            findUserInfoByUserId(transactionRecord.debtor!!, transactionRecord.groupId!!)
-//                ?: throw NotFoundException("User with id ${transactionRecord.debtor!!} not found " +
-//                        "in Group with id ${transactionRecord.groupId}")
-//        val debteeUserInfo: UserInfo =
-//            findUserInfoByUserId(transactionRecord.debtee!!, transactionRecord.groupId!!)
-//                ?: throw NotFoundException("User with id ${transactionRecord.debtee!!} not found " +
-//                        "in Group with id ${transactionRecord.groupId}")
-//
-//        if (allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange!! < 0) {
-//            throw NegativeBalanceException("Transaction with id ${transactionRecord.getId()}" +
-//                    "results in negative balance")
-//        }
-//
-//        userInfoRepository.updateUserInfo(debtorUserInfo) {
-//            it.userBalance -= transactionRecord.balanceChange!!
-//        }
-//        userInfoRepository.updateUserInfo(debteeUserInfo) {
-//            it.userBalance += transactionRecord.balanceChange!!
-//        }
-//    }
+    fun applyDebtActionTransactionRecord(debtAction: DebtAction,
+                                         transactionRecord: TransactionRecord,
+                                         allowNegative: Boolean = true) {
+        val debtorUserInfo: UserInfo =
+            findUserInfoByUserId(transactionRecord.debtor!!, debtAction.groupId!!)
+                ?: throw NotFoundException("User with id ${transactionRecord.debtor!!} not found " +
+                        "in Group with id ${debtAction.groupId!!}")
+        val debteeUserInfo: UserInfo =
+            findUserInfoByUserId(debtAction.debtee!!, debtAction.groupId!!)
+                ?: throw NotFoundException("User with id ${debtAction.debtee!!} not found " +
+                        "in Group with id ${debtAction.groupId}")
+
+        if (allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange!! < 0) {
+            throw NegativeBalanceException("DebtAction with id ${debtAction.getId()}" +
+                    "results in negative balance")
+        }
+
+        userInfoRepository.updateUserInfo(debtorUserInfo) {
+            it.userBalance -= transactionRecord.balanceChange!!
+        }
+        userInfoRepository.updateUserInfo(debteeUserInfo) {
+            it.userBalance += transactionRecord.balanceChange!!
+        }
+    }
 }

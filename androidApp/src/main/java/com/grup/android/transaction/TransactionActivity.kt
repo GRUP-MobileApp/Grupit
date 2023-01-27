@@ -1,5 +1,6 @@
 package com.grup.android.transaction
 
+import com.grup.exceptions.PendingTransactionRecordException
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 
@@ -7,41 +8,42 @@ sealed class TransactionActivity {
     abstract val userId: String
     abstract val name: String
     abstract val date: String
-    abstract fun displayText(asPersonal: Boolean = false): String
-}
+    abstract fun displayText(): String
 
-data class CreateDebtAction(
-    private val debtAction: DebtAction
-) : TransactionActivity() {
-    override val userId: String
-        get() = debtAction.debtee!!
-    override val name: String
-        get() = debtAction.debteeName!!
-    override val date: String
-        get() = debtAction.date
+    data class CreateDebtAction(
+        val debtAction: DebtAction
+    ) : TransactionActivity() {
+        override val userId: String
+            get() = debtAction.debtee!!
+        override val name: String
+            get() = debtAction.debteeName!!
+        override val date: String
+            get() = debtAction.date
 
-    override fun displayText(asPersonal: Boolean) =
-        (if (asPersonal) "You" else name) +
-                " created a transaction with ${debtAction.debtTransactions.size} people"
-}
+        override fun displayText() =
+                    "$name created a transaction with ${debtAction.debtTransactions.size} people"
+    }
 
-data class AcceptDebtAction(
-    private val debtAction: DebtAction,
-    private val transactionRecord: TransactionRecord
-): TransactionActivity() {
-    override val userId: String
-        get() = transactionRecord.debtor!!
-    override val name: String
-        get() = transactionRecord.debtorName!!
-    override val date: String
-        get() = transactionRecord.dateAccepted.also {
-            if (it == "PENDING") {
-                throw Exception()
+    data class AcceptDebtAction(
+        val debtAction: DebtAction,
+        val transactionRecord: TransactionRecord
+    ): TransactionActivity() {
+        override val userId: String
+            get() = transactionRecord.debtor!!
+        override val name: String
+            get() = transactionRecord.debtorName!!
+        override val date: String
+            get() = transactionRecord.dateAccepted.also {
+                if (date == TransactionRecord.PENDING) {
+                    throw PendingTransactionRecordException(
+                        "TransactionRecord still pending for" +
+                                "DebtAction with id ${debtAction.getId()}"
+                    )
+                }
             }
-        }
 
-    override fun displayText(asPersonal: Boolean) =
-        (if (asPersonal) "You" else name) +
-                " accepted a debt of ${transactionRecord.balanceChange} from" +
-                " ${debtAction.debteeName}"
+        override fun displayText() =
+                    "$name accepted a debt of ${transactionRecord.balanceChange} from" +
+                    " ${debtAction.debteeName}"
+    }
 }

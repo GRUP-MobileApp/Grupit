@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_graph"
-    app:startDestination="@id/mainFragment">
+    app:startDestination="@id/welcomeFragment">
 
     <fragment
         android:id="@+id/mainFragment"
@@ -12,14 +12,14 @@
             android:id="@+id/enterActionAmount"
             app:destination="@id/actionAmountFragment" />
         <action
-            android:id="@+id/startWelcomeSlideshow"
-            app:destination="@id/welcomeFragment" />
-        <action
             android:id="@+id/createGroup"
             app:destination="@id/createGroupFragment" />
         <action
             android:id="@+id/viewMembers"
             app:destination="@id/membersFragment" />
+        <action
+            android:id="@+id/openNotifications"
+            app:destination="@id/notificationsFragment" />
     </fragment>
 
     <fragment
@@ -27,9 +27,22 @@
         android:name="com.grup.android.welcome.WelcomeFragment"
         android:label="WelcomeFragment" >
         <action
-            android:id="@+id/endWelcomeSlideshow"
+            android:id="@+id/startMainFragment"
             app:destination="@id/mainFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/createGroupFragment"
+        android:name="com.grup.android.CreateGroupFragment"
+        android:label="CreateGroupFragment" />
+    <fragment
+        android:id="@+id/membersFragment"
+        android:name="com.grup.android.GroupMembersFragment"
+        android:label="MembersFragment" />
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.grup.android.notifications.NotificationsFragment"
+        android:label="NotificationsFragment" />
 
     <fragment
         android:id="@+id/actionAmountFragment"
@@ -44,13 +57,4 @@
         android:id="@+id/debtActionFragment"
         android:name="com.grup.android.transaction.DebtActionFragment"
         android:label="DebtActionFragment" />
-
-    <fragment
-        android:id="@+id/createGroupFragment"
-        android:name="com.grup.android.CreateGroupFragment"
-        android:label="CreateGroupFragment" />
-    <fragment
-        android:id="@+id/membersFragment"
-        android:name="com.grup.android.MembersFragment"
-        android:label="MembersFragment" />
 </navigation>

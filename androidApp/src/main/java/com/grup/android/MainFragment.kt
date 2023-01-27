@@ -12,7 +12,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,13 +19,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -38,15 +34,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.accompanist.pager.*
 import com.grup.android.login.LoginActivity
-import com.grup.android.transaction.AcceptDebtAction
-import com.grup.android.transaction.CreateDebtAction
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.*
 import com.grup.android.ui.caption
 import com.grup.android.ui.h1Text
-import com.grup.android.ui.smallIcon
+import com.grup.android.ui.SmallIcon
 import com.grup.models.Group
-import com.grup.models.GroupInvite
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
@@ -64,36 +57,27 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
-
             setContent {
                 MainLayout(
                     mainViewModel = mainViewModel,
                     navController = findNavController()
                 )
-            }.also {
-                if (!mainViewModel.hasUserObject) {
-                    findNavController().navigate(R.id.startWelcomeSlideshow)
-                }
             }
         }
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun MainLayout(
     mainViewModel: MainViewModel,
     navController: NavController
 ) {
     val scaffoldState = rememberScaffoldState()
-    val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val groupNotificationsBottomSheetState =
-        rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
     val groups: List<Group> by mainViewModel.groups.collectAsStateWithLifecycle()
     val selectedGroup: Group? by mainViewModel.selectedGroup.collectAsStateWithLifecycle()
-    val groupInvites: List<GroupInvite> by mainViewModel.groupInvitesList.collectAsState()
     val myUserInfo: UserInfo? by mainViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
             mainViewModel.groupActivity.collectAsStateWithLifecycle()
@@ -102,95 +86,68 @@ fun MainLayout(
     fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
     fun selectedGroupOnValueChange(group: Group) = mainViewModel.onSelectedGroupChange(group)
 
-    val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
-        GroupNotificationsBottomSheet(
-            groupInvites = groupInvites,
-            state = groupNotificationsBottomSheetState,
-            groupInviteOnClick = { groupInvite ->
-                mainViewModel.acceptInviteToGroup(groupInvite)
-                selectedGroupOnValueChange(groups.find { it.getId() == groupInvite.groupId }!!)
-            }
-        ) {
-            selectedGroup?.let {
-                AddToGroupBottomSheetLayout(
-                    selectedGroup = it,
-                    state = addToGroupBottomSheetState,
-                    inviteUsernameToGroup = { username, group ->
-                        mainViewModel.inviteUserToGroup(username, group)
-                        closeDrawer()
-                    },
-                    content = content
-                )
-            } ?: content()
-        }
-    }
-
-    modalSheets {
-        Scaffold(
-            scaffoldState = scaffoldState,
-            topBar = {
-                TopBar(
-                    onNavigationIconClick = { openDrawer() },
-                    actions = {
-                        GroupNotificationsButton(
-                            groupNotificationsOnClick = {
-                                scope.launch { groupNotificationsBottomSheetState.show() }
+    Scaffold(
+        scaffoldState = scaffoldState,
+        topBar = {
+            TopBar(
+                onNavigationIconClick = { openDrawer() },
+                actions = {
+                    if (selectedGroup!= null) {
+                        MembersButton(
+                            membersOnClick = {
+                                navController.navigate(R.id.viewMembers)
                             }
                         )
-                        if (selectedGroup!= null) {
-                            MembersButton(
-                                membersOnClick = {
-                                    navController.navigate(R.id.viewMembers)
-                                }
-                            )
-                        }
                     }
-                )
-            },
-            drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
-            drawerBackgroundColor = AppTheme.colors.secondary,
-            drawerContent = {
-                GroupNavigationMenu(
-                    groups = groups,
-                    onItemClick = { menuItem ->
-                        selectedGroupOnValueChange(groups[menuItem.index])
-                        closeDrawer()
-                    },
-                    navigateCreateGroupOnClick = {
-                        closeDrawer()
-                        navController.navigate(R.id.createGroup)
-                    },
-                    logOutOnClick = { mainViewModel.logOut() }
-                )
-            },
-            bottomBar = { /* TODO */ },
-            backgroundColor = AppTheme.colors.primary,
-            modifier = Modifier.fillMaxSize()
-        ) { padding ->
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(padding)
+                }
+            )
+        },
+        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+        drawerBackgroundColor = AppTheme.colors.secondary,
+        drawerContent = {
+            GroupNavigationMenu(
+                groups = groups,
+                onItemClick = { menuItem ->
+                    selectedGroupOnValueChange(groups[menuItem.index])
+                    closeDrawer()
+                },
+                navigateNotificationsOnClick = {
+                    closeDrawer()
+                    navController.navigate(R.id.openNotifications)
+                },
+                navigateCreateGroupOnClick = {
+                    closeDrawer()
+                    navController.navigate(R.id.createGroup)
+                },
+                logOutOnClick = { mainViewModel.logOut() }
+            )
+        },
+        backgroundColor = AppTheme.colors.primary,
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(padding)
+        ) {
+            CompositionLocalProvider(
+                LocalContentColor provides AppTheme.colors.onPrimary
             ) {
-                CompositionLocalProvider(
-                    LocalContentColor provides AppTheme.colors.onPrimary
-                ) {
-                    if (groups.isNotEmpty()) {
-                        myUserInfo?.let { myUserInfo ->
-                            GroupDetails(
-                                myUserInfo = myUserInfo,
-                                group = selectedGroup ?: selectedGroupOnValueChange(groups[0]),
-                                navigateActionAmountOnClick = {
-                                    navController.navigate(R.id.enterActionAmount)
-                                }
-                            )
-                            RecentActivityList(
-                                groupActivity = groupActivity
-                            )
-                        }
-                    } else {
-                        NoGroupsDisplay()
+                if (groups.isNotEmpty()) {
+                    myUserInfo?.let { myUserInfo ->
+                        GroupDetails(
+                            myUserInfo = myUserInfo,
+                            group = selectedGroup ?: selectedGroupOnValueChange(groups[0]),
+                            navigateActionAmountOnClick = {
+                                navController.navigate(R.id.enterActionAmount)
+                            }
+                        )
+                        RecentActivityList(
+                            groupActivity = groupActivity
+                        )
                     }
+                } else {
+                    NoGroupsDisplay()
                 }
             }
         }
@@ -202,23 +159,17 @@ fun NoGroupsDisplay() {
     Text(text = "Yaint in any groups bozo", color = AppTheme.colors.onPrimary)
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun GroupNavigationMenu(
     groups: List<Group>,
     onItemClick: (GroupItem) -> Unit,
+    navigateNotificationsOnClick: () -> Unit,
     navigateCreateGroupOnClick: () -> Unit,
     logOutOnClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val groupNotificationsBottomSheetState =
-        rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val scope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
 
-    fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
-
-    DrawerHeader(scope, groupNotificationsBottomSheetState)
+    DrawerHeader(navigateNotificationsOnClick = navigateNotificationsOnClick)
     DrawerBody(
         items = groups.mapIndexed { index, group ->
             GroupItem(
@@ -289,7 +240,7 @@ fun TopBar(
             IconButton(
                 onClick = onNavigationIconClick
             ) {
-                smallIcon(
+                SmallIcon(
                     imageVector = Icons.Filled.Menu,
                     contentDescription = "Menu"
                 )
@@ -299,165 +250,12 @@ fun TopBar(
     )
 }
 
-
-@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
-fun GroupNotificationsBottomSheet(
-    groupInvites: List<GroupInvite>,
-    groupInviteOnClick: (GroupInvite) -> Unit,
-    state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
-    textColor: Color = AppTheme.colors.onSecondary,
-    content: @Composable () -> Unit
+fun NotificationsButton(
+    navigateNotificationsOnClick: () -> Unit
 ) {
-
-
-    val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState()
-
-    val tabItems = listOf(
-        "Transactions",
-        "Invites"
-    )
-
-    val sampleList = mapOf(
-        "4/20" to listOf("test1", "test2", "test3", "test4"),
-        "6/9" to listOf("test5", "test6", "test7", "test8")
-    )
-
-    ModalBottomSheetLayout(
-        sheetState = state,
-        sheetContent = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppTheme.dimensions.paddingMedium)
-            ) {
-                Text(text = "NOTIFICATIONS LIST", color = textColor)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .padding(top = AppTheme.dimensions.paddingMedium)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
-                    ) {
-
-                        val indicator: @Composable (List<TabPosition>) -> Unit = { tabPositions ->
-                            CustomIndicator(tabPositions, pagerState)
-                        }
-
-                        TabRow(
-                            selectedTabIndex = pagerState.currentPage,
-                            backgroundColor = AppTheme.colors.primary,
-                            indicator = indicator,
-                            modifier = Modifier
-                                .padding(all = 5.dp)
-                                .clip(AppTheme.shapes.medium)
-                                .height(30.dp),
-                        ) {
-                            tabItems.forEachIndexed {index, title ->
-                                Tab(
-                                    text = {
-                                        Text(
-                                            title,
-                                            style = TextStyle(
-                                                color = AppTheme.colors.onPrimary,
-                                                fontSize = 16.sp)
-                                        )
-                                    },
-                                    modifier = Modifier
-                                        .zIndex(6f),
-                                    selected = pagerState.currentPage == index,
-                                    onClick = {
-                                        scope.launch {
-                                            pagerState.animateScrollToPage(index)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-
-                    }
-                }
-                // contains the lists that are scrolled through
-                HorizontalPager(
-                    count = 2,
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) { page ->
-
-                    when (page) {
-                        0 -> {
-                            PublicRequestsList(content = sampleList)
-                        }
-
-                        1 -> {
-                            groupInvites.forEach { groupInvite ->
-                                Text(
-                                    text = AnnotatedString(
-                                        "Group Invite to ${groupInvite.groupName!!}"
-                                    ),
-                                    color = textColor
-                                )
-                                Button(onClick = { groupInviteOnClick(groupInvite) }) {
-                                    Text(text = "Join ${groupInvite.groupName!!}")
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-            }
-        },
-        sheetBackgroundColor = backgroundColor,
-        content = content,
-        sheetShape = AppTheme.shapes.large
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun MembersListBottomSheet(
-    state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
-    textColor: Color = AppTheme.colors.onSecondary,
-    content: @Composable () -> Unit
-) {
-
-    ModalBottomSheetLayout(
-        sheetState = state,
-        sheetContent = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppTheme.dimensions.paddingMedium)
-            ) {
-                Text(text = "NOTIFICATIONS LIST", color = textColor)
-                Spacer(modifier = Modifier.height(8.dp))
-
-            }
-        },
-        sheetBackgroundColor = backgroundColor,
-        content = content,
-        sheetShape = AppTheme.shapes.large
-    )
-}
-
-@Composable
-fun GroupNotificationsButton(
-    groupNotificationsOnClick: () -> Unit
-) {
-    IconButton(onClick = groupNotificationsOnClick) {
-        Icon(
+    IconButton(onClick = navigateNotificationsOnClick) {
+        SmallIcon(
             imageVector = Icons.Default.Notifications,
             contentDescription = "Notifications"
         )
@@ -471,7 +269,7 @@ fun MembersButton(
     IconButton(
         onClick = membersOnClick
     ) {
-        smallIcon(
+        SmallIcon(
             imageVector = Icons.Default.Person,
             contentDescription = "Members"
         )
@@ -553,7 +351,6 @@ fun RecentActivityList(
         "Personal",
         "Settle"
     )
-
     val sampleList = mapOf(
         "4/20" to listOf("test1", "test2", "test3", "test4"),
         "6/9" to listOf("test5", "test6", "test7", "test8")
@@ -581,8 +378,7 @@ fun RecentActivityList(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
                 ) {
-
-                    val indicator = @Composable { tabPositions: List<TabPosition> ->
+                    val indicator: @Composable (List<TabPosition>) -> Unit = { tabPositions ->
                         CustomIndicator(tabPositions, pagerState)
                     }
 
@@ -627,17 +423,9 @@ fun RecentActivityList(
                     .fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> {
-                        RecentGroupActivityList(groupActivity = groupActivity)
-                    }
-
-                    1 -> {
-                        PublicRequestsList(content = sampleList)
-                    }
-
-                    2 -> {
-                        PublicRequestsList(content = sampleList)
-                    }
+                    0 -> RecentGroupActivityList(groupActivity = groupActivity)
+                    1 -> PublicRequestsList(content = sampleList)
+                    2 -> PublicRequestsList(content = sampleList)
                 }
             }
         }
@@ -655,10 +443,10 @@ fun RecentGroupActivityList(
     ) {
         itemsIndexed(groupActivity) { _, transactionActivity ->
             when(transactionActivity) {
-                is AcceptDebtAction -> {
+                is TransactionActivity.AcceptDebtAction -> {
                     Text(text = transactionActivity.displayText())
                 }
-                is CreateDebtAction -> {
+                is TransactionActivity.CreateDebtAction -> {
                     Text(text = transactionActivity.displayText())
                 }
             }
@@ -693,42 +481,6 @@ fun PublicRequestsList(content: Map<String, List<String>>) {
     }
 }
 
-@Composable
-fun SearchBar (
-    username: String,
-    onUsernameChange: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        TextField(
-            value = username,
-            onValueChange = onUsernameChange,
-            label = { Text("Search", color = AppTheme.colors.primary) },
-            singleLine = true,
-            shape = RoundedCornerShape(10.dp),
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "SearchIcon"
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(AppTheme.shapes.large)
-                .background(AppTheme.colors.secondary)
-                .padding(all = AppTheme.dimensions.paddingMedium),
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = AppTheme.colors.primary,
-                disabledTextColor = Color.Transparent,
-                backgroundColor = AppTheme.colors.onPrimary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            )
-        )
-    }
-}
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerState) {

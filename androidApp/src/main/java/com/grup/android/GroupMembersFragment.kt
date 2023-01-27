@@ -1,6 +1,5 @@
 package com.grup.android
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -24,31 +21,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.caption
 import com.grup.android.ui.h1Text
-import com.grup.android.ui.smallIcon
-import com.grup.models.Group
-import com.grup.models.GroupInvite
+import com.grup.android.ui.SmallIcon
+import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
-class MembersFragment : Fragment() {
-    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
+class GroupMembersFragment : Fragment() {
+    private val groupMembersViewModel: GroupMembersViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,8 +48,8 @@ class MembersFragment : Fragment() {
                 CompositionLocalProvider(
                     LocalContentColor provides AppTheme.colors.onSecondary
                 ) {
-                    MembersLayout(
-                        mainViewModel = mainViewModel,
+                    GroupMembersLayout(
+                        groupMembersViewModel = groupMembersViewModel,
                         navController = findNavController()
                     )
                 }
@@ -71,44 +59,36 @@ class MembersFragment : Fragment() {
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLifecycleComposeApi::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MembersLayout(
-    mainViewModel: MainViewModel,
+fun GroupMembersLayout(
+    groupMembersViewModel: GroupMembersViewModel,
     navController: NavController
 ) {
-
-    val scaffoldState = rememberScaffoldState()
-    var username: String by remember { mutableStateOf("") }
-    val MemberInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val userInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-
-    val selectedGroup: Group? by mainViewModel.selectedGroup.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-
-    val sampleList = mapOf(
-        "4/20" to listOf("test1", "test2", "test3", "test4"),
-        "6/9" to listOf("test5", "test6", "test7", "test8")
-    )
+    
+    val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
+    
+    var usernameSearchQuery: String by remember { mutableStateOf("") }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
-
         AddToGroupBottomSheetLayout(
-            selectedGroup = selectedGroup!!,
             state = addToGroupBottomSheetState,
-            inviteUsernameToGroup = { username, group ->
-                mainViewModel.inviteUserToGroup(username, group)
+            inviteUsernameToGroupOnClick = { username ->
+                groupMembersViewModel.inviteUserToGroup(username)
+                scope.launch {
+                    addToGroupBottomSheetState.hide()
+                }
             }
         ) {
-            MemberInfoBottomSheet(state = MemberInfoBottomSheetState ) {
+            GroupMemberInfoBottomSheet(state = userInfoBottomSheetState) {
                 content()
-
             }
         }
-
     }
 
-    modalSheets{
+    modalSheets {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -135,71 +115,124 @@ fun MembersLayout(
                 )
             },
             backgroundColor = AppTheme.colors.primary,
-            drawerContent = { Text(text = "drawerContent") },
-            bottomBar = { /* TODO */ },
-            content = {
-                Box(
-                    modifier = Modifier
-                        .clip(AppTheme.shapes.large)
-                        .background(AppTheme.colors.secondary)
-                        .fillMaxSize()
+            drawerContent = { Text(text = "drawerContent") }
+        ) { padding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(AppTheme.shapes.large)
+                    .padding(padding)
+                    .background(AppTheme.colors.secondary)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            SearchBar(
-                                username = username,
-                                onUsernameChange = {}
-                            )
-                        }
-
-                        MembersList()
+                        UsernameSearchBar(
+                            usernameSearchQuery = usernameSearchQuery,
+                            onUsernameChange = { usernameSearchQuery = it }
+                        )
                     }
+                    UsersList(
+                        userInfos = userInfos.filter { userInfo ->
+                            userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
+                        }
+                    )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun UsernameSearchBar(
+    usernameSearchQuery: String,
+    onUsernameChange: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TextField(
+            value = usernameSearchQuery,
+            onValueChange = onUsernameChange,
+            label = { Text("Search", color = AppTheme.colors.primary) },
+            singleLine = true,
+            shape = RoundedCornerShape(10.dp),
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "SearchIcon"
+                )
             },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.secondary)
+                .padding(all = AppTheme.dimensions.paddingMedium),
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = AppTheme.colors.primary,
+                disabledTextColor = Color.Transparent,
+                backgroundColor = AppTheme.colors.onPrimary,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            )
         )
     }
 }
 
 @Composable
-fun MembersList() {
+fun UsersList(
+    userInfos: List<UserInfo>
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        itemsIndexed(userInfos) { _, userInfo ->
+            UserDisplay(userInfo = userInfo)
+        }
+    }
+}
+
+@Composable
+fun UserDisplay(
+    userInfo: UserInfo
+) {
     Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.dimensions.paddingMedium)
     ) {
-        Icon(
-            imageVector = Icons.Default.Face,
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(70.dp)
-                .padding(horizontal = AppTheme.dimensions.paddingSmall)
-        )
-
-        Column(verticalArrangement = Arrangement.Center) {
-            h1Text(text = "Name")
-            caption(text = "This is a description")
+        Row {
+            Icon(
+                imageVector = Icons.Default.Face,
+                contentDescription = "Profile Picture",
+                modifier = Modifier
+                    .size(70.dp)
+                    .padding(horizontal = AppTheme.dimensions.paddingSmall)
+            )
+            Column(verticalArrangement = Arrangement.Center) {
+                h1Text(text = userInfo.nickname!!)
+                caption(text = "This is a description")
+            }
         }
+        Text(text = "$${userInfo.userBalance}")
     }
-
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MemberInfoBottomSheet(
+fun GroupMemberInfoBottomSheet(
     state: ModalBottomSheetState,
     backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState()
-
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
@@ -217,7 +250,8 @@ fun MemberInfoBottomSheet(
                     )
                     h1Text(
                         text = "Member",
-                        modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
+                        modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge),
+                        color = textColor
                     )
                 }
             },
@@ -232,7 +266,7 @@ fun AddToGroupButton(
     addToGroupOnClick: () -> Unit
 ) {
     IconButton(onClick = addToGroupOnClick) {
-        smallIcon(
+        SmallIcon(
             imageVector = Icons.Default.Add,
             contentDescription = "Add to Group"
         )
@@ -242,8 +276,7 @@ fun AddToGroupButton(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddToGroupBottomSheetLayout(
-    selectedGroup: Group,
-    inviteUsernameToGroup: (String, Group) -> Unit,
+    inviteUsernameToGroupOnClick: (String) -> Unit,
     state: ModalBottomSheetState,
     backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
@@ -260,13 +293,13 @@ fun AddToGroupBottomSheetLayout(
                     .fillMaxWidth()
                     .padding(AppTheme.dimensions.paddingMedium)
             ) {
-                SearchBar(
-                    username = username,
+                UsernameSearchBar(
+                    usernameSearchQuery = username,
                     onUsernameChange = { username = it }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { inviteUsernameToGroup(username, selectedGroup) },
+                    onClick = { inviteUsernameToGroupOnClick(username) },
                     colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
                     shape = AppTheme.shapes.CircleShape
                 ) {

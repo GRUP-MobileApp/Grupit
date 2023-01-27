@@ -35,7 +35,7 @@ import androidx.navigation.navGraphViewModels
 import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
-import com.grup.android.ui.smallIcon
+import com.grup.android.ui.SmallIcon
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
@@ -244,7 +244,7 @@ fun AddDebtorBottomSheet(
     content: @Composable () -> Unit
 ) {
     val selectedUsers: MutableList<UserInfo> = remember { mutableStateListOf() }
-    var userSearchQuery: String by remember { mutableStateOf("") }
+    var usernameSearchQuery: String by remember { mutableStateOf("") }
 
     ModalBottomSheetLayout(
         sheetState = state,
@@ -259,8 +259,8 @@ fun AddDebtorBottomSheet(
                 Text(text = "Add Debtors", color = textColor)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = userSearchQuery,
-                    onValueChange = { userSearchQuery = it },
+                    value = usernameSearchQuery,
+                    onValueChange = { usernameSearchQuery = it },
                     trailingIcon = { Icons.Default.Search },
                     modifier = Modifier
                         .padding(5.dp)
@@ -270,8 +270,8 @@ fun AddDebtorBottomSheet(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 SelectDebtorsChecklist(
-                    userSearchQuery = userSearchQuery,
-                    allUsers = userInfos,
+                    usernameSearchQuery = usernameSearchQuery,
+                    userInfos = userInfos,
                     selectedUsers = selectedUsers,
                     onCheckedChange = { userInfo, isSelected ->
                         if (isSelected) {
@@ -294,8 +294,8 @@ fun AddDebtorBottomSheet(
 
 @Composable
 fun SelectDebtorsChecklist(
-    userSearchQuery: String,
-    allUsers: List<UserInfo>,
+    usernameSearchQuery: String,
+    userInfos: List<UserInfo>,
     selectedUsers: List<UserInfo>,
     onCheckedChange: (UserInfo, Boolean) -> Unit
 ) {
@@ -305,8 +305,8 @@ fun SelectDebtorsChecklist(
         modifier = Modifier.fillMaxWidth()
     ) {
         itemsIndexed(
-            allUsers.filter {
-                it.nickname!!.contains(userSearchQuery, ignoreCase = true)
+            userInfos.filter { userInfo ->
+                userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
             }
         ) { _, userInfo ->
             Row(
@@ -331,7 +331,7 @@ fun AddDebtorButton(
     addDebtorOnClick: () -> Unit
 ) {
     IconButton(onClick = addDebtorOnClick) {
-        smallIcon(
+        SmallIcon(
             imageVector = Icons.Default.Add,
             contentDescription = "Add a debtor"
         )

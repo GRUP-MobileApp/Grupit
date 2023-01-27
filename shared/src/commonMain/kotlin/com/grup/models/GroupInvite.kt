@@ -18,6 +18,10 @@ class GroupInvite internal constructor() : BaseEntity(), RealmObject {
     var inviter: String? = null
         get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing inviter")
         internal set
+    var inviterUsername: String? = null
+        get() = field
+            ?: throw MissingFieldException("GroupInvite with id $_id missing inviterUsername")
+        internal set
     var invitee: String? = null
         get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing invitee")
         internal set
@@ -27,7 +31,7 @@ class GroupInvite internal constructor() : BaseEntity(), RealmObject {
     var groupId: String? = null
         get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing groupId")
         internal set
-    var date: Instant = Clock.System.now()
+    var date: String = Clock.System.now().toString()
         internal set
     var status: String = RequestStatus.PENDING
         internal set

@@ -13,15 +13,14 @@ class TransactionViewModel : ViewModel() {
     private val selectedGroup
         get() = MainViewModel.selectedGroup
 
-    // Hot flow containing UserInfo's belonging to the selectedGroup
+    // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
+    // change during lifecycle.
     private val _userInfosFlow = APIServer.getAllUserInfosAsFlow()
     val userInfos: StateFlow<List<UserInfo>> =
-        _userInfosFlow.combine(selectedGroup) { userInfos, selectedGroup ->
-            selectedGroup?.let { nonNullGroup ->
-                userInfos.filter { userInfo ->
-                    userInfo.groupId == nonNullGroup.getId()
-                }
-            } ?: emptyList()
+        _userInfosFlow.map { userInfos ->
+            userInfos.filter { userInfo ->
+                userInfo.groupId == selectedGroup.getId()
+            }
         }.asState()
 
     val myUserInfo: StateFlow<UserInfo> = userInfos.map { userInfos ->
