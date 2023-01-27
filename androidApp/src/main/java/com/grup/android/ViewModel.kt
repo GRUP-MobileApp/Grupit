@@ -1,13 +1,19 @@
 package com.grup.android
 
 import androidx.lifecycle.viewModelScope
+import com.grup.APIServer
+import com.grup.models.Group
+import com.grup.models.User
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 
 abstract class ViewModel : androidx.lifecycle.ViewModel() {
-    private companion object {
+    companion object {
         private const val STOP_TIMEOUT_MILLIS: Long = 5000
     }
+
+    protected val userObject: User
+        get() = APIServer.user
 
     // Turns into hot flow that continues running even in background
     protected fun <T> Flow<List<T>>.asNotifications() =

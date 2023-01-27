@@ -36,6 +36,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.accompanist.pager.*
 import com.grup.android.login.LoginActivity
+import com.grup.android.transaction.AcceptDebtAction
+import com.grup.android.transaction.CreateDebtAction
+import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.*
 import com.grup.android.ui.caption
 import com.grup.android.ui.h1Text

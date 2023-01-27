@@ -30,7 +30,7 @@
 
     <fragment
         android:id="@+id/actionAmountFragment"
-        android:name="com.grup.android.ActionAmountFragment"
+        android:name="com.grup.android.transaction.ActionAmountFragment"
         android:label="DebtActionFragment" >
         <action
             android:id="@+id/createDebtAction"
@@ -39,7 +39,7 @@
 
     <fragment
         android:id="@+id/debtActionFragment"
-        android:name="com.grup.android.DebtActionFragment"
+        android:name="com.grup.android.transaction.DebtActionFragment"
         android:label="DebtActionFragment" />
 
     <fragment

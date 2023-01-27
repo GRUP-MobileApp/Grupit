@@ -1,14 +1,19 @@
 package com.grup.android
 
 import com.grup.APIServer
+import com.grup.android.transaction.AcceptDebtAction
+import com.grup.android.transaction.CreateDebtAction
+import com.grup.android.transaction.TransactionActivity
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import kotlinx.coroutines.flow.*
 
 class MainViewModel : ViewModel() {
-    private val userObject: User
-        get() = APIServer.user
-
+    companion object {
+        private val selectedGroupMutable:
+                MutableStateFlow<Group?> = MutableStateFlow(null)
+        val selectedGroup: StateFlow<Group?> = selectedGroupMutable
+    }
     val hasUserObject: Boolean
         get() = try {
             userObject
@@ -18,36 +23,26 @@ class MainViewModel : ViewModel() {
         }
 
     // Selected group in the UI. Other UI flows use this to filter data based on the selected group.
-    private val _selectedGroup: MutableStateFlow<Group?> = MutableStateFlow(null)
-    val selectedGroup: StateFlow<Group?> = _selectedGroup
+    val selectedGroup
+        get() = MainViewModel.selectedGroup
 
     fun onSelectedGroupChange(group: Group) = group.also {
-        _selectedGroup.value = group
+        selectedGroupMutable.value = group
     }
 
     // Hot flow containing all Group's the user is in. Updates selectedGroup if it's changed/deleted
     private val _groupsFlow = APIServer.getAllGroupsAsFlow()
     val groups: StateFlow<List<Group>> = _groupsFlow.onEach { newGroups ->
-        _selectedGroup.value?.let { nonNullGroup ->
-            _selectedGroup.value = newGroups.find { group ->
+        selectedGroup.value?.let { nonNullGroup ->
+            selectedGroupMutable.value = newGroups.find { group ->
                 group.getId() == nonNullGroup.getId()
             }
         } ?: run {
-            _selectedGroup.value = newGroups.getOrNull(0)
+            selectedGroupMutable.value = newGroups.getOrNull(0)
         }
     }.asState()
 
-    // Hot flow containing UserInfo's belonging to the selectedGroup
-    private val _userInfosFlow = APIServer.getAllUserInfosAsFlow()
-    val userInfos: StateFlow<List<UserInfo>> =
-        _userInfosFlow.combine(_selectedGroup) { userInfos, selectedGroup ->
-            selectedGroup?.let { nonNullGroup ->
-                userInfos.filter { userInfo ->
-                    userInfo.groupId == nonNullGroup.getId()
-                }
-            } ?: emptyList()
-        }.asState()
-
+    // Hot flow containing User's UserInfos
     private val _myUserInfos = APIServer.getMyUserInfosAsFlow()
     val myUserInfo: StateFlow<UserInfo?> = _myUserInfos.map { userInfos ->
         userInfos.find { it.userId == userObject.getId() }
@@ -59,7 +54,7 @@ class MainViewModel : ViewModel() {
     // Hot flow containing DebtAction's belonging to the selectedGroup
     private val _debtActionsFlow = APIServer.getAllDebtActionsAsFlow()
     private val debtActions: StateFlow<List<DebtAction>> =
-        _debtActionsFlow.combine(_selectedGroup) { debtActions, selectedGroup ->
+        _debtActionsFlow.combine(selectedGroup) { debtActions, selectedGroup ->
             selectedGroup?.let { group ->
                 debtActions.filter { debtAction ->
                     debtAction.groupId == group.getId()
@@ -106,19 +101,6 @@ class MainViewModel : ViewModel() {
     fun acceptInviteToGroup(groupInvite: GroupInvite) = APIServer.acceptInviteToGroup(groupInvite)
     fun inviteUserToGroup(username: String, group: Group) =
         APIServer.inviteUserToGroup(username, group)
-
-    // DebtAction operations
-    fun createDebtAction(userInfos: List<UserInfo>, debtAmounts: List<Double>) =
-        APIServer.createDebtAction(
-            userInfos.zip(debtAmounts).map { (userInfo, balanceChange) ->
-                TransactionRecord().apply {
-                    this.debtor = userInfo.userId!!
-                    this.debtorName = userInfo.nickname!!
-                    this.balanceChange = balanceChange
-                }
-            },
-            myUserInfo.value!!
-        )
 
     fun logOut() = APIServer.logOut()
 }

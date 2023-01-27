@@ -1,4 +1,4 @@
-package com.grup.android
+package com.grup.android.transaction
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,12 +21,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
+import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
 import com.grup.models.UserInfo
 
 class ActionAmountFragment : Fragment() {
-    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
+    private val transactionViewModel: TransactionViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,7 +37,7 @@ class ActionAmountFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 ActionAmountLayout(
-                    mainViewModel = mainViewModel,
+                    transactionViewModel = transactionViewModel,
                     navController = findNavController()
                 )
             }
@@ -47,11 +48,10 @@ class ActionAmountFragment : Fragment() {
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun ActionAmountLayout(
-    mainViewModel: MainViewModel,
+    transactionViewModel: TransactionViewModel,
     navController: NavController
 ) {
-    val nullableUserInfo: UserInfo? by mainViewModel.myUserInfo.collectAsStateWithLifecycle()
-    val myUserInfo: UserInfo = nullableUserInfo!!
+    val myUserInfo: UserInfo by transactionViewModel.myUserInfo.collectAsStateWithLifecycle()
     var actionAmount: String by remember { mutableStateOf("0") }
 
     Scaffold(

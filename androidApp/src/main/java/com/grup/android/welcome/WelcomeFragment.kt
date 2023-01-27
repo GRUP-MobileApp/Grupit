@@ -125,17 +125,6 @@ fun WelcomeContent(
 
 @ExperimentalPagerApi
 @Composable
-fun PagerIndicator(pagerState: PagerState, content: @Composable BoxScope.()->Unit) {
-    HorizontalPagerIndicator(
-        pagerState = pagerState,
-        modifier = Modifier
-            .padding(16.dp),
-        activeColor = AppTheme.colors.onPrimary,
-    )
-}
-
-@ExperimentalPagerApi
-@Composable
 fun WelcomeScreen1(
     welcomeViewModel: WelcomeViewModel,
     navController: NavController

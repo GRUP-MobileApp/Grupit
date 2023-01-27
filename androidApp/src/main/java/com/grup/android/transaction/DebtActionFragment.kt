@@ -1,4 +1,4 @@
-package com.grup.android
+package com.grup.android.transaction
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -20,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -28,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
+import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
 import com.grup.android.ui.smallIcon
@@ -35,7 +40,7 @@ import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
 class DebtActionFragment : Fragment() {
-    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
+    private val transactionViewModel: TransactionViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,7 +54,7 @@ class DebtActionFragment : Fragment() {
                 ) {
                     DebtActionLayout(
                         debtActionAmount = requireArguments().getDouble("amount"),
-                        mainViewModel = mainViewModel,
+                        transactionViewModel = transactionViewModel,
                         navController = findNavController()
                     )
                 }
@@ -62,13 +67,13 @@ class DebtActionFragment : Fragment() {
 @Composable
 fun DebtActionLayout(
     debtActionAmount: Double,
-    mainViewModel: MainViewModel,
+    transactionViewModel: TransactionViewModel,
     navController: NavController
 ) {
     val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
-    val userInfos: List<UserInfo> by mainViewModel.userInfos.collectAsStateWithLifecycle()
+    val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
     val debtors: MutableList<UserInfo> = remember { mutableStateListOf() }
 
     AddDebtorBottomSheet(
@@ -117,7 +122,49 @@ fun DebtActionLayout(
                                 .height(40.dp)
                                 .padding(AppTheme.dimensions.paddingMedium)
                         ) {
-                            Text(text = "Even split between", color = AppTheme.colors.onSecondary)
+                            buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = AppTheme.colors.onSecondary
+                                    )
+                                ) {
+                                    append("by ")
+                                }
+                                pushStringAnnotation(
+                                    tag = "SplitStrategy",
+                                    annotation = "Split Strategy"
+                                )
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = AppTheme.colors.onSecondary,
+                                        background = AppTheme.colors.primary
+                                    )
+                                ) {
+                                    append("Even Split")
+                                }
+                                pop()
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = AppTheme.colors.onSecondary
+                                    )
+                                ) {
+                                    append(" between:")
+                                }
+                            }.let { annotatedText ->
+                                ClickableText(
+                                    text = annotatedText,
+                                    onClick = { offset ->
+                                        annotatedText.getStringAnnotations(
+                                            tag = "SignUp",// tag which you used in the buildAnnotatedString
+                                            start = offset,
+                                            end = offset
+                                        )[0].let { annotation ->
+                                            //do your stuff when it gets clicked
+                                        }
+                                    }
+                                )
+                            }
+
                             AddDebtorButton(
                                 addDebtorOnClick = {
                                     scope.launch { addDebtorBottomSheetState.show() }
@@ -129,7 +176,7 @@ fun DebtActionLayout(
                             debtActionAmount = debtActionAmount,
                             debtors = debtors,
                             createDebtActionOnClick = { userInfos, debtAmounts ->
-                                mainViewModel.createDebtAction(userInfos, debtAmounts)
+                                transactionViewModel.createDebtAction(userInfos, debtAmounts)
                                 navController.popBackStack()
                                 navController.popBackStack()
                             }

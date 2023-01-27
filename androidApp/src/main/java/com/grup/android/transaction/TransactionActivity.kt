@@ -1,4 +1,4 @@
-package com.grup.android
+package com.grup.android.transaction
 
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
