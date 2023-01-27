@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Search
@@ -41,6 +42,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.caption
 import com.grup.android.ui.h1Text
+import com.grup.android.ui.smallIcon
 import com.grup.models.Group
 import com.grup.models.GroupInvite
 import kotlinx.coroutines.launch
@@ -77,15 +79,12 @@ fun MembersLayout(
 ) {
 
     val scaffoldState = rememberScaffoldState()
-    var searchText: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
+    var username: String by remember { mutableStateOf("") }
     val MemberInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
     val selectedGroup: Group? by mainViewModel.selectedGroup.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-
-    fun openDrawer() = scope.launch { scaffoldState.drawerState.open() }
-    fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
 
     val sampleList = mapOf(
         "4/20" to listOf("test1", "test2", "test3", "test4"),
@@ -93,21 +92,20 @@ fun MembersLayout(
     )
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
-        MemberInfoBottomSheet(state = MemberInfoBottomSheetState ) {
 
+        AddToGroupBottomSheetLayout(
+            selectedGroup = selectedGroup!!,
+            state = addToGroupBottomSheetState,
+            inviteUsernameToGroup = { username, group ->
+                mainViewModel.inviteUserToGroup(username, group)
+            }
+        ) {
+            MemberInfoBottomSheet(state = MemberInfoBottomSheetState ) {
+                content()
+
+            }
         }
 
-        selectedGroup?.let {
-            AddToGroupBottomSheetLayout(
-                selectedGroup = it,
-                state = addToGroupBottomSheetState,
-                inviteUsernameToGroup = { username, group ->
-                    mainViewModel.inviteUserToGroup(username, group)
-                    closeDrawer()
-                },
-                content = content
-            )
-        } ?: content()
     }
 
     modalSheets{
@@ -154,7 +152,10 @@ fun MembersLayout(
                         Row(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            SearchBar()
+                            SearchBar(
+                                username = username,
+                                onUsernameChange = {}
+                            )
                         }
 
                         MembersList()
@@ -223,5 +224,57 @@ fun MemberInfoBottomSheet(
         sheetBackgroundColor = backgroundColor,
         content = content,
         sheetShape = AppTheme.shapes.large
+    )
+}
+
+@Composable
+fun AddToGroupButton(
+    addToGroupOnClick: () -> Unit
+) {
+    IconButton(onClick = addToGroupOnClick) {
+        smallIcon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add to Group"
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AddToGroupBottomSheetLayout(
+    selectedGroup: Group,
+    inviteUsernameToGroup: (String, Group) -> Unit,
+    state: ModalBottomSheetState,
+    backgroundColor: Color = AppTheme.colors.secondary,
+    textColor: Color = AppTheme.colors.onSecondary,
+    content: @Composable () -> Unit
+) {
+    var username: String by remember { mutableStateOf("") }
+
+    ModalBottomSheetLayout(
+        sheetState = state,
+        sheetContent = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppTheme.dimensions.paddingMedium)
+            ) {
+                SearchBar(
+                    username = username,
+                    onUsernameChange = { username = it }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { inviteUsernameToGroup(username, selectedGroup) },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+                    shape = AppTheme.shapes.CircleShape
+                ) {
+                    Text(text = "Add to group", color = textColor)
+                }
+            }
+        },
+        sheetBackgroundColor = backgroundColor,
+        content = content
     )
 }
