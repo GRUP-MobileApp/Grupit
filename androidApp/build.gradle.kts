@@ -72,7 +72,7 @@ dependencies {
     
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
-    
+
     //Accompanist
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
