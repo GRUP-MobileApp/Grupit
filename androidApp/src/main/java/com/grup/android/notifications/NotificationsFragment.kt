@@ -82,13 +82,14 @@ fun NotificationsLayout(
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
             itemsIndexed(notifications) { _, notification ->
                 when(notification) {
-                    is Notification.GroupInvite -> Text(text = notification.displayText())
+                    is Notification.IncomingGroupInvite -> Text(text = notification.displayText())
+                    is Notification.InviteeAcceptOutgoingGroupInvite ->
+                        Text(text = notification.displayText())
                     is Notification.IncomingDebtAction -> Text(text = notification.displayText())
-                    is Notification.DebtorAcceptDebtAction ->
+                    is Notification.DebtorAcceptOutgoingDebtAction ->
                         Text(text = notification.displayText())
                 }
             }
         }
     }
-
 }

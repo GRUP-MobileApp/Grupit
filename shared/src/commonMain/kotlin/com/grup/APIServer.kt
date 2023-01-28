@@ -1,12 +1,14 @@
 package com.grup
 
 import com.grup.controllers.*
-import com.grup.di.stopSubscriptionSyncJob
+import com.grup.di.*
+import com.grup.di.httpClientModule
 import com.grup.di.openSyncedRealm
 import com.grup.di.realm
 import com.grup.di.registerUserObject
 import com.grup.di.repositoriesModule
 import com.grup.di.servicesModule
+import com.grup.di.stopSubscriptionSyncJob
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
@@ -105,7 +107,8 @@ object APIServer {
                     single { realm }
                 },
                 servicesModule,
-                repositoriesModule
+                repositoriesModule,
+                httpClientModule
             ))
         }
     }

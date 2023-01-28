@@ -3,13 +3,26 @@ package com.grup.android.notifications
 import com.grup.APIServer
 import com.grup.android.ViewModel
 import com.grup.models.GroupInvite
+import com.grup.models.TransactionRecord
 import kotlinx.coroutines.flow.*
 
 class NotificationsViewModel : ViewModel() {
-    private val groupInvitesAsNotification: Flow<List<Notification>> =
-        APIServer.getAllGroupInvitesAsFlow().map { groupInvites ->
-            groupInvites.map { groupInvite ->
-                Notification.GroupInvite(groupInvite)
+    private val _groupInvitesFlow = APIServer.getAllGroupInvitesAsFlow()
+    private val incomingGroupInvitesAsNotification: Flow<List<Notification>> =
+        _groupInvitesFlow.map { groupInvites ->
+            groupInvites.filter { groupInvite ->
+                groupInvite.invitee!! == userObject.getId()
+            }.map { groupInvite ->
+                Notification.IncomingGroupInvite(groupInvite)
+            }
+        }
+    private val outgoingGroupInvitesAsNotification: Flow<List<Notification>> =
+        _groupInvitesFlow.map { groupInvites ->
+            groupInvites.filter { groupInvite ->
+                groupInvite.inviter!! == userObject.getId() &&
+                        groupInvite.dateAccepted != GroupInvite.PENDING
+            }.map { groupInvite ->
+                Notification.InviteeAcceptOutgoingGroupInvite(groupInvite)
             }
         }
 
@@ -25,10 +38,27 @@ class NotificationsViewModel : ViewModel() {
                 }
             }
         }
+    private val outgoingDebtActionsAsNotification: Flow<List<Notification>> =
+        _debtActionsFlow.map { debtActions ->
+            debtActions.filter { debtAction ->
+                debtAction.debtee == userObject.getId()
+            }.flatMap { debtAction ->
+                debtAction.debtTransactions.filter { transactionRecord ->
+                    transactionRecord.dateAccepted != TransactionRecord.PENDING
+                }.map { transactionRecord ->
+                    Notification.DebtorAcceptOutgoingDebtAction(debtAction, transactionRecord)
+                }
+            }
+        }
 
     val notifications: StateFlow<List<Notification>> =
-        merge(groupInvitesAsNotification, incomingDebtActionsAsNotification).map { notifications ->
-            notifications.sortedBy { notification ->
+        combine(
+            incomingGroupInvitesAsNotification,
+            outgoingGroupInvitesAsNotification,
+            incomingDebtActionsAsNotification,
+            outgoingDebtActionsAsNotification
+        ) { allNotifications: Array<List<Notification>> ->
+            allNotifications.flatMap { it }.sortedBy { notification ->
                 notification.date
             }
         }.asNotifications()

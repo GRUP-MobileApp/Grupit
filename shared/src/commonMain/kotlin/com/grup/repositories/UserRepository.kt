@@ -6,27 +6,14 @@ import com.grup.other.idSerialName
 import kotlinx.coroutines.runBlocking
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.statement.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-internal class UserRepository : IUserRepository {
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                    prettyPrint = true
-                },
-                contentType = ContentType.Application.Json
-            )
-        }
-    }
+internal class UserRepository : IUserRepository, KoinComponent {
+    private val client: HttpClient by inject()
 
     override fun findUserById(realmUserId: String): User? {
         var responseUser: User? = null

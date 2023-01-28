@@ -4,6 +4,7 @@ import com.grup.interfaces.IGroupInviteRepository
 import com.grup.models.Group
 import com.grup.models.GroupInvite
 import com.grup.models.User
+import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -16,6 +17,7 @@ internal class GroupInviteService: KoinComponent {
                 this.inviter = inviter.getId()
                 this.inviterUsername = inviter.username!!
                 this.invitee = invitee.getId()
+                this.inviteeUsername = invitee.username!!
                 this.groupId = group.getId()
                 this.groupName = group.groupName!!
             }
@@ -24,12 +26,7 @@ internal class GroupInviteService: KoinComponent {
 
     fun acceptGroupInvite(groupInvite: GroupInvite) {
         groupInviteRepository.updateGroupInviteStatus(groupInvite,
-            GroupInvite.RequestStatus.ACCEPTED)
-    }
-
-    fun rejectGroupInvite(groupInvite: GroupInvite) {
-        groupInviteRepository.updateGroupInviteStatus(groupInvite,
-            GroupInvite.RequestStatus.REJECTED)
+            Clock.System.now().toString())
     }
 
     fun getAllGroupInvitesAsFlow() = groupInviteRepository.findAllGroupInvitesAsFlow()

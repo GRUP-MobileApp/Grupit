@@ -38,10 +38,6 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
     return realm
 }
 
-internal fun stopSubscriptionSyncJob() {
-    subscriptionsJob.cancel()
-}
-
 @OptIn(DelicateCoroutinesApi::class)
 internal fun startSubscriptionSyncJob(): Job = GlobalScope.launch {
     var prevUserInfoList: List<UserInfo> = emptyList()
@@ -58,6 +54,10 @@ internal fun startSubscriptionSyncJob(): Job = GlobalScope.launch {
     }
 }
 
+internal fun stopSubscriptionSyncJob() {
+    subscriptionsJob.cancel()
+}
+
 internal fun registerUserObject(newUser: User) {
     realm.writeBlocking {
         copyToRealm(newUser)
@@ -66,11 +66,13 @@ internal fun registerUserObject(newUser: User) {
 
 internal fun MutableSubscriptionSet.addGroup(groupId: String) {
     add(realm.query<Group>("$idSerialName == $0", groupId), "${groupId}_Group")
+    add(realm.query<UserInfo>("groupId == $0", groupId), "${groupId}_UserInfo")
     add(realm.query<DebtAction>("groupId == $0", groupId),
         "${groupId}_DebtAction")
 }
 
 internal fun MutableSubscriptionSet.removeGroup(groupId: String) {
     remove("${groupId}_Group")
+    remove("${groupId}_UserInfo")
     remove("${groupId}_DebtAction")
 }

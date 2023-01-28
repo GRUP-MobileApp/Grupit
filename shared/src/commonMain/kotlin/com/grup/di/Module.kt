@@ -10,6 +10,12 @@ import com.grup.service.*
 import com.grup.service.GroupService
 import com.grup.service.DebtActionService
 import com.grup.service.UserService
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
 internal val servicesModule = module {
@@ -33,4 +39,21 @@ internal val testRepositoriesModule = module {
     single<IGroupRepository> { TestGroupRepository() }
     single<IUserInfoRepository> { TestUserInfoRepository() }
     single<IDebtActionRepository> { TestDebtActionRepository() }
+}
+
+internal val httpClientModule = module {
+    single {
+        HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        ignoreUnknownKeys = true
+                        isLenient = true
+                        prettyPrint = true
+                    },
+                    contentType = ContentType.Application.Json
+                )
+            }
+        }
+    }
 }

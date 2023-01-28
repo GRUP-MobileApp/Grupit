@@ -33,8 +33,8 @@ sealed class TransactionActivity {
         override val name: String
             get() = transactionRecord.debtorName!!
         override val date: String
-            get() = transactionRecord.dateAccepted.also {
-                if (date == TransactionRecord.PENDING) {
+            get() = transactionRecord.dateAccepted.also { dateAccepted ->
+                if (dateAccepted == TransactionRecord.PENDING) {
                     throw PendingTransactionRecordException(
                         "TransactionRecord still pending for" +
                                 "DebtAction with id ${debtAction.getId()}"

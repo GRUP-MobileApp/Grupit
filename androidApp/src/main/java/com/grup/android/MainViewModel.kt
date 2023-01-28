@@ -2,7 +2,6 @@ package com.grup.android
 
 import com.grup.APIServer
 import com.grup.android.transaction.TransactionActivity
-import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import kotlinx.coroutines.flow.*
 
@@ -33,9 +32,9 @@ class MainViewModel : ViewModel() {
     }.asState()
 
     // Hot flow containing User's UserInfos
-    private val _myUserInfos by lazy { APIServer.getMyUserInfosAsFlow() }
+    private val _myUserInfosFlow by lazy { APIServer.getMyUserInfosAsFlow() }
     val myUserInfo: StateFlow<UserInfo?> by lazy {
-        _myUserInfos.map { userInfos ->
+        _myUserInfosFlow.map { userInfos ->
             userInfos.find { it.userId == userObject.getId() }
         }.asState()
     }
@@ -47,7 +46,7 @@ class MainViewModel : ViewModel() {
             selectedGroup?.let { group ->
                 debtActions.filter { debtAction ->
                     debtAction.groupId == group.getId()
-                }.map { debtAction ->
+                }.flatMap { debtAction ->
                     listOf(
                         TransactionActivity.CreateDebtAction(debtAction),
                         *debtAction.debtTransactions.filter { transactionRecord ->
@@ -56,14 +55,16 @@ class MainViewModel : ViewModel() {
                             TransactionActivity.AcceptDebtAction(debtAction, transactionRecord)
                         }.toTypedArray()
                     )
-                }.flatten()
+                }
             } ?: emptyList()
         }
 
     // Hot flow combining all TransactionActivity flows to be displayed as recent activity in UI
     val groupActivity: StateFlow<List<TransactionActivity>> =
-        debtActionsAsTransactionActivity.map { transactionActivities ->
-            transactionActivities.sortedBy { transactionActivity ->
+        combine(
+            debtActionsAsTransactionActivity
+        ) { allTransactionActivities: Array<List<TransactionActivity>> ->
+            allTransactionActivities.flatMap { it }.sortedBy { transactionActivity ->
                 transactionActivity.date
             }
         }.asState()
