@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -31,8 +32,10 @@ import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.caption
 import com.grup.android.ui.h1Text
+
 import com.grup.android.ui.SmallIcon
 import com.grup.models.UserInfo
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class GroupMembersFragment : Fragment() {
@@ -67,9 +70,9 @@ fun GroupMembersLayout(
     val userInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    
+
     val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
-    
+
     var usernameSearchQuery: String by remember { mutableStateOf("") }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
@@ -184,7 +187,9 @@ fun UsernameSearchBar(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
+
 fun UsersList(
     userInfos: List<UserInfo>
 ) {
@@ -198,15 +203,21 @@ fun UsersList(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserDisplay(
-    userInfo: UserInfo
+    userInfo: UserInfo,
+    scope: CoroutineScope,
+    state: ModalBottomSheetState
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.dimensions.paddingMedium)
+            .clickable(
+                onClick = { scope.launch { state.show() } }
+            )
     ) {
         Row {
             Icon(
@@ -229,10 +240,17 @@ fun UserDisplay(
 @Composable
 fun GroupMemberInfoBottomSheet(
     state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
+    backgroundColor: Color = AppTheme.colors.primary,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
+
+
+    val sampleList = mapOf(
+        "4/20" to listOf("test1", "test2", "test3", "test4"),
+        "6/9" to listOf("test5", "test6", "test7", "test8")
+    )
+
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
@@ -241,19 +259,24 @@ fun GroupMemberInfoBottomSheet(
                     verticalAlignment = Alignment.Top,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = AppTheme.dimensions.paddingLarge)
+                        .background(AppTheme.colors.secondary)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Face,
                         contentDescription = "Profile Picture",
                         modifier = Modifier.size(98.dp)
                     )
+
                     h1Text(
                         text = "Member",
                         modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge),
                         color = textColor
                     )
+
+                    Divider()
+
                 }
+            PublicRequestsList(sampleList)
             },
         sheetBackgroundColor = backgroundColor,
         content = content,
