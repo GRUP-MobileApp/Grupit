@@ -50,8 +50,4 @@ internal class UserRepository : IUserRepository, KoinComponent {
         }
         return responseUser
     }
-
-    override fun close() {
-         client.close()
-    }
 }

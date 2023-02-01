@@ -23,11 +23,7 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
         }
     }
 
-    override fun getAllDebtActionsAsFlow(): Flow<List<DebtAction>> {
+    override fun findAllDebtActionsAsFlow(): Flow<List<DebtAction>> {
         return realm.query<DebtAction>().find().asFlow().map { it.list }
-    }
-
-    override fun close() {
-        realm.close()
     }
 }

@@ -55,7 +55,7 @@ kotlin {
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
 
-                //Ktor
+                // Ktor
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")

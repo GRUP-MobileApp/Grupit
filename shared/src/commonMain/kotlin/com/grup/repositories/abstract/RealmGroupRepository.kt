@@ -35,8 +35,4 @@ internal abstract class RealmGroupRepository : IGroupRepository {
             findLatest(group)?.apply(block)
         }
     }
-
-    override fun close() {
-        realm.close()
-    }
 }

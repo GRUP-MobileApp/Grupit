@@ -8,5 +8,5 @@ internal interface IDebtActionRepository : IRepository {
 
     fun updateDebtAction(debtAction: DebtAction, block: DebtAction.() -> Unit): DebtAction?
 
-    fun getAllDebtActionsAsFlow(): Flow<List<DebtAction>>
+    fun findAllDebtActionsAsFlow(): Flow<List<DebtAction>>
 }

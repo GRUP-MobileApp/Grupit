@@ -18,7 +18,7 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
         SyncConfiguration.Builder(realmUser,
             setOf(
                 User::class, Group::class, UserInfo::class, GroupInvite::class, DebtAction::class,
-                TransactionRecord::class
+                SettleAction::class, TransactionRecord::class
             )
         )
         .initialSubscriptions(rerunOnOpen = true) { realm ->
@@ -69,10 +69,13 @@ internal fun MutableSubscriptionSet.addGroup(groupId: String) {
     add(realm.query<UserInfo>("groupId == $0", groupId), "${groupId}_UserInfo")
     add(realm.query<DebtAction>("groupId == $0", groupId),
         "${groupId}_DebtAction")
+    add(realm.query<SettleAction>("groupId == $0", groupId),
+        "${groupId}_SettleAction")
 }
 
 internal fun MutableSubscriptionSet.removeGroup(groupId: String) {
     remove("${groupId}_Group")
     remove("${groupId}_UserInfo")
     remove("${groupId}_DebtAction")
+    remove("${groupId}_SettleAction")
 }

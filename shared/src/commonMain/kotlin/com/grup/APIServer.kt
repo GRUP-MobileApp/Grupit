@@ -58,6 +58,17 @@ object APIServer {
         DebtActionController.acceptDebtAction(debtAction, myTransactionRecord)
     fun getAllDebtActionsAsFlow() = DebtActionController.getAllDebtActionsAsFlow()
 
+    // SettleAction
+    fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
+        SettleActionController.createSettleAction(settleAmount, debtee)
+    fun settlePartialSettleAction(settleAction: SettleAction,
+                                   myTransactionRecord: TransactionRecord) =
+        SettleActionController.addTransactionRecord(settleAction, myTransactionRecord)
+    fun acceptPartialSettleAction(settleAction: SettleAction,
+                                  transactionRecord: TransactionRecord) =
+        SettleActionController.acceptTransactionRecord(settleAction, transactionRecord)
+    fun getAllSettleActionsAsFlow() = SettleActionController.getAllSettleActionsAsFlow()
+
 
     object Login {
         private suspend fun login(credentials: Credentials) {

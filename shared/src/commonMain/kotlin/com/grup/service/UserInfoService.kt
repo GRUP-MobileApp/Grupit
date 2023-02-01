@@ -3,10 +3,7 @@ package com.grup.service
 import com.grup.exceptions.NegativeBalanceException
 import com.grup.exceptions.NotFoundException
 import com.grup.interfaces.IUserInfoRepository
-import com.grup.models.DebtAction
-import com.grup.models.TransactionRecord
-import com.grup.models.User
-import com.grup.models.UserInfo
+import com.grup.models.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -43,15 +40,51 @@ class UserInfoService : KoinComponent {
                         "in Group with id ${debtAction.groupId}")
 
         if (allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange!! < 0) {
-            throw NegativeBalanceException("DebtAction with id ${debtAction.getId()}" +
+            throw NegativeBalanceException("TransactionRecord between debtor with id " +
+                    "${debtorUserInfo.userId} and debtee with id ${debteeUserInfo.userId} " +
+                    "in DebtAction with id ${debtAction.getId()} results in negative balance")
+        }
+
+        userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->
+            userInfo.userBalance -= transactionRecord.balanceChange!!
+        }
+        userInfoRepository.updateUserInfo(debteeUserInfo) { userInfo ->
+            userInfo.userBalance += transactionRecord.balanceChange!!
+        }
+    }
+
+    fun applySettleAction(settleAction: SettleAction) {
+        val debteeUserInfo: UserInfo =
+            findUserInfoByUserId(settleAction.debtee!!, settleAction.groupId!!)
+                ?: throw NotFoundException("User with id ${settleAction.debtee!!} not found " +
+                        "in Group with id ${settleAction.groupId}")
+
+        if (debteeUserInfo.userBalance - settleAction.settleAmount!! < 0) {
+            throw NegativeBalanceException("SettleAction with id ${settleAction.getId()}" +
                     "results in negative balance")
         }
 
-        userInfoRepository.updateUserInfo(debtorUserInfo) {
-            it.userBalance -= transactionRecord.balanceChange!!
+        userInfoRepository.updateUserInfo(debteeUserInfo) { userInfo ->
+            userInfo.userBalance -= settleAction.settleAmount!!
         }
-        userInfoRepository.updateUserInfo(debteeUserInfo) {
-            it.userBalance += transactionRecord.balanceChange!!
+    }
+
+    fun applyPartialSettleActionTransactionRecord(settleAction: SettleAction,
+                                                  transactionRecord: TransactionRecord) {
+        val debtorUserInfo: UserInfo =
+            findUserInfoByUserId(transactionRecord.debtor!!, settleAction.groupId!!)
+                ?: throw NotFoundException("User with id ${transactionRecord.debtor!!} not found " +
+                        "in Group with id ${settleAction.groupId!!}")
+
+        if (transactionRecord.balanceChange!! > settleAction.remainingAmount) {
+            throw NegativeBalanceException("TransactionRecord between debtor with id " +
+                    "${debtorUserInfo.userId} and debtee with id ${settleAction.debtee!!} in " +
+                    "SettleAction with id ${settleAction.getId()} results in negative " +
+                    "remaining amount")
+        }
+
+        userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->
+            userInfo.userBalance -= transactionRecord.balanceChange!!
         }
     }
 }

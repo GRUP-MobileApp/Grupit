@@ -36,8 +36,4 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
             }
         }
     }
-
-    override fun close() {
-        realm.close()
-    }
 }

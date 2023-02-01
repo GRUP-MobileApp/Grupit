@@ -27,8 +27,4 @@ internal abstract class RealmGroupInviteRepository : IGroupInviteRepository {
             }
         }
     }
-
-    override fun close() {
-        realm.close()
-    }
 }

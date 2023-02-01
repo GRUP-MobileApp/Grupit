@@ -30,15 +30,18 @@ internal val repositoriesModule = module {
     single<IUserRepository> { UserRepository() }
     single<IGroupRepository> { SyncedGroupRepository() }
     single<IUserInfoRepository> { SyncedUserInfoRepository() }
-    single<IDebtActionRepository> { SyncedDebtActionRepository() }
     single<IGroupInviteRepository> { SyncedGroupInviteRepository() }
+    single<IDebtActionRepository> { SyncedDebtActionRepository() }
+    single<ISettleActionRepository> { SyncedSettleActionRepository() }
 }
 
 internal val testRepositoriesModule = module {
     single<IUserRepository> { UserRepository() }
     single<IGroupRepository> { TestGroupRepository() }
     single<IUserInfoRepository> { TestUserInfoRepository() }
+    single<IGroupInviteRepository> { TestGroupInviteRepository() }
     single<IDebtActionRepository> { TestDebtActionRepository() }
+    single<ISettleActionRepository> { TestSettleActionRepository() }
 }
 
 internal val httpClientModule = module {
