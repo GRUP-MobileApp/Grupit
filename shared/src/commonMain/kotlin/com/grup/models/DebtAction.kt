@@ -14,6 +14,9 @@ open class DebtAction internal constructor(): Action(), RealmObject {
     override var groupId: String? = null
         get() = field
             ?: throw MissingFieldException("DebtAction with id $_id missing groupId")
+    override var groupName: String? = null
+        get() = field
+            ?: throw MissingFieldException("SettleAction with id $_id missing groupName")
     override var date: String = Clock.System.now().toString()
     override var debtee: String? = null
         get() = field

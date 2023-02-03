@@ -12,20 +12,60 @@ sealed class TransactionActivity {
     abstract val date: String
     abstract fun displayText(): String
 
-    abstract class CreateAction<T: Action> (
-        open val action: T
-    ): TransactionActivity() {
+    data class CreateDebtAction(
+        val debtAction: DebtAction
+    ) : TransactionActivity() {
         override val userId: String
-            get() = action.debtee!!
+            get() = debtAction.debtee!!
         override val name: String
-            get() = action.debteeName!!
+            get() = debtAction.debteeName!!
         override val date: String
-            get() = action.date
+            get() = debtAction.date
+
+        override fun displayText() =
+                    "$name created a transaction with ${debtAction.debtTransactions.size} people"
     }
 
-    abstract class AcceptAction<T: Action> (
-        private val action: T,
-        private val transactionRecord: TransactionRecord
+    data class AcceptDebtAction(
+        val debtAction: DebtAction,
+        val transactionRecord: TransactionRecord
+    ): TransactionActivity() {
+        override val userId: String
+            get() = transactionRecord.debtor!!
+        override val name: String
+            get() = transactionRecord.debtorName!!
+        override val date: String
+            get() = transactionRecord.dateAccepted.also { dateAccepted ->
+                if (dateAccepted == TransactionRecord.PENDING) {
+                    throw PendingTransactionRecordException(
+                        "TransactionRecord still pending for Debt Action " +
+                                "with id ${debtAction.getId()}"
+                    )
+                }
+            }
+
+        override fun displayText() =
+                    "$name accepted a debt of ${transactionRecord.balanceChange} from" +
+                    " ${debtAction.debteeName}"
+    }
+
+    data class CreateSettleAction(
+        val settleAction: SettleAction
+    ) : TransactionActivity() {
+        override val userId: String
+            get() = settleAction.debtee!!
+        override val name: String
+            get() = settleAction.debteeName!!
+        override val date: String
+            get() = settleAction.date
+
+        override fun displayText() =
+            "$name requested $${settleAction.settleAmount} to the group"
+    }
+
+    data class SettlePartialSettleAction(
+        val settleAction: SettleAction,
+        val transactionRecord: TransactionRecord
     ) : TransactionActivity() {
         override val userId: String
             get() = transactionRecord.debtor!!
@@ -35,46 +75,12 @@ sealed class TransactionActivity {
             get() = transactionRecord.dateAccepted.also { dateAccepted ->
                 if (dateAccepted == TransactionRecord.PENDING) {
                     throw PendingTransactionRecordException(
-                        "TransactionRecord still pending for " +
-                                when(action) {
-                                    is DebtAction -> "DebtAction"
-                                    is SettleAction -> "SettleAction"
-                                    else -> ""
-                                } +
-                                " with id ${action.getId()}"
+                        "TransactionRecord still pending for SettleAction " +
+                                "with id ${settleAction.getId()}"
                     )
                 }
             }
-    }
-
-    data class CreateDebtAction(
-        val debtAction: DebtAction
-    ) : CreateAction<DebtAction>(debtAction) {
-        override fun displayText() =
-                    "$name created a transaction with ${debtAction.debtTransactions.size} people"
-    }
-
-    data class AcceptDebtAction(
-        val debtAction: DebtAction,
-        val transactionRecord: TransactionRecord
-    ): AcceptAction<DebtAction>(debtAction, transactionRecord) {
-        override fun displayText() =
-                    "$name accepted a debt of ${transactionRecord.balanceChange} from" +
-                    " ${debtAction.debteeName}"
-    }
-
-    data class CreateSettleAction(
-        val settleAction: SettleAction
-    ) : CreateAction<SettleAction>(settleAction) {
-        override fun displayText() =
-            "$name created a transaction with ${settleAction.debtTransactions.size} people"
-    }
-
-    data class SettlePartialSettleAction(
-        val settleAction: SettleAction,
-        val transactionRecord: TransactionRecord
-    ) : AcceptAction<SettleAction>(settleAction, transactionRecord) {
         override fun displayText(): String =
-            ""
+            "$name paid ${transactionRecord.balanceChange} to ${settleAction.debteeName}"
     }
 }

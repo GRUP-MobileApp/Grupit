@@ -12,10 +12,13 @@ import kotlinx.datetime.Clock
 class SettleAction : Action(), RealmObject {
     @PrimaryKey override var _id: String = createId()
 
+    override var date: String = Clock.System.now().toString()
     override var groupId: String? = null
         get() = field
             ?: throw MissingFieldException("SettleAction with id $_id missing groupId")
-    override var date: String = Clock.System.now().toString()
+    override var groupName: String? = null
+        get() = field
+            ?: throw MissingFieldException("SettleAction with id $_id missing groupName")
     override var debtee: String? = null
         get() = field
             ?: throw MissingFieldException("SettleAction with id $_id missing debtee")

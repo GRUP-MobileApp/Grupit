@@ -4,6 +4,7 @@ import com.grup.exceptions.PendingTransactionRecordException
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.models.GroupInvite
+import com.grup.models.SettleAction
 
 sealed class Notification {
     abstract val date: String
@@ -63,5 +64,15 @@ sealed class Notification {
         override fun displayText(): String =
             "${transactionRecord.debtorName} has accepted a debt of " +
                     "${transactionRecord.balanceChange} from you"
+    }
+
+    data class NewSettleAction(
+        val settleAction: SettleAction
+    ) : Notification() {
+        override val date: String
+            get() = settleAction.date
+
+        override fun displayText(): String =
+            "${settleAction.debteeName} is requesting ${settleAction.settleAmount}"
     }
 }

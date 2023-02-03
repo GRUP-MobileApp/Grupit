@@ -449,6 +449,12 @@ fun RecentGroupActivityList(
                 is TransactionActivity.CreateDebtAction -> {
                     Text(text = transactionActivity.displayText())
                 }
+                is TransactionActivity.CreateSettleAction -> {
+                    Text(text = transactionActivity.displayText())
+                }
+                is TransactionActivity.SettlePartialSettleAction -> {
+                    Text(text = transactionActivity.displayText())
+                }
             }
         }
     }

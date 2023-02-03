@@ -84,7 +84,7 @@ class UserInfoService : KoinComponent {
         }
 
         userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->
-            userInfo.userBalance -= transactionRecord.balanceChange!!
+            userInfo.userBalance += transactionRecord.balanceChange!!
         }
     }
 }

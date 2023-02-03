@@ -88,6 +88,7 @@ fun NotificationsLayout(
                     is Notification.IncomingDebtAction -> Text(text = notification.displayText())
                     is Notification.DebtorAcceptOutgoingDebtAction ->
                         Text(text = notification.displayText())
+                    is Notification.NewSettleAction -> Text(text = notification.displayText())
                 }
             }
         }
