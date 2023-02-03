@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,10 +31,11 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.caption
-import com.grup.android.ui.h1Text
+import com.grup.android.ui.*
+
 import com.grup.android.ui.SmallIcon
 import com.grup.models.UserInfo
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class GroupMembersFragment : Fragment() {
@@ -67,9 +70,9 @@ fun GroupMembersLayout(
     val userInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    
+
     val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
-    
+
     var usernameSearchQuery: String by remember { mutableStateOf("") }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
@@ -139,7 +142,9 @@ fun GroupMembersLayout(
                     UsersList(
                         userInfos = userInfos.filter { userInfo ->
                             userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
-                        }
+                        },
+                        scope = scope,
+                        state = userInfoBottomSheetState
                     )
                 }
             }
@@ -184,44 +189,42 @@ fun UsernameSearchBar(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UsersList(
-    userInfos: List<UserInfo>
+    userInfos: List<UserInfo>,
+    scope: CoroutineScope,
+    state: ModalBottomSheetState
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing),
         modifier = Modifier.fillMaxSize()
     ) {
         itemsIndexed(userInfos) { _, userInfo ->
-            UserDisplay(userInfo = userInfo)
+            UserDisplay(userInfo = userInfo,
+                scope = scope,
+                state = state)
         }
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserDisplay(
-    userInfo: UserInfo
+    userInfo: UserInfo,
+    scope: CoroutineScope,
+    state: ModalBottomSheetState
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.dimensions.paddingMedium)
-    ) {
-        Row {
-            Icon(
-                imageVector = Icons.Default.Face,
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(70.dp)
-                    .padding(horizontal = AppTheme.dimensions.paddingSmall)
+            .clickable(
+                onClick = { scope.launch { state.show() } }
             )
-            Column(verticalArrangement = Arrangement.Center) {
-                h1Text(text = userInfo.nickname!!)
-                caption(text = "This is a description")
-            }
-        }
-        Text(text = "$${userInfo.userBalance}")
+    ) {
+        UserCard(userInfo, sideContent = { Text(text = "$${userInfo.userBalance}") })
     }
 }
 
@@ -229,7 +232,7 @@ fun UserDisplay(
 @Composable
 fun GroupMemberInfoBottomSheet(
     state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
+    backgroundColor: Color = AppTheme.colors.primary,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
@@ -241,19 +244,25 @@ fun GroupMemberInfoBottomSheet(
                     verticalAlignment = Alignment.Top,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = AppTheme.dimensions.paddingLarge)
+                        .background(AppTheme.colors.secondary)
+                        .padding(vertical = 10.dp, horizontal = 10.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Face,
                         contentDescription = "Profile Picture",
                         modifier = Modifier.size(98.dp)
                     )
+
                     h1Text(
                         text = "Member",
-                        modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge),
-                        color = textColor
+                        modifier = Modifier
+                            .padding(top = AppTheme.dimensions.paddingLarge),
+                        color = textColor,
+                        fontSize = 50.sp
                     )
+                    Divider()
                 }
+            /*TODO user transaction list here*/
             },
         sheetBackgroundColor = backgroundColor,
         content = content,
