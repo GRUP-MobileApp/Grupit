@@ -123,7 +123,12 @@ fun ActionAmountLayout(
                         )
                     }
                 )
-                SettleButton()
+                SettleButton(
+                    onClick = {
+                        transactionViewModel.createSettleAction(actionAmount.toDouble())
+                        navController.popBackStack()
+                    }
+                )
             }
         }
     }
@@ -351,7 +356,9 @@ fun RequestButton(
 }
 
 @Composable
-fun SettleButton() {
+fun SettleButton(
+    onClick: () -> Unit
+) {
     Button(
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
         modifier = Modifier
@@ -359,7 +366,7 @@ fun SettleButton() {
             .width(150.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
-        onClick = { /*TODO*/ }
+        onClick = onClick
     ) {
         Text(
             text = "Settle",

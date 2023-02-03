@@ -45,7 +45,7 @@ class UserInfoService : KoinComponent {
     fun applySettleAction(settleAction: SettleAction) {
         val debteeUserInfo: UserInfo = settleAction.debteeUserInfo!!
 
-        if (debteeUserInfo.userBalance - settleAction.settleAmount!! < 0) {
+        if (debteeUserInfo.userBalance < settleAction.settleAmount!!) {
             throw NegativeBalanceException("SettleAction with id ${settleAction.getId()}" +
                     "results in negative balance")
         }
@@ -61,9 +61,9 @@ class UserInfoService : KoinComponent {
 
         if (transactionRecord.balanceChange!! > settleAction.remainingAmount) {
             throw NegativeBalanceException("TransactionRecord between debtor with id " +
-                    "${debtorUserInfo.userId} and debtee with id ${settleAction.debteeUserInfo!!} in " +
-                    "SettleAction with id ${settleAction.getId()} results in negative " +
-                    "remaining amount")
+                    "${debtorUserInfo.userId} and debtee with id " +
+                    "${settleAction.debteeUserInfo!!} in SettleAction with id " +
+                    "${settleAction.getId()} results in negative remaining amount")
         }
 
         userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->

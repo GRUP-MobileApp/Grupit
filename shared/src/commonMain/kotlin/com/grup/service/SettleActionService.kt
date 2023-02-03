@@ -1,5 +1,6 @@
 package com.grup.service
 
+import com.grup.exceptions.NegativeBalanceException
 import com.grup.exceptions.NotCreatedException
 import com.grup.interfaces.ISettleActionRepository
 import com.grup.models.SettleAction
@@ -13,6 +14,10 @@ class SettleActionService : KoinComponent {
     private val settleActionRepository: ISettleActionRepository by inject()
 
     fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
+        if (debtee.userBalance < settleAmount) {
+            throw NegativeBalanceException("SettleAction for $settleAmount results in negative " +
+                    "balance")
+        }
         return settleActionRepository.createSettleAction(SettleAction().apply {
             this.groupId = debtee.groupId
             this.debteeUserInfo = debtee
