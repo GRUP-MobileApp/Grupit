@@ -7,6 +7,7 @@ import com.grup.models.TransactionRecord
 import kotlinx.coroutines.flow.*
 
 class NotificationsViewModel : ViewModel() {
+    // Hot flow containing all subscribed GroupInvites
     private val _groupInvitesFlow = APIServer.getAllGroupInvitesAsFlow()
     private val incomingGroupInvitesAsNotification: Flow<List<Notification>> =
         _groupInvitesFlow.map { groupInvites ->
@@ -32,7 +33,7 @@ class NotificationsViewModel : ViewModel() {
         _debtActionsFlow.map { debtActions ->
             debtActions.mapNotNull { debtAction ->
                 debtAction.debtTransactions.find { transactionRecord ->
-                    transactionRecord.debtor!! == userObject.getId()
+                    transactionRecord.debtorUserInfo!!.userId!! == userObject.getId()
                 }?.let { transactionRecord ->
                     Notification.IncomingDebtAction(debtAction, transactionRecord)
                 }
@@ -41,7 +42,7 @@ class NotificationsViewModel : ViewModel() {
     private val outgoingDebtActionsAsNotification: Flow<List<Notification>> =
         _debtActionsFlow.map { debtActions ->
             debtActions.filter { debtAction ->
-                debtAction.debtee == userObject.getId()
+                debtAction.debteeUserInfo!!.userId!! == userObject.getId()
             }.flatMap { debtAction ->
                 debtAction.debtTransactions.filter { transactionRecord ->
                     transactionRecord.dateAccepted != TransactionRecord.PENDING
@@ -51,12 +52,50 @@ class NotificationsViewModel : ViewModel() {
             }
         }
 
+    // Hot flow containing all Settle across all groups that the user is a part of
+    private val _settleActionsFlow = APIServer.getAllSettleActionsAsFlow()
+    private val newSettleActionsAsNotification: Flow<List<Notification>> =
+        _settleActionsFlow.map { settleActions ->
+            settleActions.mapNotNull { settleAction ->
+                if (settleAction.debteeUserInfo!!.userId!! != userObject.getId()) {
+                    Notification.NewSettleAction(settleAction)
+                } else {
+                    null
+                }
+            }
+        }
+    private val incomingTransactionsOnSettleActionsAsNotification: Flow<List<Notification>> =
+        _settleActionsFlow.map { settleActions ->
+            settleActions.filter { settleAction ->
+                settleAction.debteeUserInfo!!.userId!! == userObject.getId()
+            }.flatMap { debtAction ->
+                debtAction.debtTransactions.filter { transactionRecord ->
+                    transactionRecord.dateAccepted != TransactionRecord.PENDING
+                }.map { transactionRecord ->
+                    Notification.DebteeAcceptSettleActionTransaction(debtAction, transactionRecord)
+                }
+            }
+        }
+    private val outgoingTransactionsOnSettleActionsAsNotification: Flow<List<Notification>> =
+        _settleActionsFlow.map { settleActions ->
+            settleActions.mapNotNull { settleAction ->
+                settleAction.debtTransactions.find { transactionRecord ->
+                    transactionRecord.debtorUserInfo!!.userId!! == userObject.getId()
+                }?.let { transactionRecord ->
+                    Notification.IncomingTransactionOnSettleAction(settleAction, transactionRecord)
+                }
+            }
+        }
+
     val notifications: StateFlow<List<Notification>> =
         combine(
             incomingGroupInvitesAsNotification,
             outgoingGroupInvitesAsNotification,
             incomingDebtActionsAsNotification,
-            outgoingDebtActionsAsNotification
+            outgoingDebtActionsAsNotification,
+            newSettleActionsAsNotification,
+            incomingTransactionsOnSettleActionsAsNotification,
+            outgoingTransactionsOnSettleActionsAsNotification
         ) { allNotifications: Array<List<Notification>> ->
             allNotifications.flatMap { it }.sortedBy { notification ->
                 notification.date

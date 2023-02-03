@@ -12,6 +12,12 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
 
     override fun createDebtAction(debtAction: DebtAction): DebtAction? {
         return realm.writeBlocking {
+            debtAction.debteeUserInfo = findLatest(debtAction.debteeUserInfo!!)!!
+            debtAction.debtTransactions.forEachIndexed { i, _ ->
+                debtAction.debtTransactions[i].apply {
+                    this.debtorUserInfo = findLatest(this.debtorUserInfo!!)!!
+                }
+            }
             copyToRealm(debtAction)
         }
     }

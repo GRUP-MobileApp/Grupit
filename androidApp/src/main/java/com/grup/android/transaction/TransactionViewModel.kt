@@ -33,8 +33,7 @@ class TransactionViewModel : ViewModel() {
         APIServer.createDebtAction(
             userInfos.zip(debtAmounts).map { (userInfo, balanceChange) ->
                 TransactionRecord().apply {
-                    this.debtor = userInfo.userId!!
-                    this.debtorName = userInfo.nickname!!
+                    this.debtorUserInfo = userInfo
                     this.balanceChange = balanceChange
                 }
             },

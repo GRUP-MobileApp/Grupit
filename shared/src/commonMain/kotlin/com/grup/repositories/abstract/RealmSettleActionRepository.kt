@@ -12,6 +12,12 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
 
     override fun createSettleAction(settleAction: SettleAction): SettleAction? {
         return realm.writeBlocking {
+            settleAction.debteeUserInfo = findLatest(settleAction.debteeUserInfo!!)!!
+            settleAction.debtTransactions.forEachIndexed { i, _ ->
+                settleAction.debtTransactions[i].apply {
+                    this.debtorUserInfo = findLatest(this.debtorUserInfo!!)!!
+                }
+            }
             copyToRealm(settleAction)
         }
     }

@@ -44,7 +44,8 @@ sealed class Notification {
             get() = debtAction.date
 
         override fun displayText(): String =
-            "${debtAction.debteeName} is requesting ${transactionRecord.balanceChange} from you"
+            "${debtAction.debteeUserInfo!!.nickname} is requesting ${transactionRecord.balanceChange} " +
+                    "from you"
     }
 
     data class DebtorAcceptOutgoingDebtAction(
@@ -62,7 +63,7 @@ sealed class Notification {
             }
 
         override fun displayText(): String =
-            "${transactionRecord.debtorName} has accepted a debt of " +
+            "${transactionRecord.debtorUserInfo!!.nickname!!} has accepted a debt of " +
                     "${transactionRecord.balanceChange} from you"
     }
 
@@ -73,6 +74,38 @@ sealed class Notification {
             get() = settleAction.date
 
         override fun displayText(): String =
-            "${settleAction.debteeName} is requesting ${settleAction.settleAmount}"
+            "${settleAction.debteeUserInfo!!.nickname!!} is requesting ${settleAction.settleAmount}"
+    }
+
+    data class IncomingTransactionOnSettleAction(
+        val settleAction: SettleAction,
+        val transactionRecord: TransactionRecord
+    ) : Notification() {
+        override val date: String
+            get() = transactionRecord.dateCreated
+
+        override fun displayText(): String =
+            "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +
+                    "$${transactionRecord.balanceChange} out of your " +
+                    "$${settleAction.settleAmount} request"
+    }
+
+    data class DebteeAcceptSettleActionTransaction(
+        val settleAction: SettleAction,
+        val transactionRecord: TransactionRecord
+    ) : Notification() {
+        override val date: String
+            get() = transactionRecord.dateAccepted.also { date ->
+                if (date == TransactionRecord.PENDING) {
+                    throw PendingTransactionRecordException(
+                        "TransactionRecord still pending for" +
+                                "DebtAction with id ${settleAction.getId()}"
+                    )
+                }
+            }
+
+        override fun displayText(): String =
+            "${settleAction.debteeUserInfo!!.nickname} accepted your settlement for " +
+                    "${transactionRecord.balanceChange}"
     }
 }

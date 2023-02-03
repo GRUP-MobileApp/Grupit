@@ -8,21 +8,15 @@ import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
 
-open class DebtAction internal constructor(): Action(), RealmObject {
+class DebtAction internal constructor(): Action(), RealmObject {
     @PrimaryKey override var _id: String = createId()
 
+    override var date: String = Clock.System.now().toString()
     override var groupId: String? = null
         get() = field
             ?: throw MissingFieldException("DebtAction with id $_id missing groupId")
-    override var groupName: String? = null
+    override var debteeUserInfo: UserInfo? = null
         get() = field
-            ?: throw MissingFieldException("SettleAction with id $_id missing groupName")
-    override var date: String = Clock.System.now().toString()
-    override var debtee: String? = null
-        get() = field
-            ?: throw MissingFieldException("DebtAction with id $_id missing debtee")
-    override var debteeName: String? = null
-        get() = field
-            ?: throw MissingFieldException("DebtAction with id $_id missing debteeName")
+            ?: throw MissingFieldException("DebtAction with id $_id missing debteeUserInfo")
     override var debtTransactions: RealmList<TransactionRecord> = realmListOf()
 }

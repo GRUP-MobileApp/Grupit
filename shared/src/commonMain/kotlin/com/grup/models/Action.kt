@@ -3,15 +3,11 @@ package com.grup.models
 import io.realm.kotlin.types.RealmList
 
 sealed class Action : BaseEntity() {
-    abstract var date: String
-        internal set
     abstract var groupId: String?
         internal set
-    abstract var groupName: String?
+    abstract var debteeUserInfo: UserInfo?
         internal set
-    abstract var debtee: String?
-        internal set
-    abstract var debteeName: String?
+    abstract var date: String
         internal set
     abstract var debtTransactions: RealmList<TransactionRecord>
         internal set

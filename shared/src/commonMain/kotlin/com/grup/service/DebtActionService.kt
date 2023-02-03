@@ -15,9 +15,8 @@ internal class DebtActionService : KoinComponent {
     fun createDebtAction(transactionRecords: List<TransactionRecord>,
                          debtee: UserInfo): DebtAction {
         return debtActionRepository.createDebtAction(DebtAction().apply {
+            this.debteeUserInfo = debtee
             this.groupId = debtee.groupId
-            this.debtee = debtee.userId
-            this.debteeName = debtee.nickname
             this.debtTransactions.addAll(transactionRecords)
         }) ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
                 " ${debtee.groupId}")
@@ -26,7 +25,7 @@ internal class DebtActionService : KoinComponent {
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionRepository.updateDebtAction(debtAction) {
             this.debtTransactions.find { transactionRecord ->
-                transactionRecord.debtor == myTransactionRecord.debtor!!
+                transactionRecord.debtorUserInfo == myTransactionRecord.debtorUserInfo!!
             }?.dateAccepted = Clock.System.now().toString()
         }
     }

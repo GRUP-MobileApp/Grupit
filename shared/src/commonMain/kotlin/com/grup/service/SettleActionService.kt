@@ -15,8 +15,7 @@ class SettleActionService : KoinComponent {
     fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
         return settleActionRepository.createSettleAction(SettleAction().apply {
             this.groupId = debtee.groupId
-            this.debtee = debtee.userId
-            this.debteeName = debtee.nickname
+            this.debteeUserInfo = debtee
             this.settleAmount = settleAmount
         }) ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
                 " ${debtee.groupId}")
@@ -31,7 +30,7 @@ class SettleActionService : KoinComponent {
     fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.debtTransactions.find {
-                it.debtor == transactionRecord.debtor!!
+                it.debtorUserInfo == transactionRecord.debtorUserInfo!!
             }?.dateAccepted = Clock.System.now().toString()
         }
     }

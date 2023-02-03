@@ -1,7 +1,6 @@
 package com.grup.android.transaction
 
 import com.grup.exceptions.PendingTransactionRecordException
-import com.grup.models.Action
 import com.grup.models.DebtAction
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
@@ -16,9 +15,9 @@ sealed class TransactionActivity {
         val debtAction: DebtAction
     ) : TransactionActivity() {
         override val userId: String
-            get() = debtAction.debtee!!
+            get() = debtAction.debteeUserInfo!!.userId!!
         override val name: String
-            get() = debtAction.debteeName!!
+            get() = debtAction.debteeUserInfo!!.nickname!!
         override val date: String
             get() = debtAction.date
 
@@ -31,9 +30,9 @@ sealed class TransactionActivity {
         val transactionRecord: TransactionRecord
     ): TransactionActivity() {
         override val userId: String
-            get() = transactionRecord.debtor!!
+            get() = transactionRecord.debtorUserInfo!!.getId()
         override val name: String
-            get() = transactionRecord.debtorName!!
+            get() = transactionRecord.debtorUserInfo!!.nickname!!
         override val date: String
             get() = transactionRecord.dateAccepted.also { dateAccepted ->
                 if (dateAccepted == TransactionRecord.PENDING) {
@@ -46,16 +45,16 @@ sealed class TransactionActivity {
 
         override fun displayText() =
                     "$name accepted a debt of ${transactionRecord.balanceChange} from" +
-                    " ${debtAction.debteeName}"
+                    " ${debtAction.debteeUserInfo!!.nickname!!}"
     }
 
     data class CreateSettleAction(
         val settleAction: SettleAction
     ) : TransactionActivity() {
         override val userId: String
-            get() = settleAction.debtee!!
+            get() = settleAction.debteeUserInfo!!.userId!!
         override val name: String
-            get() = settleAction.debteeName!!
+            get() = settleAction.debteeUserInfo!!.nickname!!
         override val date: String
             get() = settleAction.date
 
@@ -68,9 +67,9 @@ sealed class TransactionActivity {
         val transactionRecord: TransactionRecord
     ) : TransactionActivity() {
         override val userId: String
-            get() = transactionRecord.debtor!!
+            get() = transactionRecord.debtorUserInfo!!.getId()
         override val name: String
-            get() = transactionRecord.debtorName!!
+            get() = transactionRecord.debtorUserInfo!!.nickname!!
         override val date: String
             get() = transactionRecord.dateAccepted.also { dateAccepted ->
                 if (dateAccepted == TransactionRecord.PENDING) {
@@ -81,6 +80,6 @@ sealed class TransactionActivity {
                 }
             }
         override fun displayText(): String =
-            "$name paid ${transactionRecord.balanceChange} to ${settleAction.debteeName}"
+            "$name paid ${transactionRecord.balanceChange} to ${settleAction.debteeUserInfo!!.nickname!!}"
     }
 }
