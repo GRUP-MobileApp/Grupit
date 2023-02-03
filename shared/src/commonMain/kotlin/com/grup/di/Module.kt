@@ -22,8 +22,9 @@ internal val servicesModule = module {
     single { UserService() }
     single { GroupService() }
     single { UserInfoService() }
-    single { DebtActionService() }
     single { GroupInviteService() }
+    single { DebtActionService() }
+    single { SettleActionService() }
 }
 
 internal val repositoriesModule = module {
