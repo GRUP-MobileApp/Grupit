@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,8 +31,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.caption
-import com.grup.android.ui.h1Text
+import com.grup.android.ui.*
 
 import com.grup.android.ui.SmallIcon
 import com.grup.models.UserInfo
@@ -142,7 +142,9 @@ fun GroupMembersLayout(
                     UsersList(
                         userInfos = userInfos.filter { userInfo ->
                             userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
-                        }
+                        },
+                        scope = scope,
+                        state = userInfoBottomSheetState
                     )
                 }
             }
@@ -189,16 +191,19 @@ fun UsernameSearchBar(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-
 fun UsersList(
-    userInfos: List<UserInfo>
+    userInfos: List<UserInfo>,
+    scope: CoroutineScope,
+    state: ModalBottomSheetState
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing),
         modifier = Modifier.fillMaxSize()
     ) {
         itemsIndexed(userInfos) { _, userInfo ->
-            UserDisplay(userInfo = userInfo)
+            UserDisplay(userInfo = userInfo,
+                scope = scope,
+                state = state)
         }
     }
 }
@@ -219,20 +224,7 @@ fun UserDisplay(
                 onClick = { scope.launch { state.show() } }
             )
     ) {
-        Row {
-            Icon(
-                imageVector = Icons.Default.Face,
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(70.dp)
-                    .padding(horizontal = AppTheme.dimensions.paddingSmall)
-            )
-            Column(verticalArrangement = Arrangement.Center) {
-                h1Text(text = userInfo.nickname!!)
-                caption(text = "This is a description")
-            }
-        }
-        Text(text = "$${userInfo.userBalance}")
+        UserCard(userInfo, sideContent = { Text(text = "$${userInfo.userBalance}") })
     }
 }
 
@@ -244,13 +236,6 @@ fun GroupMemberInfoBottomSheet(
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
-
-
-    val sampleList = mapOf(
-        "4/20" to listOf("test1", "test2", "test3", "test4"),
-        "6/9" to listOf("test5", "test6", "test7", "test8")
-    )
-
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
@@ -260,6 +245,7 @@ fun GroupMemberInfoBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(AppTheme.colors.secondary)
+                        .padding(vertical = 10.dp, horizontal = 10.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Face,
@@ -269,14 +255,14 @@ fun GroupMemberInfoBottomSheet(
 
                     h1Text(
                         text = "Member",
-                        modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge),
-                        color = textColor
+                        modifier = Modifier
+                            .padding(top = AppTheme.dimensions.paddingLarge),
+                        color = textColor,
+                        fontSize = 50.sp
                     )
-
                     Divider()
-
                 }
-            PublicRequestsList(sampleList)
+            /*TODO user transaction list here*/
             },
         sheetBackgroundColor = backgroundColor,
         content = content,

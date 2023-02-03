@@ -3,10 +3,12 @@ package com.grup.android.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.grup.android.ui.apptheme.AppTheme
+import com.grup.models.UserInfo
 
 @Composable
 fun h1Text(
@@ -88,5 +91,33 @@ fun SmallIconButton(
             contentDescription = contentDescription,
             modifier = modifier.clip(AppTheme.shapes.CircleShape)
         )
+    }
+}
+
+//displays icon, name/description, and side content (balance, menu)
+@Composable
+fun UserCard(
+    userInfo: UserInfo,
+    userInfoDisplay: @Composable (UserInfo) -> Unit,
+    sideContent: @Composable () -> Unit
+) {
+    Row {
+        // user icon
+        Icon(
+            imageVector = Icons.Default.Face,
+            contentDescription = "Profile Picture",
+            modifier = Modifier
+                .size(70.dp)
+                .padding(horizontal = AppTheme.dimensions.paddingSmall)
+        )
+        // main content
+        Column(verticalArrangement = Arrangement.Center) {
+            h1Text(text = userInfo.nickname!!)
+            caption(text = "This is a description")
+        }
+
+        // side content
+        sideContent
+
     }
 }

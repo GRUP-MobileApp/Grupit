@@ -56,5 +56,13 @@
     <fragment
         android:id="@+id/debtActionFragment"
         android:name="com.grup.android.transaction.DebtActionFragment"
-        android:label="DebtActionFragment" />
+        android:label="DebtActionFragment" >
+        <action
+            android:id="@+id/toTransactionMessage"
+            app:destination="@id/messageFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/messageFragment"
+        android:name="com.grup.android.transaction.MessageFragment"
+        android:label="MessageFragment" />
 </navigation>
