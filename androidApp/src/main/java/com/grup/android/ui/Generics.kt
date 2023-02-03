@@ -98,7 +98,6 @@ fun SmallIconButton(
 @Composable
 fun UserCard(
     userInfo: UserInfo,
-    userInfoDisplay: @Composable (UserInfo) -> Unit,
     sideContent: @Composable () -> Unit
 ) {
     Row {
@@ -115,9 +114,7 @@ fun UserCard(
             h1Text(text = userInfo.nickname!!)
             caption(text = "This is a description")
         }
-
         // side content
         sideContent
-
     }
 }
