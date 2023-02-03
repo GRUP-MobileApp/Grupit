@@ -59,10 +59,34 @@ class MainViewModel : ViewModel() {
             } ?: emptyList()
         }
 
+    // SettleActions belonging to the selectedGroup, mapped to TransactionActivity
+    private val _settleActionsFlow = APIServer.getAllSettleActionsAsFlow()
+    private val settleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
+        _settleActionsFlow.combine(selectedGroup) { settleActions, selectedGroup ->
+            selectedGroup?.let { group ->
+                settleActions.filter { settleAction ->
+                    settleAction.groupId == group.getId()
+                }.flatMap { settleAction ->
+                    listOf(
+                        TransactionActivity.CreateSettleAction(settleAction),
+                        *settleAction.debtTransactions.filter { transactionRecord ->
+                            transactionRecord.dateAccepted != TransactionRecord.PENDING
+                        }.map { transactionRecord ->
+                            TransactionActivity.SettlePartialSettleAction(
+                                settleAction,
+                                transactionRecord
+                            )
+                        }.toTypedArray()
+                    )
+                }
+            } ?: emptyList()
+        }
+
     // Hot flow combining all TransactionActivity flows to be displayed as recent activity in UI
     val groupActivity: StateFlow<List<TransactionActivity>> =
         combine(
-            debtActionsAsTransactionActivity
+            debtActionsAsTransactionActivity,
+            settleActionsAsTransactionActivity
         ) { allTransactionActivities: Array<List<TransactionActivity>> ->
             allTransactionActivities.flatMap { it }.sortedBy { transactionActivity ->
                 transactionActivity.date

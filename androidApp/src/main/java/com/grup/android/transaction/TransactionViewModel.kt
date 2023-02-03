@@ -6,7 +6,6 @@ import com.grup.android.ViewModel
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 class TransactionViewModel : ViewModel() {
@@ -29,7 +28,7 @@ class TransactionViewModel : ViewModel() {
         }!!
     }.asState()
 
-    // DebtAction operations
+    // DebtAction
     fun createDebtAction(userInfos: List<UserInfo>, debtAmounts: List<Double>) =
         APIServer.createDebtAction(
             userInfos.zip(debtAmounts).map { (userInfo, balanceChange) ->
@@ -41,4 +40,8 @@ class TransactionViewModel : ViewModel() {
             },
             myUserInfo.value
         )
+
+    // SettleAction
+    fun createSettleAction(settleAmount: Double) =
+        APIServer.createSettleAction(settleAmount, myUserInfo.value)
 }
