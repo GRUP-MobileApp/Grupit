@@ -33,6 +33,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.R
+import com.grup.android.UsernameSearchBar
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
 import com.grup.android.ui.SmallIcon
@@ -102,7 +103,7 @@ fun DebtActionLayout(
                 h1Text(
                     text = "$$debtActionAmount",
                     color = AppTheme.colors.onSecondary,
-                    fontSize = 65.sp
+                    fontSize = 100.sp
                 )
                 Box(
                     modifier = Modifier
@@ -179,7 +180,8 @@ fun DebtActionLayout(
                                 transactionViewModel.createDebtAction(userInfos, debtAmounts)
                                 navController.popBackStack()
                                 navController.popBackStack()
-                            }
+                            },
+                            navController = navController
                         )
                     }
                 }
@@ -202,6 +204,7 @@ fun DebtActionTopBar(
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Back",
+                    tint = AppTheme.colors.onSecondary
                 )
             }
         }
@@ -212,25 +215,68 @@ fun DebtActionTopBar(
 fun SelectedDebtorsList(
     debtActionAmount: Double,
     debtors: List<UserInfo>,
-    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit
+    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit,
+    navController: NavController
 ) {
     val debtAmounts: MutableList<Double> =
         debtors.map { debtActionAmount / debtors.size }.toMutableStateList()
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+    Column(
+        verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        itemsIndexed(debtors) { index, userInfo ->
-            Text(
-                text = "${userInfo.nickname} pays $${debtAmounts[index]}",
-                color = AppTheme.colors.onSecondary
-            )
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 10.dp)
+    )
+        {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                itemsIndexed(debtors) { index, userInfo ->
+                    Text(
+                        text = "${userInfo.nickname} pays $${debtAmounts[index]}",
+                        color = AppTheme.colors.onSecondary
+                    )
+                }
+            }
+
+            Button(
+                onClick = { navController.navigate(
+                    R.id.toTransactionMessage,
+                    Bundle().apply {
+                        this.putDouble("amount", debtActionAmount)
+                    })},
+                shape = AppTheme.shapes.CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = AppTheme.colors.confirm
+                ),
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(50.dp)
+            ) {
+                Text(
+                    text = "Add Message",
+                    color = AppTheme.colors.onSecondary
+                )
+            }
+
+            Button(
+                onClick = { createDebtActionOnClick(debtors, debtAmounts)},
+                shape = AppTheme.shapes.CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = AppTheme.colors.confirm
+                ),
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(50.dp)
+            ) {
+                Text(
+                    text = "Add Selected Users",
+                    color = AppTheme.colors.onSecondary
+                )
+            }
         }
-    }
-    Button(onClick = { createDebtActionOnClick(debtors, debtAmounts) }) {
-        Text(text = "Add selected users")
-    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -256,16 +302,12 @@ fun AddDebtorBottomSheet(
                     .fillMaxHeight(0.8f)
                     .padding(AppTheme.dimensions.paddingMedium)
             ) {
-                Text(text = "Add Debtors", color = textColor)
+                h1Text(text = "Add Debtors", color = textColor, fontSize = 50.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = usernameSearchQuery,
-                    onValueChange = { usernameSearchQuery = it },
-                    trailingIcon = { Icons.Default.Search },
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .background(color = Color.White)
-                        .clip(shape = AppTheme.shapes.medium)
+
+                UsernameSearchBar(
+                    usernameSearchQuery = usernameSearchQuery,
+                    onUsernameChange = { usernameSearchQuery = it }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -281,10 +323,30 @@ fun AddDebtorBottomSheet(
                         }
                     }
                 )
-                Button(
-                    onClick = { addDebtorOnClick(selectedUsers) }) {
-                    Text(text = "Add selected users")
+                Column(
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 10.dp)
+                ) {
+                    Button(
+                        onClick = { addDebtorOnClick(selectedUsers) },
+                        shape = AppTheme.shapes.CircleShape,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = AppTheme.colors.confirm
+                        ),
+                        modifier = Modifier
+                            .width(200.dp)
+                            .height(50.dp)
+                    ) {
+                        Text(
+                            text = "Add Selected Users",
+                            color = AppTheme.colors.onSecondary
+                        )
+                    }
                 }
+
             }
         },
         sheetBackgroundColor = backgroundColor,

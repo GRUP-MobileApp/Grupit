@@ -382,6 +382,7 @@ fun ActionAmountTopAppBar(
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Back",
+                    tint = AppTheme.colors.onSecondary
                 )
             }
         }
