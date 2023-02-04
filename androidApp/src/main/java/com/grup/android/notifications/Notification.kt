@@ -1,10 +1,7 @@
 package com.grup.android.notifications
 
 import com.grup.exceptions.PendingTransactionRecordException
-import com.grup.models.DebtAction
-import com.grup.models.TransactionRecord
-import com.grup.models.GroupInvite
-import com.grup.models.SettleAction
+import com.grup.models.*
 
 sealed class Notification {
     abstract val date: String

@@ -3,6 +3,7 @@ package com.grup.android.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -15,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.grup.android.ui.apptheme.AppTheme
@@ -94,27 +96,53 @@ fun SmallIconButton(
     }
 }
 
-//displays icon, name/description, and side content (balance, menu)
 @Composable
-fun UserCard(
-    userInfo: UserInfo,
-    sideContent: @Composable () -> Unit
+fun IconRowCard(
+    icon: ImageVector = Icons.Default.Face,
+    iconSize: Dp = 70.dp,
+    mainContent: @Composable () -> Unit,
+    sideContent: @Composable () -> Unit,
+    onClick: () -> Unit = {}
 ) {
-    Row {
-        // user icon
-        Icon(
-            imageVector = Icons.Default.Face,
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(70.dp)
-                .padding(horizontal = AppTheme.dimensions.paddingSmall)
-        )
-        // main content
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth(0.95f)
+            .padding(end = 5.dp)
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraSmall)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = "Profile Picture",
+                modifier = Modifier
+                    .size(iconSize)
+            )
+            mainContent()
+        }
+        sideContent()
+    }
+}
+
+@Composable
+fun UserInfoRowCard(
+    userInfo: UserInfo,
+    mainContent: @Composable (UserInfo) -> Unit = {
         Column(verticalArrangement = Arrangement.Center) {
-            h1Text(text = userInfo.nickname!!)
+            h1Text(text = it.nickname!!)
             caption(text = "This is a description")
         }
-        // side content
-        sideContent
-    }
+    },
+    sideContent: @Composable (UserInfo) -> Unit = {
+        Text(text = "$${it.userBalance}")
+    },
+    onClick: () -> Unit = {}
+) {
+    IconRowCard(
+        mainContent = { mainContent(userInfo) },
+        sideContent = { sideContent(userInfo) },
+        onClick = onClick
+    )
 }

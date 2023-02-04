@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -197,34 +196,18 @@ fun UsersList(
     state: ModalBottomSheetState
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
         itemsIndexed(userInfos) { _, userInfo ->
-            UserDisplay(userInfo = userInfo,
-                scope = scope,
-                state = state)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun UserDisplay(
-    userInfo: UserInfo,
-    scope: CoroutineScope,
-    state: ModalBottomSheetState
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = AppTheme.dimensions.paddingMedium)
-            .clickable(
-                onClick = { scope.launch { state.show() } }
+            UserInfoRowCard(
+                userInfo = userInfo,
+                onClick = {
+                    scope.launch { state.show() }
+                }
             )
-    ) {
-        UserCard(userInfo, sideContent = { Text(text = "$${userInfo.userBalance}") })
+        }
     }
 }
 
@@ -252,7 +235,6 @@ fun GroupMemberInfoBottomSheet(
                         contentDescription = "Profile Picture",
                         modifier = Modifier.size(98.dp)
                     )
-
                     h1Text(
                         text = "Member",
                         modifier = Modifier

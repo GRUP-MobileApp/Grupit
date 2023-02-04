@@ -376,7 +376,7 @@ fun RecentActivityList(
                     .padding(top = AppTheme.dimensions.paddingMedium)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.smallSpacing)
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
                 ) {
                     val indicator: @Composable (List<TabPosition>) -> Unit = { tabPositions ->
                         CustomIndicator(tabPositions, pagerState)

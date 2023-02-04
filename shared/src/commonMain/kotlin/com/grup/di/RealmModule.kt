@@ -9,6 +9,7 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.sync.MutableSubscriptionSet
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 
 internal lateinit var realm: Realm
 private lateinit var subscriptionsJob: Job

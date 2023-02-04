@@ -13,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +36,8 @@ import com.grup.android.UsernameSearchBar
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
 import com.grup.android.ui.SmallIcon
+import com.grup.android.ui.UserInfoRowCard
+import com.grup.android.ui.caption
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
@@ -75,12 +76,12 @@ fun DebtActionLayout(
     val scope = rememberCoroutineScope()
 
     val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
-    val debtors: MutableList<UserInfo> = remember { mutableStateListOf() }
+    var debtors: List<UserInfo> by remember { mutableStateOf(emptyList()) }
 
     AddDebtorBottomSheet(
         userInfos = userInfos,
         addDebtorOnClick = { selectedUsers ->
-            debtors.addAll(selectedUsers)
+            debtors = selectedUsers
             scope.launch { addDebtorBottomSheetState.hide() }
         },
         state = addDebtorBottomSheetState
@@ -106,6 +107,7 @@ fun DebtActionLayout(
                     fontSize = 100.sp
                 )
                 Box(
+                    contentAlignment = Alignment.TopCenter,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(AppTheme.shapes.large)
@@ -117,11 +119,9 @@ fun DebtActionLayout(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier
-                                .height(40.dp)
-                                .padding(AppTheme.dimensions.paddingMedium)
+                            horizontalArrangement = Arrangement
+                                .spacedBy(AppTheme.dimensions.spacingSmall),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             buildAnnotatedString {
                                 withStyle(
@@ -156,23 +156,21 @@ fun DebtActionLayout(
                                     text = annotatedText,
                                     onClick = { offset ->
                                         annotatedText.getStringAnnotations(
-                                            tag = "SignUp",// tag which you used in the buildAnnotatedString
+                                            tag = "SignUp",
                                             start = offset,
                                             end = offset
-                                        )[0].let { annotation ->
+                                        )[0].let { _ ->
                                             //do your stuff when it gets clicked
                                         }
                                     }
                                 )
                             }
-
                             AddDebtorButton(
                                 addDebtorOnClick = {
                                     scope.launch { addDebtorBottomSheetState.show() }
                                 }
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
                         SelectedDebtorsList(
                             debtActionAmount = debtActionAmount,
                             debtors = debtors,
@@ -180,8 +178,7 @@ fun DebtActionLayout(
                                 transactionViewModel.createDebtAction(userInfos, debtAmounts)
                                 navController.popBackStack()
                                 navController.popBackStack()
-                            },
-                            navController = navController
+                            }
                         )
                     }
                 }
@@ -215,68 +212,42 @@ fun DebtActionTopBar(
 fun SelectedDebtorsList(
     debtActionAmount: Double,
     debtors: List<UserInfo>,
-    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit,
-    navController: NavController
+    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit
 ) {
     val debtAmounts: MutableList<Double> =
         debtors.map { debtActionAmount / debtors.size }.toMutableStateList()
-    Column(
-        verticalArrangement = Arrangement.Bottom,
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 10.dp)
-    )
-        {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                itemsIndexed(debtors) { index, userInfo ->
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        itemsIndexed(debtors) { index, userInfo ->
+            UserInfoRowCard(
+                userInfo = userInfo,
+                sideContent = {
                     Text(
-                        text = "${userInfo.nickname} pays $${debtAmounts[index]}",
+                        text = "pays $${debtAmounts[index]}",
                         color = AppTheme.colors.onSecondary
                     )
                 }
-            }
-
-            Button(
-                onClick = { navController.navigate(
-                    R.id.toTransactionMessage,
-                    Bundle().apply {
-                        this.putDouble("amount", debtActionAmount)
-                    })},
-                shape = AppTheme.shapes.CircleShape,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.confirm
-                ),
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "Add Message",
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-
-            Button(
-                onClick = { createDebtActionOnClick(debtors, debtAmounts)},
-                shape = AppTheme.shapes.CircleShape,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.confirm
-                ),
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "Add Selected Users",
-                    color = AppTheme.colors.onSecondary
-                )
-            }
+            )
         }
+    }
+    Button(
+        onClick = { createDebtActionOnClick(debtors, debtAmounts) },
+        shape = AppTheme.shapes.CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = AppTheme.colors.confirm
+        ),
+        modifier = Modifier
+            .width(200.dp)
+            .height(50.dp)
+    ) {
+        Text(
+            text = "Add Selected Users",
+            color = AppTheme.colors.onSecondary
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -289,7 +260,7 @@ fun AddDebtorBottomSheet(
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
-    val selectedUsers: MutableList<UserInfo> = remember { mutableStateListOf() }
+    var selectedUsers: List<UserInfo> by remember { mutableStateOf(emptyList()) }
     var usernameSearchQuery: String by remember { mutableStateOf("") }
 
     ModalBottomSheetLayout(
@@ -317,9 +288,9 @@ fun AddDebtorBottomSheet(
                     selectedUsers = selectedUsers,
                     onCheckedChange = { userInfo, isSelected ->
                         if (isSelected) {
-                            selectedUsers.add(userInfo)
+                            selectedUsers = selectedUsers + userInfo
                         } else {
-                            selectedUsers.remove(userInfo)
+                            selectedUsers = selectedUsers - userInfo
                         }
                     }
                 )
@@ -375,13 +346,20 @@ fun SelectDebtorsChecklist(
                 horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "${userInfo.nickname}: ${userInfo.userBalance}",
-                    color = AppTheme.colors.onSecondary
-                )
-                Checkbox(
-                    checked = selectedUsers.contains(userInfo),
-                    onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) }
+                UserInfoRowCard(
+                    userInfo = userInfo,
+                    mainContent = {
+                        Column(verticalArrangement = Arrangement.Center) {
+                            h1Text(text = it.nickname!!)
+                            caption(text = "Balance: ${it.userBalance}")
+                        }
+                    },
+                    sideContent = { userInfo ->
+                        Checkbox(
+                            checked = selectedUsers.contains(userInfo),
+                            onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) }
+                        )
+                    }
                 )
             }
         }
