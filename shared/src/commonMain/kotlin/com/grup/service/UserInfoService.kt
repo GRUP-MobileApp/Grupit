@@ -14,7 +14,7 @@ class UserInfoService : KoinComponent {
             UserInfo().apply {
                 this.userId = user.getId()
                 this.groupId = groupId
-                this.nickname = user.username
+                this.nickname = user.displayName
             }
         )
     }

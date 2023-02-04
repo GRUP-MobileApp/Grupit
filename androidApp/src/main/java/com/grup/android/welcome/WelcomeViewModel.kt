@@ -1,8 +1,13 @@
 package com.grup.android.welcome
 
+import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
 import com.grup.android.ViewModel
 import com.grup.exceptions.login.UserObjectNotFoundException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class WelcomeViewModel : ViewModel() {
     val hasUserObject: Boolean
@@ -13,5 +18,34 @@ class WelcomeViewModel : ViewModel() {
             false
         }
 
-    fun registerUserObject(username: String) = APIServer.registerUser(username)
+    sealed class UsernameValidity {
+        object Valid : UsernameValidity()
+        object Invalid : UsernameValidity()
+        object Pending : UsernameValidity()
+        object None : UsernameValidity()
+    }
+
+    private var currentJob: Job = viewModelScope.launch {  }
+
+    private val _usernameValidity = MutableStateFlow<UsernameValidity>(UsernameValidity.None)
+    val usernameValidity: StateFlow<UsernameValidity> = _usernameValidity
+
+    fun checkUsername(username: String) {
+        currentJob.cancel()
+        if (username.isBlank()) {
+            _usernameValidity.value = UsernameValidity.None
+        } else {
+            currentJob = viewModelScope.launch {
+                _usernameValidity.value = UsernameValidity.Pending
+                if (!APIServer.usernameExists(username)) {
+                    _usernameValidity.value = UsernameValidity.Valid
+                } else {
+                    _usernameValidity.value = UsernameValidity.Invalid
+                }
+            }
+        }
+    }
+
+    fun registerUserObject(username: String, displayName: String) =
+        APIServer.registerUser(username, displayName)
 }

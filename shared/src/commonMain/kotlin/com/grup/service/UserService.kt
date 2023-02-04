@@ -8,11 +8,7 @@ import org.koin.core.component.inject
 internal class UserService : KoinComponent {
     private val userRepository: IUserRepository by inject()
 
-    fun getUserById(userId: String): User? {
-        return userRepository.findUserById(userId)
-    }
-
-    fun getUserByUsername(username: String): User? {
+    suspend fun getUserByUsername(username: String): User? {
         return userRepository.findUserByUsername(username)
     }
 }

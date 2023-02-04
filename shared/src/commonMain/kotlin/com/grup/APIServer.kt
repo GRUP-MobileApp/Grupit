@@ -35,6 +35,9 @@ object APIServer {
     val user: User
         get() = realm.query<User>().first().find() ?: throw UserObjectNotFoundException()
 
+    // User
+    suspend fun usernameExists(username: String) = UserController.usernameExists(username)
+
     // Group
     fun createGroup(groupName: String) = GroupController.createGroup(user, groupName)
     fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
@@ -44,7 +47,7 @@ object APIServer {
     fun getAllUserInfosAsFlow() = UserInfoController.getAllUserInfosAsFlow()
 
     // GroupInvite
-    fun inviteUserToGroup(username: String, group: Group) =
+    suspend fun inviteUserToGroup(username: String, group: Group) =
         GroupInviteController.createGroupInvite(user, username, group)
     fun acceptInviteToGroup(groupInvite: GroupInvite) =
         GroupInviteController.acceptInviteToGroup(groupInvite, user)
@@ -95,10 +98,13 @@ object APIServer {
         }
     }
 
-    fun registerUser(username: String) {
-        registerUserObject(User(realmUser.id).apply {
-            this.username = username
-        })
+    fun registerUser(username: String, displayName: String) {
+        registerUserObject(
+            User(realmUser.id).apply {
+                this.username = username
+                this.displayName = displayName
+            }
+        )
     }
 
     fun logOut() {

@@ -15,38 +15,18 @@ import org.koin.core.component.inject
 internal class UserRepository : IUserRepository, KoinComponent {
     private val client: HttpClient by inject()
 
-    override fun findUserById(realmUserId: String): User? {
+    override suspend fun findUserByUsername(username: String): User? {
         var responseUser: User? = null
-        runBlocking {
-            val response: HttpResponse = client.get(
-                "${MONGODB_API_ENDPOINT}/user/findUserByRealmUserId"
-            ) {
-                contentType(ContentType.Application.Json)
-                url {
-                    parameters.append(idSerialName, realmUserId)
-                }
-            }
-            if (response.status.value in 200..299) {
-                responseUser = response.body()
+        val response: HttpResponse = client.get(
+            "${MONGODB_API_ENDPOINT}/user/findUserByUsername"
+        ) {
+            contentType(ContentType.Application.Json)
+            url {
+                parameters.append("username", username)
             }
         }
-        return responseUser
-    }
-
-    override fun findUserByUsername(username: String): User? {
-        var responseUser: User? = null
-        runBlocking {
-            val response: HttpResponse = client.get(
-                "${MONGODB_API_ENDPOINT}/user/findUserByUsername"
-            ) {
-                contentType(ContentType.Application.Json)
-                url {
-                    parameters.append("username", username)
-                }
-            }
-            if (response.status.value in 200..299) {
-                responseUser = response.body()
-            }
+        if (response.status.value in 200..299) {
+            responseUser = response.body()
         }
         return responseUser
     }
