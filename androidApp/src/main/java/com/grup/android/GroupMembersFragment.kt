@@ -154,10 +154,11 @@ fun GroupMembersLayout(
 @Composable
 fun UsernameSearchBar(
     usernameSearchQuery: String,
-    onUsernameChange: (String) -> Unit
+    onUsernameChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         TextField(
             value = usernameSearchQuery,
@@ -172,7 +173,6 @@ fun UsernameSearchBar(
                 )
             },
             modifier = Modifier
-                .fillMaxWidth()
                 .clip(AppTheme.shapes.large)
                 .background(AppTheme.colors.secondary)
                 .padding(all = AppTheme.dimensions.paddingMedium),

@@ -212,41 +212,48 @@ fun DebtActionTopBar(
 fun SelectedDebtorsList(
     debtActionAmount: Double,
     debtors: List<UserInfo>,
-    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit
+    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val debtAmounts: MutableList<Double> =
         debtors.map { debtActionAmount / debtors.size }.toMutableStateList()
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxSize(0.95f)
     ) {
-        itemsIndexed(debtors) { index, userInfo ->
-            UserInfoRowCard(
-                userInfo = userInfo,
-                sideContent = {
-                    Text(
-                        text = "pays $${debtAmounts[index]}",
-                        color = AppTheme.colors.onSecondary
-                    )
-                }
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.weight(1f)
+        ) {
+            itemsIndexed(debtors) { index, userInfo ->
+                UserInfoRowCard(
+                    userInfo = userInfo,
+                    sideContent = {
+                        Text(
+                            text = "pays $${debtAmounts[index]}",
+                            color = AppTheme.colors.onSecondary
+                        )
+                    }
+                )
+            }
+        }
+        Button(
+            onClick = { createDebtActionOnClick(debtors, debtAmounts) },
+            shape = AppTheme.shapes.CircleShape,
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = AppTheme.colors.confirm
+            ),
+            modifier = Modifier
+                .width(200.dp)
+                .height(50.dp)
+        ) {
+            Text(
+                text = "Add Selected Users",
+                color = AppTheme.colors.onSecondary
             )
         }
-    }
-    Button(
-        onClick = { createDebtActionOnClick(debtors, debtAmounts) },
-        shape = AppTheme.shapes.CircleShape,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = AppTheme.colors.confirm
-        ),
-        modifier = Modifier
-            .width(200.dp)
-            .height(50.dp)
-    ) {
-        Text(
-            text = "Add Selected Users",
-            color = AppTheme.colors.onSecondary
-        )
     }
 }
 
@@ -276,31 +283,15 @@ fun AddDebtorBottomSheet(
                 h1Text(text = "Add Debtors", color = textColor, fontSize = 50.sp)
                 Spacer(modifier = Modifier.height(8.dp))
 
-                UsernameSearchBar(
-                    usernameSearchQuery = usernameSearchQuery,
-                    onUsernameChange = { usernameSearchQuery = it }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                SelectDebtorsChecklist(
-                    usernameSearchQuery = usernameSearchQuery,
-                    userInfos = userInfos,
-                    selectedUsers = selectedUsers,
-                    onCheckedChange = { userInfo, isSelected ->
-                        if (isSelected) {
-                            selectedUsers = selectedUsers + userInfo
-                        } else {
-                            selectedUsers = selectedUsers - userInfo
-                        }
-                    }
-                )
-                Column(
-                    verticalArrangement = Arrangement.Bottom,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 10.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    UsernameSearchBar(
+                        usernameSearchQuery = usernameSearchQuery,
+                        onUsernameChange = { usernameSearchQuery = it },
+                        modifier = Modifier.weight(1f)
+                    )
                     Button(
                         onClick = { addDebtorOnClick(selectedUsers) },
                         shape = AppTheme.shapes.CircleShape,
@@ -308,16 +299,28 @@ fun AddDebtorBottomSheet(
                             backgroundColor = AppTheme.colors.confirm
                         ),
                         modifier = Modifier
-                            .width(200.dp)
+                            .width(100.dp)
                             .height(50.dp)
                     ) {
                         Text(
-                            text = "Add Selected Users",
+                            text = "Add",
                             color = AppTheme.colors.onSecondary
                         )
                     }
                 }
-
+                Spacer(modifier = Modifier.height(8.dp))
+                SelectDebtorsChecklist(
+                    usernameSearchQuery = usernameSearchQuery,
+                    userInfos = userInfos,
+                    selectedUsers = selectedUsers,
+                    onCheckedChange = { userInfo, isSelected ->
+                        selectedUsers = if (isSelected) {
+                            selectedUsers + userInfo
+                        } else {
+                            selectedUsers - userInfo
+                        }
+                    }
+                )
             }
         },
         sheetBackgroundColor = backgroundColor,
