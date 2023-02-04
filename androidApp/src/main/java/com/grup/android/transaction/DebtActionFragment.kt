@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -31,7 +32,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
+import com.grup.android.PublicRequestsList
 import com.grup.android.R
+import com.grup.android.RecentGroupActivityList
 import com.grup.android.UsernameSearchBar
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
@@ -65,7 +71,9 @@ class DebtActionFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class,
+    ExperimentalPagerApi::class
+)
 @Composable
 fun DebtActionLayout(
     debtActionAmount: Double,
@@ -74,6 +82,8 @@ fun DebtActionLayout(
 ) {
     val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState()
+
 
     val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
     var debtors: List<UserInfo> by remember { mutableStateOf(emptyList()) }
@@ -171,15 +181,27 @@ fun DebtActionLayout(
                                 }
                             )
                         }
-                        SelectedDebtorsList(
-                            debtActionAmount = debtActionAmount,
-                            debtors = debtors,
-                            createDebtActionOnClick = { userInfos, debtAmounts ->
-                                transactionViewModel.createDebtAction(userInfos, debtAmounts)
-                                navController.popBackStack()
-                                navController.popBackStack()
+
+                        HorizontalPager(
+                            count = 2,
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) { page ->
+                            when (page) {
+                                0 -> SelectedDebtorsList(
+                                        debtActionAmount = debtActionAmount,
+                                        debtors = debtors,
+                                        createDebtActionOnClick = { userInfos, debtAmounts ->
+                                            transactionViewModel.createDebtAction(userInfos, debtAmounts)
+                                            navController.popBackStack()
+                                            navController.popBackStack()
+                                        }
+                                    )
+
+                                1 -> MessageLayout()
                             }
-                        )
+                        }
                     }
                 }
             }
@@ -378,5 +400,94 @@ fun AddDebtorButton(
             imageVector = Icons.Default.Add,
             contentDescription = "Add a debtor"
         )
+    }
+}
+
+@Composable
+fun MessageLayout() {
+    var transactionMessage: String by remember { mutableStateOf("") }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(AppTheme.shapes.large)
+            .background(AppTheme.colors.secondary)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .fillMaxSize()
+        ) {
+            h1Text(text = "What is this for?", fontSize = 40.sp)
+
+            TextField(
+                value = transactionMessage,
+                onValueChange = {transactionMessage = it},
+                shape = RectangleShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(AppTheme.shapes.large)
+                    .background(AppTheme.colors.secondary)
+                    .padding(all = AppTheme.dimensions.paddingMedium)
+                    .height(200.dp),
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = AppTheme.colors.primary,
+                    disabledTextColor = Color.Transparent,
+                    backgroundColor = AppTheme.colors.onPrimary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                )
+            )
+
+            Column(
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(top = 20.dp, bottom = 40.dp)
+                ) {
+                    Button(
+                        onClick = { },
+                        shape = AppTheme.shapes.CircleShape,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = AppTheme.colors.error
+                        ),
+                        modifier = Modifier
+                            .width(175.dp)
+                            .height(50.dp)
+                    ) {
+                        Text(
+                            text = "Cancel Request",
+                            color = AppTheme.colors.onSecondary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(20.dp))
+
+                    Button(
+                        onClick = { },
+                        shape = AppTheme.shapes.CircleShape,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = AppTheme.colors.confirm
+                        ),
+                        modifier = Modifier
+                            .width(175.dp)
+                            .height(50.dp)
+                    ) {
+                        Text(
+                            text = "Confirm Request",
+                            color = AppTheme.colors.onSecondary
+                        )
+                    }
+                }
+
+            }
+
+        }
     }
 }
