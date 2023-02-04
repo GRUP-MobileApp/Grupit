@@ -15,12 +15,6 @@ abstract class ViewModel : androidx.lifecycle.ViewModel() {
     protected val userObject: User
         get() = APIServer.user
 
-    // Turns into hot flow that continues running even in background
-    protected fun <T> Flow<List<T>>.asNotifications() =
-        this.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    // Turns into hot flow that runs only in app. Also loads initial data of the flow in a blocking
-    // fashion to be displayed immediately
     protected fun <T> Flow<T>.asState() =
         this.let { flow ->
             runBlocking { flow.first() }.let { initialList ->
@@ -31,4 +25,11 @@ abstract class ViewModel : androidx.lifecycle.ViewModel() {
                 )
             }
         }
+
+    protected fun <T> Flow<List<T>>.asInitialEmptyState() =
+        this.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+            emptyList()
+        )
 }
