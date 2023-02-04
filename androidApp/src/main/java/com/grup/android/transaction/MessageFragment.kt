@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -23,13 +22,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
-import com.grup.android.AddToGroupButton
 import com.grup.android.R
-import com.grup.android.UsernameSearchBar
-import com.grup.android.UsersList
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
-import kotlinx.coroutines.launch
 
 class MessageFragment : Fragment() {
     private val transactionViewModel: TransactionViewModel by navGraphViewModels(R.id.main_graph)

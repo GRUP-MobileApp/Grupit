@@ -32,12 +32,8 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.R
-import com.grup.android.UsernameSearchBar
+import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.h1Text
-import com.grup.android.ui.SmallIcon
-import com.grup.android.ui.UserInfoRowCard
-import com.grup.android.ui.caption
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
@@ -275,16 +271,16 @@ fun AddDebtorBottomSheet(
         sheetContent = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.8f)
                     .padding(AppTheme.dimensions.paddingMedium)
             ) {
                 h1Text(text = "Add Debtors", color = textColor, fontSize = 50.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     UsernameSearchBar(
@@ -308,7 +304,7 @@ fun AddDebtorBottomSheet(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
                 SelectDebtorsChecklist(
                     usernameSearchQuery = usernameSearchQuery,
                     userInfos = userInfos,
@@ -360,7 +356,10 @@ fun SelectDebtorsChecklist(
                     sideContent = { userInfo ->
                         Checkbox(
                             checked = selectedUsers.contains(userInfo),
-                            onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) }
+                            onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) },
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = AppTheme.colors.onPrimary
+                            )
                         )
                     }
                 )
