@@ -5,11 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -123,6 +123,41 @@ fun IconRowCard(
             mainContent()
         }
         sideContent()
+    }
+}
+
+@Composable
+fun UsernameSearchBar(
+    usernameSearchQuery: String,
+    onUsernameChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        TextField(
+            value = usernameSearchQuery,
+            onValueChange = onUsernameChange,
+            label = { Text("Search", color = AppTheme.colors.primary) },
+            singleLine = true,
+            shape = RoundedCornerShape(10.dp),
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "SearchIcon"
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.secondary),
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = AppTheme.colors.primary,
+                disabledTextColor = Color.Transparent,
+                backgroundColor = AppTheme.colors.onPrimary,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            )
+        )
     }
 }
 

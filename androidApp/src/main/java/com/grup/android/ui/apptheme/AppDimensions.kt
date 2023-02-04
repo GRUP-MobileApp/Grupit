@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 data class AppDimensions(
-    val paddingSmall: Dp = 4.dp,
+    val paddingSmall: Dp = 5.dp,
     val paddingMedium: Dp = 10.dp,
     val paddingLarge: Dp = 20.dp,
     val paddingExtraLarge: Dp = 30.dp,

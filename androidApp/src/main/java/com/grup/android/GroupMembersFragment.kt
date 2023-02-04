@@ -8,13 +8,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -129,15 +127,15 @@ fun GroupMembersLayout(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(AppTheme.dimensions.paddingMedium)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        UsernameSearchBar(
-                            usernameSearchQuery = usernameSearchQuery,
-                            onUsernameChange = { usernameSearchQuery = it }
-                        )
-                    }
+                    UsernameSearchBar(
+                        usernameSearchQuery = usernameSearchQuery,
+                        onUsernameChange = { usernameSearchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth(0.95f)
+                            .padding(top = AppTheme.dimensions.paddingMedium)
+                    )
                     UsersList(
                         userInfos = userInfos.filter { userInfo ->
                             userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
@@ -148,43 +146,6 @@ fun GroupMembersLayout(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun UsernameSearchBar(
-    usernameSearchQuery: String,
-    onUsernameChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-    ) {
-        TextField(
-            value = usernameSearchQuery,
-            onValueChange = onUsernameChange,
-            label = { Text("Search", color = AppTheme.colors.primary) },
-            singleLine = true,
-            shape = RoundedCornerShape(10.dp),
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "SearchIcon"
-                )
-            },
-            modifier = Modifier
-                .clip(AppTheme.shapes.large)
-                .background(AppTheme.colors.secondary)
-                .padding(all = AppTheme.dimensions.paddingMedium),
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = AppTheme.colors.primary,
-                disabledTextColor = Color.Transparent,
-                backgroundColor = AppTheme.colors.onPrimary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            )
-        )
     }
 }
 
@@ -286,9 +247,10 @@ fun AddToGroupBottomSheetLayout(
             ) {
                 UsernameSearchBar(
                     usernameSearchQuery = username,
-                    onUsernameChange = { username = it }
+                    onUsernameChange = { username = it },
+                    modifier = Modifier.padding(top = AppTheme.dimensions.paddingSmall)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
                 Button(
                     onClick = { inviteUsernameToGroupOnClick(username) },
                     colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
