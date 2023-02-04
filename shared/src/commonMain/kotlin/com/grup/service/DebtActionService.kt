@@ -25,7 +25,8 @@ internal class DebtActionService : KoinComponent {
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionRepository.updateDebtAction(debtAction) {
             this.debtTransactions.find { transactionRecord ->
-                transactionRecord.debtorUserInfo == myTransactionRecord.debtorUserInfo!!
+                transactionRecord.debtorUserInfo!!.getId() ==
+                        myTransactionRecord.debtorUserInfo!!.getId()
             }?.dateAccepted = Clock.System.now().toString()
         }
     }

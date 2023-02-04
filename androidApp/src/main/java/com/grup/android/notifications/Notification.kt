@@ -8,7 +8,7 @@ sealed class Notification {
     abstract fun displayText(): String
 
     data class IncomingGroupInvite(
-        private val groupInvite: GroupInvite
+        val groupInvite: GroupInvite
     ) : Notification() {
         override val date: String
             get() = groupInvite.date
@@ -18,7 +18,7 @@ sealed class Notification {
     }
 
     data class InviteeAcceptOutgoingGroupInvite(
-        private val groupInvite: GroupInvite
+        val groupInvite: GroupInvite
     ) : Notification() {
         override val date: String
             get() = groupInvite.dateAccepted.also { date ->
@@ -41,8 +41,8 @@ sealed class Notification {
             get() = debtAction.date
 
         override fun displayText(): String =
-            "${debtAction.debteeUserInfo!!.nickname} is requesting ${transactionRecord.balanceChange} " +
-                    "from you"
+            "${debtAction.debteeUserInfo!!.nickname} is requesting " +
+                    "${transactionRecord.balanceChange} from you"
     }
 
     data class DebtorAcceptOutgoingDebtAction(

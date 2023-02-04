@@ -127,6 +127,27 @@ fun IconRowCard(
 }
 
 @Composable
+fun UserInfoRowCard(
+    userInfo: UserInfo,
+    mainContent: @Composable (UserInfo) -> Unit = {
+        Column(verticalArrangement = Arrangement.Center) {
+            h1Text(text = it.nickname!!)
+            caption(text = "This is a description")
+        }
+    },
+    sideContent: @Composable (UserInfo) -> Unit = {
+        Text(text = "$${it.userBalance}")
+    },
+    onClick: () -> Unit = {}
+) {
+    IconRowCard(
+        mainContent = { mainContent(userInfo) },
+        sideContent = { sideContent(userInfo) },
+        onClick = onClick
+    )
+}
+
+@Composable
 fun UsernameSearchBar(
     usernameSearchQuery: String,
     onUsernameChange: (String) -> Unit,
@@ -159,25 +180,4 @@ fun UsernameSearchBar(
             )
         )
     }
-}
-
-@Composable
-fun UserInfoRowCard(
-    userInfo: UserInfo,
-    mainContent: @Composable (UserInfo) -> Unit = {
-        Column(verticalArrangement = Arrangement.Center) {
-            h1Text(text = it.nickname!!)
-            caption(text = "This is a description")
-        }
-    },
-    sideContent: @Composable (UserInfo) -> Unit = {
-        Text(text = "$${it.userBalance}")
-    },
-    onClick: () -> Unit = {}
-) {
-    IconRowCard(
-        mainContent = { mainContent(userInfo) },
-        sideContent = { sideContent(userInfo) },
-        onClick = onClick
-    )
 }
