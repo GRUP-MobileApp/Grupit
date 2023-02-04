@@ -2,7 +2,9 @@ package com.grup.android.notifications
 
 import com.grup.APIServer
 import com.grup.android.ViewModel
+import com.grup.models.DebtAction
 import com.grup.models.GroupInvite
+import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import kotlinx.coroutines.flow.*
 
@@ -12,7 +14,8 @@ class NotificationsViewModel : ViewModel() {
     private val incomingGroupInvitesAsNotification: Flow<List<Notification>> =
         _groupInvitesFlow.map { groupInvites ->
             groupInvites.filter { groupInvite ->
-                groupInvite.invitee!! == userObject.getId()
+                groupInvite.invitee!! == userObject.getId() &&
+                        groupInvite.dateAccepted == GroupInvite.PENDING
             }.map { groupInvite ->
                 Notification.IncomingGroupInvite(groupInvite)
             }
@@ -33,7 +36,8 @@ class NotificationsViewModel : ViewModel() {
         _debtActionsFlow.map { debtActions ->
             debtActions.mapNotNull { debtAction ->
                 debtAction.debtTransactions.find { transactionRecord ->
-                    transactionRecord.debtorUserInfo!!.userId!! == userObject.getId()
+                    transactionRecord.debtorUserInfo!!.userId!! == userObject.getId() &&
+                            transactionRecord.dateAccepted == TransactionRecord.PENDING
                 }?.let { transactionRecord ->
                     Notification.IncomingDebtAction(debtAction, transactionRecord)
                 }
@@ -103,5 +107,15 @@ class NotificationsViewModel : ViewModel() {
         }.asNotifications()
 
 
+    // Group Invite
     fun acceptInviteToGroup(groupInvite: GroupInvite) = APIServer.acceptInviteToGroup(groupInvite)
+
+    // DebtAction
+    fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
+        APIServer.acceptDebtAction(debtAction, myTransactionRecord)
+
+    // SettleAction
+    fun acceptSettleActionTransaction(settleAction: SettleAction,
+                                      transactionRecord: TransactionRecord) =
+        APIServer.acceptSettleActionTransaction(settleAction, transactionRecord)
 }

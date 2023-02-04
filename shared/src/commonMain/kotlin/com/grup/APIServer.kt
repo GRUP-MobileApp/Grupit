@@ -1,7 +1,6 @@
 package com.grup
 
 import com.grup.controllers.*
-import com.grup.di.*
 import com.grup.di.httpClientModule
 import com.grup.di.openSyncedRealm
 import com.grup.di.realm
@@ -64,8 +63,8 @@ object APIServer {
     fun settlePartialSettleAction(settleAction: SettleAction,
                                    myTransactionRecord: TransactionRecord) =
         SettleActionController.addTransactionRecord(settleAction, myTransactionRecord)
-    fun acceptPartialSettleAction(settleAction: SettleAction,
-                                  transactionRecord: TransactionRecord) =
+    fun acceptSettleActionTransaction(settleAction: SettleAction,
+                                      transactionRecord: TransactionRecord) =
         SettleActionController.acceptTransactionRecord(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = SettleActionController.getAllSettleActionsAsFlow()
 

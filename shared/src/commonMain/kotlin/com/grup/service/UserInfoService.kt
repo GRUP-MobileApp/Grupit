@@ -28,7 +28,7 @@ class UserInfoService : KoinComponent {
         val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo!!
         val debteeUserInfo: UserInfo = debtAction.debteeUserInfo!!
 
-        if (allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange!! < 0) {
+        if (allowNegative || debtorUserInfo.userBalance - transactionRecord.balanceChange!! < 0) {
             throw NegativeBalanceException("TransactionRecord between debtor with id " +
                     "${debtorUserInfo.userId} and debtee with id ${debteeUserInfo.userId} " +
                     "in DebtAction with id ${debtAction.getId()} results in negative balance")
