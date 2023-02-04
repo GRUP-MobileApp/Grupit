@@ -20,32 +20,24 @@ class LoginViewModel : ViewModel() {
     val loginResult: StateFlow<LoginResult> = _loginResult
 
     fun loginEmailPassword(email: String, password: String) = viewModelScope.launch {
-        pendingLoginResult()
+        _loginResult.value = LoginResult.Pending
         try {
-            APIServer.Login.emailAndPassword(email, password).also { successLoginResult() }
+            APIServer.Login.emailAndPassword(email, password).also {
+                _loginResult.value = LoginResult.Success
+            }
         } catch (e: LoginException) {
-            errorLoginResult(e)
+            _loginResult.value = LoginResult.Error(e)
         }
     }
 
     fun registerEmailPassword(email: String, password: String) = viewModelScope.launch {
-        pendingLoginResult()
-        try {
-            APIServer.Login.registerEmailAndPassword(email, password).also { successLoginResult() }
-        } catch (e: LoginException) {
-            errorLoginResult(e)
-        }
-    }
-
-    private fun pendingLoginResult() {
         _loginResult.value = LoginResult.Pending
-    }
-
-    private fun successLoginResult() {
-        _loginResult.value = LoginResult.Success
-    }
-
-    private fun errorLoginResult(e: Exception) {
-        _loginResult.value = LoginResult.Error(e)
+        try {
+            APIServer.Login.registerEmailAndPassword(email, password).also {
+                _loginResult.value = LoginResult.Success
+            }
+        } catch (e: LoginException) {
+            _loginResult.value = LoginResult.Error(e)
+        }
     }
 }

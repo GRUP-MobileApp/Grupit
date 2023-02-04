@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
 import com.grup.android.ui.apptheme.AppTheme
@@ -48,6 +50,7 @@ class LoginActivity : AppCompatActivity() {
 
 }
 
+@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun LoginPage(
     loginViewModel: LoginViewModel
@@ -56,7 +59,8 @@ fun LoginPage(
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     val context = LocalContext.current
 
-    val loginResult: LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsState()
+    val loginResult:
+            LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
 
     if (loginResult is LoginViewModel.LoginResult.Success) {
         context.startActivity(Intent(context, MainActivity::class.java))

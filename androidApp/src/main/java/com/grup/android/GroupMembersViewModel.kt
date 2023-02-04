@@ -1,9 +1,11 @@
 package com.grup.android
 
+import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class GroupMembersViewModel : ViewModel() {
     private val selectedGroup
@@ -19,6 +21,7 @@ class GroupMembersViewModel : ViewModel() {
             }
         }.asState()
 
-    fun inviteUserToGroup(username: String) =
+    fun inviteUserToGroup(username: String) = viewModelScope.launch {
         APIServer.inviteUserToGroup(username, selectedGroup)
+    }
 }
