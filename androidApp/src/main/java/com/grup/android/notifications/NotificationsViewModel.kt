@@ -104,7 +104,7 @@ class NotificationsViewModel : ViewModel() {
             allNotifications.flatMap { it }.sortedBy { notification ->
                 notification.date
             }
-        }.asNotifications()
+        }.asInitialEmptyState()
 
 
     // Group Invite

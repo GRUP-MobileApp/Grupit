@@ -61,11 +61,26 @@ class MainViewModel : ViewModel() {
 
     // SettleActions belonging to the selectedGroup, mapped to TransactionActivity
     private val _settleActionsFlow = APIServer.getAllSettleActionsAsFlow()
+    private val openSettleActionsAsTransactionActivity:
+            Flow<List<TransactionActivity.CreateSettleAction>> =
+        _settleActionsFlow.combine(selectedGroup) { settleActions, selectedGroup ->
+            selectedGroup?.let { group ->
+                settleActions.filter { settleAction ->
+                    settleAction.groupId!! == group.getId()
+                }.mapNotNull { settleAction ->
+                    if (settleAction.remainingAmount > 0) {
+                        TransactionActivity.CreateSettleAction(settleAction)
+                    } else {
+                        null
+                    }
+                }
+            } ?: emptyList()
+        }
     private val settleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
         _settleActionsFlow.combine(selectedGroup) { settleActions, selectedGroup ->
             selectedGroup?.let { group ->
                 settleActions.filter { settleAction ->
-                    settleAction.groupId == group.getId()
+                    settleAction.groupId!! == group.getId()
                 }.flatMap { settleAction ->
                     listOf(
                         TransactionActivity.CreateSettleAction(settleAction),
@@ -91,7 +106,13 @@ class MainViewModel : ViewModel() {
             allTransactionActivities.flatMap { it }.sortedBy { transactionActivity ->
                 transactionActivity.date
             }
-        }.asState()
+        }.asInitialEmptyState()
+    val activeSettleActions: StateFlow<List<TransactionActivity.CreateSettleAction>> =
+        openSettleActionsAsTransactionActivity.map { transactionActivities ->
+            transactionActivities.sortedBy { transactionActivity ->
+                transactionActivity.date
+            }
+        }.asInitialEmptyState()
 
 
     // Group operations

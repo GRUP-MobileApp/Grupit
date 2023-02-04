@@ -81,6 +81,8 @@ fun MainLayout(
     val myUserInfo: UserInfo? by mainViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
             mainViewModel.groupActivity.collectAsStateWithLifecycle()
+    val activeSettleActions: List<TransactionActivity.CreateSettleAction> by
+            mainViewModel.activeSettleActions.collectAsStateWithLifecycle()
 
     fun openDrawer() = scope.launch { scaffoldState.drawerState.open() }
     fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
@@ -143,7 +145,8 @@ fun MainLayout(
                             }
                         )
                         RecentActivityList(
-                            groupActivity = groupActivity
+                            groupActivity = groupActivity,
+                            activeSettleActions = activeSettleActions
                         )
                     }
                 } else {
@@ -341,19 +344,15 @@ fun GroupDetails(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun RecentActivityList(
-    groupActivity: List<TransactionActivity>
+    groupActivity: List<TransactionActivity>,
+    activeSettleActions: List<TransactionActivity.CreateSettleAction>
 ) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
 
     val tabItems = listOf(
         "All",
-        "Personal",
         "Settle"
-    )
-    val sampleList = mapOf(
-        "4/20" to listOf("test1", "test2", "test3", "test4"),
-        "6/9" to listOf("test5", "test6", "test7", "test8")
     )
 
     Box(
@@ -424,8 +423,7 @@ fun RecentActivityList(
             ) { page ->
                 when (page) {
                     0 -> RecentGroupActivityList(groupActivity = groupActivity)
-                    1 -> PublicRequestsList(content = sampleList)
-                    2 -> PublicRequestsList(content = sampleList)
+                    1 -> PublicRequestsList(activeSettleActions = activeSettleActions)
                 }
             }
         }
@@ -442,47 +440,22 @@ fun RecentGroupActivityList(
         modifier = Modifier.fillMaxSize()
     ) {
         itemsIndexed(groupActivity) { _, transactionActivity ->
-            when(transactionActivity) {
-                is TransactionActivity.AcceptDebtAction -> {
-                    Text(text = transactionActivity.displayText())
-                }
-                is TransactionActivity.CreateDebtAction -> {
-                    Text(text = transactionActivity.displayText())
-                }
-                is TransactionActivity.CreateSettleAction -> {
-                    Text(text = transactionActivity.displayText())
-                }
-                is TransactionActivity.SettlePartialSettleAction -> {
-                    Text(text = transactionActivity.displayText())
-                }
-            }
+            Text(text = transactionActivity.displayText())
         }
     }
 }
 
 @Composable
-fun PublicRequestsList(content: Map<String, List<String>>) {
+fun PublicRequestsList(
+    activeSettleActions: List<TransactionActivity.CreateSettleAction>
+) {
     LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = Modifier.fillMaxSize()
     ) {
-        itemsIndexed(content.keys.toList()) { _, filterGroup ->
-            caption(
-                text = "Completed - $filterGroup",
-                modifier = Modifier.padding(start = AppTheme.dimensions.paddingExtraLarge)
-            )
-            Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing / 2))
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                content[filterGroup]!!.forEach { request ->
-                    h1Text(
-                        text = request,
-                    )
-                }
-            }
+        itemsIndexed(activeSettleActions) { _, createSettleAction ->
+            Text(text = createSettleAction.displayText())
         }
     }
 }
