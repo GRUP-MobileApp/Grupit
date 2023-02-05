@@ -54,8 +54,11 @@ object APIServer {
     fun getAllGroupInvitesAsFlow() = GroupInviteController.getAllGroupInvitesAsFlow()
 
     // DebtAction
-    fun createDebtAction(transactionRecords: List<TransactionRecord>, debtee: UserInfo) =
-        DebtActionController.createDebtAction(transactionRecords, debtee)
+    fun createDebtAction(
+        transactionRecords: List<TransactionRecord>,
+        debtee: UserInfo,
+        message: String
+    ) = DebtActionController.createDebtAction(transactionRecords, debtee, message)
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
         DebtActionController.acceptDebtAction(debtAction, myTransactionRecord)
     fun getAllDebtActionsAsFlow() = DebtActionController.getAllDebtActionsAsFlow()
@@ -63,9 +66,10 @@ object APIServer {
     // SettleAction
     fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
         SettleActionController.createSettleAction(settleAmount, debtee)
-    fun settlePartialSettleAction(settleAction: SettleAction,
-                                   myTransactionRecord: TransactionRecord) =
-        SettleActionController.addTransactionRecord(settleAction, myTransactionRecord)
+    fun settlePartialSettleAction(
+        settleAction: SettleAction,
+        myTransactionRecord: TransactionRecord
+    ) = SettleActionController.addTransactionRecord(settleAction, myTransactionRecord)
     fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
         SettleActionController.acceptTransactionRecord(settleAction, transactionRecord)

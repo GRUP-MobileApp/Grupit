@@ -17,9 +17,11 @@ object GroupInviteController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
     private val groupInviteService: GroupInviteService by inject()
 
-    suspend fun createGroupInvite(inviter: User,
-                                  inviteeUsername: String,
-                                  group: Group): GroupInvite {
+    suspend fun createGroupInvite(
+        inviter: User,
+        inviteeUsername: String,
+        group: Group
+    ): GroupInvite {
         val foundInvitee: User = userService.getUserByUsername(inviteeUsername)
             ?: throw NotFoundException("User with username $inviteeUsername not found")
         val userIdsInGroup: List<String> =

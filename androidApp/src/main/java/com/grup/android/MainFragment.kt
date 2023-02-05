@@ -35,10 +35,8 @@ import androidx.navigation.navGraphViewModels
 import com.google.accompanist.pager.*
 import com.grup.android.login.LoginActivity
 import com.grup.android.transaction.TransactionActivity
+import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.*
-import com.grup.android.ui.caption
-import com.grup.android.ui.h1Text
-import com.grup.android.ui.SmallIcon
 import com.grup.models.Group
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
@@ -96,7 +94,7 @@ fun MainLayout(
         scaffoldState = scaffoldState,
         topBar = {
             TopBar(
-                onNavigationIconClick = { openDrawer() },
+                onNavigationIconClick = openDrawer,
                 actions = {
                     if (selectedGroup!= null) {
                         MembersButton(

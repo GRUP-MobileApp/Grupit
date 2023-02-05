@@ -14,9 +14,5 @@ internal class GroupService : KoinComponent {
             ?: throw NotCreatedException("Error creating group ${group.groupName}")
     }
 
-    fun getByGroupId(groupId: String): Group? {
-        return groupRepository.findGroupById(groupId)
-    }
-
     fun getAllGroupsAsFlow() = groupRepository.findAllGroupsAsFlow()
 }

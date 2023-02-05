@@ -37,7 +37,7 @@
         android:label="CreateGroupFragment" />
     <fragment
         android:id="@+id/membersFragment"
-        android:name="com.grup.android.GroupMembersFragment"
+        android:name="com.grup.android.members.GroupMembersFragment"
         android:label="MembersFragment" />
     <fragment
         android:id="@+id/notificationsFragment"
@@ -57,12 +57,5 @@
         android:id="@+id/debtActionFragment"
         android:name="com.grup.android.transaction.DebtActionFragment"
         android:label="DebtActionFragment" >
-        <action
-            android:id="@+id/toTransactionMessage"
-            app:destination="@id/messageFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/messageFragment"
-        android:name="com.grup.android.transaction.MessageFragment"
-        android:label="MessageFragment" />
 </navigation>

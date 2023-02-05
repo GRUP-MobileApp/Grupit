@@ -28,8 +28,22 @@ class TransactionViewModel : ViewModel() {
         }!!
     }.asState()
 
+    sealed class SplitStrategy {
+        abstract val name: String
+        abstract fun generateSplit(transactionAmount: Double, numPeople: Int): List<Double>
+
+        object EvenSplit : SplitStrategy() {
+            override val name: String = "Even Split"
+
+            override fun generateSplit(transactionAmount: Double, numPeople: Int): List<Double> =
+                List(numPeople) { transactionAmount / numPeople }
+        }
+    }
+
     // DebtAction
-    fun createDebtAction(userInfos: List<UserInfo>, debtAmounts: List<Double>) =
+    fun createDebtAction(userInfos: List<UserInfo>,
+                         debtAmounts: List<Double>,
+                         message: String) =
         APIServer.createDebtAction(
             userInfos.zip(debtAmounts).map { (userInfo, balanceChange) ->
                 TransactionRecord().apply {
@@ -37,7 +51,8 @@ class TransactionViewModel : ViewModel() {
                     this.balanceChange = balanceChange
                 }
             },
-            myUserInfo.value
+            myUserInfo.value,
+            message
         )
 
     // SettleAction

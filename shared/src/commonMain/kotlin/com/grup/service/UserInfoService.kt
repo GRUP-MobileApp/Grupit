@@ -26,9 +26,11 @@ class UserInfoService : KoinComponent {
     fun findMyUserInfosAsFlow(user: User) = userInfoRepository.findMyUserInfosAsFlow(user.getId())
     fun findAllUserInfosAsFlow() = userInfoRepository.findAllUserInfosAsFlow()
 
-    fun applyDebtActionTransactionRecord(debtAction: DebtAction,
-                                         transactionRecord: TransactionRecord,
-                                         allowNegative: Boolean = true) {
+    fun applyDebtActionTransactionRecord(
+        debtAction: DebtAction,
+        transactionRecord: TransactionRecord,
+        allowNegative: Boolean = true
+    ) {
         val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo!!
         val debteeUserInfo: UserInfo = debtAction.debteeUserInfo!!
 
@@ -59,8 +61,10 @@ class UserInfoService : KoinComponent {
         }
     }
 
-    fun applyPartialSettleActionTransactionRecord(settleAction: SettleAction,
-                                                  transactionRecord: TransactionRecord) {
+    fun applyPartialSettleActionTransactionRecord(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) {
         val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo!!
 
         if (transactionRecord.balanceChange!! > settleAction.remainingAmount) {

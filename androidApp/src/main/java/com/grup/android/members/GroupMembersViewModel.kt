@@ -1,7 +1,9 @@
-package com.grup.android
+package com.grup.android.members
 
 import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
+import com.grup.android.MainViewModel
+import com.grup.android.ViewModel
 import com.grup.exceptions.APIException
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow

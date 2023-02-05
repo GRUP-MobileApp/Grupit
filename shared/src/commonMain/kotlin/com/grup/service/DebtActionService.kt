@@ -12,12 +12,16 @@ import org.koin.core.component.inject
 internal class DebtActionService : KoinComponent {
     private val debtActionRepository: IDebtActionRepository by inject()
 
-    fun createDebtAction(transactionRecords: List<TransactionRecord>,
-                         debtee: UserInfo): DebtAction {
+    fun createDebtAction(
+        transactionRecords: List<TransactionRecord>,
+        debtee: UserInfo,
+        message: String
+    ): DebtAction {
         return debtActionRepository.createDebtAction(DebtAction().apply {
             this.debteeUserInfo = debtee
             this.groupId = debtee.groupId
             this.debtTransactions.addAll(transactionRecords)
+            this.message = message
         }) ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
                 " ${debtee.groupId}")
     }

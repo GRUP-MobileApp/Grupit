@@ -78,14 +78,18 @@ fun DebtActionLayout(
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
 
-
     val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
     var debtors: List<UserInfo> by remember { mutableStateOf(emptyList()) }
+    var splitStrategy: TransactionViewModel.SplitStrategy
+        by remember { mutableStateOf(TransactionViewModel.SplitStrategy.EvenSplit) }
+    var debtAmounts: List<Double> by remember { mutableStateOf(emptyList()) }
+    var message: String by remember { mutableStateOf("") }
 
     AddDebtorBottomSheet(
         userInfos = userInfos,
-        addDebtorOnClick = { selectedUsers ->
+        addDebtorsOnClick = { selectedUsers ->
             debtors = selectedUsers
+            debtAmounts = splitStrategy.generateSplit(debtActionAmount, debtors.size)
             scope.launch { addDebtorBottomSheetState.hide() }
         },
         state = addDebtorBottomSheetState
@@ -117,84 +121,39 @@ fun DebtActionLayout(
                         .clip(AppTheme.shapes.large)
                         .background(AppTheme.colors.secondary)
                 ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement
-                                .spacedBy(AppTheme.dimensions.spacingSmall),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            buildAnnotatedString {
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = AppTheme.colors.onSecondary
-                                    )
-                                ) {
-                                    append("by ")
-                                }
-                                pushStringAnnotation(
-                                    tag = "SplitStrategy",
-                                    annotation = "Split Strategy"
-                                )
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = AppTheme.colors.onSecondary,
-                                        background = AppTheme.colors.primary
-                                    )
-                                ) {
-                                    append("Even Split")
-                                }
-                                pop()
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = AppTheme.colors.onSecondary
-                                    )
-                                ) {
-                                    append(" between:")
-                                }
-                            }.let { annotatedText ->
-                                ClickableText(
-                                    text = annotatedText,
-                                    onClick = { offset ->
-                                        annotatedText.getStringAnnotations(
-                                            tag = "SignUp",
-                                            start = offset,
-                                            end = offset
-                                        )[0].let { _ ->
-                                            //do your stuff when it gets clicked
-                                        }
+                    HorizontalPager(
+                        count = 2,
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) { page ->
+                        when (page) {
+                            0 ->
+                                DebtAmountsScreen(
+                                    debtors = debtors,
+                                    debtAmounts = debtAmounts,
+                                    splitStrategy = splitStrategy,
+                                    onSplitStrategyChange = { splitStrategy = it },
+                                    addDebtorsOnClick = {
+                                        scope.launch { addDebtorBottomSheetState.show() }
+                                    },
+                                    onClickContinue = {
+                                        scope.launch { pagerState.animateScrollToPage(1) }
                                     }
                                 )
-                            }
-                            AddDebtorButton(
-                                addDebtorOnClick = {
-                                    scope.launch { addDebtorBottomSheetState.show() }
-                                }
-                            )
-                        }
-
-                        HorizontalPager(
-                            count = 2,
-                            state = pagerState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                        ) { page ->
-                            when (page) {
-                                0 -> SelectedDebtorsList(
-                                        debtActionAmount = debtActionAmount,
-                                        debtors = debtors,
-                                        createDebtActionOnClick = { userInfos, debtAmounts ->
-                                            transactionViewModel.createDebtAction(userInfos, debtAmounts)
-                                            navController.popBackStack()
-                                            navController.popBackStack()
-                                        }
-                                    )
-
-                                1 -> MessageLayout()
-                            }
+                            1 -> AddMessageScreen(
+                                    message = message,
+                                    onMessageChange = { message = it },
+                                    createDebtActionOnClick = {
+                                        transactionViewModel.createDebtAction(
+                                            debtors,
+                                            debtAmounts,
+                                            message
+                                        )
+                                        navController.popBackStack()
+                                        navController.popBackStack()
+                                    }
+                                )
                         }
                     }
                 }
@@ -225,14 +184,97 @@ fun DebtActionTopBar(
 }
 
 @Composable
-fun SelectedDebtorsList(
-    debtActionAmount: Double,
+fun DebtAmountsScreen(
     debtors: List<UserInfo>,
-    createDebtActionOnClick: (List<UserInfo>, List<Double>) -> Unit,
+    debtAmounts: List<Double>,
+    splitStrategy: TransactionViewModel.SplitStrategy,
+    onSplitStrategyChange: (TransactionViewModel.SplitStrategy) -> Unit,
+    addDebtorsOnClick: () -> Unit,
+    onClickContinue: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement
+            .spacedBy(AppTheme.dimensions.spacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        DebtActionSettings(
+            splitStrategy = splitStrategy,
+            onSplitStrategyChange = onSplitStrategyChange,
+            addDebtorsOnClick = addDebtorsOnClick
+        )
+        SelectedDebtorsList(
+            debtors = debtors,
+            debtAmounts = debtAmounts,
+            onClickContinue = onClickContinue
+        )
+    }
+}
+
+@Composable
+fun DebtActionSettings(
+    splitStrategy: TransactionViewModel.SplitStrategy,
+    onSplitStrategyChange: (TransactionViewModel.SplitStrategy) -> Unit,
+    addDebtorsOnClick: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement
+            .spacedBy(AppTheme.dimensions.spacingSmall),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    color = AppTheme.colors.onSecondary
+                )
+            ) {
+                append("by ")
+            }
+            pushStringAnnotation(
+                tag = "SplitStrategy",
+                annotation = "Split Strategy"
+            )
+            withStyle(
+                style = SpanStyle(
+                    color = AppTheme.colors.onSecondary,
+                    background = AppTheme.colors.primary
+                )
+            ) {
+                append(splitStrategy.name)
+            }
+            pop()
+            withStyle(
+                style = SpanStyle(
+                    color = AppTheme.colors.onSecondary
+                )
+            ) {
+                append(" between:")
+            }
+        }.let { annotatedText ->
+            ClickableText(
+                text = annotatedText,
+                onClick = { offset ->
+                    annotatedText.getStringAnnotations(
+                        tag = "Split Strategy",
+                        start = offset,
+                        end = offset
+                    )[0].let { _ ->
+                        /* TODO: Split strategy menu select */
+                    }
+                }
+            )
+        }
+        AddDebtorButton(addDebtorsOnClick = addDebtorsOnClick)
+    }
+}
+
+@Composable
+fun SelectedDebtorsList(
+    debtors: List<UserInfo>,
+    debtAmounts: List<Double>,
+    onClickContinue: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val debtAmounts: MutableList<Double> =
-        debtors.map { debtActionAmount / debtors.size }.toMutableStateList()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -256,7 +298,7 @@ fun SelectedDebtorsList(
             }
         }
         Button(
-            onClick = { createDebtActionOnClick(debtors, debtAmounts) },
+            onClick = onClickContinue,
             shape = AppTheme.shapes.CircleShape,
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = AppTheme.colors.confirm
@@ -266,7 +308,7 @@ fun SelectedDebtorsList(
                 .height(50.dp)
         ) {
             Text(
-                text = "Add Selected Users",
+                text = "Continue",
                 color = AppTheme.colors.onSecondary
             )
         }
@@ -277,7 +319,7 @@ fun SelectedDebtorsList(
 @Composable
 fun AddDebtorBottomSheet(
     userInfos: List<UserInfo>,
-    addDebtorOnClick: (List<UserInfo>) -> Unit,
+    addDebtorsOnClick: (List<UserInfo>) -> Unit,
     state: ModalBottomSheetState,
     backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
@@ -309,7 +351,7 @@ fun AddDebtorBottomSheet(
                         modifier = Modifier.weight(1f)
                     )
                     Button(
-                        onClick = { addDebtorOnClick(selectedUsers) },
+                        onClick = { addDebtorsOnClick(selectedUsers) },
                         shape = AppTheme.shapes.CircleShape,
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = AppTheme.colors.confirm
@@ -390,9 +432,9 @@ fun SelectDebtorsChecklist(
 
 @Composable
 fun AddDebtorButton(
-    addDebtorOnClick: () -> Unit
+    addDebtorsOnClick: () -> Unit
 ) {
-    IconButton(onClick = addDebtorOnClick) {
+    IconButton(onClick = addDebtorsOnClick) {
         SmallIcon(
             imageVector = Icons.Default.Add,
             contentDescription = "Add a debtor"
@@ -401,90 +443,58 @@ fun AddDebtorButton(
 }
 
 @Composable
-fun MessageLayout() {
-    var transactionMessage: String by remember { mutableStateOf("") }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(AppTheme.shapes.large)
-            .background(AppTheme.colors.secondary)
+fun AddMessageScreen(
+    message: String,
+    onMessageChange: (String) -> Unit,
+    createDebtActionOnClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement
+            .spacedBy(AppTheme.dimensions.spacing),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        h1Text(text = "What is this for?", fontSize = 40.sp)
+        TextField(
+            value = message,
+            onValueChange = onMessageChange,
+            shape = RectangleShape,
             modifier = Modifier
-                .padding(top = 10.dp)
-                .fillMaxSize()
-        ) {
-            h1Text(text = "What is this for?", fontSize = 40.sp)
-
-            TextField(
-                value = transactionMessage,
-                onValueChange = {transactionMessage = it},
-                shape = RectangleShape,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(AppTheme.shapes.large)
-                    .background(AppTheme.colors.secondary)
-                    .padding(all = AppTheme.dimensions.paddingMedium)
-                    .height(200.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = AppTheme.colors.primary,
-                    disabledTextColor = Color.Transparent,
-                    backgroundColor = AppTheme.colors.onPrimary,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                )
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.secondary)
+                .padding(all = AppTheme.dimensions.paddingMedium)
+                .height(200.dp),
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = AppTheme.colors.primary,
+                disabledTextColor = Color.Transparent,
+                backgroundColor = AppTheme.colors.onPrimary,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
             )
+        )
 
-            Column(
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Button(
+                onClick = createDebtActionOnClick,
+                shape = AppTheme.shapes.CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = AppTheme.colors.confirm
+                ),
+                modifier = Modifier
+                    .width(175.dp)
+                    .height(50.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .padding(top = 20.dp, bottom = 40.dp)
-                ) {
-                    Button(
-                        onClick = { },
-                        shape = AppTheme.shapes.CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = AppTheme.colors.error
-                        ),
-                        modifier = Modifier
-                            .width(175.dp)
-                            .height(50.dp)
-                    ) {
-                        Text(
-                            text = "Cancel Request",
-                            color = AppTheme.colors.onSecondary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(20.dp))
-
-                    Button(
-                        onClick = { },
-                        shape = AppTheme.shapes.CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = AppTheme.colors.confirm
-                        ),
-                        modifier = Modifier
-                            .width(175.dp)
-                            .height(50.dp)
-                    ) {
-                        Text(
-                            text = "Confirm Request",
-                            color = AppTheme.colors.onSecondary
-                        )
-                    }
-                }
-
+                Text(
+                    text = "Confirm Request",
+                    color = AppTheme.colors.onSecondary
+                )
             }
-
         }
     }
 }

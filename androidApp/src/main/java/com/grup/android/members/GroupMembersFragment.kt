@@ -1,4 +1,4 @@
-package com.grup.android
+package com.grup.android.members
 
 import LoadingSpinner
 import android.os.Bundle
@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
+import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.*
 
