@@ -2,7 +2,9 @@ package com.grup.android
 
 import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
+import com.grup.exceptions.APIException
 import com.grup.models.UserInfo
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -21,7 +23,29 @@ class GroupMembersViewModel : ViewModel() {
             }
         }.asState()
 
-    fun inviteUserToGroup(username: String) = viewModelScope.launch {
-        APIServer.inviteUserToGroup(username, selectedGroup)
+    sealed class InviteResult {
+        object Sent : InviteResult()
+        object Pending : InviteResult()
+        data class Error(val exception: Exception) : InviteResult()
+        object None : InviteResult()
+    }
+
+    private val _inviteResult = MutableStateFlow<InviteResult>(InviteResult.None)
+    val inviteResult: StateFlow<InviteResult> = _inviteResult
+
+    fun resetInviteResult() {
+        _inviteResult.value = InviteResult.None
+    }
+
+    fun inviteUserToGroup(username: String) {
+        _inviteResult.value = InviteResult.Pending
+        viewModelScope.launch {
+            try {
+                APIServer.inviteUserToGroup(username, selectedGroup)
+                _inviteResult.value = InviteResult.Sent
+            } catch (e: APIException) {
+                _inviteResult.value = InviteResult.Error(e)
+            }
+        }
     }
 }

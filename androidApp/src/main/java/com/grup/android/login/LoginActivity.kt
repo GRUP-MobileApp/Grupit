@@ -1,5 +1,6 @@
 package com.grup.android.login
 
+import LoadingSpinner
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -152,10 +153,14 @@ fun LoginPage(
                         .width(150.dp)
                         .height(50.dp)
                 ) {
-                    Text(
-                        text = "Sign Up",
-                        color = AppTheme.colors.onSecondary
-                    )
+                    if (loginResult is LoginViewModel.LoginResult.PendingRegister) {
+                        LoadingSpinner()
+                    } else {
+                        Text(
+                            text = "Sign Up",
+                            color = AppTheme.colors.onSecondary
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(20.dp))
@@ -170,10 +175,14 @@ fun LoginPage(
                         .width(150.dp)
                         .height(50.dp)
                 ) {
-                    Text(
-                        text = "Login",
-                        color = AppTheme.colors.onSecondary
-                    )
+                    if (loginResult is LoginViewModel.LoginResult.PendingLogin) {
+                        LoadingSpinner()
+                    } else {
+                        Text(
+                            text = "Login",
+                            color = AppTheme.colors.onSecondary
+                        )
+                    }
                 }
             }
         }

@@ -16,9 +16,8 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
         }
     }
 
-    override fun findUserInfoByUser(userId: String, groupId: String): UserInfo? {
-        return realm.query<UserInfo>("userId == $0 AND groupId == $1", userId, groupId)
-            .first().find()
+    override fun findUserInfosByGroupId(groupId: String): List<UserInfo> {
+        return realm.query<UserInfo>("groupId == $0", groupId).find()
     }
 
     override fun findMyUserInfosAsFlow(userId: String): Flow<List<UserInfo>> {

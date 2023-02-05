@@ -35,8 +35,8 @@ class WelcomeViewModel : ViewModel() {
         if (username.isBlank()) {
             _usernameValidity.value = UsernameValidity.None
         } else {
+            _usernameValidity.value = UsernameValidity.Pending
             currentJob = viewModelScope.launch {
-                _usernameValidity.value = UsernameValidity.Pending
                 if (!APIServer.usernameExists(username)) {
                     _usernameValidity.value = UsernameValidity.Valid
                 } else {

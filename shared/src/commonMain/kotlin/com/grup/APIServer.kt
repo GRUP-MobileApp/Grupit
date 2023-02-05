@@ -83,6 +83,8 @@ object APIServer {
                 login(Credentials.emailPassword(email, password))
             } catch (e: InvalidCredentialsException) {
                 throw InvalidEmailPasswordException()
+            } catch (e: IllegalArgumentException) {
+                throw InvalidEmailPasswordException(e.message)
             }
         }
 
@@ -91,6 +93,8 @@ object APIServer {
                 app.emailPasswordAuth.registerUser(email, password)
             } catch (e: UserAlreadyExistsException) {
                 throw EntityAlreadyExistsException("Email already exists")
+            } catch (e: IllegalArgumentException) {
+                throw InvalidEmailPasswordException(e.message)
             } catch (e: BadRequestException) {
                 // TODO: Bad email/bad password exception
             }

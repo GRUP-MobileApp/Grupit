@@ -149,14 +149,15 @@ fun UserInfoRowCard(
 
 @Composable
 fun UsernameSearchBar(
+    modifier: Modifier = Modifier,
     usernameSearchQuery: String,
-    onUsernameChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onQueryChange: (String) -> Unit,
+    border: Color = Color.Transparent
 ) {
     Row(modifier = modifier) {
         TextField(
             value = usernameSearchQuery,
-            onValueChange = onUsernameChange,
+            onValueChange = onQueryChange,
             label = { Text("Search", color = AppTheme.colors.primary) },
             singleLine = true,
             shape = RoundedCornerShape(10.dp),
@@ -174,8 +175,8 @@ fun UsernameSearchBar(
                 textColor = AppTheme.colors.primary,
                 disabledTextColor = Color.Transparent,
                 backgroundColor = AppTheme.colors.onPrimary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = border,
+                unfocusedIndicatorColor = border,
                 disabledIndicatorColor = Color.Transparent
             )
         )

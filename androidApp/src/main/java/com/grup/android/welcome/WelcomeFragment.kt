@@ -54,7 +54,6 @@ class WelcomeFragment : Fragment() {
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalLifecycleComposeApi::class)

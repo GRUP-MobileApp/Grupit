@@ -305,7 +305,7 @@ fun AddDebtorBottomSheet(
                 ) {
                     UsernameSearchBar(
                         usernameSearchQuery = usernameSearchQuery,
-                        onUsernameChange = { usernameSearchQuery = it },
+                        onQueryChange = { usernameSearchQuery = it },
                         modifier = Modifier.weight(1f)
                     )
                     Button(

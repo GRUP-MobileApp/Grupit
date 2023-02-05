@@ -84,8 +84,12 @@ fun MainLayout(
     val activeSettleActions: List<TransactionActivity.CreateSettleAction> by
             mainViewModel.activeSettleActions.collectAsStateWithLifecycle()
 
-    fun openDrawer() = scope.launch { scaffoldState.drawerState.open() }
-    fun closeDrawer() = scope.launch { scaffoldState.drawerState.close() }
+    val openDrawer: () -> Unit = {
+        scope.launch { scaffoldState.drawerState.open() }
+    }
+    val closeDrawer: () -> Unit = {
+        scope.launch { scaffoldState.drawerState.close() }
+    }
     fun selectedGroupOnValueChange(group: Group) = mainViewModel.onSelectedGroupChange(group)
 
     Scaffold(

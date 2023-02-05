@@ -1,5 +1,6 @@
 package com.grup.android
 
+import LoadingSpinner
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -69,17 +70,26 @@ fun GroupMembersLayout(
     val scope = rememberCoroutineScope()
 
     val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
+    val inviteResult: GroupMembersViewModel.InviteResult by
+        groupMembersViewModel.inviteResult.collectAsStateWithLifecycle()
 
     var usernameSearchQuery: String by remember { mutableStateOf("") }
+    var addToGroupUsernameSearchQuery: String by remember { mutableStateOf("") }
+
+    val openAddToGroupBottomSheet: () -> Unit = {
+        addToGroupUsernameSearchQuery = ""
+        groupMembersViewModel.resetInviteResult()
+        scope.launch { addToGroupBottomSheetState.show() }
+    }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         AddToGroupBottomSheetLayout(
+            addToGroupUsernameSearchQuery = addToGroupUsernameSearchQuery,
+            onQueryChange = { addToGroupUsernameSearchQuery = it },
             state = addToGroupBottomSheetState,
-            inviteUsernameToGroupOnClick = { username ->
-                groupMembersViewModel.inviteUserToGroup(username)
-                scope.launch {
-                    addToGroupBottomSheetState.hide()
-                }
+            inviteResult = inviteResult,
+            inviteUsernameToGroupOnClick = {
+                groupMembersViewModel.inviteUserToGroup(addToGroupUsernameSearchQuery)
             }
         ) {
             GroupMemberInfoBottomSheet(state = userInfoBottomSheetState) {
@@ -107,9 +117,7 @@ fun GroupMembersLayout(
                     },
                     actions = {
                         AddToGroupButton(
-                            addToGroupOnClick = {
-                                scope.launch { addToGroupBottomSheetState.show() }
-                            }
+                            addToGroupOnClick = openAddToGroupBottomSheet
                         )
                     }
                 )
@@ -131,7 +139,10 @@ fun GroupMembersLayout(
                 ) {
                     UsernameSearchBar(
                         usernameSearchQuery = usernameSearchQuery,
-                        onUsernameChange = { usernameSearchQuery = it },
+                        onQueryChange = { username ->
+                            usernameSearchQuery = username
+                            groupMembersViewModel.resetInviteResult()
+                        },
                         modifier = Modifier
                             .fillMaxWidth(0.95f)
                             .padding(top = AppTheme.dimensions.paddingMedium)
@@ -228,13 +239,21 @@ fun AddToGroupButton(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddToGroupBottomSheetLayout(
-    inviteUsernameToGroupOnClick: (String) -> Unit,
+    addToGroupUsernameSearchQuery: String,
+    onQueryChange: (String) -> Unit,
+    inviteUsernameToGroupOnClick: () -> Unit,
+    inviteResult: GroupMembersViewModel.InviteResult,
     state: ModalBottomSheetState,
     backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
-    var username: String by remember { mutableStateOf("") }
+    val usernameSearchBarBorderColor: Color =
+        if (inviteResult is GroupMembersViewModel.InviteResult.Error) {
+            AppTheme.colors.error
+        } else {
+            Color.Transparent
+        }
 
     ModalBottomSheetLayout(
         sheetState = state,
@@ -246,17 +265,33 @@ fun AddToGroupBottomSheetLayout(
                     .padding(AppTheme.dimensions.paddingMedium)
             ) {
                 UsernameSearchBar(
-                    usernameSearchQuery = username,
-                    onUsernameChange = { username = it },
+                    usernameSearchQuery = addToGroupUsernameSearchQuery,
+                    onQueryChange = onQueryChange,
+                    border = usernameSearchBarBorderColor,
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingSmall)
                 )
                 Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (inviteResult is GroupMembersViewModel.InviteResult.Error) {
+                        Text(text = inviteResult.exception.message!!)
+                    } else if(inviteResult is GroupMembersViewModel.InviteResult.Sent) {
+                        Text(text = "Sent!")
+                    }
+                }
+                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
                 Button(
-                    onClick = { inviteUsernameToGroupOnClick(username) },
+                    onClick = inviteUsernameToGroupOnClick,
                     colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
                     shape = AppTheme.shapes.CircleShape
                 ) {
-                    Text(text = "Add to group", color = textColor)
+                    if (inviteResult is GroupMembersViewModel.InviteResult.Pending) {
+                        LoadingSpinner()
+                    } else {
+                        Text(text = "Add to group", color = textColor)
+                    }
                 }
             }
         },

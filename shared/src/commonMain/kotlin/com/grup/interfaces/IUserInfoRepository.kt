@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 internal interface IUserInfoRepository : IRepository {
     fun createUserInfo(userInfo: UserInfo): UserInfo?
 
-    fun findUserInfoByUser(userId: String, groupId: String): UserInfo?
+    fun findUserInfosByGroupId(groupId: String): List<UserInfo>
     fun findMyUserInfosAsFlow(userId: String): Flow<List<UserInfo>>
     fun findAllUserInfosAsFlow(): Flow<List<UserInfo>>
 
