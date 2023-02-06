@@ -101,7 +101,7 @@ class NotificationsViewModel : ViewModel() {
             incomingTransactionsOnSettleActionsAsNotification,
             outgoingTransactionsOnSettleActionsAsNotification
         ) { allNotifications: Array<List<Notification>> ->
-            allNotifications.flatMap { it }.sortedBy { notification ->
+            allNotifications.flatMap { it }.sortedByDescending { notification ->
                 notification.date
             }
         }.asInitialEmptyState()

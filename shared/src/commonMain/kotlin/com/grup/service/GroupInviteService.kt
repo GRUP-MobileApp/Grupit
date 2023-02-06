@@ -5,7 +5,7 @@ import com.grup.interfaces.IGroupInviteRepository
 import com.grup.models.Group
 import com.grup.models.GroupInvite
 import com.grup.models.User
-import kotlinx.datetime.Clock
+import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -26,8 +26,7 @@ internal class GroupInviteService: KoinComponent {
     }
 
     fun acceptGroupInvite(groupInvite: GroupInvite) {
-        groupInviteRepository.updateGroupInviteStatus(groupInvite,
-            Clock.System.now().toString())
+        groupInviteRepository.updateGroupInviteStatus(groupInvite, getCurrentTime())
     }
 
     fun getAllGroupInvitesAsFlow() = groupInviteRepository.findAllGroupInvitesAsFlow()

@@ -32,9 +32,9 @@ import com.grup.models.UserInfo
 
 @Composable
 fun h1Text(
+    modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onSecondary,
-    modifier: Modifier = Modifier,
     fontSize: TextUnit = TextUnit.Unspecified
 ) {
     Text(

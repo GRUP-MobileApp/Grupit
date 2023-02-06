@@ -6,7 +6,7 @@ import com.grup.interfaces.ISettleActionRepository
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
-import kotlinx.datetime.Clock
+import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -36,7 +36,7 @@ class SettleActionService : KoinComponent {
         settleActionRepository.updateSettleAction(settleAction) {
             this.debtTransactions.find {
                 it.debtorUserInfo == transactionRecord.debtorUserInfo!!
-            }?.dateAccepted = Clock.System.now().toString()
+            }?.dateAccepted = getCurrentTime()
         }
     }
 

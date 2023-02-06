@@ -2,9 +2,9 @@ package com.grup.models
 
 import com.grup.exceptions.MissingFieldException
 import com.grup.other.createId
+import com.grup.other.getCurrentTime
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-import kotlinx.datetime.Clock
 
 class GroupInvite internal constructor() : BaseEntity(), RealmObject {
     companion object {
@@ -32,7 +32,7 @@ class GroupInvite internal constructor() : BaseEntity(), RealmObject {
     var groupName: String? = null
         get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing groupName")
         internal set
-    var date: String = Clock.System.now().toString()
+    var date: String = getCurrentTime()
         internal set
     var dateAccepted: String = PENDING
         internal set

@@ -37,8 +37,10 @@ class MainViewModel : ViewModel() {
     // Hot flow containing User's UserInfos
     private val _myUserInfosFlow by lazy { APIServer.getMyUserInfosAsFlow() }
     val myUserInfo: StateFlow<UserInfo?> by lazy {
-        _myUserInfosFlow.map { userInfos ->
-            userInfos.find { it.userId == userObject.getId() }
+        _myUserInfosFlow.combine(selectedGroup) { userInfos, selectedGroup ->
+            selectedGroup?.let { nonNullGroup ->
+                userInfos.find { it.groupId == nonNullGroup.getId() }
+            }
         }.asState()
     }
 
@@ -74,11 +76,12 @@ class MainViewModel : ViewModel() {
                 }
             } ?: emptyList()
         }
+    // Active SettleActions to be displayed, oldest first
     val activeSettleActions: StateFlow<List<SettleAction>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
                 settleAction.remainingAmount > 0
-            }
+            }.sortedBy { it.date }
         }.asState()
 
     private val settleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
@@ -104,7 +107,7 @@ class MainViewModel : ViewModel() {
             debtActionsAsTransactionActivity,
             settleActionsAsTransactionActivity
         ) { allTransactionActivities: Array<List<TransactionActivity>> ->
-            allTransactionActivities.flatMap { it }.sortedBy { transactionActivity ->
+            allTransactionActivities.flatMap { it }.sortedByDescending { transactionActivity ->
                 transactionActivity.date
             }
         }.asInitialEmptyState()

@@ -5,14 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -23,18 +20,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
-import com.google.accompanist.pager.*
 import com.grup.android.login.LoginActivity
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.*
@@ -97,17 +91,9 @@ fun MainLayout(
         scaffoldState = scaffoldState,
         topBar = {
             TopBar(
-                groupName = selectedGroup?.groupName,
+                group = selectedGroup,
                 onNavigationIconClick = openDrawer,
-                actions = {
-                    if (selectedGroup!= null) {
-                        MembersButton(
-                            membersOnClick = {
-                                navController.navigate(R.id.viewMembers)
-                            }
-                        )
-                    }
-                }
+                navigateGroupMembersOnClick = { navController.navigate(R.id.viewMembers) }
             )
         },
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
@@ -260,12 +246,12 @@ fun GroupNavigationMenu(
 
 @Composable
 fun TopBar(
-    groupName: String? = null,
+    group: Group?,
     onNavigationIconClick: () -> Unit,
-    actions: @Composable RowScope.() -> Unit = {}
+    navigateGroupMembersOnClick: () -> Unit
 ) {
     TopAppBar(
-        title = { groupName?.let { h1Text(text = it) } },
+        title = { group?.let { h1Text(text = it.groupName!!) } },
         backgroundColor = AppTheme.colors.primary,
         navigationIcon = {
             IconButton(
@@ -277,7 +263,11 @@ fun TopBar(
                 )
             }
         },
-        actions = actions
+        actions = {
+            if (group != null) {
+                MembersButton(navigateGroupMembersOnClick = navigateGroupMembersOnClick)
+            }
+        }
     )
 }
 
@@ -295,10 +285,10 @@ fun NotificationsButton(
 
 @Composable
 fun MembersButton(
-    membersOnClick: () -> Unit
+    navigateGroupMembersOnClick: () -> Unit
 ) {
     IconButton(
-        onClick = membersOnClick
+        onClick = navigateGroupMembersOnClick
     ) {
         SmallIcon(
             imageVector = Icons.Default.Person,
@@ -386,7 +376,7 @@ fun ActiveSettleActions(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                itemsIndexed(activeSettleActions) { _, settleAction ->
+                items(activeSettleActions) { settleAction ->
                     SettleActionCard(settleAction = settleAction)
                 }
             }
@@ -401,15 +391,19 @@ fun SettleActionCard(
     Box(
         modifier = Modifier
             .clip(AppTheme.shapes.large)
-            .size(110.dp)
+            .width(140.dp)
+            .height(140.dp)
             .background(AppTheme.colors.secondary)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             modifier = Modifier
                 .padding(AppTheme.dimensions.cardPadding)
         ) {
-            h1Text(text = settleAction.debteeUserInfo!!.nickname!!)
+            ProfileIcon(
+                imageVector = Icons.Default.Face,
+                iconSize = 50.dp
+            )
             h1Text(text = settleAction.remainingAmount.asMoneyAmount())
         }
     }
@@ -420,6 +414,8 @@ fun RecentActivityList(
     modifier: Modifier = Modifier,
     groupActivity: List<TransactionActivity>
 ) {
+    val groupActivityByDate: Map<String, List<TransactionActivity>> =
+        groupActivity.groupBy { isoDate(it.date) }
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier
@@ -432,14 +428,27 @@ fun RecentActivityList(
                 .background(AppTheme.colors.secondary)
         ) {
             LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
-                itemsIndexed(groupActivity) { _, transactionActivity ->
-                    Text(text = transactionActivity.displayText())
+                items(groupActivityByDate.keys.toList()) { date ->
+                    caption(text = date)
+                    Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
+                    Column(
+                        verticalArrangement = Arrangement
+                            .spacedBy(AppTheme.dimensions.spacingSmall),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        groupActivityByDate[date]!!.forEach { transactionActivity ->  
+                            h1Text(
+                                text = transactionActivity.displayText(),
+                                fontSize = 18.sp
+                            )
+                        }
+                    }
                 }
             }
         }

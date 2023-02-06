@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
@@ -399,11 +400,11 @@ fun SelectDebtorsChecklist(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        itemsIndexed(
+        items(
             userInfos.filter { userInfo ->
                 userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
             }
-        ) { _, userInfo ->
+        ) { userInfo ->
             Row(
                 horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier.fillMaxWidth()

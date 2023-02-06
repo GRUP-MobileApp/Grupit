@@ -1,9 +1,8 @@
 package com.grup.models
 
 import com.grup.exceptions.MissingFieldException
+import com.grup.other.getCurrentTime
 import io.realm.kotlin.types.EmbeddedRealmObject
-import io.realm.kotlin.types.annotations.Ignore
-import kotlinx.datetime.Clock
 
 class TransactionRecord : EmbeddedRealmObject {
     companion object {
@@ -16,6 +15,6 @@ class TransactionRecord : EmbeddedRealmObject {
     var balanceChange: Double? = null
         get() = field
             ?: throw MissingFieldException("TransactionRecord missing balanceChange")
-    var dateCreated: String = Clock.System.now().toString()
+    var dateCreated: String = getCurrentTime()
     var dateAccepted: String = PENDING
 }

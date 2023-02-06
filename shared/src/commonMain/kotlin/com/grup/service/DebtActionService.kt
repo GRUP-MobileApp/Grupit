@@ -5,7 +5,7 @@ import com.grup.interfaces.IDebtActionRepository
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
-import kotlinx.datetime.Clock
+import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -31,7 +31,7 @@ internal class DebtActionService : KoinComponent {
             this.debtTransactions.find { transactionRecord ->
                 transactionRecord.debtorUserInfo!!.getId() ==
                         myTransactionRecord.debtorUserInfo!!.getId()
-            }?.dateAccepted = Clock.System.now().toString()
+            }?.dateAccepted = getCurrentTime()
         }
     }
 
