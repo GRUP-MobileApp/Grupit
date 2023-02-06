@@ -153,7 +153,7 @@ fun LoginPage(
                         backgroundColor = AppTheme.colors.secondary
                     ),
                     modifier = Modifier
-                        .width(150.dp)
+                        .width(120.dp)
                         .height(50.dp)
                 ) {
                     if (loginResult is LoginViewModel.LoginResult.PendingRegister) {
@@ -175,7 +175,7 @@ fun LoginPage(
                         backgroundColor = AppTheme.colors.confirm
                     ),
                     modifier = Modifier
-                        .width(150.dp)
+                        .width(120.dp)
                         .height(50.dp)
                 ) {
                     if (loginResult is LoginViewModel.LoginResult.PendingLogin) {

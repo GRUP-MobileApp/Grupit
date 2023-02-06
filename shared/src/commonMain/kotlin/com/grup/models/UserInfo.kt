@@ -19,4 +19,7 @@ class UserInfo internal constructor() : BaseEntity(), RealmObject {
         internal set
     var userBalance: Double = 0.0
         internal set
+    var joinDate: String? = null
+        get() = field ?: throw MissingFieldException("UserInfo with id $_id missing joinDate")
+        internal set
 }

@@ -22,6 +22,12 @@ class GroupMembersViewModel : ViewModel() {
         _userInfosFlow.map { userInfos ->
             userInfos.filter { userInfo ->
                 userInfo.groupId == selectedGroup.getId()
+            }.sortedBy { userInfo ->
+                if (userInfo.userId == userObject.getId()) {
+                    ""
+                } else {
+                    userInfo.nickname!!
+                }
             }
         }.asState()
 

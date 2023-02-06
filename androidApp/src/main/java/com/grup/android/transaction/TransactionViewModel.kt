@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 class TransactionViewModel : ViewModel() {
+    companion object {
+        const val DEBT = "Debt"
+        const val SETTLE = "Settle"
+    }
+
     private val selectedGroup
         get() = MainViewModel.selectedGroup
 

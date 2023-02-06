@@ -22,7 +22,7 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
                 SettleAction::class, TransactionRecord::class
             )
         )
-        .initialSubscriptions(rerunOnOpen = true) { realm ->
+        .initialSubscriptions { realm ->
             removeAll()
             add(realm.query<User>("$idSerialName == $0", realmUser.id), "User")
             add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
@@ -31,10 +31,10 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
                 "GroupInvites"
             )
         }
-        .waitForInitialRemoteData()
         .name("syncedRealm")
         .build()
-    ).also { subscriptionsJob = startSubscriptionSyncJob() }
+    )
+    subscriptionsJob = startSubscriptionSyncJob()
     realm.subscriptions.waitForSynchronization()
     return realm
 }

@@ -103,7 +103,7 @@ fun GroupMembersLayout(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Members", color = AppTheme.colors.onSecondary) },
+                    title = { h1Text(text = "Members", color = AppTheme.colors.onSecondary) },
                     backgroundColor = AppTheme.colors.primary,
                     navigationIcon = {
                         IconButton(

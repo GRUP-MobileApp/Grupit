@@ -4,25 +4,30 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.*
 import com.grup.android.GroupItem
 import com.grup.android.MenuItem
 import com.grup.android.NotificationsButton
@@ -35,7 +40,8 @@ fun h1Text(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onSecondary,
-    fontSize: TextUnit = TextUnit.Unspecified
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontWeight: FontWeight? = null
 ) {
     Text(
         text = text,
@@ -43,19 +49,22 @@ fun h1Text(
         modifier = modifier,
         style = AppTheme.typography.h1,
         fontSize = fontSize,
+        fontWeight = fontWeight
     )
 }
 
 
 @Composable
 fun caption(
-    text: String,
     modifier: Modifier = Modifier,
+    text: String,
+    color: Color = AppTheme.colors.onSecondary,
     fontSize: TextUnit = TextUnit.Unspecified
 ) {
     Text(
         text = text,
         modifier = modifier,
+        color = color,
         style = AppTheme.typography.smallFont,
         fontSize = fontSize
     )
@@ -156,7 +165,10 @@ fun UserInfoRowCard(
         }
     },
     sideContent: @Composable (UserInfo) -> Unit = {
-        Text(text = it.userBalance.asMoneyAmount())
+        MoneyAmount(
+            moneyAmount = userInfo.userBalance,
+            fontSize = 24.sp
+        )
     },
     onClick: () -> Unit = {}
 ) {
@@ -165,6 +177,24 @@ fun UserInfoRowCard(
         sideContent = { sideContent(userInfo) },
         onClick = onClick
     )
+}
+
+@Composable
+fun MoneyAmount(
+    moneyAmount: Double,
+    fontSize: TextUnit = 30.sp
+) {
+    Row(verticalAlignment = Alignment.Top) {
+        h1Text(
+            text = moneyAmount.asMoneyAmount().substring(0, 1),
+            fontSize = fontSize.times(0.6),
+            modifier = Modifier.padding(top = 3.dp)
+        )
+        h1Text(
+            text = moneyAmount.asMoneyAmount().substring(1),
+            fontSize = fontSize
+        )
+    }
 }
 
 @Composable
@@ -285,4 +315,32 @@ fun UsernameSearchBar(
             )
         )
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun TransparentTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    textColor: Color = AppTheme.colors.onSecondary,
+    onValueChange: (String) -> Unit
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = TextStyle(color = textColor),
+        singleLine = true,
+        decorationBox = { innerTextField ->
+            TextFieldDefaults.TextFieldDecorationBox(
+                value = value,
+                innerTextField = innerTextField,
+                enabled = true,
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                interactionSource  = remember { MutableInteractionSource() },
+                label = { h1Text(text = "Message") }
+            )
+        },
+        modifier = modifier.width(IntrinsicSize.Min)
+    )
 }

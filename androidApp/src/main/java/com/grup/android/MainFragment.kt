@@ -31,6 +31,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.login.LoginActivity
 import com.grup.android.transaction.TransactionActivity
+import com.grup.android.transaction.TransactionViewModel
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.*
 import com.grup.models.Group
@@ -53,10 +54,14 @@ class MainFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MainLayout(
-                    mainViewModel = mainViewModel,
-                    navController = findNavController()
-                )
+                CompositionLocalProvider(
+                    LocalContentColor provides AppTheme.colors.onPrimary
+                ) {
+                    MainLayout(
+                        mainViewModel = mainViewModel,
+                        navController = findNavController()
+                    )
+                }
             }
         }
     }
@@ -127,38 +132,47 @@ fun MainLayout(
                 .padding(padding)
                 .padding(top = AppTheme.dimensions.appPadding)
         ) {
-            CompositionLocalProvider(
-                LocalContentColor provides AppTheme.colors.onPrimary
-            ) {
-                if (groups.isNotEmpty()) {
-                    myUserInfo?.let { myUserInfo ->
-                        GroupBalanceCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = AppTheme.dimensions.appPadding),
-                            myUserInfo = myUserInfo,
-                            navigateActionAmountOnClick = {
-                                navController.navigate(R.id.enterActionAmount)
-                            }
-                        )
-                        ActiveSettleActions(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = AppTheme.dimensions.appPadding)
-                                .padding(top = AppTheme.dimensions.spacingLarge),
-                            activeSettleActions = activeSettleActions
-                        )
-                        RecentActivityList(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = AppTheme.dimensions.appPadding)
-                                .padding(top = AppTheme.dimensions.spacingLarge),
-                            groupActivity = groupActivity
-                        )
-                    }
-                } else {
-                    NoGroupsDisplay()
+            if (groups.isNotEmpty()) {
+                myUserInfo?.let { myUserInfo ->
+                    GroupBalanceCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = AppTheme.dimensions.appPadding),
+                        myUserInfo = myUserInfo,
+                        navigateDebtActionAmountOnClick = {
+                            navController.navigate(
+                                R.id.enterActionAmount,
+                                Bundle().apply {
+                                    this.putString("actionType", TransactionViewModel.DEBT)
+                                }
+                            )
+                        },
+                        navigateSettleActionAmountOnClick = {
+                            navController.navigate(
+                                R.id.enterActionAmount,
+                                Bundle().apply {
+                                    this.putString("actionType", TransactionViewModel.SETTLE)
+                                }
+                            )
+                        }
+                    )
+                    ActiveSettleActions(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = AppTheme.dimensions.appPadding)
+                            .padding(top = AppTheme.dimensions.spacingLarge),
+                        activeSettleActions = activeSettleActions
+                    )
+                    RecentActivityList(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = AppTheme.dimensions.appPadding)
+                            .padding(top = AppTheme.dimensions.spacingLarge),
+                        groupActivity = groupActivity
+                    )
                 }
+            } else {
+                NoGroupsDisplay()
             }
         }
     }
@@ -316,7 +330,8 @@ fun MembersButton(
 fun GroupBalanceCard(
     modifier: Modifier = Modifier,
     myUserInfo: UserInfo,
-    navigateActionAmountOnClick: () -> Unit
+    navigateDebtActionAmountOnClick: () -> Unit,
+    navigateSettleActionAmountOnClick: () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -330,10 +345,7 @@ fun GroupBalanceCard(
                 .padding(AppTheme.dimensions.cardPadding)
         ) {
             h1Text(text = "Your Balance")
-            h1Text(
-                text = myUserInfo.userBalance.asMoneyAmount(),
-                fontSize = 30.sp
-            )
+            MoneyAmount(moneyAmount = myUserInfo.userBalance)
             Row(
                 horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier
@@ -346,11 +358,11 @@ fun GroupBalanceCard(
                         .width(140.dp)
                         .height(45.dp),
                     shape = AppTheme.shapes.CircleShape,
-                    onClick = navigateActionAmountOnClick
+                    onClick = navigateDebtActionAmountOnClick
                 ) {
-                    Text(
+                    h1Text(
                         text = "Request",
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         color = AppTheme.colors.onPrimary,
                     )
@@ -361,11 +373,11 @@ fun GroupBalanceCard(
                         .width(140.dp)
                         .height(45.dp),
                     shape = AppTheme.shapes.CircleShape,
-                    onClick = navigateActionAmountOnClick
+                    onClick = navigateSettleActionAmountOnClick
                 ) {
-                    Text(
+                    h1Text(
                         text = "Settle",
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         color = AppTheme.colors.onPrimary,
                     )
@@ -387,7 +399,7 @@ fun ActiveSettleActions(
         h1Text(text = "Requests")
         if (activeSettleActions.isNotEmpty()) {
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -419,7 +431,10 @@ fun SettleActionCard(
                 imageVector = Icons.Default.Face,
                 iconSize = 50.dp
             )
-            h1Text(text = settleAction.remainingAmount.asMoneyAmount())
+            MoneyAmount(
+                moneyAmount = settleAction.settleAmount!!,
+                fontSize = 24.sp
+            )
         }
     }
 }

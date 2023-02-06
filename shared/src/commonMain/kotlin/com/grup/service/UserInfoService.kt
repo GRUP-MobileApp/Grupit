@@ -3,6 +3,7 @@ package com.grup.service
 import com.grup.exceptions.NegativeBalanceException
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.*
+import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -15,6 +16,7 @@ class UserInfoService : KoinComponent {
                 this.userId = user.getId()
                 this.groupId = groupId
                 this.nickname = user.displayName
+                this.joinDate = getCurrentTime()
             }
         )
     }
