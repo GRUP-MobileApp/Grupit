@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,9 +22,8 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.R
-import com.grup.android.asMoneyAmount
+import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.h1Text
 import com.grup.models.UserInfo
 
 class ActionAmountFragment : Fragment() {
@@ -37,10 +36,15 @@ class ActionAmountFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                ActionAmountLayout(
-                    transactionViewModel = transactionViewModel,
-                    navController = findNavController()
-                )
+                CompositionLocalProvider(
+                    LocalContentColor provides AppTheme.colors.onSecondary
+                ) {
+                    ActionAmountLayout(
+                        transactionViewModel = transactionViewModel,
+                        navController = findNavController(),
+                        actionType = requireArguments().getString("actionType")!!
+                    )
+                }
             }
         }
     }
@@ -50,37 +54,65 @@ class ActionAmountFragment : Fragment() {
 @Composable
 fun ActionAmountLayout(
     transactionViewModel: TransactionViewModel,
-    navController: NavController
+    navController: NavController,
+    actionType: String
 ) {
     val myUserInfo: UserInfo by transactionViewModel.myUserInfo.collectAsStateWithLifecycle()
     var actionAmount: String by remember { mutableStateOf("0") }
+    var message: String by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             ActionAmountTopAppBar(
                 onBackPress = { navController.popBackStack() }
             )
-        }
+        },
+        backgroundColor = AppTheme.colors.primary
     ) { padding ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             modifier = Modifier
-                .fillMaxHeight()
+                .fillMaxSize()
                 .padding(padding)
-                .background(AppTheme.colors.primary)
+                .padding(AppTheme.dimensions.appPadding)
         ) {
-            h1Text(
-                text = "Balance: ${myUserInfo.userBalance.asMoneyAmount()}",
-                color = AppTheme.colors.onSecondary,
-                fontSize = 50.sp,
-            )
-            h1Text(
-                text = "$$actionAmount",
-                color = AppTheme.colors.onSecondary,
-                fontSize = 65.sp
-            )
+            Column(
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ProfileIcon(
+                        imageVector = Icons.Default.Face,
+                        iconSize = 90.dp
+                    )
+                    Column(horizontalAlignment = Alignment.Start) {
+                        caption(text = "Balance")
+                        MoneyAmount(
+                            moneyAmount = myUserInfo.userBalance,
+                            fontSize = 48.sp
+                        )
+                    }
+                }
+                h1Text(
+                    text = "$$actionAmount",
+                    color = AppTheme.colors.onSecondary,
+                    fontSize = 98.sp
+                )
+                if (actionType == TransactionViewModel.DEBT) {
+                    TransparentTextField(
+                        value = message,
+                        onValueChange = { message = it }
+                    )
+                }
+            }
             KeyPad(
+                modifier = Modifier.padding(top = AppTheme.dimensions.spacing),
                 onKeyPress = { key ->
                     when(key) {
                         '.' -> {
@@ -114,37 +146,62 @@ fun ActionAmountLayout(
                     .fillMaxWidth()
                     .padding(top = 20.dp, bottom = 40.dp)
             ) {
-                RequestButton(
-                    onClick = {
-                        navController.navigate(
-                            R.id.createDebtAction,
-                            Bundle().apply {
-                                this.putDouble("amount", actionAmount.toDouble())
-                            }
-                        )
-                    }
-                )
-                SettleButton(
-                    onClick = {
-                        transactionViewModel.createSettleAction(actionAmount.toDouble())
-                        navController.popBackStack()
-                    }
-                )
+                if (actionType == TransactionViewModel.DEBT) {
+                    RequestButton(
+                        onClick = {
+                            navController.navigate(
+                                R.id.createDebtAction,
+                                Bundle().apply {
+                                    this.putDouble("amount", actionAmount.toDouble())
+                                    this.putString("message", message)
+                                }
+                            )
+                        }
+                    )
+                } else if (actionType == TransactionViewModel.SETTLE) {
+                    SettleButton(
+                        onClick = {
+                            transactionViewModel.createSettleAction(actionAmount.toDouble())
+                            navController.popBackStack()
+                        }
+                    )
+                }
             }
         }
     }
+}
 
+@Composable
+fun ActionAmountTopAppBar(
+    onBackPress: () -> Unit
+) {
+    TopAppBar(
+        title = {},
+        backgroundColor = AppTheme.colors.primary,
+        navigationIcon = {
+            IconButton(
+                onClick = onBackPress
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = AppTheme.colors.onSecondary
+                )
+            }
+        }
+    )
 }
 
 @Composable
 fun KeyPad(
+    modifier: Modifier = Modifier,
     onKeyPress: (Char) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(top = 50.dp)
+        modifier = modifier
+            .fillMaxWidth()
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
@@ -341,9 +398,8 @@ fun RequestButton(
     onClick: () -> Unit
 ) {
     Button(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
+        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
         modifier = Modifier
-            .padding(bottom = AppTheme.dimensions.paddingMedium)
             .width(150.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
@@ -361,9 +417,8 @@ fun SettleButton(
     onClick: () -> Unit
 ) {
     Button(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
+        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
         modifier = Modifier
-            .padding(bottom = AppTheme.dimensions.paddingMedium)
             .width(150.dp)
             .height(40.dp),
         shape = AppTheme.shapes.large,
@@ -374,25 +429,4 @@ fun SettleButton(
             color = AppTheme.colors.onSecondary,
         )
     }
-}
-
-@Composable
-fun ActionAmountTopAppBar(
-    onBackPress: () -> Unit
-) {
-    TopAppBar(
-        title = { Text("Request Amount", color = AppTheme.colors.onSecondary) },
-        backgroundColor = AppTheme.colors.primary,
-        navigationIcon = {
-            IconButton(
-                onClick = onBackPress
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = AppTheme.colors.onSecondary
-                )
-            }
-        }
-    )
 }

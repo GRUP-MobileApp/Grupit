@@ -16,6 +16,7 @@ data class AppDimensions(
 
     val spacingSmall: Dp = 5.dp,
     val spacing: Dp = 10.dp,
+    val mediumSpacing: Dp = 15.dp,
     val spacingLarge: Dp = 20.dp,
 
     val groupDetailsSize: Dp = 350.dp,

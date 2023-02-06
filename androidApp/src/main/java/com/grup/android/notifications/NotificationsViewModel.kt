@@ -9,6 +9,7 @@ import com.grup.models.TransactionRecord
 import kotlinx.coroutines.flow.*
 
 class NotificationsViewModel : ViewModel() {
+    // TODO: Remove notifications after joinDate
     // Hot flow containing all subscribed GroupInvites
     private val _groupInvitesFlow = APIServer.getAllGroupInvitesAsFlow()
     private val incomingGroupInvitesAsNotification: Flow<List<Notification>> =
@@ -118,4 +119,7 @@ class NotificationsViewModel : ViewModel() {
     fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
         APIServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+
+    private fun <T: Iterable<Notification>> T.afterJoinDate(date: String) =
+        this.filter { it.date > date }
 }
