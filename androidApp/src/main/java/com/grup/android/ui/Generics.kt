@@ -29,7 +29,6 @@ import com.grup.android.NotificationsButton
 import com.grup.android.asMoneyAmount
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
-import java.math.BigDecimal
 
 @Composable
 fun h1Text(
@@ -77,6 +76,20 @@ fun SmallIcon(
 }
 
 @Composable
+fun ProfileIcon(
+    modifier: Modifier = Modifier,
+    imageVector: ImageVector,
+    contentDescription: String = "Profile Picture",
+    iconSize: Dp = 70.dp
+) {
+    Icon(
+        imageVector = imageVector,
+        contentDescription = contentDescription,
+        modifier = modifier.size(iconSize)
+    )
+}
+
+@Composable
 fun SmallIconButton(
     imageVector: ImageVector,
     contentDescription: String,
@@ -110,24 +123,23 @@ fun IconRowCard(
     icon: ImageVector = Icons.Default.Face,
     iconSize: Dp = 70.dp,
     mainContent: @Composable () -> Unit,
-    sideContent: @Composable () -> Unit,
+    sideContent: @Composable () -> Unit = {},
     onClick: () -> Unit = {}
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth(0.95f)
+            .padding(vertical = 3.dp)
             .padding(end = 5.dp)
             .clickable(onClick = onClick)
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraSmall)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
         ) {
-            Icon(
+            ProfileIcon(
                 imageVector = icon,
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(iconSize)
+                iconSize = iconSize
             )
             mainContent()
         }
@@ -141,7 +153,6 @@ fun UserInfoRowCard(
     mainContent: @Composable (UserInfo) -> Unit = {
         Column(verticalArrangement = Arrangement.Center) {
             h1Text(text = it.nickname!!)
-            caption(text = "This is a description")
         }
     },
     sideContent: @Composable (UserInfo) -> Unit = {

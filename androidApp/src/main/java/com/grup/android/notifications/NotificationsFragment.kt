@@ -86,7 +86,7 @@ fun NotificationsLayout(
         backgroundColor = AppTheme.colors.primary
     ) { padding ->
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()

@@ -7,13 +7,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 data class AppDimensions(
+    val appPadding: Dp = 15.dp,
+    val cardPadding: Dp = 20.dp,
     val paddingSmall: Dp = 5.dp,
     val paddingMedium: Dp = 10.dp,
     val paddingLarge: Dp = 20.dp,
     val paddingExtraLarge: Dp = 30.dp,
-    val spacingExtraSmall: Dp = 5.dp,
-    val spacingSmall: Dp = 10.dp,
-    val spacing: Dp = 20.dp,
+
+    val spacingSmall: Dp = 5.dp,
+    val spacing: Dp = 10.dp,
+    val spacingLarge: Dp = 20.dp,
 
     val groupDetailsSize: Dp = 350.dp,
     val topBarSize: Float = 0.07f,

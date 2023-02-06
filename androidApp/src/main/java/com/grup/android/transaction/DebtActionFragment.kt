@@ -104,7 +104,7 @@ fun DebtActionLayout(
         ) { padding ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -195,7 +195,7 @@ fun DebtAmountsScreen(
 ) {
     Column(
         verticalArrangement = Arrangement
-            .spacedBy(AppTheme.dimensions.spacing),
+            .spacedBy(AppTheme.dimensions.spacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
@@ -220,7 +220,7 @@ fun DebtActionSettings(
 ) {
     Row(
         horizontalArrangement = Arrangement
-            .spacedBy(AppTheme.dimensions.spacingSmall),
+            .spacedBy(AppTheme.dimensions.spacing),
         verticalAlignment = Alignment.CenterVertically
     ) {
         buildAnnotatedString {
@@ -282,7 +282,7 @@ fun SelectedDebtorsList(
             .fillMaxSize(0.95f)
     ) {
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(1f)
         ) {
@@ -334,7 +334,7 @@ fun AddDebtorBottomSheet(
         sheetContent = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.8f)
@@ -343,7 +343,7 @@ fun AddDebtorBottomSheet(
                 h1Text(text = "Add Debtors", color = textColor, fontSize = 50.sp)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     UsernameSearchBar(
@@ -367,7 +367,7 @@ fun AddDebtorBottomSheet(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
+                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                 SelectDebtorsChecklist(
                     usernameSearchQuery = usernameSearchQuery,
                     userInfos = userInfos,
@@ -395,7 +395,7 @@ fun SelectDebtorsChecklist(
     onCheckedChange: (UserInfo, Boolean) -> Unit
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -451,7 +451,7 @@ fun AddMessageScreen(
 ) {
     Column(
         verticalArrangement = Arrangement
-            .spacedBy(AppTheme.dimensions.spacing),
+            .spacedBy(AppTheme.dimensions.spacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {

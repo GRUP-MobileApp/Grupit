@@ -68,7 +68,7 @@ fun CreateGroupLayout(
     ) { padding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)

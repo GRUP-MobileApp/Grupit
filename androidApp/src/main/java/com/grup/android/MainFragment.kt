@@ -11,6 +11,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -39,6 +40,7 @@ import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.*
 import com.grup.models.Group
+import com.grup.models.SettleAction
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
@@ -80,7 +82,7 @@ fun MainLayout(
     val myUserInfo: UserInfo? by mainViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
             mainViewModel.groupActivity.collectAsStateWithLifecycle()
-    val activeSettleActions: List<TransactionActivity.CreateSettleAction> by
+    val activeSettleActions: List<SettleAction> by
             mainViewModel.activeSettleActions.collectAsStateWithLifecycle()
 
     val openDrawer: () -> Unit = {
@@ -132,25 +134,39 @@ fun MainLayout(
         modifier = Modifier.fillMaxSize()
     ) { padding ->
         Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier
+                .padding(padding)
+                .padding(top = AppTheme.dimensions.appPadding)
         ) {
             CompositionLocalProvider(
                 LocalContentColor provides AppTheme.colors.onPrimary
             ) {
                 if (groups.isNotEmpty()) {
                     myUserInfo?.let { myUserInfo ->
-                        GroupDetails(
+                        GroupBalanceCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = AppTheme.dimensions.appPadding),
                             myUserInfo = myUserInfo,
-                            group = selectedGroup ?: selectedGroupOnValueChange(groups[0]),
                             navigateActionAmountOnClick = {
                                 navController.navigate(R.id.enterActionAmount)
                             }
                         )
-                        RecentActivityList(
-                            groupActivity = groupActivity,
+                        ActiveSettleActions(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = AppTheme.dimensions.appPadding)
+                                .padding(top = AppTheme.dimensions.spacingLarge),
                             activeSettleActions = activeSettleActions
+                        )
+                        RecentActivityList(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = AppTheme.dimensions.appPadding)
+                                .padding(top = AppTheme.dimensions.spacingLarge),
+                            groupActivity = groupActivity
                         )
                     }
                 } else {
@@ -292,222 +308,140 @@ fun MembersButton(
 }
 
 @Composable
-fun GroupDetails(
+fun GroupBalanceCard(
+    modifier: Modifier = Modifier,
     myUserInfo: UserInfo,
-    group: Group,
     navigateActionAmountOnClick: () -> Unit
 ) {
-    Column (
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .size(AppTheme.dimensions.groupDetailsSize)
-            .padding(top = AppTheme.dimensions.paddingLarge)
+    Box(
+        modifier = modifier
+            .clip(AppTheme.shapes.extraLarge)
+            .background(AppTheme.colors.secondary)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = AppTheme.dimensions.paddingLarge)
+                .padding(AppTheme.dimensions.cardPadding)
         ) {
+            h1Text(text = "Your Balance")
+            h1Text(
+                text = myUserInfo.userBalance.asMoneyAmount(),
+                fontSize = 30.sp
+            )
             Row(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = AppTheme.dimensions.paddingLarge)
+                    .padding(top = AppTheme.dimensions.spacing)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier.size(98.dp)
-                )
-                h1Text(
-                    text = "${group.groupName}",
-                    modifier = Modifier.padding(top = AppTheme.dimensions.paddingLarge)
-                )
+                TextButton(
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+                    modifier = Modifier
+                        .width(140.dp)
+                        .height(45.dp),
+                    shape = AppTheme.shapes.CircleShape,
+                    onClick = navigateActionAmountOnClick
+                ) {
+                    Text(
+                        text = "Request",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp,
+                        color = AppTheme.colors.onPrimary,
+                    )
+                }
+                TextButton(
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+                    modifier = Modifier
+                        .width(140.dp)
+                        .height(45.dp),
+                    shape = AppTheme.shapes.CircleShape,
+                    onClick = navigateActionAmountOnClick
+                ) {
+                    Text(
+                        text = "Settle",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp,
+                        color = AppTheme.colors.onPrimary,
+                    )
+                }
             }
-            h1Text(
-                myUserInfo.userBalance.asMoneyAmount(),
-                fontSize = 100.sp
-            )
-        }
-        TextButton(
-            colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-            modifier = Modifier
-                .padding(bottom = AppTheme.dimensions.paddingMedium)
-                .width(250.dp)
-                .height(45.dp),
-            shape = AppTheme.shapes.CircleShape,
-            onClick = navigateActionAmountOnClick
-        ) {
-            Text(
-                text = "Money Request",
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = AppTheme.colors.onPrimary,
-            )
         }
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun RecentActivityList(
-    groupActivity: List<TransactionActivity>,
-    activeSettleActions: List<TransactionActivity.CreateSettleAction>
+fun ActiveSettleActions(
+    modifier: Modifier = Modifier,
+    activeSettleActions: List<SettleAction>
 ) {
-    val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState()
+    Column(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        modifier = modifier
+    ) {
+        h1Text(text = "Requests")
+        if (activeSettleActions.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(activeSettleActions) { _, settleAction ->
+                    SettleActionCard(settleAction = settleAction)
+                }
+            }
+        }
+    }
+}
 
-    val tabItems = listOf(
-        "All",
-        "Settle"
-    )
-
+@Composable
+fun SettleActionCard(
+    settleAction: SettleAction
+) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
             .clip(AppTheme.shapes.large)
+            .size(110.dp)
             .background(AppTheme.colors.secondary)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxSize()
+                .padding(AppTheme.dimensions.cardPadding)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(top = AppTheme.dimensions.paddingMedium)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
-                ) {
-                    val indicator: @Composable (List<TabPosition>) -> Unit = { tabPositions ->
-                        CustomIndicator(tabPositions, pagerState)
-                    }
-
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage,
-                        backgroundColor = AppTheme.colors.primary,
-                        indicator = indicator,
-                        modifier = Modifier
-                            .padding(all = 5.dp)
-                            .clip(AppTheme.shapes.medium)
-                            .height(30.dp),
-                    ) {
-                        tabItems.forEachIndexed {index, title ->
-                            Tab(
-                                text = {
-                                    Text(
-                                        title,
-                                        style = TextStyle(
-                                            color = AppTheme.colors.onPrimary,
-                                            fontSize = 16.sp)
-                                    )
-                                },
-                                modifier = Modifier
-                                    .zIndex(6f),
-                                selected = pagerState.currentPage == index,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                }
-                            )
-                        }
-                    }
-
-                }
-            }
-            // contains the lists that are scrolled through
-            HorizontalPager(
-                count = 3,
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxSize()
-            ) { page ->
-                when (page) {
-                    0 -> RecentGroupActivityList(groupActivity = groupActivity)
-                    1 -> PublicRequestsList(activeSettleActions = activeSettleActions)
-                }
-            }
+            h1Text(text = settleAction.debteeUserInfo!!.nickname!!)
+            h1Text(text = settleAction.remainingAmount.asMoneyAmount())
         }
     }
 }
 
 @Composable
-fun RecentGroupActivityList(
+fun RecentActivityList(
+    modifier: Modifier = Modifier,
     groupActivity: List<TransactionActivity>
 ) {
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) {
-        itemsIndexed(groupActivity) { _, transactionActivity ->
-            Text(text = transactionActivity.displayText())
+        h1Text(text = "Recent Transactions")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.secondary)
+        ) {
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(AppTheme.dimensions.cardPadding)
+            ) {
+                itemsIndexed(groupActivity) { _, transactionActivity ->
+                    Text(text = transactionActivity.displayText())
+                }
+            }
         }
     }
-}
-
-@Composable
-fun PublicRequestsList(
-    activeSettleActions: List<TransactionActivity.CreateSettleAction>
-) {
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        itemsIndexed(activeSettleActions) { _, createSettleAction ->
-            Text(text = createSettleAction.displayText())
-        }
-    }
-}
-
-@OptIn(ExperimentalPagerApi::class)
-@Composable
-fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerState) {
-    val transition = updateTransition(pagerState.currentPage, label = "")
-    val indicatorStart by transition.animateDp(
-        transitionSpec = {
-            if (initialState < targetState) {
-                spring(dampingRatio = 1f, stiffness = 50f)
-            } else {
-                spring(dampingRatio = 1f, stiffness = 1000f)
-            }
-        }, label = ""
-    ) {
-        tabPositions[it].left
-    }
-
-    val indicatorEnd by transition.animateDp(
-        transitionSpec = {
-            if (initialState < targetState) {
-                spring(dampingRatio = 1f, stiffness = 1000f)
-            } else {
-                spring(dampingRatio = 1f, stiffness = 50f)
-            }
-        }, label = ""
-    ) {
-        tabPositions[it].right
-    }
-
-    Box(
-        Modifier
-            .offset(x = indicatorStart)
-            .wrapContentSize(align = Alignment.BottomStart)
-            .width(indicatorEnd - indicatorStart)
-            .padding(2.dp)
-            .fillMaxSize()
-            .background(color = AppTheme.colors.caption, AppTheme.shapes.medium)
-            .zIndex(1f)
-    )
 }

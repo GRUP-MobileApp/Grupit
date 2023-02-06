@@ -134,7 +134,7 @@ fun GroupMembersLayout(
                     .background(AppTheme.colors.secondary)
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(AppTheme.dimensions.paddingMedium)
                 ) {
@@ -169,7 +169,7 @@ fun UsersList(
     state: ModalBottomSheetState
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
@@ -196,7 +196,7 @@ fun GroupMemberInfoBottomSheet(
         sheetState = state,
         sheetContent = {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
                     verticalAlignment = Alignment.Top,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -271,7 +271,7 @@ fun AddToGroupBottomSheetLayout(
                     border = usernameSearchBarBorderColor,
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingSmall)
                 )
-                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
+                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -282,7 +282,7 @@ fun AddToGroupBottomSheetLayout(
                         Text(text = "Sent!")
                     }
                 }
-                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
+                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                 Button(
                     onClick = inviteUsernameToGroupOnClick,
                     colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),

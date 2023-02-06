@@ -64,7 +64,7 @@ fun ActionAmountLayout(
     ) { padding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             modifier = Modifier
                 .fillMaxHeight()
                 .padding(padding)
@@ -141,13 +141,13 @@ fun KeyPad(
     onKeyPress: (Char) -> Unit
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .padding(top = 50.dp)
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
         ) {
             Button(
                 onClick = { onKeyPress('1') },
@@ -194,7 +194,7 @@ fun KeyPad(
         }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
         ) {
             Button(
                 onClick = { onKeyPress('4') },
@@ -241,7 +241,7 @@ fun KeyPad(
         }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
         ) {
             Button(
                 onClick = { onKeyPress('7') },
@@ -288,7 +288,7 @@ fun KeyPad(
         }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
         ) {
             Button(
                 onClick = { onKeyPress('.') },
