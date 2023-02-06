@@ -1,5 +1,6 @@
 package com.grup.android.notifications
 
+import com.grup.android.asMoneyAmount
 import com.grup.exceptions.PendingTransactionRecordException
 import com.grup.models.*
 
@@ -42,7 +43,7 @@ sealed class Notification {
 
         override fun displayText(): String =
             "${debtAction.debteeUserInfo!!.nickname} is requesting " +
-                    "${transactionRecord.balanceChange} from you"
+                    "${transactionRecord.balanceChange!!.asMoneyAmount()} from you"
     }
 
     data class DebtorAcceptOutgoingDebtAction(
@@ -61,7 +62,7 @@ sealed class Notification {
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} has accepted a debt of " +
-                    "${transactionRecord.balanceChange} from you"
+                    "${transactionRecord.balanceChange!!} from you"
     }
 
     data class NewSettleAction(
@@ -71,7 +72,8 @@ sealed class Notification {
             get() = settleAction.date
 
         override fun displayText(): String =
-            "${settleAction.debteeUserInfo!!.nickname!!} is requesting ${settleAction.settleAmount}"
+            "${settleAction.debteeUserInfo!!.nickname!!} is requesting " +
+                    settleAction.settleAmount!!.asMoneyAmount()
     }
 
     data class IncomingTransactionOnSettleAction(
@@ -83,8 +85,8 @@ sealed class Notification {
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +
-                    "$${transactionRecord.balanceChange} out of your " +
-                    "$${settleAction.settleAmount} request"
+                    "${transactionRecord.balanceChange} out of your " +
+                    "${settleAction.settleAmount} request"
     }
 
     data class DebteeAcceptSettleActionTransaction(
@@ -103,6 +105,6 @@ sealed class Notification {
 
         override fun displayText(): String =
             "${settleAction.debteeUserInfo!!.nickname} accepted your settlement for " +
-                    "${transactionRecord.balanceChange}"
+                    transactionRecord.balanceChange!!.asMoneyAmount()
     }
 }

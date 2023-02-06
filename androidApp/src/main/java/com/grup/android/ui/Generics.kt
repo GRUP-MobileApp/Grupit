@@ -26,8 +26,10 @@ import androidx.compose.ui.unit.sp
 import com.grup.android.GroupItem
 import com.grup.android.MenuItem
 import com.grup.android.NotificationsButton
+import com.grup.android.asMoneyAmount
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
+import java.math.BigDecimal
 
 @Composable
 fun h1Text(
@@ -143,7 +145,7 @@ fun UserInfoRowCard(
         }
     },
     sideContent: @Composable (UserInfo) -> Unit = {
-        Text(text = "$${it.userBalance}")
+        Text(text = it.userBalance.asMoneyAmount())
     },
     onClick: () -> Unit = {}
 ) {
@@ -162,7 +164,6 @@ fun DrawerHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 20.dp, horizontal = 20.dp)
-            .background(AppTheme.colors.secondary),
     ) {
         Text(text = "Groups", fontSize = 40.sp, color = AppTheme.colors.onPrimary)
 
@@ -178,10 +179,7 @@ fun DrawerBody(
     itemTextStyle: TextStyle = TextStyle(fontSize = 25.sp),
     onItemClick: (GroupItem) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .background(AppTheme.colors.secondary)
-    ) {
+    LazyColumn {
         items(items) { item ->
             Row(
                 modifier = Modifier
@@ -190,7 +188,6 @@ fun DrawerBody(
                         onItemClick(item)
                     }
                     .padding(20.dp)
-                    .background(AppTheme.colors.secondary)
             ) {
                 SmallIcon(
                     imageVector = item.icon,
@@ -215,8 +212,6 @@ fun DrawerSettings(
     onItemClick: (MenuItem) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier
-            .background(AppTheme.colors.secondary),
         verticalArrangement = Arrangement.Bottom)
     {
         items(items) { item ->
@@ -227,12 +222,11 @@ fun DrawerSettings(
                         onItemClick(item)
                     }
                     .padding(13.dp)
-                    .background(AppTheme.colors.secondary)
             ) {
                 Icon(
                     imageVector = item.icon,
                     contentDescription = item.contentDescription,
-                    tint = AppTheme.colors.onSecondary
+                    tint = AppTheme.colors.onPrimary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(

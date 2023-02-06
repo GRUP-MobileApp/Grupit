@@ -36,6 +36,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.grup.android.R
+import com.grup.android.asMoneyAmount
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
@@ -110,7 +111,7 @@ fun DebtActionLayout(
                     .background(AppTheme.colors.primary)
             ) {
                 h1Text(
-                    text = "$$debtActionAmount",
+                    text = debtActionAmount.asMoneyAmount(),
                     color = AppTheme.colors.onSecondary,
                     fontSize = 100.sp
                 )
@@ -290,7 +291,7 @@ fun SelectedDebtorsList(
                     userInfo = userInfo,
                     sideContent = {
                         Text(
-                            text = "pays $${debtAmounts[index]}",
+                            text = "pays ${debtAmounts[index].asMoneyAmount()}",
                             color = AppTheme.colors.onSecondary
                         )
                     }
@@ -412,7 +413,7 @@ fun SelectDebtorsChecklist(
                     mainContent = {
                         Column(verticalArrangement = Arrangement.Center) {
                             h1Text(text = it.nickname!!)
-                            caption(text = "Balance: ${it.userBalance}")
+                            caption(text = "Balance: ${it.userBalance.asMoneyAmount()}")
                         }
                     },
                     sideContent = { userInfo ->

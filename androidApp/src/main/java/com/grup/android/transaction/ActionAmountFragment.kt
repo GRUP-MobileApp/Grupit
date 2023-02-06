@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.R
+import com.grup.android.asMoneyAmount
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.h1Text
 import com.grup.models.UserInfo
@@ -70,7 +71,7 @@ fun ActionAmountLayout(
                 .background(AppTheme.colors.primary)
         ) {
             h1Text(
-                text = "Balance: $${myUserInfo.userBalance}",
+                text = "Balance: ${myUserInfo.userBalance.asMoneyAmount()}",
                 color = AppTheme.colors.onSecondary,
                 fontSize = 50.sp,
             )

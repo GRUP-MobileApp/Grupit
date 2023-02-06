@@ -1,5 +1,6 @@
 package com.grup.android.transaction
 
+import com.grup.android.asMoneyAmount
 import com.grup.exceptions.PendingTransactionRecordException
 import com.grup.models.DebtAction
 import com.grup.models.SettleAction
@@ -44,8 +45,9 @@ sealed class TransactionActivity {
             }
 
         override fun displayText() =
-                    "$name accepted a debt of ${transactionRecord.balanceChange} from" +
-                    " ${debtAction.debteeUserInfo!!.nickname!!}"
+                    "$name accepted a debt of " +
+                            "${transactionRecord.balanceChange!!.asMoneyAmount()} from " +
+                            debtAction.debteeUserInfo!!.nickname!!
     }
 
     data class CreateSettleAction(
@@ -59,7 +61,7 @@ sealed class TransactionActivity {
             get() = settleAction.date
 
         override fun displayText() =
-            "$name requested $${settleAction.settleAmount} to the group"
+            "$name requested ${settleAction.settleAmount!!.asMoneyAmount()} to the group"
     }
 
     data class SettlePartialSettleAction(
@@ -80,6 +82,7 @@ sealed class TransactionActivity {
                 }
             }
         override fun displayText(): String =
-            "$name paid ${transactionRecord.balanceChange} to ${settleAction.debteeUserInfo!!.nickname!!}"
+            "$name paid ${transactionRecord.balanceChange!!.asMoneyAmount()} to " +
+                    settleAction.debteeUserInfo!!.nickname!!
     }
 }

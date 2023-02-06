@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -94,6 +95,7 @@ fun MainLayout(
         scaffoldState = scaffoldState,
         topBar = {
             TopBar(
+                groupName = selectedGroup?.groupName,
                 onNavigationIconClick = openDrawer,
                 actions = {
                     if (selectedGroup!= null) {
@@ -170,76 +172,84 @@ fun GroupNavigationMenu(
     onItemClick: (GroupItem) -> Unit,
     navigateNotificationsOnClick: () -> Unit,
     navigateCreateGroupOnClick: () -> Unit,
-    logOutOnClick: () -> Unit
+    logOutOnClick: () -> Unit,
+    background: Color = AppTheme.colors.primary
 ) {
     val context = LocalContext.current
 
-    DrawerHeader(navigateNotificationsOnClick = navigateNotificationsOnClick)
-    DrawerBody(
-        items = groups.mapIndexed { index, group ->
-            GroupItem(
-                id = group.getId(),
-                index = index,
-                groupName = group.groupName!!,
-                contentDescription = "Open ${group.groupName}'s details",
-                icon = Icons.Default.Home
-            )
-        },
-        onItemClick = {
-            onItemClick(it)
-        }
-    )
-
     Column(
-        verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(background)
     ) {
-        Divider(color = AppTheme.colors.primary, thickness = 3.dp)
-        DrawerSettings(
-            items = listOf(
-                MenuItem(
-                    id = "home",
-                    title = "Create New Group",
-                    contentDescription = "Go to the home screen",
-                    icon = Icons.Default.AddCircle,
-                    onClick = { navigateCreateGroupOnClick() }
-                ),
-                MenuItem(
-                    id = "home",
-                    title = "Settings",
-                    contentDescription = "Go to the settings screen",
-                    icon = Icons.Default.Settings,
-                    onClick = {}
-                ),
-                MenuItem(
-                    id = "home",
-                    title = "Sign Out",
-                    contentDescription = "Go to the home screen",
-                    icon = Icons.Default.ExitToApp,
-                    onClick = {
-                        logOutOnClick()
-                        context.startActivity(
-                            Intent(context, LoginActivity::class.java)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        )
-                    }
-                ),
-            ),
+        DrawerHeader(navigateNotificationsOnClick = navigateNotificationsOnClick)
+        DrawerBody(
+            items = groups.mapIndexed { index, group ->
+                GroupItem(
+                    id = group.getId(),
+                    index = index,
+                    groupName = group.groupName!!,
+                    contentDescription = "Open ${group.groupName}'s details",
+                    icon = Icons.Default.Home
+                )
+            },
             onItemClick = {
-                it.onClick()
-                println("Clicked on ${it.title}")
+                onItemClick(it)
             }
         )
+
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Divider(color = AppTheme.colors.primary, thickness = 3.dp)
+            DrawerSettings(
+                items = listOf(
+                    MenuItem(
+                        id = "home",
+                        title = "Create New Group",
+                        contentDescription = "Go to the home screen",
+                        icon = Icons.Default.AddCircle,
+                        onClick = { navigateCreateGroupOnClick() }
+                    ),
+                    MenuItem(
+                        id = "home",
+                        title = "Settings",
+                        contentDescription = "Go to the settings screen",
+                        icon = Icons.Default.Settings,
+                        onClick = {}
+                    ),
+                    MenuItem(
+                        id = "home",
+                        title = "Sign Out",
+                        contentDescription = "Go to the home screen",
+                        icon = Icons.Default.ExitToApp,
+                        onClick = {
+                            logOutOnClick()
+                            context.startActivity(
+                                Intent(context, LoginActivity::class.java)
+                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            )
+                        }
+                    ),
+                ),
+                onItemClick = {
+                    it.onClick()
+                    println("Clicked on ${it.title}")
+                }
+            )
+        }
     }
 }
 
 @Composable
 fun TopBar(
+    groupName: String? = null,
     onNavigationIconClick: () -> Unit,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
-        title = {},
+        title = { groupName?.let { h1Text(text = it) } },
         backgroundColor = AppTheme.colors.primary,
         navigationIcon = {
             IconButton(
@@ -320,7 +330,7 @@ fun GroupDetails(
                 )
             }
             h1Text(
-                "$${myUserInfo.userBalance}",
+                myUserInfo.userBalance.asMoneyAmount(),
                 fontSize = 100.sp
             )
         }

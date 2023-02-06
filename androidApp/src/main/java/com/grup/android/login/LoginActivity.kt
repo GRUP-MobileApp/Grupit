@@ -2,11 +2,13 @@ package com.grup.android.login
 
 import LoadingSpinner
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
@@ -32,6 +34,7 @@ import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
+import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
 
 
