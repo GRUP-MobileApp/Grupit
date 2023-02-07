@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,6 +32,7 @@ import com.grup.android.R
 import com.grup.android.ui.IconRowCard
 import com.grup.android.ui.SmallIcon
 import com.grup.android.ui.apptheme.AppTheme
+import com.grup.android.ui.h1Text
 
 class NotificationsFragment : Fragment() {
     private val notificationsViewModel:
@@ -68,7 +70,7 @@ fun NotificationsLayout(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notifications", color = AppTheme.colors.onSecondary) },
+                title = { h1Text(text = "Notifications", color = AppTheme.colors.onSecondary) },
                 backgroundColor = AppTheme.colors.primary,
                 navigationIcon = {
                     IconButton(
@@ -170,7 +172,7 @@ fun NotificationsLayout(
 fun NotificationRowCard(
     notification: Notification,
     mainContent: @Composable () -> Unit = {
-        Text(text = notification.displayText())
+        h1Text(text = notification.displayText(), fontSize = 16.sp)
     },
     sideContent: @Composable () -> Unit,
     onClick: () -> Unit = {}
