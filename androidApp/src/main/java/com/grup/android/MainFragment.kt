@@ -99,6 +99,7 @@ fun MainLayout(
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         drawerBackgroundColor = AppTheme.colors.secondary,
         drawerContent = {
+            //delete later
             GroupNavigationMenu(
                 groups = groups,
                 onItemClick = { menuItem ->
@@ -269,6 +270,20 @@ fun TopBar(
             }
         }
     )
+}
+
+@Composable
+fun TestDebtButton(
+    debtOnClick: () -> Unit
+) {
+    IconButton(
+        onClick = debtOnClick
+    ) {
+        SmallIcon(
+            imageVector = Icons.Default.Home,
+            contentDescription = "Members"
+        )
+    }
 }
 
 @Composable
