@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -13,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -77,7 +80,7 @@ fun ActionAmountLayout(
                 .padding(AppTheme.dimensions.appPadding)
         ) {
             Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
+                verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,11 +107,14 @@ fun ActionAmountLayout(
                     color = AppTheme.colors.onSecondary,
                     fontSize = 98.sp
                 )
-                if (actionType == TransactionViewModel.DEBT) {
-                    TransparentTextField(
-                        value = message,
-                        onValueChange = { message = it }
-                    )
+                Row(modifier = Modifier.height(40.dp)) {
+                    if (actionType == TransactionViewModel.DEBT) {
+                        TransparentTextField(
+                            value = message,
+                            onValueChange = { message = it }
+                        )
+                    }
+
                 }
             }
             KeyPad(
@@ -197,199 +203,51 @@ fun KeyPad(
     modifier: Modifier = Modifier,
     onKeyPress: (Char) -> Unit
 ) {
+    val keys: List<List<Char>> = listOf(
+        listOf('1', '2', '3'),
+        listOf('4', '5', '6'),
+        listOf('7', '8', '9'),
+        listOf('.', '0', '<')
+    )
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
-        ) {
-            Button(
-                onClick = { onKeyPress('1') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
+        keys.forEach { row ->
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "1",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('2') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "2",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('3') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "3",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
+                row.forEach { key ->
+                    Key(key = key, onKeyPress = onKeyPress)
+                }
             }
         }
+    }
+}
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
-        ) {
-            Button(
-                onClick = { onKeyPress('4') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "4",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('5') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "5",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('6') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "6",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
-        ) {
-            Button(
-                onClick = { onKeyPress('7') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "7",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('8') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "8",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('9') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "9",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
-        ) {
-            Button(
-                onClick = { onKeyPress('.') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = ".",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('0') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "0",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-            Button(
-                onClick = { onKeyPress('<') },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary),
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(50.dp)
-            ) {
-                Text(
-                    text = "<",
-                    fontSize = 20.sp,
-                    color = AppTheme.colors.onSecondary
-                )
-            }
-        }
+@Composable
+fun Key(
+    key: Char,
+    onKeyPress: (Char) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(80.dp)
+            .height(50.dp)
+            .background(AppTheme.colors.primary)
+            .clickable { onKeyPress(key) }
+    ) {
+        h1Text(
+            text = key.toString(),
+            fontSize = 28.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = AppTheme.colors.onSecondary
+        )
     }
 }
 
@@ -397,16 +255,18 @@ fun KeyPad(
 fun RequestButton(
     onClick: () -> Unit
 ) {
-    Button(
+    TextButton(
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
         modifier = Modifier
             .width(150.dp)
-            .height(40.dp),
-        shape = AppTheme.shapes.large,
+            .height(45.dp),
+        shape = AppTheme.shapes.CircleShape,
         onClick = onClick
     ) {
-        Text(
+        h1Text(
             text = "Request",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
             color = AppTheme.colors.onSecondary,
         )
     }
@@ -416,16 +276,18 @@ fun RequestButton(
 fun SettleButton(
     onClick: () -> Unit
 ) {
-    Button(
+    TextButton(
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
         modifier = Modifier
             .width(150.dp)
-            .height(40.dp),
-        shape = AppTheme.shapes.large,
+            .height(45.dp),
+        shape = AppTheme.shapes.CircleShape,
         onClick = onClick
     ) {
-        Text(
+        h1Text(
             text = "Settle",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
             color = AppTheme.colors.onSecondary,
         )
     }

@@ -396,7 +396,7 @@ fun ActiveSettleActions(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier
     ) {
-        h1Text(text = "Requests")
+        h1Text(text = "Requests", fontWeight = FontWeight.Medium)
         if (activeSettleActions.isNotEmpty()) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
@@ -450,7 +450,7 @@ fun RecentActivityList(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier
     ) {
-        h1Text(text = "Recent Transactions")
+        h1Text(text = "Recent Transactions", fontWeight = FontWeight.Medium)
         Box(
             modifier = Modifier
                 .fillMaxSize()

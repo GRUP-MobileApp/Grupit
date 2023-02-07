@@ -46,10 +46,10 @@ fun h1Text(
     Text(
         text = text,
         color = color,
-        modifier = modifier,
         style = AppTheme.typography.h1,
         fontSize = fontSize,
-        fontWeight = fontWeight
+        fontWeight = fontWeight,
+        modifier = modifier
     )
 }
 
@@ -129,6 +129,7 @@ fun SmallIconButton(
 
 @Composable
 fun IconRowCard(
+    modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Default.Face,
     iconSize: Dp = 70.dp,
     mainContent: @Composable () -> Unit,
@@ -137,10 +138,8 @@ fun IconRowCard(
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(0.95f)
-            .padding(vertical = 3.dp)
-            .padding(end = 5.dp)
             .clickable(onClick = onClick)
     ) {
         Row(
@@ -158,9 +157,13 @@ fun IconRowCard(
 
 @Composable
 fun UserInfoRowCard(
+    modifier: Modifier = Modifier,
     userInfo: UserInfo,
     mainContent: @Composable (UserInfo) -> Unit = {
-        Column(verticalArrangement = Arrangement.Center) {
+        Column(
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier.fillMaxHeight(0.8f)
+        ) {
             h1Text(text = it.nickname!!)
         }
     },
@@ -175,7 +178,8 @@ fun UserInfoRowCard(
     IconRowCard(
         mainContent = { mainContent(userInfo) },
         sideContent = { sideContent(userInfo) },
-        onClick = onClick
+        onClick = onClick,
+        modifier = modifier
     )
 }
 
@@ -184,11 +188,14 @@ fun MoneyAmount(
     moneyAmount: Double,
     fontSize: TextUnit = 30.sp
 ) {
-    Row(verticalAlignment = Alignment.Top) {
+    Row(
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier
+            .height(IntrinsicSize.Min)
+    ) {
         h1Text(
             text = moneyAmount.asMoneyAmount().substring(0, 1),
-            fontSize = fontSize.times(0.6),
-            modifier = Modifier.padding(top = 3.dp)
+            fontSize = fontSize.times(0.6)
         )
         h1Text(
             text = moneyAmount.asMoneyAmount().substring(1),

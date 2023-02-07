@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -33,8 +33,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
 import com.grup.android.R
 import com.grup.android.asMoneyAmount
 import com.grup.android.ui.*
@@ -123,7 +121,7 @@ fun DebtActionLayout(
                 ) {
                     Column(
                         verticalArrangement = Arrangement
-                            .spacedBy(AppTheme.dimensions.spacingLarge),
+                            .spacedBy(AppTheme.dimensions.spacing),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxSize()
@@ -200,47 +198,22 @@ fun DebtActionSettings(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    color = AppTheme.colors.onSecondary
-                )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            h1Text(text = "by ", fontSize = 20.sp)
+            Box(
+                modifier = Modifier
+                    .padding(vertical = AppTheme.dimensions.spacing)
+                    .clip(AppTheme.shapes.medium)
+                    .background(AppTheme.colors.primary)
+                    .clickable {  }
             ) {
-                append("by ")
-            }
-            pushStringAnnotation(
-                tag = "SplitStrategy",
-                annotation = "Split Strategy"
-            )
-            withStyle(
-                style = SpanStyle(
-                    color = AppTheme.colors.onSecondary,
-                    background = AppTheme.colors.primary
+                h1Text(
+                    text = splitStrategy.name,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(AppTheme.dimensions.spacingSmall)
                 )
-            ) {
-                append(splitStrategy.name)
             }
-            pop()
-            withStyle(
-                style = SpanStyle(
-                    color = AppTheme.colors.onSecondary
-                )
-            ) {
-                append(" between:")
-            }
-        }.let { annotatedText ->
-            ClickableText(
-                text = annotatedText,
-                onClick = { offset ->
-                    annotatedText.getStringAnnotations(
-                        tag = "SplitStrategy",
-                        start = offset,
-                        end = offset
-                    )[0].let { _ ->
-                        /* TODO: Split strategy menu select */
-                    }
-                }
-            )
+            h1Text(text = " between:", fontSize = 20.sp)
         }
         AddDebtorButton(addDebtorsOnClick = addDebtorsOnClick)
     }
@@ -254,12 +227,14 @@ fun SelectedDebtorsList(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = modifier.fillMaxWidth()
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
         ) {
             itemsIndexed(debtors) { index, userInfo ->
                 UserInfoRowCard(
@@ -269,7 +244,8 @@ fun SelectedDebtorsList(
                             text = "pays ${debtAmounts[index].asMoneyAmount()}",
                             color = AppTheme.colors.onSecondary
                         )
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
