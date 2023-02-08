@@ -6,6 +6,7 @@ import com.grup.android.ViewModel
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
 class TransactionViewModel : ViewModel() {
@@ -20,14 +21,18 @@ class TransactionViewModel : ViewModel() {
     // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
     // change during lifecycle.
     private val _userInfosFlow = APIServer.getAllUserInfosAsFlow()
-    val userInfos: StateFlow<List<UserInfo>> =
-        _userInfosFlow.map { userInfos ->
+        .map { userInfos ->
             userInfos.filter { userInfo ->
                 userInfo.groupId == selectedGroup.getId()
             }
-        }.asState()
+        }
+    val userInfos: StateFlow<List<UserInfo>> = _userInfosFlow.map { userInfos ->
+        userInfos.filter { userInfo ->
+            userInfo.userId != userObject.getId()
+        }
+    }.asState()
 
-    val myUserInfo: StateFlow<UserInfo> = userInfos.map { userInfos ->
+    val myUserInfo: StateFlow<UserInfo> = _userInfosFlow.map { userInfos ->
         userInfos.find { userInfo ->
             userInfo.userId == userObject.getId()
         }!!

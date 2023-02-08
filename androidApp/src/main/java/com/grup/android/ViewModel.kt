@@ -17,11 +17,11 @@ abstract class ViewModel : androidx.lifecycle.ViewModel() {
 
     protected fun <T> Flow<T>.asState() =
         this.let { flow ->
-            runBlocking { flow.first() }.let { initialList ->
+            runBlocking { flow.first() }.let { initialValue ->
                 flow.stateIn(
                     viewModelScope,
                     SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                    initialList
+                    initialValue
                 )
             }
         }

@@ -13,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,23 +20,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
+import com.grup.android.MainViewModel
 import com.grup.android.R
+import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.*
 
 import com.grup.android.ui.SmallIcon
 import com.grup.models.UserInfo
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class GroupMembersFragment : Fragment() {
+    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
     private val groupMembersViewModel: GroupMembersViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
@@ -52,6 +52,7 @@ class GroupMembersFragment : Fragment() {
                 ) {
                     GroupMembersLayout(
                         groupMembersViewModel = groupMembersViewModel,
+                        mainViewModel = mainViewModel,
                         navController = findNavController()
                     )
                 }
@@ -64,6 +65,7 @@ class GroupMembersFragment : Fragment() {
 @Composable
 fun GroupMembersLayout(
     groupMembersViewModel: GroupMembersViewModel,
+    mainViewModel: MainViewModel,
     navController: NavController
 ) {
     val userInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -71,11 +73,14 @@ fun GroupMembersLayout(
     val scope = rememberCoroutineScope()
 
     val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
+    val groupActivity: List<TransactionActivity>
+        by mainViewModel.groupActivity.collectAsStateWithLifecycle()
     val inviteResult: GroupMembersViewModel.InviteResult by
         groupMembersViewModel.inviteResult.collectAsStateWithLifecycle()
 
     var usernameSearchQuery: String by remember { mutableStateOf("") }
     var addToGroupUsernameSearchQuery: String by remember { mutableStateOf("") }
+    var selectedUserInfo: UserInfo? by remember { mutableStateOf(null) }
 
     val openAddToGroupBottomSheet: () -> Unit = {
         addToGroupUsernameSearchQuery = ""
@@ -93,9 +98,16 @@ fun GroupMembersLayout(
                 groupMembersViewModel.inviteUserToGroup(addToGroupUsernameSearchQuery)
             }
         ) {
-            GroupMemberInfoBottomSheet(state = userInfoBottomSheetState) {
-                content()
-            }
+            selectedUserInfo?.let { selectedUserInfo ->
+                GroupMemberInfoBottomSheet(
+                    selectedUserInfo = selectedUserInfo,
+                    groupActivity = groupActivity.filter { it.userId == selectedUserInfo.userId },
+                    state = userInfoBottomSheetState
+                ) {
+                    content()
+                }
+            } ?: content()
+
         }
     }
 
@@ -152,8 +164,10 @@ fun GroupMembersLayout(
                         userInfos = userInfos.filter { userInfo ->
                             userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
                         },
-                        scope = scope,
-                        state = userInfoBottomSheetState
+                        userInfoOnClick = {
+                            selectedUserInfo = it
+                            scope.launch { userInfoBottomSheetState.show() }
+                        }
                     )
                 }
             }
@@ -161,12 +175,10 @@ fun GroupMembersLayout(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UsersList(
     userInfos: List<UserInfo>,
-    scope: CoroutineScope,
-    state: ModalBottomSheetState
+    userInfoOnClick: (UserInfo) -> Unit
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -177,7 +189,7 @@ fun UsersList(
             UserInfoRowCard(
                 userInfo = userInfo,
                 onClick = {
-                    scope.launch { state.show() }
+                    userInfoOnClick(userInfo)
                 }
             )
         }
@@ -187,43 +199,46 @@ fun UsersList(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun GroupMemberInfoBottomSheet(
+    selectedUserInfo: UserInfo,
+    groupActivity: List<TransactionActivity>,
     state: ModalBottomSheetState,
     backgroundColor: Color = AppTheme.colors.primary,
-    textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-                    verticalAlignment = Alignment.Top,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(AppTheme.colors.secondary)
-                        .padding(vertical = 10.dp, horizontal = 10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Face,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.size(98.dp)
-                    )
-                    h1Text(
-                        text = "Member",
-                        modifier = Modifier
-                            .padding(top = AppTheme.dimensions.paddingLarge),
-                        color = textColor,
-                        fontSize = 50.sp
-                    )
-                    Divider()
-                }
-            /*TODO user transaction list here*/
+                UserDetails(
+                    userInfo = selectedUserInfo,
+                    groupActivity = groupActivity,
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f)
+                )
             },
         sheetBackgroundColor = backgroundColor,
         content = content,
-        sheetShape = AppTheme.shapes.large
+        sheetShape = AppTheme.shapes.large,
     )
 }
+
+@Composable
+fun UserDetails(
+    userInfo: UserInfo,
+    groupActivity: List<TransactionActivity>,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = AppTheme.dimensions.appPadding)
+            .padding(horizontal = AppTheme.dimensions.appPadding)
+    ) {
+        UserInfoRowCard(userInfo = userInfo, iconSize = 64.dp)
+        Divider()
+        RecentActivityList(groupActivity = groupActivity)
+    }
+}
+
 
 @Composable
 fun AddToGroupButton(

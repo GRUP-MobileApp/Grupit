@@ -26,10 +26,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.*
-import com.grup.android.GroupItem
-import com.grup.android.MenuItem
-import com.grup.android.NotificationsButton
-import com.grup.android.asMoneyAmount
+import com.grup.android.*
+import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
 
@@ -132,13 +130,14 @@ fun IconRowCard(
     iconSize: Dp = 70.dp,
     mainContent: @Composable () -> Unit,
     sideContent: @Composable () -> Unit = {},
-    onClick: () -> Unit = {}
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
+            .height(IntrinsicSize.Min)
             .fillMaxWidth(0.95f)
-            .clickable(onClick = onClick)
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
@@ -171,11 +170,13 @@ fun UserInfoRowCard(
             fontSize = 24.sp
         )
     },
-    onClick: () -> Unit = {}
+    iconSize: Dp = 70.dp,
+    onClick: (() -> Unit)? = null
 ) {
     IconRowCard(
         mainContent = { mainContent(userInfo) },
         sideContent = { sideContent(userInfo) },
+        iconSize = iconSize,
         onClick = onClick,
         modifier = modifier
     )
@@ -200,6 +201,52 @@ fun MoneyAmount(
             text = moneyAmount.asMoneyAmount().substring(1),
             fontSize = fontSize
         )
+    }
+}
+
+@Composable
+fun RecentActivityList(
+    modifier: Modifier = Modifier,
+    groupActivity: List<TransactionActivity>
+) {
+    val groupActivityByDate: Map<String, List<TransactionActivity>> =
+        groupActivity.groupBy { isoDate(it.date) }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        h1Text(text = "Recent Transactions", fontWeight = FontWeight.Medium)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.secondary)
+        ) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(AppTheme.dimensions.cardPadding)
+            ) {
+                items(groupActivityByDate.keys.toList()) { date ->
+                    caption(text = date)
+                    Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
+                    Column(
+                        verticalArrangement = Arrangement
+                            .spacedBy(AppTheme.dimensions.spacingSmall),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        groupActivityByDate[date]!!.forEach { transactionActivity ->
+                            h1Text(
+                                text = transactionActivity.displayText(),
+                                fontSize = 18.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
