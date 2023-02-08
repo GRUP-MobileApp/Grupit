@@ -22,11 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.grup.android.GroupItem
 import com.grup.android.MenuItem
@@ -195,7 +193,8 @@ fun MoneyAmount(
     ) {
         h1Text(
             text = moneyAmount.asMoneyAmount().substring(0, 1),
-            fontSize = fontSize.times(0.6)
+            fontSize = fontSize.times(0.6),
+            modifier = Modifier.padding(top = 4.dp)
         )
         h1Text(
             text = moneyAmount.asMoneyAmount().substring(1),
