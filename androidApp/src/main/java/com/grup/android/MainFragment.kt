@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -106,10 +108,11 @@ fun MainLayout(
         drawerContent = {
             GroupNavigationMenu(
                 groups = groups,
-                onItemClick = { menuItem ->
-                    selectedGroupOnValueChange(groups[menuItem.index])
+                onGroupClick = { index ->
+                    selectedGroupOnValueChange(groups[index])
                     closeDrawer()
                 },
+                isSelectedGroup = { it.getId() == selectedGroup?.getId() },
                 navigateNotificationsOnClick = {
                     closeDrawer()
                     navController.navigate(R.id.openNotifications)
@@ -185,7 +188,8 @@ fun NoGroupsDisplay() {
 @Composable
 fun GroupNavigationMenu(
     groups: List<Group>,
-    onItemClick: (GroupItem) -> Unit,
+    onGroupClick: (Int) -> Unit,
+    isSelectedGroup: (Group) -> Boolean,
     navigateNotificationsOnClick: () -> Unit,
     navigateCreateGroupOnClick: () -> Unit,
     logOutOnClick: () -> Unit,
@@ -199,21 +203,15 @@ fun GroupNavigationMenu(
             .background(background)
     ) {
         DrawerHeader(navigateNotificationsOnClick = navigateNotificationsOnClick)
-        DrawerBody(
-            items = groups.mapIndexed { index, group ->
-                GroupItem(
-                    id = group.getId(),
-                    index = index,
-                    groupName = group.groupName!!,
-                    contentDescription = "Open ${group.groupName}'s details",
-                    icon = Icons.Default.Home
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)) {
+            itemsIndexed(groups) { index, group ->
+                GroupNavigationRow(
+                    group = group,
+                    onGroupClick = { onGroupClick(index) },
+                    isSelected = isSelectedGroup(group)
                 )
-            },
-            onItemClick = {
-                onItemClick(it)
             }
-        )
-
+        }
         Column(
             verticalArrangement = Arrangement.Bottom,
             modifier = Modifier.fillMaxSize()
@@ -253,6 +251,49 @@ fun GroupNavigationMenu(
                     it.onClick()
                     println("Clicked on ${it.title}")
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun GroupNavigationRow(
+    group: Group,
+    onGroupClick: () -> Unit,
+    isSelected: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppTheme.dimensions.appPadding)
+            .clip(AppTheme.shapes.medium)
+            .clickable { onGroupClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = AppTheme.dimensions.paddingSmall)
+        ) {
+            Box(
+                modifier =
+                    if (isSelected)
+                        Modifier.border(
+                            width = 2.dp,
+                            color = Color.White
+                        )
+                    else
+                        Modifier
+            ) {
+                SmallIcon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = group.groupName!!
+                )
+            }
+            Spacer(modifier = Modifier.width(20.dp))
+            h1Text(
+                text = group.groupName!!,
+                color = AppTheme.colors.onPrimary,
+                modifier = Modifier.weight(1f)
             )
         }
     }
