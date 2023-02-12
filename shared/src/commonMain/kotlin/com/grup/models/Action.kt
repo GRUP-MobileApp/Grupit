@@ -9,13 +9,13 @@ sealed class Action : BaseEntity() {
         internal set
     abstract var date: String
         internal set
-    abstract var debtTransactions: RealmList<TransactionRecord>
+    abstract var transactionRecords: RealmList<TransactionRecord>
         internal set
 
     val totalAmount
-        get() = debtTransactions.sumOf { it.balanceChange!! }
+        get() = transactionRecords.sumOf { it.balanceChange!! }
     val acceptedAmount
-        get() = debtTransactions.sumOf { transactionRecord ->
+        get() = transactionRecords.sumOf { transactionRecord ->
             if (transactionRecord.dateAccepted != TransactionRecord.PENDING) {
                 transactionRecord.balanceChange!!
             } else {

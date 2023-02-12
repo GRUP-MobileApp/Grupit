@@ -1,7 +1,9 @@
 package com.grup.repositories.abstract
 
+import com.grup.di.getLatestFields
 import com.grup.interfaces.ISettleActionRepository
 import com.grup.models.SettleAction
+import com.grup.models.TransactionRecord
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
@@ -12,13 +14,7 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
 
     override fun createSettleAction(settleAction: SettleAction): SettleAction? {
         return realm.writeBlocking {
-            settleAction.debteeUserInfo = findLatest(settleAction.debteeUserInfo!!)!!
-            settleAction.debtTransactions.forEachIndexed { i, _ ->
-                settleAction.debtTransactions[i].apply {
-                    this.debtorUserInfo = findLatest(this.debtorUserInfo!!)!!
-                }
-            }
-            copyToRealm(settleAction)
+            copyToRealm(getLatestFields(settleAction))
         }
     }
 
@@ -27,7 +23,22 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
         block: SettleAction.() -> Unit
     ): SettleAction? {
         return realm.writeBlocking {
-            findLatest(settleAction)?.apply(block)
+            findLatest(settleAction)!!.apply(block)
+        }
+    }
+
+    override fun addSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ): SettleAction? {
+        return realm.writeBlocking {
+            findLatest(settleAction)!!.apply {
+                this.transactionRecords.add(
+                    transactionRecord.apply {
+                        this.debtorUserInfo = findLatest(this.debtorUserInfo!!)!!
+                    }
+                )
+            }
         }
     }
 

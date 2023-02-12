@@ -23,8 +23,8 @@ object DebtActionController : KoinComponent {
     }
 
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
-        userInfoService.applyDebtActionTransactionRecord(debtAction, myTransactionRecord)
         debtActionService.acceptDebtAction(debtAction, myTransactionRecord)
+        userInfoService.applyDebtActionTransactionRecord(debtAction, myTransactionRecord)
     }
 
     fun getAllDebtActionsAsFlow() = debtActionService.getAllDebtActionsAsFlow()

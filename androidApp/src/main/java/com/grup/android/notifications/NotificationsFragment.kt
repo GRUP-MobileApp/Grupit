@@ -32,7 +32,7 @@ import com.grup.android.R
 import com.grup.android.ui.IconRowCard
 import com.grup.android.ui.SmallIcon
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.h1Text
+import com.grup.android.ui.H1Text
 
 class NotificationsFragment : Fragment() {
     private val notificationsViewModel:
@@ -70,7 +70,7 @@ fun NotificationsLayout(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { h1Text(text = "Notifications", color = AppTheme.colors.onSecondary) },
+                title = { H1Text(text = "Notifications", color = AppTheme.colors.onSecondary) },
                 backgroundColor = AppTheme.colors.primary,
                 navigationIcon = {
                     IconButton(
@@ -172,7 +172,7 @@ fun NotificationsLayout(
 fun NotificationRowCard(
     notification: Notification,
     mainContent: @Composable () -> Unit = {
-        h1Text(text = notification.displayText(), fontSize = 16.sp)
+        H1Text(text = notification.displayText(), fontSize = 16.sp)
     },
     sideContent: @Composable () -> Unit,
     onClick: () -> Unit = {}

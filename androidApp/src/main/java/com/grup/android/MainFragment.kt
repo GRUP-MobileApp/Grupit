@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -36,9 +35,7 @@ import com.grup.android.transaction.TransactionActivity
 import com.grup.android.transaction.TransactionViewModel
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.*
-import com.grup.models.Group
-import com.grup.models.SettleAction
-import com.grup.models.UserInfo
+import com.grup.models.*
 import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
@@ -69,14 +66,18 @@ class MainFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
+@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun MainLayout(
     mainViewModel: MainViewModel,
     navController: NavController
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
+    val actionDetailsBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
 
     val groups: List<Group> by mainViewModel.groups.collectAsStateWithLifecycle()
     val selectedGroup: Group? by mainViewModel.selectedGroup.collectAsStateWithLifecycle()
@@ -86,96 +87,118 @@ fun MainLayout(
     val activeSettleActions: List<SettleAction> by
             mainViewModel.activeSettleActions.collectAsStateWithLifecycle()
 
-    val openDrawer: () -> Unit = {
-        scope.launch { scaffoldState.drawerState.open() }
-    }
-    val closeDrawer: () -> Unit = {
-        scope.launch { scaffoldState.drawerState.close() }
-    }
-    fun selectedGroupOnValueChange(group: Group) = mainViewModel.onSelectedGroupChange(group)
+    var selectedAction: Action? by remember { mutableStateOf(null) }
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            TopBar(
-                group = selectedGroup,
-                onNavigationIconClick = openDrawer,
-                navigateGroupMembersOnClick = { navController.navigate(R.id.viewMembers) }
-            )
-        },
-        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
-        drawerBackgroundColor = AppTheme.colors.secondary,
-        drawerContent = {
-            //delete later
-            GroupNavigationMenu(
-                groups = groups,
-                onGroupClick = { index ->
-                    selectedGroupOnValueChange(groups[index])
-                    closeDrawer()
-                },
-                isSelectedGroup = { it.getId() == selectedGroup?.getId() },
-                navigateNotificationsOnClick = {
-                    closeDrawer()
-                    navController.navigate(R.id.openNotifications)
-                },
-                navigateCreateGroupOnClick = {
-                    closeDrawer()
-                    navController.navigate(R.id.createGroup)
-                },
-                logOutOnClick = { mainViewModel.logOut() }
-            )
-        },
-        backgroundColor = AppTheme.colors.primary,
-        modifier = Modifier.fillMaxSize()
-    ) { padding ->
-        Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .padding(padding)
-                .padding(top = AppTheme.dimensions.appPadding)
-        ) {
-            if (groups.isNotEmpty()) {
-                myUserInfo?.let { myUserInfo ->
-                    GroupBalanceCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = AppTheme.dimensions.appPadding),
-                        myUserInfo = myUserInfo,
-                        navigateDebtActionAmountOnClick = {
-                            navController.navigate(
-                                R.id.enterActionAmount,
-                                Bundle().apply {
-                                    this.putString("actionType", TransactionViewModel.DEBT)
-                                }
-                            )
-                        },
-                        navigateSettleActionAmountOnClick = {
-                            navController.navigate(
-                                R.id.enterActionAmount,
-                                Bundle().apply {
-                                    this.putString("actionType", TransactionViewModel.SETTLE)
-                                }
-                            )
+    val openDrawer: () -> Unit = { scope.launch { scaffoldState.drawerState.open() } }
+    val closeDrawer: () -> Unit = { scope.launch { scaffoldState.drawerState.close() } }
+    val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
+        selectedAction?.let { selectedAction ->
+            ActionDetailsBottomSheet(
+                action = selectedAction,
+                state = actionDetailsBottomSheetState,
+                navigateSettleActionTransactionOnClick = {
+                    navController.navigate(
+                        R.id.actionAmountFragment,
+                        Bundle().apply {
+                            this.putString("actionType", TransactionViewModel.SETTLE_TRANSACTION)
+                            this.putString("actionId", selectedAction.getId())
                         }
                     )
-                    ActiveSettleActions(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = AppTheme.dimensions.appPadding)
-                            .padding(top = AppTheme.dimensions.spacingLarge),
-                        activeSettleActions = activeSettleActions
-                    )
-                    RecentActivityList(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = AppTheme.dimensions.appPadding)
-                            .padding(top = AppTheme.dimensions.spacingLarge),
-                        groupActivity = groupActivity
-                    )
+                },
+                onBackPress = { scope.launch { actionDetailsBottomSheetState.hide() } },
+                content = content
+            )
+        } ?: content()
+    }
+
+    modalSheets {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                TopBar(
+                    group = selectedGroup,
+                    onNavigationIconClick = openDrawer,
+                    navigateGroupMembersOnClick = { navController.navigate(R.id.viewMembers) }
+                )
+            },
+            drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+            drawerBackgroundColor = AppTheme.colors.secondary,
+            drawerContent = {
+                //delete later
+                GroupNavigationMenu(
+                    groups = groups,
+                    onGroupClick = { index ->
+                        mainViewModel.onSelectedGroupChange(groups[index])
+                        closeDrawer()
+                    },
+                    isSelectedGroup = { it.getId() == selectedGroup?.getId() },
+                    navigateNotificationsOnClick = {
+                        closeDrawer()
+                        navController.navigate(R.id.openNotifications)
+                    },
+                    navigateCreateGroupOnClick = {
+                        closeDrawer()
+                        navController.navigate(R.id.createGroup)
+                    },
+                    logOutOnClick = { mainViewModel.logOut() }
+                )
+            },
+            backgroundColor = AppTheme.colors.primary,
+            modifier = Modifier.fillMaxSize()
+        ) { padding ->
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(top = AppTheme.dimensions.appPadding)
+            ) {
+                if (groups.isNotEmpty()) {
+                    myUserInfo?.let { myUserInfo ->
+                        GroupBalanceCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = AppTheme.dimensions.appPadding),
+                            myUserInfo = myUserInfo,
+                            navigateDebtActionAmountOnClick = {
+                                navController.navigate(
+                                    R.id.enterActionAmount,
+                                    Bundle().apply {
+                                        this.putString("actionType", TransactionViewModel.DEBT)
+                                    }
+                                )
+                            },
+                            navigateSettleActionAmountOnClick = {
+                                navController.navigate(
+                                    R.id.enterActionAmount,
+                                    Bundle().apply {
+                                        this.putString("actionType", TransactionViewModel.SETTLE)
+                                    }
+                                )
+                            }
+                        )
+                        ActiveSettleActions(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = AppTheme.dimensions.appPadding)
+                                .padding(top = AppTheme.dimensions.spacingLarge),
+                            activeSettleActions = activeSettleActions,
+                            settleActionCardOnClick = { settleAction ->
+                                selectedAction = settleAction
+                                scope.launch { actionDetailsBottomSheetState.show() }
+                            }
+                        )
+                        RecentActivityList(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = AppTheme.dimensions.appPadding)
+                                .padding(top = AppTheme.dimensions.spacingLarge),
+                            groupActivity = groupActivity
+                        )
+                    }
+                } else {
+                    NoGroupsDisplay()
                 }
-            } else {
-                NoGroupsDisplay()
             }
         }
     }
@@ -221,23 +244,23 @@ fun GroupNavigationMenu(
             DrawerSettings(
                 items = listOf(
                     MenuItem(
-                        id = "home",
+                        id = "new_group",
                         title = "Create New Group",
-                        contentDescription = "Go to the home screen",
+                        contentDescription = "Create a new group",
                         icon = Icons.Default.AddCircle,
                         onClick = { navigateCreateGroupOnClick() }
                     ),
                     MenuItem(
-                        id = "home",
+                        id = "settings",
                         title = "Settings",
-                        contentDescription = "Go to the settings screen",
+                        contentDescription = "Open settings screen",
                         icon = Icons.Default.Settings,
-                        onClick = {}
+                        onClick = { }
                     ),
                     MenuItem(
-                        id = "home",
+                        id = "logout",
                         title = "Sign Out",
-                        contentDescription = "Go to the home screen",
+                        contentDescription = "Log out",
                         icon = Icons.Default.ExitToApp,
                         onClick = {
                             logOutOnClick()
@@ -247,11 +270,7 @@ fun GroupNavigationMenu(
                             )
                         }
                     ),
-                ),
-                onItemClick = {
-                    it.onClick()
-                    println("Clicked on ${it.title}")
-                }
+                )
             )
         }
     }
@@ -291,7 +310,7 @@ fun GroupNavigationRow(
                 )
             }
             Spacer(modifier = Modifier.width(20.dp))
-            h1Text(
+            H1Text(
                 text = group.groupName!!,
                 color = AppTheme.colors.onPrimary,
                 modifier = Modifier.weight(1f)
@@ -307,7 +326,7 @@ fun TopBar(
     navigateGroupMembersOnClick: () -> Unit
 ) {
     TopAppBar(
-        title = { group?.let { h1Text(text = it.groupName!!) } },
+        title = { group?.let { H1Text(text = it.groupName!!) } },
         backgroundColor = AppTheme.colors.primary,
         navigationIcon = {
             IconButton(
@@ -325,20 +344,6 @@ fun TopBar(
             }
         }
     )
-}
-
-@Composable
-fun TestDebtButton(
-    debtOnClick: () -> Unit
-) {
-    IconButton(
-        onClick = debtOnClick
-    ) {
-        SmallIcon(
-            imageVector = Icons.Default.Home,
-            contentDescription = "Members"
-        )
-    }
 }
 
 @Composable
@@ -385,7 +390,7 @@ fun GroupBalanceCard(
                 .fillMaxWidth()
                 .padding(AppTheme.dimensions.cardPadding)
         ) {
-            h1Text(text = "Your Balance")
+            H1Text(text = "Your Balance")
             MoneyAmount(moneyAmount = myUserInfo.userBalance)
             Row(
                 horizontalArrangement = Arrangement.SpaceAround,
@@ -401,7 +406,7 @@ fun GroupBalanceCard(
                     shape = AppTheme.shapes.CircleShape,
                     onClick = navigateDebtActionAmountOnClick
                 ) {
-                    h1Text(
+                    H1Text(
                         text = "Request",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
@@ -416,7 +421,7 @@ fun GroupBalanceCard(
                     shape = AppTheme.shapes.CircleShape,
                     onClick = navigateSettleActionAmountOnClick
                 ) {
-                    h1Text(
+                    H1Text(
                         text = "Settle",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
@@ -431,13 +436,14 @@ fun GroupBalanceCard(
 @Composable
 fun ActiveSettleActions(
     modifier: Modifier = Modifier,
-    activeSettleActions: List<SettleAction>
+    activeSettleActions: List<SettleAction>,
+    settleActionCardOnClick: (SettleAction) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier
     ) {
-        h1Text(text = "Requests", fontWeight = FontWeight.Medium)
+        H1Text(text = "Requests", fontWeight = FontWeight.Medium)
         if (activeSettleActions.isNotEmpty()) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
@@ -445,16 +451,22 @@ fun ActiveSettleActions(
                     .fillMaxWidth()
             ) {
                 items(activeSettleActions) { settleAction ->
-                    SettleActionCard(settleAction = settleAction)
+                    SettleActionCard(
+                        settleAction = settleAction,
+                        settleActionCardOnClick = { settleActionCardOnClick(settleAction) }
+                    )
                 }
             }
+        } else {
+            // TODO: No requests display
         }
     }
 }
 
 @Composable
 fun SettleActionCard(
-    settleAction: SettleAction
+    settleAction: SettleAction,
+    settleActionCardOnClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -462,6 +474,7 @@ fun SettleActionCard(
             .width(140.dp)
             .height(140.dp)
             .background(AppTheme.colors.secondary)
+            .clickable(onClick = settleActionCardOnClick)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
@@ -475,6 +488,95 @@ fun SettleActionCard(
             MoneyAmount(
                 moneyAmount = settleAction.settleAmount!!,
                 fontSize = 24.sp
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ActionDetailsBottomSheet(
+    action: Action,
+    state: ModalBottomSheetState,
+    onBackPress: () -> Unit,
+    navigateSettleActionTransactionOnClick: () -> Unit,
+    background: Color = AppTheme.colors.primary,
+    content: @Composable () -> Unit
+) {
+    ModalBottomSheetLayout(
+        sheetState = state,
+        sheetContent = {
+            when(action) {
+                is DebtAction -> TODO()
+                is SettleAction -> SettleActionDetails(
+                    settleAction = action,
+                    navigateSettleActionTransactionOnClick = navigateSettleActionTransactionOnClick,
+                    onBackPress = onBackPress,
+                    background = background
+                )
+            }
+        },
+        sheetBackgroundColor = background,
+        content = content
+    )
+}
+
+@Composable
+fun SettleActionDetails(
+    settleAction: SettleAction,
+    navigateSettleActionTransactionOnClick: () -> Unit,
+    onBackPress: () -> Unit,
+    background: Color = AppTheme.colors.primary
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onBackPress) {
+                        SmallIcon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                backgroundColor = background
+            )
+        },
+        backgroundColor = background,
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(AppTheme.dimensions.appPadding)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ProfileIcon(
+                    imageVector = Icons.Default.Face,
+                    iconSize = 90.dp
+                )
+                Column(horizontalAlignment = Alignment.Start) {
+                    Caption(text = "Remaining Amount")
+                    MoneyAmount(
+                        moneyAmount = settleAction.remainingAmount,
+                        fontSize = 48.sp
+                    )
+                }
+            }
+            LazyColumn() {
+
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            H1ConfirmTextButton(
+                text = "Settle",
+                onClick = navigateSettleActionTransactionOnClick
             )
         }
     }

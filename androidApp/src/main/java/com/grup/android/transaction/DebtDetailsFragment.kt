@@ -21,15 +21,9 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.navGraphViewModels
-import com.google.accompanist.pager.HorizontalPager
-import com.grup.android.R
-import com.grup.android.asMoneyAmount
-import com.grup.android.ui.IconRowCard
 import com.grup.android.ui.ProfileIcon
 import com.grup.android.ui.apptheme.AppTheme
-import com.grup.android.ui.h1Text
-import kotlinx.coroutines.launch
+import com.grup.android.ui.H1Text
 
 class DebtDetailsFragment : Fragment() {
 
@@ -75,17 +69,17 @@ fun DebtDetailsLayout(
                 imageVector = Icons.Default.Face,
                 iconSize = 100.dp
             )
-            h1Text(
+            H1Text(
                 text = "[NAME] Requested",
                 color = AppTheme.colors.onSecondary,
                 fontSize = 30.sp
             )
-            h1Text(
+            H1Text(
                 text = "DEBT",
                 color = AppTheme.colors.onSecondary,
                 fontSize = 75.sp
             )
-            h1Text(
+            H1Text(
                 text = "Message",
                 color = AppTheme.colors.onSecondary,
                 fontSize = 30.sp
@@ -108,7 +102,7 @@ fun DebtDetailsLayout(
                             start = AppTheme.dimensions.spacing
                         )
                 ) {
-                    h1Text(
+                    H1Text(
                         text = "Debtors",
                         color = AppTheme.colors.onSecondary,
                         fontSize = 30.sp

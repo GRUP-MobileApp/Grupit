@@ -3,13 +3,13 @@ package com.grup.di
 import com.grup.models.*
 import com.grup.other.RealmUser
 import com.grup.other.idSerialName
+import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.sync.MutableSubscriptionSet
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 
 internal lateinit var realm: Realm
 private lateinit var subscriptionsJob: Job
@@ -79,4 +79,28 @@ internal fun MutableSubscriptionSet.removeGroup(groupId: String) {
     remove("${groupId}_UserInfo")
     remove("${groupId}_DebtAction")
     remove("${groupId}_SettleAction")
+}
+
+internal fun <T: BaseEntity> MutableRealm.getLatestFields(obj: T): T {
+    return when(obj) {
+        is SettleAction -> {
+            obj.debteeUserInfo = findLatest(obj.debteeUserInfo!!)
+            obj.transactionRecords.forEachIndexed { i, _ ->
+                obj.transactionRecords[i].apply {
+                    this.debtorUserInfo = findLatest(this.debtorUserInfo!!)!!
+                }
+            }
+            obj
+        }
+        is DebtAction -> {
+            obj.debteeUserInfo = findLatest(obj.debteeUserInfo!!)
+            obj.transactionRecords.forEachIndexed { i, _ ->
+                obj.transactionRecords[i].apply {
+                    this.debtorUserInfo = findLatest(this.debtorUserInfo!!)!!
+                }
+            }
+            obj
+        }
+        else -> obj
+    }
 }

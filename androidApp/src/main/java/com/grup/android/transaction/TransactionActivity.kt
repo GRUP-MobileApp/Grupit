@@ -23,7 +23,7 @@ sealed class TransactionActivity {
             get() = debtAction.date
 
         override fun displayText() =
-                    "$name created a transaction with ${debtAction.debtTransactions.size} people"
+                    "$name created a transaction with ${debtAction.transactionRecords.size} people"
     }
 
     data class AcceptDebtAction(
@@ -31,7 +31,7 @@ sealed class TransactionActivity {
         val transactionRecord: TransactionRecord
     ): TransactionActivity() {
         override val userId: String
-            get() = transactionRecord.debtorUserInfo!!.getId()
+            get() = transactionRecord.debtorUserInfo!!.userId!!
         override val name: String
             get() = transactionRecord.debtorUserInfo!!.nickname!!
         override val date: String

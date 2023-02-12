@@ -18,8 +18,8 @@ object SettleActionController : KoinComponent {
         }
     }
 
-    fun addTransactionRecord(settleAction: SettleAction, myTransactionRecord: TransactionRecord) {
-        settleActionService.addTransactionRecord(settleAction, myTransactionRecord)
+    fun createSettleActionTransaction(settleAction: SettleAction, myTransactionRecord: TransactionRecord) {
+        settleActionService.createSettleActionTransaction(settleAction, myTransactionRecord)
     }
 
     fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {

@@ -195,7 +195,7 @@ fun DebtActionSettings(
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            h1Text(text = "by ", fontSize = 20.sp)
+            H1Text(text = "by ", fontSize = 20.sp)
             Box(
                 modifier = Modifier
                     .padding(vertical = AppTheme.dimensions.spacing)
@@ -203,13 +203,13 @@ fun DebtActionSettings(
                     .background(AppTheme.colors.primary)
                     .clickable {  }
             ) {
-                h1Text(
+                H1Text(
                     text = splitStrategy.name,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(AppTheme.dimensions.spacingSmall)
                 )
             }
-            h1Text(text = " between:", fontSize = 20.sp)
+            H1Text(text = " between:", fontSize = 20.sp)
         }
         AddDebtorButton(addDebtorsOnClick = addDebtorsOnClick)
     }
@@ -272,7 +272,7 @@ fun AddDebtorBottomSheet(
                     .fillMaxHeight(0.8f)
                     .padding(AppTheme.dimensions.paddingMedium)
             ) {
-                h1Text(text = "Add Debtors", color = textColor, fontSize = 50.sp)
+                H1Text(text = "Add Debtors", color = textColor, fontSize = 50.sp)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -344,8 +344,8 @@ fun SelectDebtorsChecklist(
                     userInfo = userInfo,
                     mainContent = {
                         Column(verticalArrangement = Arrangement.Center) {
-                            h1Text(text = it.nickname!!)
-                            caption(text = "Balance: ${it.userBalance.asMoneyAmount()}")
+                            H1Text(text = it.nickname!!)
+                            Caption(text = "Balance: ${it.userBalance.asMoneyAmount()}")
                         }
                     },
                     sideContent = { userInfo ->

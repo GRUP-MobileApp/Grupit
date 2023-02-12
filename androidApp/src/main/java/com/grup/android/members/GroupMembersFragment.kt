@@ -82,6 +82,10 @@ fun GroupMembersLayout(
     var addToGroupUsernameSearchQuery: String by remember { mutableStateOf("") }
     var selectedUserInfo: UserInfo? by remember { mutableStateOf(null) }
 
+    val userInfoOnClick: (UserInfo) -> Unit = { userInfo ->
+        selectedUserInfo = userInfo
+        scope.launch { userInfoBottomSheetState.show() }
+    }
     val openAddToGroupBottomSheet: () -> Unit = {
         addToGroupUsernameSearchQuery = ""
         groupMembersViewModel.resetInviteResult()
@@ -115,7 +119,7 @@ fun GroupMembersLayout(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { h1Text(text = "Members", color = AppTheme.colors.onSecondary) },
+                    title = { H1Text(text = "Members", color = AppTheme.colors.onSecondary) },
                     backgroundColor = AppTheme.colors.primary,
                     navigationIcon = {
                         IconButton(
@@ -164,10 +168,7 @@ fun GroupMembersLayout(
                         userInfos = userInfos.filter { userInfo ->
                             userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
                         },
-                        userInfoOnClick = {
-                            selectedUserInfo = it
-                            scope.launch { userInfoBottomSheetState.show() }
-                        }
+                        userInfoOnClick = { userInfoOnClick(it) }
                     )
                 }
             }
@@ -208,37 +209,24 @@ fun GroupMemberInfoBottomSheet(
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
-                UserDetails(
-                    userInfo = selectedUserInfo,
-                    groupActivity = groupActivity,
-                    modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f)
-                )
-            },
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.5f)
+                    .padding(top = AppTheme.dimensions.appPadding)
+                    .padding(horizontal = AppTheme.dimensions.appPadding)
+            ) {
+                UserInfoRowCard(userInfo = selectedUserInfo, iconSize = 64.dp)
+                Divider()
+                RecentActivityList(groupActivity = groupActivity)
+            }
+        },
         sheetBackgroundColor = backgroundColor,
         content = content,
         sheetShape = AppTheme.shapes.large,
     )
 }
-
-@Composable
-fun UserDetails(
-    userInfo: UserInfo,
-    groupActivity: List<TransactionActivity>,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
-        modifier = modifier
-            .fillMaxSize()
-            .padding(top = AppTheme.dimensions.appPadding)
-            .padding(horizontal = AppTheme.dimensions.appPadding)
-    ) {
-        UserInfoRowCard(userInfo = userInfo, iconSize = 64.dp)
-        Divider()
-        RecentActivityList(groupActivity = groupActivity)
-    }
-}
-
 
 @Composable
 fun AddToGroupButton(

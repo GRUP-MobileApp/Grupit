@@ -15,7 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -25,9 +28,12 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.R
+import com.grup.android.getCurrencySymbol
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
+import com.grup.models.SettleAction
 import com.grup.models.UserInfo
+import kotlin.math.min
 
 class ActionAmountFragment : Fragment() {
     private val transactionViewModel: TransactionViewModel by navGraphViewModels(R.id.main_graph)
@@ -45,7 +51,8 @@ class ActionAmountFragment : Fragment() {
                     ActionAmountLayout(
                         transactionViewModel = transactionViewModel,
                         navController = findNavController(),
-                        actionType = requireArguments().getString("actionType")!!
+                        actionType = requireArguments().getString("actionType")!!,
+                        existingActionId = requireArguments().getString("actionId")
                     )
                 }
             }
@@ -58,18 +65,158 @@ class ActionAmountFragment : Fragment() {
 fun ActionAmountLayout(
     transactionViewModel: TransactionViewModel,
     navController: NavController,
-    actionType: String
+    actionType: String,
+    existingActionId: String?
 ) {
     val myUserInfo: UserInfo by transactionViewModel.myUserInfo.collectAsStateWithLifecycle()
     var actionAmount: String by remember { mutableStateOf("0") }
-    var message: String by remember { mutableStateOf("") }
 
-    Scaffold(
-        topBar = {
-            ActionAmountTopAppBar(
-                onBackPress = { navController.popBackStack() }
+    val onBackPress: () -> Unit = { navController.popBackStack() }
+    fun onActionAmountChange(newActionAmount: String, maxAmount: Double = Double.MAX_VALUE)  {
+        actionAmount = if (newActionAmount.toDouble() > maxAmount) {
+            maxAmount.toString().trimEnd('0')
+        } else {
+            newActionAmount
+        }
+    }
+
+    when (actionType) {
+        TransactionViewModel.DEBT -> {
+            var message: String by remember { mutableStateOf("") }
+
+            ActionAmountScreenLayout(
+                actionAmount = actionAmount,
+                onActionAmountChange = { onActionAmountChange(it) },
+                message = message,
+                onMessageChange = { message = it },
+                topContent = {
+                    Row(
+                        horizontalArrangement = Arrangement
+                            .spacedBy(AppTheme.dimensions.spacingLarge),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProfileIcon(
+                            imageVector = Icons.Default.Face,
+                            iconSize = 90.dp
+                        )
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Caption(text = "Balance")
+                            MoneyAmount(
+                                moneyAmount = myUserInfo.userBalance,
+                                fontSize = 48.sp
+                            )
+                        }
+                    }
+                },
+                actionButton = {
+                    H1ConfirmTextButton(
+                        text = actionType,
+                        onClick = {
+                            navController.navigate(
+                                R.id.createDebtAction,
+                                Bundle().apply {
+                                    this.putDouble("amount", actionAmount.toDouble())
+                                    this.putString("message", message)
+                                }
+                            )
+                        }
+                    )
+                },
+                onBackPress = onBackPress
             )
-        },
+        }
+        TransactionViewModel.SETTLE -> {
+            // TODO: Check for positive user balance
+            ActionAmountScreenLayout(
+                actionAmount = actionAmount,
+                onActionAmountChange = { onActionAmountChange(it, myUserInfo.userBalance) },
+                topContent = {
+                    Row(
+                        horizontalArrangement = Arrangement
+                            .spacedBy(AppTheme.dimensions.spacingLarge),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProfileIcon(
+                            imageVector = Icons.Default.Face,
+                            iconSize = 90.dp
+                        )
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Caption(text = "Balance")
+                            MoneyAmount(
+                                moneyAmount = myUserInfo.userBalance,
+                                fontSize = 48.sp
+                            )
+                        }
+                    }
+                },
+                actionButton = {
+                    H1ConfirmTextButton(
+                        text = actionType,
+                        onClick = {
+                            transactionViewModel.createSettleAction(actionAmount.toDouble())
+                            onBackPress()
+                        }
+                    )
+                },
+                onBackPress = onBackPress
+            )
+        }
+        TransactionViewModel.SETTLE_TRANSACTION -> {
+            val settleAction: SettleAction by
+            transactionViewModel.getSettleAction(existingActionId!!).collectAsStateWithLifecycle()
+            ActionAmountScreenLayout(
+                actionAmount = actionAmount,
+                onActionAmountChange = { onActionAmountChange(it, settleAction.remainingAmount) },
+                topContent = {
+                    Row(
+                        horizontalArrangement = Arrangement
+                            .spacedBy(AppTheme.dimensions.spacingLarge),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProfileIcon(
+                            imageVector = Icons.Default.Face,
+                            iconSize = 90.dp
+                        )
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Caption(text = "Remaining Amount")
+                            MoneyAmount(
+                                moneyAmount = settleAction.remainingAmount,
+                                fontSize = 48.sp
+                            )
+                        }
+                    }
+                },
+                actionButton = {
+                    H1ConfirmTextButton(
+                        text = actionType,
+                        onClick = {
+                            transactionViewModel.createSettleActionTransaction(
+                                settleAction,
+                                actionAmount.toDouble(),
+                                myUserInfo
+                            )
+                            onBackPress()
+                        }
+                    )
+                },
+                onBackPress = onBackPress,
+            )
+        }
+    }
+}
+
+@Composable
+fun ActionAmountScreenLayout(
+    actionAmount: String,
+    onActionAmountChange: (String) -> Unit,
+    message: String? = null,
+    onMessageChange: ((String) -> Unit)? = null,
+    topContent: @Composable () -> Unit,
+    actionButton: @Composable () -> Unit,
+    onBackPress: () -> Unit,
+) {
+    Scaffold(
+        topBar = { ActionAmountTopAppBar(onBackPress = onBackPress) },
         backgroundColor = AppTheme.colors.primary
     ) { padding ->
         Column(
@@ -86,35 +233,32 @@ fun ActionAmountLayout(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ProfileIcon(
-                        imageVector = Icons.Default.Face,
-                        iconSize = 90.dp
-                    )
-                    Column(horizontalAlignment = Alignment.Start) {
-                        caption(text = "Balance")
-                        MoneyAmount(
-                            moneyAmount = myUserInfo.userBalance,
-                            fontSize = 48.sp
-                        )
-                    }
-                }
-                h1Text(
-                    text = "$$actionAmount",
-                    color = AppTheme.colors.onSecondary,
+                topContent()
+                H1Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = AppTheme.colors.onSecondary)) {
+                            append(getCurrencySymbol())
+                            append(actionAmount)
+                        }
+                        actionAmount.indexOf('.').let { index ->
+                            if (index != -1) {
+                                withStyle(SpanStyle(color = AppTheme.colors.caption)) {
+                                    repeat(2 - (actionAmount.length - (index + 1))) {
+                                        append('0')
+                                    }
+                                }
+                            }
+                        }
+                    },
                     fontSize = 98.sp
                 )
                 Row(modifier = Modifier.height(40.dp)) {
-                    if (actionType == TransactionViewModel.DEBT) {
+                    message?.let { message ->
                         TransparentTextField(
                             value = message,
-                            onValueChange = { message = it }
+                            onValueChange = onMessageChange!!
                         )
                     }
-
                 }
             }
             KeyPad(
@@ -123,24 +267,29 @@ fun ActionAmountLayout(
                     when(key) {
                         '.' -> {
                             if (!actionAmount.contains('.')) {
-                                actionAmount += key
+                                onActionAmountChange(actionAmount + key)
                             }
                         }
                         '<' -> {
-                            actionAmount = if (actionAmount.length > 1) {
-                                actionAmount.substring(0, actionAmount.length - 1)
-                            } else {
-                                "0"
-                            }
+                            onActionAmountChange(
+                                if (actionAmount.length > 1) {
+                                    actionAmount.substring(0, actionAmount.length - 1)
+                                } else {
+                                    "0"
+                                }
+                            )
                         }
                         else -> {
                             if (key.isDigit() &&
                                 (actionAmount.length < 3 ||
                                         actionAmount[actionAmount.length - 3] != '.')) {
-                                if (actionAmount == "0") {
-                                    actionAmount = ""
-                                }
-                                actionAmount += key
+                                onActionAmountChange(
+                                    if (actionAmount == "0") {
+                                        key.toString()
+                                    } else {
+                                        actionAmount + key
+                                    }
+                                )
                             }
                         }
                     }
@@ -152,26 +301,7 @@ fun ActionAmountLayout(
                     .fillMaxWidth()
                     .padding(top = 20.dp, bottom = 40.dp)
             ) {
-                if (actionType == TransactionViewModel.DEBT) {
-                    RequestButton(
-                        onClick = {
-                            navController.navigate(
-                                R.id.createDebtAction,
-                                Bundle().apply {
-                                    this.putDouble("amount", actionAmount.toDouble())
-                                    this.putString("message", message)
-                                }
-                            )
-                        }
-                    )
-                } else if (actionType == TransactionViewModel.SETTLE) {
-                    SettleButton(
-                        onClick = {
-                            transactionViewModel.createSettleAction(actionAmount.toDouble())
-                            navController.popBackStack()
-                        }
-                    )
-                }
+                actionButton()
             }
         }
     }
@@ -242,53 +372,11 @@ fun Key(
             .background(AppTheme.colors.primary)
             .clickable { onKeyPress(key) }
     ) {
-        h1Text(
+        H1Text(
             text = key.toString(),
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
             color = AppTheme.colors.onSecondary
-        )
-    }
-}
-
-@Composable
-fun RequestButton(
-    onClick: () -> Unit
-) {
-    TextButton(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-        modifier = Modifier
-            .width(150.dp)
-            .height(45.dp),
-        shape = AppTheme.shapes.CircleShape,
-        onClick = onClick
-    ) {
-        h1Text(
-            text = "Request",
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = AppTheme.colors.onSecondary,
-        )
-    }
-}
-
-@Composable
-fun SettleButton(
-    onClick: () -> Unit
-) {
-    TextButton(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-        modifier = Modifier
-            .width(150.dp)
-            .height(45.dp),
-        shape = AppTheme.shapes.CircleShape,
-        onClick = onClick
-    ) {
-        h1Text(
-            text = "Settle",
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = AppTheme.colors.onSecondary,
         )
     }
 }

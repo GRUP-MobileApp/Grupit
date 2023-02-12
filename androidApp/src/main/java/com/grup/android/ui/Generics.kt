@@ -14,14 +14,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
@@ -31,8 +31,10 @@ import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
 
+private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
+
 @Composable
-fun h1Text(
+fun H1Text(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onSecondary,
@@ -49,9 +51,45 @@ fun h1Text(
     )
 }
 
+@Composable
+fun H1Text(
+    modifier: Modifier = Modifier,
+    text: AnnotatedString,
+    color: Color = AppTheme.colors.onSecondary,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontWeight: FontWeight? = null,
+    maxLines: Int = 1
+) {
+    var textSize: TextUnit by remember { mutableStateOf(fontSize) }
+    var textLength: Int by remember { mutableStateOf(text.length) }
+
+    Text(
+        modifier = modifier,
+        text = text,
+        color = color,
+        style = AppTheme.typography.h1,
+        fontSize = textSize,
+        fontWeight = fontWeight,
+        softWrap = false,
+        maxLines = maxLines,
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.didOverflowWidth) {
+                textSize = textSize.times(TEXT_SCALE_REDUCTION_INTERVAL)
+            } else if(text.length < textLength) {
+                textSize = minOf(
+                    textSize.div(TEXT_SCALE_REDUCTION_INTERVAL),
+                    fontSize
+                ) { font1, font2 ->
+                    (font1.value - font2.value).toInt()
+                }
+            }
+            textLength = text.length
+        }
+    )
+}
 
 @Composable
-fun caption(
+fun Caption(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onSecondary,
@@ -78,6 +116,31 @@ fun SmallIcon(
         tint = AppTheme.colors.onPrimary,
         modifier = modifier.size(AppTheme.dimensions.iconSize)
     )
+}
+
+@Composable
+fun H1ConfirmTextButton(
+    text: String,
+    width: Dp = 150.dp,
+    height: Dp = 45.dp,
+    fontSize: TextUnit = 20.sp,
+    onClick: () -> Unit
+) {
+    TextButton(
+        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+        modifier = Modifier
+            .width(width)
+            .height(height),
+        shape = AppTheme.shapes.CircleShape,
+        onClick = onClick
+    ) {
+        H1Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize,
+            color = AppTheme.colors.onSecondary,
+        )
+    }
 }
 
 @Composable
@@ -161,7 +224,7 @@ fun UserInfoRowCard(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier.fillMaxHeight(0.8f)
         ) {
-            h1Text(text = it.nickname!!)
+            H1Text(text = it.nickname!!)
         }
     },
     sideContent: @Composable (UserInfo) -> Unit = {
@@ -192,12 +255,12 @@ fun MoneyAmount(
         modifier = Modifier
             .height(IntrinsicSize.Min)
     ) {
-        h1Text(
+        H1Text(
             text = moneyAmount.asMoneyAmount().substring(0, 1),
             fontSize = fontSize.times(0.6),
             modifier = Modifier.padding(top = 4.dp)
         )
-        h1Text(
+        H1Text(
             text = moneyAmount.asMoneyAmount().substring(1),
             fontSize = fontSize
         )
@@ -215,7 +278,7 @@ fun RecentActivityList(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier.fillMaxWidth()
     ) {
-        h1Text(text = "Recent Transactions", fontWeight = FontWeight.Medium)
+        H1Text(text = "Recent Transactions", fontWeight = FontWeight.Medium)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -229,7 +292,7 @@ fun RecentActivityList(
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
                 items(groupActivityByDate.keys.toList()) { date ->
-                    caption(text = date)
+                    Caption(text = date)
                     Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                     Column(
                         verticalArrangement = Arrangement
@@ -238,7 +301,7 @@ fun RecentActivityList(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         groupActivityByDate[date]!!.forEach { transactionActivity ->
-                            h1Text(
+                            H1Text(
                                 text = transactionActivity.displayText(),
                                 fontSize = 18.sp
                             )
@@ -267,64 +330,37 @@ fun DrawerHeader(
     }
 }
 
-@Composable
-fun DrawerBody(
-    items: List<GroupItem>,
-    itemTextStyle: TextStyle = TextStyle(fontSize = 25.sp),
-    onItemClick: (GroupItem) -> Unit
-) {
-    LazyColumn {
-        items(items) { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onItemClick(item)
-                    }
-                    .padding(20.dp)
-            ) {
-                SmallIcon(
-                    imageVector = item.icon,
-                    contentDescription = item.contentDescription
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                Text(
-                    text = item.groupName,
-                    style = itemTextStyle,
-                    color = AppTheme.colors.onPrimary,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
-}
+data class MenuItem(
+    val id: String,
+    val title: String,
+    val contentDescription: String,
+    val icon: ImageVector,
+    val onClick: () -> Unit
+)
 
 @Composable
 fun DrawerSettings(
     items: List<MenuItem>,
-    itemTextStyle: TextStyle = TextStyle(fontSize = 15.sp),
-    onItemClick: (MenuItem) -> Unit
+    itemTextStyle: TextStyle = TextStyle(fontSize = 15.sp)
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.Bottom)
     {
-        items(items) { item ->
+        items(items) { menuItem ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        onItemClick(item)
-                    }
+                    .clickable(onClick = menuItem.onClick)
                     .padding(13.dp)
             ) {
                 Icon(
-                    imageVector = item.icon,
-                    contentDescription = item.contentDescription,
+                    imageVector = menuItem.icon,
+                    contentDescription = menuItem.contentDescription,
                     tint = AppTheme.colors.onPrimary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = item.title,
+                    text = menuItem.title,
                     style = itemTextStyle,
                     color = AppTheme.colors.onPrimary,
                     modifier = Modifier.weight(1f)
@@ -391,7 +427,7 @@ fun TransparentTextField(
                 singleLine = true,
                 visualTransformation = VisualTransformation.None,
                 interactionSource  = remember { MutableInteractionSource() },
-                label = { h1Text(text = "Message") }
+                label = { H1Text(text = "Message") }
             )
         },
         modifier = modifier.width(IntrinsicSize.Min)

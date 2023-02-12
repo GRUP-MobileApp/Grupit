@@ -32,4 +32,11 @@ abstract class ViewModel : androidx.lifecycle.ViewModel() {
             SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
             emptyList()
         )
+
+    protected fun <T> Flow<List<T>>.asNotification() =
+        this.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            emptyList()
+        )
 }

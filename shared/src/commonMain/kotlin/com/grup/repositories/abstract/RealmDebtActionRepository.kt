@@ -1,5 +1,6 @@
 package com.grup.repositories.abstract
 
+import com.grup.di.getLatestFields
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.models.DebtAction
 import io.realm.kotlin.ext.query
@@ -12,13 +13,7 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
 
     override fun createDebtAction(debtAction: DebtAction): DebtAction? {
         return realm.writeBlocking {
-            debtAction.debteeUserInfo = findLatest(debtAction.debteeUserInfo!!)!!
-            debtAction.debtTransactions.forEachIndexed { i, _ ->
-                debtAction.debtTransactions[i].apply {
-                    this.debtorUserInfo = findLatest(this.debtorUserInfo!!)!!
-                }
-            }
-            copyToRealm(debtAction)
+            copyToRealm(getLatestFields(debtAction))
         }
     }
 
@@ -27,7 +22,7 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
         block: DebtAction.() -> Unit
     ): DebtAction? {
         return realm.writeBlocking {
-            findLatest(debtAction)?.apply(block)
+            findLatest(debtAction)!!.apply(block)
         }
     }
 

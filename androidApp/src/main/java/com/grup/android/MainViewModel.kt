@@ -58,7 +58,7 @@ class MainViewModel : ViewModel() {
             debtActions.flatMap { debtAction ->
                 listOf(
                     TransactionActivity.CreateDebtAction(debtAction),
-                    *debtAction.debtTransactions.filter { transactionRecord ->
+                    *debtAction.transactionRecords.filter { transactionRecord ->
                         transactionRecord.dateAccepted != TransactionRecord.PENDING
                     }.map { transactionRecord ->
                         TransactionActivity.AcceptDebtAction(debtAction, transactionRecord)
@@ -89,7 +89,7 @@ class MainViewModel : ViewModel() {
             settleActions.flatMap { settleAction ->
                 listOf(
                     TransactionActivity.CreateSettleAction(settleAction),
-                    *settleAction.debtTransactions.filter { transactionRecord ->
+                    *settleAction.transactionRecords.filter { transactionRecord ->
                         transactionRecord.dateAccepted != TransactionRecord.PENDING
                     }.map { transactionRecord ->
                         TransactionActivity.SettlePartialSettleAction(

@@ -66,10 +66,10 @@ object APIServer {
     // SettleAction
     fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
         SettleActionController.createSettleAction(settleAmount, debtee)
-    fun settlePartialSettleAction(
+    fun createSettleActionTransaction(
         settleAction: SettleAction,
         myTransactionRecord: TransactionRecord
-    ) = SettleActionController.addTransactionRecord(settleAction, myTransactionRecord)
+    ) = SettleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)
     fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
         SettleActionController.acceptTransactionRecord(settleAction, transactionRecord)

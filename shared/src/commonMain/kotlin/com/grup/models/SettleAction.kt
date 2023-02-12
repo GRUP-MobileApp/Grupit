@@ -19,7 +19,7 @@ class SettleAction internal constructor() : Action(), RealmObject {
     override var debteeUserInfo: UserInfo? = null
         get() = field
             ?: throw MissingFieldException("SettleAction with id $_id missing debtee")
-    override var debtTransactions: RealmList<TransactionRecord> = realmListOf()
+    override var transactionRecords: RealmList<TransactionRecord> = realmListOf()
 
     var settleAmount: Double? = null
         get() = field

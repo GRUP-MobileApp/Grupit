@@ -36,7 +36,7 @@ class NotificationsViewModel : ViewModel() {
     private val incomingDebtActionsAsNotification: Flow<List<Notification>> =
         _debtActionsFlow.map { debtActions ->
             debtActions.mapNotNull { debtAction ->
-                debtAction.debtTransactions.find { transactionRecord ->
+                debtAction.transactionRecords.find { transactionRecord ->
                     transactionRecord.debtorUserInfo!!.userId!! == userObject.getId() &&
                             transactionRecord.dateAccepted == TransactionRecord.PENDING
                 }?.let { transactionRecord ->
@@ -49,7 +49,7 @@ class NotificationsViewModel : ViewModel() {
             debtActions.filter { debtAction ->
                 debtAction.debteeUserInfo!!.userId!! == userObject.getId()
             }.flatMap { debtAction ->
-                debtAction.debtTransactions.filter { transactionRecord ->
+                debtAction.transactionRecords.filter { transactionRecord ->
                     transactionRecord.dateAccepted != TransactionRecord.PENDING
                 }.map { transactionRecord ->
                     Notification.DebtorAcceptOutgoingDebtAction(debtAction, transactionRecord)
@@ -74,20 +74,21 @@ class NotificationsViewModel : ViewModel() {
             settleActions.filter { settleAction ->
                 settleAction.debteeUserInfo!!.userId!! == userObject.getId()
             }.flatMap { debtAction ->
-                debtAction.debtTransactions.filter { transactionRecord ->
-                    transactionRecord.dateAccepted != TransactionRecord.PENDING
+                debtAction.transactionRecords.filter { transactionRecord ->
+                    transactionRecord.dateAccepted == TransactionRecord.PENDING
                 }.map { transactionRecord ->
-                    Notification.DebteeAcceptSettleActionTransaction(debtAction, transactionRecord)
+                    Notification.IncomingTransactionOnSettleAction(debtAction, transactionRecord)
                 }
             }
         }
     private val outgoingTransactionsOnSettleActionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.mapNotNull { settleAction ->
-                settleAction.debtTransactions.find { transactionRecord ->
+                settleAction.transactionRecords.find { transactionRecord ->
                     transactionRecord.debtorUserInfo!!.userId!! == userObject.getId()
+                            && transactionRecord.dateAccepted != TransactionRecord.PENDING
                 }?.let { transactionRecord ->
-                    Notification.IncomingTransactionOnSettleAction(settleAction, transactionRecord)
+                    Notification.DebteeAcceptSettleActionTransaction(settleAction, transactionRecord)
                 }
             }
         }
@@ -105,7 +106,7 @@ class NotificationsViewModel : ViewModel() {
             allNotifications.flatMap { it }.sortedByDescending { notification ->
                 notification.date
             }
-        }.asInitialEmptyState()
+        }.asNotification()
 
 
     // Group Invite
