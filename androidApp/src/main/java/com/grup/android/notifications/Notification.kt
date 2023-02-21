@@ -86,7 +86,7 @@ sealed class Notification {
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +
                     "${transactionRecord.balanceChange} out of your " +
-                    "${settleAction.settleAmount} request"
+                    "${settleAction.remainingAmount} request"
     }
 
     data class DebteeAcceptSettleActionTransaction(

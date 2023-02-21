@@ -64,6 +64,7 @@ fun CreateGroupLayout(
                 }
             )
         },
+        backgroundColor = AppTheme.colors.primary,
         modifier = Modifier.fillMaxSize()
     ) { padding ->
         Column(

@@ -1,5 +1,6 @@
 package com.grup.android.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -30,6 +32,7 @@ import com.grup.android.*
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
+import kotlinx.coroutines.launch
 
 private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
@@ -92,7 +95,7 @@ fun H1Text(
 fun Caption(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = AppTheme.colors.onSecondary,
+    color: Color = AppTheme.colors.onPrimary,
     fontSize: TextUnit = TextUnit.Unspecified
 ) {
     Text(
@@ -113,14 +116,16 @@ fun SmallIcon(
     Icon(
         imageVector = imageVector,
         contentDescription = contentDescription,
-        tint = AppTheme.colors.onPrimary,
+        tint = AppTheme.colors.onSecondary,
         modifier = modifier.size(AppTheme.dimensions.iconSize)
     )
 }
 
 @Composable
 fun H1ConfirmTextButton(
+    modifier: Modifier = Modifier,
     text: String,
+    scale: Float = 1f,
     width: Dp = 150.dp,
     height: Dp = 45.dp,
     fontSize: TextUnit = 20.sp,
@@ -128,16 +133,16 @@ fun H1ConfirmTextButton(
 ) {
     TextButton(
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-        modifier = Modifier
-            .width(width)
-            .height(height),
+        modifier = modifier
+            .width(width.times(scale))
+            .height(height.times(scale)),
         shape = AppTheme.shapes.CircleShape,
         onClick = onClick
     ) {
         H1Text(
             text = text,
             fontWeight = FontWeight.Bold,
-            fontSize = fontSize,
+            fontSize = fontSize.times(scale),
             color = AppTheme.colors.onSecondary,
         )
     }
@@ -199,11 +204,11 @@ fun IconRowCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
             .height(IntrinsicSize.Min)
-            .fillMaxWidth(0.95f)
+            .fillMaxWidth()
             .let { if (onClick != null) it.clickable(onClick = onClick) else it }
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
         ) {
             ProfileIcon(
                 imageVector = icon,
@@ -211,7 +216,9 @@ fun IconRowCard(
             )
             mainContent()
         }
-        sideContent()
+        Row(modifier = Modifier.padding(horizontal = AppTheme.dimensions.paddingSmall)) {
+            sideContent()
+        }
     }
 }
 
@@ -256,12 +263,12 @@ fun MoneyAmount(
             .height(IntrinsicSize.Min)
     ) {
         H1Text(
-            text = moneyAmount.asMoneyAmount().substring(0, 1),
-            fontSize = fontSize.times(0.6),
+            text = moneyAmount.asMoneyAmount().substring(0, if (moneyAmount >= 0) 1 else 2),
+            fontSize = fontSize.times(0.5),
             modifier = Modifier.padding(top = 4.dp)
         )
         H1Text(
-            text = moneyAmount.asMoneyAmount().substring(1),
+            text = moneyAmount.asMoneyAmount().substring(if (moneyAmount >= 0) 1 else 2),
             fontSize = fontSize
         )
     }
@@ -282,16 +289,16 @@ fun RecentActivityList(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(AppTheme.shapes.large)
+                .clip(AppTheme.shapes.listShape)
                 .background(AppTheme.colors.secondary)
         ) {
-            LazyColumn(
+            Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
-                items(groupActivityByDate.keys.toList()) { date ->
+                groupActivityByDate.keys.forEach() { date ->
                     Caption(text = date)
                     Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                     Column(
@@ -322,7 +329,7 @@ fun DrawerHeader(
             .fillMaxWidth()
             .padding(vertical = 20.dp, horizontal = 20.dp)
     ) {
-        Text(text = "Groups", fontSize = 40.sp, color = AppTheme.colors.onPrimary)
+        Text(text = "Groups", fontSize = 40.sp, color = AppTheme.colors.onSecondary)
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -356,13 +363,13 @@ fun DrawerSettings(
                 Icon(
                     imageVector = menuItem.icon,
                     contentDescription = menuItem.contentDescription,
-                    tint = AppTheme.colors.onPrimary
+                    tint = AppTheme.colors.onSecondary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = menuItem.title,
                     style = itemTextStyle,
-                    color = AppTheme.colors.onPrimary,
+                    color = AppTheme.colors.onSecondary,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -397,7 +404,7 @@ fun UsernameSearchBar(
             colors = TextFieldDefaults.textFieldColors(
                 textColor = AppTheme.colors.primary,
                 disabledTextColor = Color.Transparent,
-                backgroundColor = AppTheme.colors.onPrimary,
+                backgroundColor = AppTheme.colors.onSecondary,
                 focusedIndicatorColor = border,
                 unfocusedIndicatorColor = border,
                 disabledIndicatorColor = Color.Transparent
@@ -432,4 +439,35 @@ fun TransparentTextField(
         },
         modifier = modifier.width(IntrinsicSize.Min)
     )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun BackPressModalBottomSheetLayout(
+    sheetContent: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier,
+    sheetState: ModalBottomSheetState,
+    sheetShape: Shape = MaterialTheme.shapes.large,
+    sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
+    sheetBackgroundColor: Color = AppTheme.colors.primary,
+    sheetContentColor: Color = AppTheme.colors.onSecondary,
+    scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
+    content: @Composable () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    ModalBottomSheetLayout(
+        sheetContent = sheetContent,
+        modifier = modifier,
+        sheetState = sheetState,
+        sheetShape = sheetShape,
+        sheetElevation = sheetElevation,
+        sheetBackgroundColor = sheetBackgroundColor,
+        sheetContentColor = sheetContentColor,
+        scrimColor = scrimColor,
+    ) {
+        BackHandler(enabled = sheetState.isVisible) {
+            scope.launch { sheetState.hide() }
+        }
+        content()
+    }
 }

@@ -223,7 +223,8 @@ fun SelectedDebtorsList(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
@@ -261,7 +262,7 @@ fun AddDebtorBottomSheet(
     var selectedUsers: List<UserInfo> by remember { mutableStateOf(emptyList()) }
     var usernameSearchQuery: String by remember { mutableStateOf("") }
 
-    ModalBottomSheetLayout(
+    BackPressModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
@@ -314,7 +315,6 @@ fun AddDebtorBottomSheet(
                 )
             }
         },
-        sheetBackgroundColor = backgroundColor,
         content = content
     )
 }
@@ -353,7 +353,7 @@ fun SelectDebtorsChecklist(
                             checked = selectedUsers.contains(userInfo),
                             onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) },
                             colors = CheckboxDefaults.colors(
-                                uncheckedColor = AppTheme.colors.onPrimary
+                                uncheckedColor = AppTheme.colors.onSecondary
                             )
                         )
                     }

@@ -203,10 +203,9 @@ fun GroupMemberInfoBottomSheet(
     selectedUserInfo: UserInfo,
     groupActivity: List<TransactionActivity>,
     state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.primary,
     content: @Composable () -> Unit
 ) {
-    ModalBottomSheetLayout(
+    BackPressModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
@@ -222,9 +221,7 @@ fun GroupMemberInfoBottomSheet(
                 RecentActivityList(groupActivity = groupActivity)
             }
         },
-        sheetBackgroundColor = backgroundColor,
-        content = content,
-        sheetShape = AppTheme.shapes.large,
+        content = content
     )
 }
 
@@ -248,7 +245,6 @@ fun AddToGroupBottomSheetLayout(
     inviteUsernameToGroupOnClick: () -> Unit,
     inviteResult: GroupMembersViewModel.InviteResult,
     state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
@@ -259,7 +255,7 @@ fun AddToGroupBottomSheetLayout(
             Color.Transparent
         }
 
-    ModalBottomSheetLayout(
+    BackPressModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
@@ -299,7 +295,6 @@ fun AddToGroupBottomSheetLayout(
                 }
             }
         },
-        sheetBackgroundColor = backgroundColor,
         content = content
     )
 }

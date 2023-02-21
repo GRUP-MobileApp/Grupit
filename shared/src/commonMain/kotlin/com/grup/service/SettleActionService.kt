@@ -33,8 +33,9 @@ class SettleActionService : KoinComponent {
     fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.transactionRecords.find {
-                it.debtorUserInfo!!.getId() ==
-                        transactionRecord.debtorUserInfo!!.getId()
+                it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
+                        it.dateCreated == transactionRecord.dateCreated
+
             }?.dateAccepted = getCurrentTime()
         }
     }

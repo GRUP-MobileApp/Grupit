@@ -5,11 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -41,20 +40,21 @@ import kotlinx.coroutines.launch
 class MainFragment : Fragment() {
     private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        requireActivity().onBackPressedDispatcher
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {}
+            }
+        )
         return ComposeView(requireContext()).apply {
             setContent {
                 CompositionLocalProvider(
-                    LocalContentColor provides AppTheme.colors.onPrimary
+                    LocalContentColor provides AppTheme.colors.onSecondary
                 ) {
                     MainLayout(
                         mainViewModel = mainViewModel,
@@ -93,19 +93,67 @@ fun MainLayout(
     val closeDrawer: () -> Unit = { scope.launch { scaffoldState.drawerState.close() } }
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         selectedAction?.let { selectedAction ->
-            ActionDetailsBottomSheet(
-                action = selectedAction,
-                state = actionDetailsBottomSheetState,
-                navigateSettleActionTransactionOnClick = {
-                    navController.navigate(
-                        R.id.actionAmountFragment,
-                        Bundle().apply {
-                            this.putString("actionType", TransactionViewModel.SETTLE_TRANSACTION)
-                            this.putString("actionId", selectedAction.getId())
+            BackPressModalBottomSheetLayout(
+                sheetState = actionDetailsBottomSheetState,
+                sheetContent = {
+                    Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                title = {},
+                                navigationIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch {
+                                                actionDetailsBottomSheetState.hide()
+                                            }
+                                        }
+                                    ) {
+                                        SmallIcon(
+                                            imageVector = Icons.Filled.ArrowBack,
+                                            contentDescription = "Back"
+                                        )
+                                    }
+                                },
+                                backgroundColor = AppTheme.colors.primary
+                            )
+                        },
+                        backgroundColor = AppTheme.colors.primary,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) { padding ->
+                        when (selectedAction) {
+                            is DebtAction -> TODO()
+                            is SettleAction -> SettleActionDetails(
+                                settleAction = selectedAction,
+                                myUserInfo = myUserInfo!!,
+                                navigateSettleActionTransactionOnClick = {
+                                    if (myUserInfo!!.userBalance < 0) {
+                                        navController.navigate(
+                                            R.id.actionAmountFragment,
+                                            Bundle().apply {
+                                                this.putString(
+                                                    "actionType",
+                                                    TransactionViewModel.SETTLE_TRANSACTION
+                                                )
+                                                this.putString("actionId", selectedAction.getId())
+                                            }
+                                        )
+                                    }
+                                },
+                                acceptSettleActionTransactionOnClick = { transactionRecord ->
+                                    mainViewModel.acceptSettleActionTransaction(
+                                        selectedAction,
+                                        transactionRecord
+                                    )
+                                    scope.launch { actionDetailsBottomSheetState.hide() }
+                                },
+                                modifier = Modifier
+                                    .padding(padding)
+                                    .padding(AppTheme.dimensions.appPadding)
+                            )
                         }
-                    )
+                    }
                 },
-                onBackPress = { scope.launch { actionDetailsBottomSheetState.hide() } },
                 content = content
             )
         } ?: content()
@@ -144,7 +192,8 @@ fun MainLayout(
                 )
             },
             backgroundColor = AppTheme.colors.primary,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
         ) { padding ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
@@ -182,7 +231,12 @@ fun MainLayout(
                                 .fillMaxWidth()
                                 .padding(horizontal = AppTheme.dimensions.appPadding)
                                 .padding(top = AppTheme.dimensions.spacingLarge),
-                            activeSettleActions = activeSettleActions,
+                            mySettleActions = activeSettleActions.filter { settleAction ->
+                                settleAction.debteeUserInfo!!.userId == myUserInfo.userId!!
+                            },
+                            activeSettleActions = activeSettleActions.filter { settleAction ->
+                                settleAction.debteeUserInfo!!.userId != myUserInfo.userId!!
+                            },
                             settleActionCardOnClick = { settleAction ->
                                 selectedAction = settleAction
                                 scope.launch { actionDetailsBottomSheetState.show() }
@@ -206,7 +260,7 @@ fun MainLayout(
 
 @Composable
 fun NoGroupsDisplay() {
-    Text(text = "Yaint in any groups bozo", color = AppTheme.colors.onPrimary)
+    Text(text = "Yaint in any groups bozo", color = AppTheme.colors.onSecondary)
 }
 
 @Composable
@@ -312,7 +366,7 @@ fun GroupNavigationRow(
             Spacer(modifier = Modifier.width(20.dp))
             H1Text(
                 text = group.groupName!!,
-                color = AppTheme.colors.onPrimary,
+                color = AppTheme.colors.onSecondary,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -329,13 +383,26 @@ fun TopBar(
         title = { group?.let { H1Text(text = it.groupName!!) } },
         backgroundColor = AppTheme.colors.primary,
         navigationIcon = {
-            IconButton(
-                onClick = onNavigationIconClick
+            BadgedBox(
+                badge = {
+                    Badge(
+                        backgroundColor = AppTheme.colors.error,
+                        modifier = Modifier
+                            .offset((-8).dp, (10).dp)
+                    ) {
+                        H1Text(
+                            text = "1",
+                            fontSize = 14.sp
+                        )
+                    }
+                }
             ) {
-                SmallIcon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = "Menu"
-                )
+                IconButton(onClick = onNavigationIconClick) {
+                    SmallIcon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = "Menu"
+                    )
+                }
             }
         },
         actions = {
@@ -410,7 +477,7 @@ fun GroupBalanceCard(
                         text = "Request",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
-                        color = AppTheme.colors.onPrimary,
+                        color = AppTheme.colors.onSecondary,
                     )
                 }
                 TextButton(
@@ -425,7 +492,7 @@ fun GroupBalanceCard(
                         text = "Settle",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
-                        color = AppTheme.colors.onPrimary,
+                        color = AppTheme.colors.onSecondary,
                     )
                 }
             }
@@ -436,6 +503,7 @@ fun GroupBalanceCard(
 @Composable
 fun ActiveSettleActions(
     modifier: Modifier = Modifier,
+    mySettleActions: List<SettleAction>,
     activeSettleActions: List<SettleAction>,
     settleActionCardOnClick: (SettleAction) -> Unit
 ) {
@@ -443,22 +511,61 @@ fun ActiveSettleActions(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier
     ) {
-        H1Text(text = "Requests", fontWeight = FontWeight.Medium)
-        if (activeSettleActions.isNotEmpty()) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
-                modifier = Modifier
-                    .fillMaxWidth()
+        H1Text(text = "Active Settle", fontWeight = FontWeight.Medium)
+        if (mySettleActions.isEmpty() && activeSettleActions.isEmpty()) {
+            // TODO: No requests display
+        } else {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding)
             ) {
-                items(activeSettleActions) { settleAction ->
-                    SettleActionCard(
-                        settleAction = settleAction,
-                        settleActionCardOnClick = { settleActionCardOnClick(settleAction) }
-                    )
+                if (mySettleActions.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Caption(text = "My Settle")
+                        Row(
+                            horizontalArrangement = Arrangement
+                                .spacedBy(AppTheme.dimensions.appPadding),
+                            modifier = Modifier
+                                .width(IntrinsicSize.Min)
+                        ) {
+                            mySettleActions.forEach { settleAction ->
+                                SettleActionCard(
+                                    settleAction = settleAction,
+                                    settleActionCardOnClick = {
+                                        settleActionCardOnClick(settleAction)
+                                    },
+                                    showPendingNotification = true
+                                )
+                            }
+                        }
+                    }
+                }
+                if (activeSettleActions.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Caption(text = "Other Settle")
+                        Row(
+                            horizontalArrangement = Arrangement
+                                .spacedBy(AppTheme.dimensions.appPadding),
+                            modifier = Modifier
+                                .width(IntrinsicSize.Min)
+                        ) {
+                            activeSettleActions.forEach { settleAction ->
+                                SettleActionCard(
+                                    settleAction = settleAction,
+                                    settleActionCardOnClick = {
+                                        settleActionCardOnClick(settleAction)
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
-        } else {
-            // TODO: No requests display
         }
     }
 }
@@ -466,118 +573,270 @@ fun ActiveSettleActions(
 @Composable
 fun SettleActionCard(
     settleAction: SettleAction,
-    settleActionCardOnClick: () -> Unit
+    settleActionCardOnClick: () -> Unit,
+    showPendingNotification: Boolean = false
 ) {
-    Box(
-        modifier = Modifier
-            .clip(AppTheme.shapes.large)
-            .width(140.dp)
-            .height(140.dp)
-            .background(AppTheme.colors.secondary)
-            .clickable(onClick = settleActionCardOnClick)
+    BadgedBox(
+        badge = {
+            settleAction.transactionRecords.count {
+                it.dateAccepted == TransactionRecord.PENDING
+            }.let { notificationCount ->
+                if (showPendingNotification && notificationCount > 0) {
+                    Badge(
+                        backgroundColor = AppTheme.colors.error,
+                        modifier = Modifier
+                            .offset((-18).dp, (18.dp))
+                    ) {
+                        H1Text(
+                            text = notificationCount.toString(),
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+        }
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+        Box(
             modifier = Modifier
-                .padding(AppTheme.dimensions.cardPadding)
+                .clip(AppTheme.shapes.large)
+                .width(140.dp)
+                .height(140.dp)
+                .background(AppTheme.colors.secondary)
+                .clickable(onClick = settleActionCardOnClick)
         ) {
-            ProfileIcon(
-                imageVector = Icons.Default.Face,
-                iconSize = 50.dp
-            )
-            MoneyAmount(
-                moneyAmount = settleAction.settleAmount!!,
-                fontSize = 24.sp
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppTheme.dimensions.cardPadding)
+            ) {
+                ProfileIcon(
+                    imageVector = Icons.Default.Face,
+                    iconSize = 50.dp
+                )
+                MoneyAmount(
+                    moneyAmount = settleAction.remainingAmount,
+                    fontSize = 24.sp
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ActionDetailsBottomSheet(
-    action: Action,
-    state: ModalBottomSheetState,
-    onBackPress: () -> Unit,
-    navigateSettleActionTransactionOnClick: () -> Unit,
-    background: Color = AppTheme.colors.primary,
-    content: @Composable () -> Unit
-) {
-    ModalBottomSheetLayout(
-        sheetState = state,
-        sheetContent = {
-            when(action) {
-                is DebtAction -> TODO()
-                is SettleAction -> SettleActionDetails(
-                    settleAction = action,
-                    navigateSettleActionTransactionOnClick = navigateSettleActionTransactionOnClick,
-                    onBackPress = onBackPress,
-                    background = background
-                )
-            }
-        },
-        sheetBackgroundColor = background,
-        content = content
-    )
-}
-
-@Composable
 fun SettleActionDetails(
+    modifier: Modifier = Modifier,
     settleAction: SettleAction,
+    myUserInfo: UserInfo,
     navigateSettleActionTransactionOnClick: () -> Unit,
-    onBackPress: () -> Unit,
-    background: Color = AppTheme.colors.primary
+    acceptSettleActionTransactionOnClick: (TransactionRecord) -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onBackPress) {
-                        SmallIcon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+    val scope = rememberCoroutineScope()
+    val acceptPendingTransactionBottomSheetState =
+        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val scrollState = rememberScrollState()
+    
+    val tabTitles: MutableList<String> = mutableListOf("Accepted")
+    var selectedTabIndex: Int by remember { mutableStateOf(0) }
+    var selectedTransaction: TransactionRecord? by remember { mutableStateOf(null) }
+
+    val isMyAction: Boolean = myUserInfo.userId!! == settleAction.debteeUserInfo!!.userId!!
+    if (
+        isMyAction &&
+        settleAction.remainingAmount > 0 &&
+        settleAction.transactionRecords.any {
+            it.dateAccepted == TransactionRecord.PENDING
+        }
+    ) {
+        tabTitles.add("Pending")
+    }
+    selectedTabIndex = 0
+
+    val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
+        selectedTransaction?.let { selectedTransaction ->
+            BackPressModalBottomSheetLayout(
+                sheetState = acceptPendingTransactionBottomSheetState,
+                sheetContent = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement
+                            .spacedBy(AppTheme.dimensions.spacingMedium),
+                        modifier = modifier.fillMaxWidth()
+                    ) {
+                        H1Text(
+                            text = "${selectedTransaction.debtorUserInfo!!.nickname!!} is " +
+                                    "paying ${selectedTransaction.balanceChange!!.asMoneyAmount()}"
                         )
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                            H1ConfirmTextButton(
+                                text = "Accept",
+                                scale = 0.8f,
+                                onClick = {
+                                    acceptSettleActionTransactionOnClick(selectedTransaction)
+                                    scope.launch { acceptPendingTransactionBottomSheetState.hide() }
+                                }
+                            )
+                        }
                     }
                 },
-                backgroundColor = background
+                content = content
             )
-        },
-        backgroundColor = background,
-        modifier = Modifier.fillMaxSize()
-    ) { padding ->
+        } ?: content()
+    }
+    
+    modalSheets {
         Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(AppTheme.dimensions.appPadding)
+            modifier = modifier.fillMaxSize()
         ) {
+            UserInfoRowCard(
+                userInfo = settleAction.debteeUserInfo!!,
+                mainContent = {
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Caption(text = settleAction.debteeUserInfo!!.nickname!!)
+                        MoneyAmount(
+                            moneyAmount = settleAction.remainingAmount,
+                            fontSize = 60.sp
+                        )
+                    }
+                },
+                sideContent = { Caption(text = isoDate(settleAction.date)) },
+                iconSize = 90.dp
+            )
+
             Row(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = AppTheme.dimensions.paddingMedium)
             ) {
-                ProfileIcon(
-                    imageVector = Icons.Default.Face,
-                    iconSize = 90.dp
-                )
-                Column(horizontalAlignment = Alignment.Start) {
-                    Caption(text = "Remaining Amount")
-                    MoneyAmount(
-                        moneyAmount = settleAction.remainingAmount,
-                        fontSize = 48.sp
-                    )
+                tabTitles.forEachIndexed { index, tabTitle ->
+                    if (tabTitle == tabTitles[selectedTabIndex]) {
+                        H1Text(
+                            text = tabTitle,
+                            modifier = Modifier.clickable { selectedTabIndex = index }
+                        )
+                    } else {
+                        Caption(
+                            text = tabTitle,
+                            modifier = Modifier.clickable { selectedTabIndex = index }
+                        )
+                    }
                 }
             }
-            LazyColumn() {
 
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(AppTheme.shapes.extraLarge)
+                    .background(AppTheme.colors.secondary)
+                    .verticalScroll(scrollState)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                    modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
+                ) {
+                    when (selectedTabIndex) {
+                        0 -> {
+                            settleAction.transactionRecords.filter { transactionRecord ->
+                                transactionRecord.dateAccepted != TransactionRecord.PENDING
+                            }.let { acceptedTransactions ->
+                                if (acceptedTransactions.isNotEmpty()) {
+                                    acceptedTransactions.forEach { acceptedTransaction ->
+                                        UserInfoRowCard(
+                                            userInfo = acceptedTransaction.debtorUserInfo!!,
+                                            iconSize = 62.dp,
+                                            mainContent = {
+                                                Column(
+                                                    verticalArrangement = Arrangement
+                                                        .spacedBy(AppTheme.dimensions.spacingSmall)
+                                                ) {
+                                                    H1Text(
+                                                        text = acceptedTransaction
+                                                            .debtorUserInfo!!.nickname!!
+                                                    )
+                                                    Caption(
+                                                        text = isoDate(
+                                                            acceptedTransaction.dateAccepted
+                                                        )
+                                                    )
+                                                }
+                                            },
+                                            sideContent = {
+                                                MoneyAmount(
+                                                    moneyAmount = acceptedTransaction
+                                                        .balanceChange!!,
+                                                    fontSize = 24.sp
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        1 -> {
+                            settleAction.transactionRecords.filter { transactionRecord ->
+                                transactionRecord.dateAccepted == TransactionRecord.PENDING
+                            }.let { pendingTransactions ->
+                                if (pendingTransactions.isNotEmpty()) {
+                                    pendingTransactions.forEach { pendingTransaction ->
+                                        UserInfoRowCard(
+                                            userInfo = pendingTransaction.debtorUserInfo!!,
+                                            iconSize = 62.dp,
+                                            mainContent = {
+                                                Column(
+                                                    verticalArrangement = Arrangement
+                                                        .spacedBy(AppTheme.dimensions.spacingSmall)
+                                                ) {
+                                                    H1Text(
+                                                        text = pendingTransaction
+                                                            .debtorUserInfo!!.nickname!!
+                                                    )
+                                                    Caption(
+                                                        text = isoDate(
+                                                            pendingTransaction.dateCreated
+                                                        )
+                                                    )
+                                                }
+                                            },
+                                            sideContent = {
+                                                MoneyAmount(
+                                                    moneyAmount = pendingTransaction
+                                                        .balanceChange!!,
+                                                    fontSize = 24.sp
+                                                )
+                                            },
+                                            modifier = Modifier.clickable {
+                                                selectedTransaction = pendingTransaction
+                                                scope.launch {
+                                                    acceptPendingTransactionBottomSheetState.show()
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            Spacer(modifier = Modifier.weight(1f))
-            H1ConfirmTextButton(
-                text = "Settle",
-                onClick = navigateSettleActionTransactionOnClick
-            )
+            
+            if (
+                !isMyAction &&
+                myUserInfo.userBalance < 0 &&
+                settleAction.remainingAmount > 0
+            ) {
+                H1ConfirmTextButton(
+                    text = "Settle",
+                    onClick = navigateSettleActionTransactionOnClick,
+                    modifier = Modifier
+                        .padding(top = AppTheme.dimensions.appPadding)
+                )
+            }
         }
     }
 }

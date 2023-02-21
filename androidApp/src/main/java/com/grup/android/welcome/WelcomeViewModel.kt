@@ -25,7 +25,7 @@ class WelcomeViewModel : ViewModel() {
         object None : UsernameValidity()
     }
 
-    private var currentJob: Job = viewModelScope.launch {  }
+    private var currentJob: Job = viewModelScope.launch { }
 
     private val _usernameValidity = MutableStateFlow<UsernameValidity>(UsernameValidity.None)
     val usernameValidity: StateFlow<UsernameValidity> = _usernameValidity
