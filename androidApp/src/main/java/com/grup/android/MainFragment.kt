@@ -9,6 +9,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -25,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -67,7 +67,7 @@ class MainFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainLayout(
     mainViewModel: MainViewModel,
@@ -210,11 +210,7 @@ fun MainLayout(
             LazyColumn(
                 state = lazyListState,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(
-                    top = AppTheme.dimensions.appPadding,
-                    start = AppTheme.dimensions.appPadding,
-                    end = AppTheme.dimensions.appPadding
-                ),
+                contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
                 modifier = Modifier
                     .padding(padding)
             ) {
@@ -359,7 +355,8 @@ fun GroupNavigationRow(
             .fillMaxWidth()
             .padding(horizontal = AppTheme.dimensions.appPadding)
             .clip(AppTheme.shapes.medium)
-            .clickable { onGroupClick() }
+            .clickable(onClick = onGroupClick)
+
     ) {
         Row(
             modifier = Modifier
@@ -518,6 +515,7 @@ fun GroupBalanceCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ActiveSettleActions(
     modifier: Modifier = Modifier,
@@ -533,22 +531,46 @@ fun ActiveSettleActions(
         if (mySettleActions.isEmpty() && activeSettleActions.isEmpty()) {
             // TODO: No requests display
         } else {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding)
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
+                verticalAlignment = Alignment.Bottom
             ) {
                 if (mySettleActions.isNotEmpty()) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Caption(text = "My Settle")
-                        Row(
-                            horizontalArrangement = Arrangement
-                                .spacedBy(AppTheme.dimensions.appPadding),
-                            modifier = Modifier
-                                .width(IntrinsicSize.Min)
-                        ) {
-                            mySettleActions.forEach { settleAction ->
+                    itemsIndexed(mySettleActions) { index, settleAction ->
+                        when(index) {
+                            0 -> {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Caption(text = "My Settle")
+                                    SettleActionCard(
+                                        settleAction = settleAction,
+                                        settleActionCardOnClick = {
+                                            settleActionCardOnClick(settleAction)
+                                        },
+                                        showPendingNotification = true
+                                    )
+                                }
+                            }
+                            else -> SettleActionCard(
+                                settleAction = settleAction,
+                                settleActionCardOnClick = {
+                                    settleActionCardOnClick(settleAction)
+                                },
+                                showPendingNotification = true
+                            )
+                        }
+                    }
+                }
+                if (activeSettleActions.isNotEmpty()) {
+                    itemsIndexed(activeSettleActions) { index, settleAction ->
+                        when(index) {
+                            0 -> Column(
+                                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                Caption(text = "Other Settle")
                                 SettleActionCard(
                                     settleAction = settleAction,
                                     settleActionCardOnClick = {
@@ -557,29 +579,13 @@ fun ActiveSettleActions(
                                     showPendingNotification = true
                                 )
                             }
-                        }
-                    }
-                }
-                if (activeSettleActions.isNotEmpty()) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Caption(text = "Other Settle")
-                        Row(
-                            horizontalArrangement = Arrangement
-                                .spacedBy(AppTheme.dimensions.appPadding),
-                            modifier = Modifier
-                                .width(IntrinsicSize.Min)
-                        ) {
-                            activeSettleActions.forEach { settleAction ->
-                                SettleActionCard(
-                                    settleAction = settleAction,
-                                    settleActionCardOnClick = {
-                                        settleActionCardOnClick(settleAction)
-                                    }
-                                )
-                            }
+                            else -> SettleActionCard(
+                                settleAction = settleAction,
+                                settleActionCardOnClick = {
+                                    settleActionCardOnClick(settleAction)
+                                },
+                                showPendingNotification = true
+                            )
                         }
                     }
                 }
@@ -658,15 +664,13 @@ fun DebtActionDetails(
         UserInfoRowCard(
             userInfo = debtAction.debteeUserInfo!!,
             mainContent = {
-                Column(horizontalAlignment = Alignment.Start) {
-                    Caption(text = debtAction.debteeUserInfo!!.nickname!!)
-                    MoneyAmount(
-                        moneyAmount =
-                            if (isMyAction) debtAction.totalAmount
-                            else debtAction.acceptedAmount,
-                        fontSize = 60.sp
-                    )
-                }
+                Caption(text = debtAction.debteeUserInfo!!.nickname!!)
+                MoneyAmount(
+                    moneyAmount =
+                        if (isMyAction) debtAction.totalAmount
+                        else debtAction.acceptedAmount,
+                    fontSize = 60.sp
+                )
             },
             sideContent = {
                 Column(horizontalAlignment = Alignment.End) {
@@ -708,7 +712,7 @@ fun DebtActionDetails(
                 debtAction.transactionRecords.filter { transactionRecord ->
                     transactionRecord.dateAccepted != TransactionRecord.PENDING
                 }.forEach { acceptedTransaction ->
-                    TransactionRowCard(transactionRecord = acceptedTransaction)
+                    TransactionRecordRowCard(transactionRecord = acceptedTransaction)
                 }
             }
         }
@@ -738,7 +742,7 @@ fun DebtActionDetails(
                     debtAction.transactionRecords.filter { transactionRecord ->
                         transactionRecord.dateAccepted == TransactionRecord.PENDING
                     }.forEach { pendingTransaction ->
-                        TransactionRowCard(transactionRecord = pendingTransaction)
+                        TransactionRecordRowCard(transactionRecord = pendingTransaction)
                     }
                 }
             }
@@ -816,13 +820,11 @@ fun SettleActionDetails(
             UserInfoRowCard(
                 userInfo = settleAction.debteeUserInfo!!,
                 mainContent = {
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Caption(text = settleAction.debteeUserInfo!!.nickname!!)
-                        MoneyAmount(
-                            moneyAmount = settleAction.remainingAmount,
-                            fontSize = 60.sp
-                        )
-                    }
+                    Caption(text = settleAction.debteeUserInfo!!.nickname!!)
+                    MoneyAmount(
+                        moneyAmount = settleAction.remainingAmount,
+                        fontSize = 60.sp
+                    )
                 },
                 sideContent = {
                     Column(horizontalAlignment = Alignment.End) {
@@ -872,7 +874,7 @@ fun SettleActionDetails(
                             }.let { acceptedTransactions ->
                                 if (acceptedTransactions.isNotEmpty()) {
                                     acceptedTransactions.forEach { acceptedTransaction ->
-                                        TransactionRowCard(transactionRecord = acceptedTransaction)
+                                        TransactionRecordRowCard(transactionRecord = acceptedTransaction)
                                     }
                                 }
                             }
@@ -883,7 +885,7 @@ fun SettleActionDetails(
                             }.let { pendingTransactions ->
                                 if (pendingTransactions.isNotEmpty()) {
                                     pendingTransactions.forEach { pendingTransaction ->
-                                        TransactionRowCard(
+                                        TransactionRecordRowCard(
                                             transactionRecord = pendingTransaction,
                                             modifier = Modifier.clickable {
                                                 selectedTransaction = pendingTransaction
@@ -917,31 +919,26 @@ fun SettleActionDetails(
 }
 
 @Composable
-fun TransactionRowCard(
+fun TransactionRecordRowCard(
     modifier: Modifier = Modifier,
     transactionRecord: TransactionRecord
 ) {
     UserInfoRowCard(
         userInfo = transactionRecord.debtorUserInfo!!,
-        iconSize = 62.dp,
+        iconSize = 50.dp,
         mainContent = {
-            Column(
-                verticalArrangement = Arrangement
-                    .spacedBy(AppTheme.dimensions.spacingSmall)
-            ) {
-                H1Text(
-                    text = transactionRecord
-                        .debtorUserInfo!!.nickname!!
+            H1Text(
+                text = transactionRecord
+                    .debtorUserInfo!!.nickname!!
+            )
+            Caption(
+                text = isoDate(
+                    if (transactionRecord.dateAccepted != TransactionRecord.PENDING)
+                        transactionRecord.dateAccepted
+                    else
+                        transactionRecord.dateCreated
                 )
-                Caption(
-                    text = isoDate(
-                        if (transactionRecord.dateAccepted != TransactionRecord.PENDING)
-                            transactionRecord.dateAccepted
-                        else
-                            transactionRecord.dateCreated
-                    )
-                )
-            }
+            )
         },
         sideContent = {
             MoneyAmount(

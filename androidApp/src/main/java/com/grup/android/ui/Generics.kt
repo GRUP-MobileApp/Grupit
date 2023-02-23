@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.*
 import com.grup.android.*
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
+import com.grup.models.DebtAction
+import com.grup.models.SettleAction
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
@@ -198,18 +200,17 @@ fun IconRowCard(
     icon: ImageVector = Icons.Default.Face,
     iconSize: Dp = 70.dp,
     mainContent: @Composable () -> Unit,
-    sideContent: @Composable () -> Unit = {},
-    onClick: (() -> Unit)? = null
+    sideContent: @Composable () -> Unit = {}
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
             .height(IntrinsicSize.Min)
             .fillMaxWidth()
-            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             ProfileIcon(
                 imageVector = icon,
@@ -227,29 +228,53 @@ fun IconRowCard(
 fun UserInfoRowCard(
     modifier: Modifier = Modifier,
     userInfo: UserInfo,
-    mainContent: @Composable (UserInfo) -> Unit = {
-        Column(
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier.fillMaxHeight(0.8f)
-        ) {
-            H1Text(text = it.nickname!!)
-        }
+    mainContent: @Composable ColumnScope.() -> Unit = {
+        H1Text(text = userInfo.nickname!!)
     },
-    sideContent: @Composable (UserInfo) -> Unit = {
+    sideContent: @Composable () -> Unit = {
         MoneyAmount(
             moneyAmount = userInfo.userBalance,
             fontSize = 24.sp
         )
     },
-    iconSize: Dp = 70.dp,
-    onClick: (() -> Unit)? = null
+    iconSize: Dp = 50.dp
 ) {
     IconRowCard(
-        mainContent = { mainContent(userInfo) },
-        sideContent = { sideContent(userInfo) },
+        mainContent = {
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                mainContent()
+            }
+        },
+        sideContent = sideContent,
         iconSize = iconSize,
-        onClick = onClick,
         modifier = modifier
+    )
+}
+
+@Composable
+fun TransactionActivityRowCard(
+    modifier: Modifier = Modifier,
+    transactionActivity: TransactionActivity
+) {
+    UserInfoRowCard(
+        userInfo = transactionActivity.userInfo,
+        mainContent = {
+            Caption(
+                text = when(transactionActivity.action) {
+                    is DebtAction -> "Request"
+                    is SettleAction -> "Settle"
+                }
+            )
+            H1Text(text = transactionActivity.displayText(), fontSize = 18.sp)
+        },
+        sideContent = {
+
+        },
+        modifier = modifier.height(70.dp)
     )
 }
 
@@ -286,28 +311,16 @@ fun LazyListScope.recentActivityList(
             modifier = Modifier
                 .fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
     }
     groupActivity.groupBy {
         isoDate(it.date)
     }.let { groupActivityByDate ->
-        groupActivityByDate.keys.forEachIndexed { index, date ->
+        groupActivityByDate.keys.forEach { date ->
             item {
-                if (index == 0) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(AppTheme.dimensions.cardPadding)
-                            .clip(AppTheme.shapes.listShape)
-                            .background(AppTheme.colors.secondary)
-                    )
-                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(AppTheme.colors.secondary)
-                        .padding(horizontal = AppTheme.dimensions.cardPadding)
-                        .padding(bottom = AppTheme.dimensions.spacing)
+                        .padding(top = AppTheme.dimensions.spacing)
                 ) {
                     Caption(text = date)
                 }
@@ -316,15 +329,13 @@ fun LazyListScope.recentActivityList(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(top = AppTheme.dimensions.spacing)
+                        .clip(AppTheme.shapes.large)
                         .background(AppTheme.colors.secondary)
-                        .padding(horizontal = AppTheme.dimensions.cardPadding)
-                        .padding(bottom = AppTheme.dimensions.spacing)
                         .clickable { transactionActivityOnClick(transactionActivity) }
+                        .padding(AppTheme.dimensions.rowCardPadding)
                 ) {
-                    H1Text(
-                        text = transactionActivity.displayText(),
-                        fontSize = 18.sp
-                    )
+                    TransactionActivityRowCard(transactionActivity = transactionActivity)
                 }
             }
         }

@@ -5,7 +5,7 @@ val napierVersion = "2.4.0"
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.7.20"
+    kotlin("plugin.serialization") version "1.8.10"
     kotlin("native.cocoapods")
     id("com.android.library")
     id("io.realm.kotlin")
@@ -77,7 +77,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
             }
         }
-        val androidTest by getting {
+        val androidInstrumentedTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")

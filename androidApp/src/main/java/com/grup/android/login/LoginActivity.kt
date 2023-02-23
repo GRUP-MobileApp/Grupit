@@ -30,11 +30,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
-import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
 
 
@@ -54,7 +52,6 @@ class LoginActivity : AppCompatActivity() {
 
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun LoginPage(
     loginViewModel: LoginViewModel
@@ -107,7 +104,8 @@ fun LoginPage(
             modifier = Modifier.background(AppTheme.colors.secondary),
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
             value = email,
-            onValueChange = { email = it }
+            onValueChange = { email = it },
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -119,7 +117,8 @@ fun LoginPage(
             value = password,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            onValueChange = { password = it }
+            onValueChange = { password = it },
+            singleLine = true
         )
 
         Column(

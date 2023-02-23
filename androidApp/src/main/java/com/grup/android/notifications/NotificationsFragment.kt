@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +25,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -58,7 +59,6 @@ class NotificationsFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun NotificationsLayout(
     notificationsViewModel: NotificationsViewModel,
@@ -90,6 +90,7 @@ fun NotificationsLayout(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -181,6 +182,6 @@ fun NotificationRowCard(
         iconSize = 50.dp,
         mainContent = mainContent,
         sideContent = sideContent,
-        onClick = onClick
+        modifier = Modifier.clickable(onClick = onClick)
     )
 }
