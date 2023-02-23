@@ -1,24 +1,32 @@
 package com.grup.android.login
 
 import LoadingSpinner
+import android.app.Activity
+import android.app.PendingIntent
 import android.content.Intent
-import android.os.Build
+import android.content.IntentSender.SendIntentException
+import android.net.Credentials
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -27,15 +35,24 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.*
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.app.ActivityCompat.startIntentSenderForResult
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
 import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
+import kotlinx.coroutines.runBlocking
 
 
 class LoginActivity : AppCompatActivity() {
@@ -45,11 +62,22 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
+        // Set up Google Sign-In options
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.web_client_id))
+            .requestEmail()
+            .build()
+        val googleSignInClient = GoogleSignIn.getClient(this, gso)
+
         setContent {
             AppTheme {
-                LoginPage(loginViewModel = loginViewModel)
+                LoginPage(
+                    loginViewModel = loginViewModel,
+                    googleSignInClient = googleSignInClient
+                )
             }
         }
+
     }
 
 }
@@ -57,7 +85,8 @@ class LoginActivity : AppCompatActivity() {
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun LoginPage(
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    googleSignInClient: GoogleSignInClient
 ) {
     var email: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
@@ -138,6 +167,7 @@ fun LoginPage(
 
         Box(
             contentAlignment = Alignment.Center,
+
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp, 0.dp, 20.dp, 0.dp)
@@ -189,5 +219,45 @@ fun LoginPage(
                 }
             }
         }
+        GoogleSignInButton(loginViewModel, googleSignInClient)
     }
+}
+
+@Composable
+fun GoogleSignInButton(loginViewModel: LoginViewModel, googleSignInClient: GoogleSignInClient) {
+    val context = LocalContext.current
+    val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                // Signed in successfully
+                loginViewModel.handleSignInResult(account)
+            } catch (e: ApiException) {
+                // Sign in failed
+            }
+        }
+    }
+
+    Button(
+        onClick = {
+            val signInIntent = googleSignInClient.signInIntent
+            signInLauncher.launch(signInIntent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp),
+        shape = RoundedCornerShape(6.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color(0xFF4285F4),
+            contentColor = Color.White
+        )
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_logo_google),
+            contentDescription = ""
+        )
+        Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
+    }
+
 }

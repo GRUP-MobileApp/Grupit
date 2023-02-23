@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="appName">GRUP</string>
+    <string name="gcs_client_id">495306064205-agl20k5a44kamfhvgjn4sttajs1uhvov.apps.googleusercontent.com</string>
+    <string name="web_client_id">495306064205-ti1jrovi2jmj1c5upl59k5o1mr6217i4.apps.googleusercontent.com</string>
 </resources>

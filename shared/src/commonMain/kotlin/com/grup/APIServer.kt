@@ -104,6 +104,14 @@ object APIServer {
             }
             emailAndPassword(email, password)
         }
+
+        suspend fun googleLogin(credentials: Credentials) {
+            try {
+                login(credentials)
+            } catch (e: InvalidCredentialsException) {
+                throw InvalidEmailPasswordException()
+            }
+        }
     }
 
     fun registerUser(username: String, displayName: String) {

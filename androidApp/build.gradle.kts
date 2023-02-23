@@ -76,4 +76,8 @@ dependencies {
     //Accompanist
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
+
+    // Google Play Services
+    implementation ("com.google.android.gms:play-services-auth:20.4.1")
+    implementation("com.google.android.gms:play-services-base:18.2.0")
 }
