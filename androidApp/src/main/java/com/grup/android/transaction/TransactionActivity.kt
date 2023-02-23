@@ -2,11 +2,13 @@ package com.grup.android.transaction
 
 import com.grup.android.asMoneyAmount
 import com.grup.exceptions.PendingTransactionRecordException
+import com.grup.models.Action
 import com.grup.models.DebtAction
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 
 sealed class TransactionActivity {
+    abstract val action: Action
     abstract val userId: String
     abstract val name: String
     abstract val date: String
@@ -15,6 +17,8 @@ sealed class TransactionActivity {
     data class CreateDebtAction(
         val debtAction: DebtAction
     ) : TransactionActivity() {
+        override val action: Action
+            get() = debtAction
         override val userId: String
             get() = debtAction.debteeUserInfo!!.userId!!
         override val name: String
@@ -30,6 +34,8 @@ sealed class TransactionActivity {
         val debtAction: DebtAction,
         val transactionRecord: TransactionRecord
     ): TransactionActivity() {
+        override val action: Action
+            get() = debtAction
         override val userId: String
             get() = transactionRecord.debtorUserInfo!!.userId!!
         override val name: String
@@ -53,6 +59,8 @@ sealed class TransactionActivity {
     data class CreateSettleAction(
         val settleAction: SettleAction
     ) : TransactionActivity() {
+        override val action: Action
+            get() = settleAction
         override val userId: String
             get() = settleAction.debteeUserInfo!!.userId!!
         override val name: String
@@ -68,6 +76,8 @@ sealed class TransactionActivity {
         val settleAction: SettleAction,
         val transactionRecord: TransactionRecord
     ) : TransactionActivity() {
+        override val action: Action
+            get() = settleAction
         override val userId: String
             get() = transactionRecord.debtorUserInfo!!.getId()
         override val name: String

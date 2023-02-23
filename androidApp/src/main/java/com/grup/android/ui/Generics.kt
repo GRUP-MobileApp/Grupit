@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -274,6 +275,62 @@ fun MoneyAmount(
     }
 }
 
+fun LazyListScope.recentActivityList(
+    groupActivity: List<TransactionActivity>,
+    transactionActivityOnClick: (TransactionActivity) -> Unit = {}
+) {
+    item {
+        H1Text(
+            text = "Recent Transactions",
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
+    }
+    groupActivity.groupBy {
+        isoDate(it.date)
+    }.let { groupActivityByDate ->
+        groupActivityByDate.keys.forEachIndexed { index, date ->
+            item {
+                if (index == 0) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(AppTheme.dimensions.cardPadding)
+                            .clip(AppTheme.shapes.listShape)
+                            .background(AppTheme.colors.secondary)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(AppTheme.colors.secondary)
+                        .padding(horizontal = AppTheme.dimensions.cardPadding)
+                        .padding(bottom = AppTheme.dimensions.spacing)
+                ) {
+                    Caption(text = date)
+                }
+            }
+            items(groupActivityByDate[date]!!) { transactionActivity ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(AppTheme.colors.secondary)
+                        .padding(horizontal = AppTheme.dimensions.cardPadding)
+                        .padding(bottom = AppTheme.dimensions.spacing)
+                        .clickable { transactionActivityOnClick(transactionActivity) }
+                ) {
+                    H1Text(
+                        text = transactionActivity.displayText(),
+                        fontSize = 18.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun RecentActivityList(
     modifier: Modifier = Modifier,
@@ -298,9 +355,8 @@ fun RecentActivityList(
                     .fillMaxSize()
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
-                groupActivityByDate.keys.forEach() { date ->
+                groupActivityByDate.keys.forEach { date ->
                     Caption(text = date)
-                    Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                     Column(
                         verticalArrangement = Arrangement
                             .spacedBy(AppTheme.dimensions.spacingSmall),
