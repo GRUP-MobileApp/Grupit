@@ -72,7 +72,7 @@ object APIServer {
     ) = SettleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)
     fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
-        SettleActionController.acceptTransactionRecord(settleAction, transactionRecord)
+        SettleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = SettleActionController.getAllSettleActionsAsFlow()
 
 

@@ -11,6 +11,11 @@ data class AppShapes (
     val large: CornerBasedShape = RoundedCornerShape(16.dp),
     val extraLarge: CornerBasedShape = RoundedCornerShape(24.dp),
 
+    val listShape: CornerBasedShape = RoundedCornerShape(
+        topStart = 24.dp,
+        topEnd = 24.dp
+    ),
+
     val CircleShape: RoundedCornerShape = RoundedCornerShape(50)
 )
 

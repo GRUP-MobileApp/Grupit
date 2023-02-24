@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -21,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -61,7 +61,7 @@ class GroupMembersFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalLifecycleComposeApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun GroupMembersLayout(
     groupMembersViewModel: GroupMembersViewModel,
@@ -105,7 +105,9 @@ fun GroupMembersLayout(
             selectedUserInfo?.let { selectedUserInfo ->
                 GroupMemberInfoBottomSheet(
                     selectedUserInfo = selectedUserInfo,
-                    groupActivity = groupActivity.filter { it.userId == selectedUserInfo.userId },
+                    groupActivity = groupActivity.filter { transactionActivity ->
+                        transactionActivity.userInfo.userId!! == selectedUserInfo.userId
+                    },
                     state = userInfoBottomSheetState
                 ) {
                     content()
@@ -139,8 +141,7 @@ fun GroupMembersLayout(
                     }
                 )
             },
-            backgroundColor = AppTheme.colors.primary,
-            drawerContent = { Text(text = "drawerContent") }
+            backgroundColor = AppTheme.colors.primary
         ) { padding ->
             Box(
                 modifier = Modifier
@@ -189,9 +190,8 @@ fun UsersList(
         itemsIndexed(userInfos) { _, userInfo ->
             UserInfoRowCard(
                 userInfo = userInfo,
-                onClick = {
-                    userInfoOnClick(userInfo)
-                }
+                iconSize = 70.dp,
+                modifier = Modifier.clickable { userInfoOnClick(userInfo) }
             )
         }
     }
@@ -203,10 +203,9 @@ fun GroupMemberInfoBottomSheet(
     selectedUserInfo: UserInfo,
     groupActivity: List<TransactionActivity>,
     state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.primary,
     content: @Composable () -> Unit
 ) {
-    ModalBottomSheetLayout(
+    BackPressModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
@@ -222,9 +221,7 @@ fun GroupMemberInfoBottomSheet(
                 RecentActivityList(groupActivity = groupActivity)
             }
         },
-        sheetBackgroundColor = backgroundColor,
-        content = content,
-        sheetShape = AppTheme.shapes.large,
+        content = content
     )
 }
 
@@ -248,7 +245,6 @@ fun AddToGroupBottomSheetLayout(
     inviteUsernameToGroupOnClick: () -> Unit,
     inviteResult: GroupMembersViewModel.InviteResult,
     state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
@@ -259,7 +255,7 @@ fun AddToGroupBottomSheetLayout(
             Color.Transparent
         }
 
-    ModalBottomSheetLayout(
+    BackPressModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
@@ -299,7 +295,6 @@ fun AddToGroupBottomSheetLayout(
                 }
             }
         },
-        sheetBackgroundColor = backgroundColor,
         content = content
     )
 }

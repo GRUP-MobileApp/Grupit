@@ -22,7 +22,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -33,7 +32,6 @@ import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.SettleAction
 import com.grup.models.UserInfo
-import kotlin.math.min
 
 class ActionAmountFragment : Fragment() {
     private val transactionViewModel: TransactionViewModel by navGraphViewModels(R.id.main_graph)
@@ -60,7 +58,6 @@ class ActionAmountFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun ActionAmountLayout(
     transactionViewModel: TransactionViewModel,

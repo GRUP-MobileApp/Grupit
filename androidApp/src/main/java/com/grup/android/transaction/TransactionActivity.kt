@@ -2,38 +2,37 @@ package com.grup.android.transaction
 
 import com.grup.android.asMoneyAmount
 import com.grup.exceptions.PendingTransactionRecordException
-import com.grup.models.DebtAction
-import com.grup.models.SettleAction
-import com.grup.models.TransactionRecord
+import com.grup.models.*
 
 sealed class TransactionActivity {
-    abstract val userId: String
-    abstract val name: String
+    abstract val action: Action
+    abstract val userInfo: UserInfo
     abstract val date: String
     abstract fun displayText(): String
 
     data class CreateDebtAction(
         val debtAction: DebtAction
     ) : TransactionActivity() {
-        override val userId: String
-            get() = debtAction.debteeUserInfo!!.userId!!
-        override val name: String
-            get() = debtAction.debteeUserInfo!!.nickname!!
+        override val action: Action
+            get() = debtAction
+        override val userInfo: UserInfo
+            get() = debtAction.debteeUserInfo!!
         override val date: String
             get() = debtAction.date
 
         override fun displayText() =
-                    "$name created a transaction with ${debtAction.transactionRecords.size} people"
+                    "${userInfo.nickname!!} created a transaction with " +
+                            "${debtAction.transactionRecords.size} people"
     }
 
     data class AcceptDebtAction(
         val debtAction: DebtAction,
         val transactionRecord: TransactionRecord
     ): TransactionActivity() {
-        override val userId: String
-            get() = transactionRecord.debtorUserInfo!!.userId!!
-        override val name: String
-            get() = transactionRecord.debtorUserInfo!!.nickname!!
+        override val action: Action
+            get() = debtAction
+        override val userInfo: UserInfo
+            get() = transactionRecord.debtorUserInfo!!
         override val date: String
             get() = transactionRecord.dateAccepted.also { dateAccepted ->
                 if (dateAccepted == TransactionRecord.PENDING) {
@@ -45,7 +44,7 @@ sealed class TransactionActivity {
             }
 
         override fun displayText() =
-                    "$name accepted a debt of " +
+                    "${userInfo.nickname!!} accepted a debt of " +
                             "${transactionRecord.balanceChange!!.asMoneyAmount()} from " +
                             debtAction.debteeUserInfo!!.nickname!!
     }
@@ -53,25 +52,26 @@ sealed class TransactionActivity {
     data class CreateSettleAction(
         val settleAction: SettleAction
     ) : TransactionActivity() {
-        override val userId: String
-            get() = settleAction.debteeUserInfo!!.userId!!
-        override val name: String
-            get() = settleAction.debteeUserInfo!!.nickname!!
+        override val action: Action
+            get() = settleAction
+        override val userInfo: UserInfo
+            get() = settleAction.debteeUserInfo!!
         override val date: String
             get() = settleAction.date
 
         override fun displayText() =
-            "$name requested ${settleAction.settleAmount!!.asMoneyAmount()} to the group"
+            "${userInfo.nickname!!} requested ${settleAction.settleAmount!!.asMoneyAmount()} " +
+                    "to the group"
     }
 
     data class SettlePartialSettleAction(
         val settleAction: SettleAction,
         val transactionRecord: TransactionRecord
     ) : TransactionActivity() {
-        override val userId: String
-            get() = transactionRecord.debtorUserInfo!!.getId()
-        override val name: String
-            get() = transactionRecord.debtorUserInfo!!.nickname!!
+        override val action: Action
+            get() = settleAction
+        override val userInfo: UserInfo
+            get() = transactionRecord.debtorUserInfo!!
         override val date: String
             get() = transactionRecord.dateAccepted.also { dateAccepted ->
                 if (dateAccepted == TransactionRecord.PENDING) {
@@ -82,7 +82,7 @@ sealed class TransactionActivity {
                 }
             }
         override fun displayText(): String =
-            "$name paid ${transactionRecord.balanceChange!!.asMoneyAmount()} to " +
+            "${userInfo.nickname!!} paid ${transactionRecord.balanceChange!!.asMoneyAmount()} to " +
                     settleAction.debteeUserInfo!!.nickname!!
     }
 }

@@ -1,5 +1,6 @@
 package com.grup.controllers
 
+import com.grup.exceptions.InvalidTransactionRecordException
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
@@ -18,11 +19,20 @@ object SettleActionController : KoinComponent {
         }
     }
 
-    fun createSettleActionTransaction(settleAction: SettleAction, myTransactionRecord: TransactionRecord) {
+    fun createSettleActionTransaction(
+        settleAction: SettleAction,
+        myTransactionRecord: TransactionRecord
+    ) {
         settleActionService.createSettleActionTransaction(settleAction, myTransactionRecord)
     }
 
-    fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
+    fun acceptSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) {
+        if (transactionRecord.balanceChange!! > settleAction.remainingAmount) {
+            throw InvalidTransactionRecordException("Transaction exceeds Settle amount")
+        }
         userInfoService.applyPartialSettleActionTransactionRecord(settleAction, transactionRecord)
         settleActionService.acceptTransactionRecord(settleAction, transactionRecord)
     }

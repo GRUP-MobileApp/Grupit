@@ -108,7 +108,6 @@ class NotificationsViewModel : ViewModel() {
             }
         }.asNotification()
 
-
     // Group Invite
     fun acceptInviteToGroup(groupInvite: GroupInvite) = APIServer.acceptInviteToGroup(groupInvite)
 
@@ -121,6 +120,6 @@ class NotificationsViewModel : ViewModel() {
                                       transactionRecord: TransactionRecord) =
         APIServer.acceptSettleActionTransaction(settleAction, transactionRecord)
 
-    private fun <T: Iterable<Notification>> T.afterJoinDate(date: String) =
+    private fun <T: Iterable<Notification>> T.afterDate(date: String) =
         this.filter { it.date > date }
 }

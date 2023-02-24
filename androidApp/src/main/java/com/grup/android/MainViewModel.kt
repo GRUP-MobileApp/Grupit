@@ -6,9 +6,6 @@ import com.grup.models.*
 import kotlinx.coroutines.flow.*
 
 class MainViewModel : ViewModel() {
-    val username: String
-        get() = userObject.username!!
-
     companion object {
         private val selectedGroupMutable:
                 MutableStateFlow<Group?> = MutableStateFlow(null)
@@ -113,8 +110,13 @@ class MainViewModel : ViewModel() {
         }.asInitialEmptyState()
 
 
-    // Group operations
+    // Group
     fun createGroup(groupName: String) = APIServer.createGroup(groupName)
+
+    // SettleAction
+    fun acceptSettleActionTransaction(settleAction: SettleAction,
+                                      transactionRecord: TransactionRecord) =
+        APIServer.acceptSettleActionTransaction(settleAction, transactionRecord)
 
     fun logOut() = APIServer.logOut()
 }

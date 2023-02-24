@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -56,7 +55,6 @@ class WelcomeFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @ExperimentalPagerApi
 @Composable
 fun WelcomeLayout(

@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -61,7 +60,7 @@ class DebtActionFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DebtActionLayout(
     debtActionAmount: Double,
@@ -223,7 +222,8 @@ fun SelectedDebtorsList(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
@@ -254,14 +254,13 @@ fun AddDebtorBottomSheet(
     userInfos: List<UserInfo>,
     addDebtorsOnClick: (List<UserInfo>) -> Unit,
     state: ModalBottomSheetState,
-    backgroundColor: Color = AppTheme.colors.secondary,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
     var selectedUsers: List<UserInfo> by remember { mutableStateOf(emptyList()) }
     var usernameSearchQuery: String by remember { mutableStateOf("") }
 
-    ModalBottomSheetLayout(
+    BackPressModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
@@ -314,7 +313,6 @@ fun AddDebtorBottomSheet(
                 )
             }
         },
-        sheetBackgroundColor = backgroundColor,
         content = content
     )
 }
@@ -343,17 +341,15 @@ fun SelectDebtorsChecklist(
                 UserInfoRowCard(
                     userInfo = userInfo,
                     mainContent = {
-                        Column(verticalArrangement = Arrangement.Center) {
-                            H1Text(text = it.nickname!!)
-                            Caption(text = "Balance: ${it.userBalance.asMoneyAmount()}")
-                        }
+                        H1Text(text = userInfo.nickname!!)
+                        Caption(text = "Balance: ${userInfo.userBalance.asMoneyAmount()}")
                     },
-                    sideContent = { userInfo ->
+                    sideContent = {
                         Checkbox(
                             checked = selectedUsers.contains(userInfo),
                             onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) },
                             colors = CheckboxDefaults.colors(
-                                uncheckedColor = AppTheme.colors.onPrimary
+                                uncheckedColor = AppTheme.colors.onSecondary
                             )
                         )
                     }
