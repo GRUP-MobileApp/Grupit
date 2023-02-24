@@ -9,6 +9,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("io.realm.kotlin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -83,4 +84,9 @@ dependencies {
     // Google Play Services
     implementation ("com.google.android.gms:play-services-auth:20.4.1")
     implementation("com.google.android.gms:play-services-base:18.2.0")
+
+
+    //Firebase
+    //implementation("com.google.firebase:firebase-bom:31.2.2")
+    //implementation("com.google.firebase:firebase-analytics-ktx")
 }

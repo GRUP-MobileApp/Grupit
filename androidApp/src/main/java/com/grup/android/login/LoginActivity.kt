@@ -2,15 +2,10 @@ package com.grup.android.login
 
 import LoadingSpinner
 import android.app.Activity
-import android.app.PendingIntent
 import android.content.Intent
-import android.content.IntentSender.SendIntentException
-import android.net.Credentials
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -26,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -35,26 +29,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.app.ActivityCompat.startIntentSenderForResult
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
-import androidx.compose.material.*
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
-import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
+import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
-import kotlinx.coroutines.runBlocking
 
 
 class LoginActivity : AppCompatActivity() {
@@ -66,7 +50,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Set up Google Sign-In options
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.web_client_id))
+            .requestIdToken(web_client_id)
             .requestEmail()
             .build()
         val googleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -223,6 +207,7 @@ fun LoginPage(
             }
         }
         GoogleSignInButton(loginViewModel, googleSignInClient)
+        crashButton()
     }
 }
 
@@ -263,4 +248,24 @@ fun GoogleSignInButton(loginViewModel: LoginViewModel, googleSignInClient: Googl
         Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
     }
 
+}
+
+// test crash reports
+@Composable
+fun crashButton () {
+    Button(
+        onClick = {
+            2 / 0
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp),
+        shape = RoundedCornerShape(6.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Black,
+            contentColor = Color.White
+        )
+    ) {
+        Text(text = "CRASH THE APP", modifier = Modifier.padding(6.dp))
+    }
 }
