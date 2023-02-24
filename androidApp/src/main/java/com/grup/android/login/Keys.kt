@@ -1,3 +1,3 @@
 package com.grup.android.login
 
-val web_client_id = "296324231687-i2hnpfhaa7916trgivrtojk1vf7mrddh.apps.googleusercontent.com"
+const val web_client_id = "296324231687-e1ecrjgjqfdqmd73dt9d02g8o64a77ph.apps.googleusercontent.com"

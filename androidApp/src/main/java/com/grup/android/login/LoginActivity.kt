@@ -32,9 +32,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
 import com.grup.android.R
@@ -49,9 +51,9 @@ class LoginActivity : AppCompatActivity() {
         Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
         // Set up Google Sign-In options
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        val gso = GoogleSignInOptions
+            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(web_client_id)
-            .requestEmail()
             .build()
         val googleSignInClient = GoogleSignIn.getClient(this, gso)
 
@@ -73,9 +75,22 @@ fun LoginPage(
     loginViewModel: LoginViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
+    val context = LocalContext.current
+
     var email: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
-    val context = LocalContext.current
+    val googleSignInLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val task: Task<GoogleSignInAccount> =
+                GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            if (task.isSuccessful) {
+                val account: GoogleSignInAccount? = task.getResult(ApiException::class.java)
+                val token: String = account?.idToken!!
+                loginViewModel.loginGoogleAccountToken(token)
+            }
+        }
 
     val loginResult:
             LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
@@ -154,7 +169,6 @@ fun LoginPage(
 
         Box(
             contentAlignment = Alignment.Center,
-
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp, 0.dp, 20.dp, 0.dp)
@@ -206,32 +220,19 @@ fun LoginPage(
                 }
             }
         }
-        GoogleSignInButton(loginViewModel, googleSignInClient)
+        GoogleSignInButton(
+            onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) }
+        )
         crashButton()
     }
 }
 
 @Composable
-fun GoogleSignInButton(loginViewModel: LoginViewModel, googleSignInClient: GoogleSignInClient) {
-    val context = LocalContext.current
-    val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                // Signed in successfully
-                loginViewModel.handleSignInResult(account)
-            } catch (e: ApiException) {
-                // Sign in failed
-            }
-        }
-    }
-
+fun GoogleSignInButton(
+    onClick: () -> Unit
+) {
     Button(
-        onClick = {
-            val signInIntent = googleSignInClient.signInIntent
-            signInLauncher.launch(signInIntent)
-        },
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp),
@@ -247,7 +248,6 @@ fun GoogleSignInButton(loginViewModel: LoginViewModel, googleSignInClient: Googl
         )
         Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
     }
-
 }
 
 // test crash reports

@@ -18,6 +18,7 @@ import com.grup.repositories.APP_ID
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.Credentials
+import io.realm.kotlin.mongodb.GoogleAuthType
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
@@ -82,7 +83,7 @@ object APIServer {
             initKoin()
         }
 
-        suspend fun emailAndPassword(email: String, password: String) {
+        suspend fun loginEmailAndPassword(email: String, password: String) {
             try {
                 login(Credentials.emailPassword(email, password))
             } catch (e: InvalidCredentialsException) {
@@ -102,14 +103,14 @@ object APIServer {
             } catch (e: BadRequestException) {
                 // TODO: Bad email/bad password exception
             }
-            emailAndPassword(email, password)
+            loginEmailAndPassword(email, password)
         }
 
-        suspend fun googleLogin(credentials: Credentials) {
+        suspend fun loginGoogleAccountToken(googleAccountToken: String) {
             try {
-                login(credentials)
-            } catch (e: InvalidCredentialsException) {
-                throw InvalidEmailPasswordException()
+                login(Credentials.google(googleAccountToken, GoogleAuthType.ID_TOKEN))
+            } catch (e: Exception) {
+                // TODO: Handle Google login exception
             }
         }
     }
