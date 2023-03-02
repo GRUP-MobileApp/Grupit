@@ -29,6 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.*
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.grup.android.*
@@ -236,7 +237,7 @@ fun IconRowCard(
                 painter = painter,
                 iconSize = iconSize
             )
-            mainContent
+            mainContent()
         }
         if (sideContent != null) {
             Row(modifier = Modifier.padding(horizontal = AppTheme.dimensions.paddingSmall)) {
@@ -265,6 +266,7 @@ fun UserInfoRowCard(
         model = getProfilePictureURI(userInfo.userId!!),
         error = rememberVectorPainter(image = Icons.Default.Face)
     )
+
     IconRowCard(
         painter = asyncPainter,
         mainContent = {
