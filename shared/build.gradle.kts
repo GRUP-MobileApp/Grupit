@@ -1,6 +1,7 @@
 val ktorVersion: String by project
 val realmVersion: String by project
 val koinVersion: String by project
+val awsVersion: String by project
 val napierVersion = "2.4.0"
 
 plugins {
@@ -45,6 +46,7 @@ kotlin {
 
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
+
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -74,7 +76,11 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+
+                // AWS
+                implementation("aws.sdk.kotlin:s3:$awsVersion")
             }
         }
         val androidInstrumentedTest by getting {

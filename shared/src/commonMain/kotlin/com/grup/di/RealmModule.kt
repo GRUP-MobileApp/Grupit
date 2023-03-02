@@ -59,8 +59,8 @@ internal fun stopSubscriptionSyncJob() {
     subscriptionsJob.cancel()
 }
 
-internal fun registerUserObject(newUser: User) {
-    realm.writeBlocking {
+internal suspend fun registerUserObject(newUser: User) {
+    realm.write {
         copyToRealm(newUser)
     }
 }

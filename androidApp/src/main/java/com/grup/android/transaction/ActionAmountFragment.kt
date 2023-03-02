@@ -87,22 +87,19 @@ fun ActionAmountLayout(
                 message = message,
                 onMessageChange = { message = it },
                 topContent = {
-                    Row(
-                        horizontalArrangement = Arrangement
-                            .spacedBy(AppTheme.dimensions.spacingLarge),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ProfileIcon(
-                            imageVector = Icons.Default.Face,
-                            iconSize = 90.dp
+                    Row(modifier = Modifier.width(IntrinsicSize.Min)) {
+                        UserInfoRowCard(
+                            userInfo = myUserInfo,
+                            iconSize = 90.dp,
+                            mainContent = {
+                                Caption(text = "Remaining Amount")
+                                MoneyAmount(
+                                    moneyAmount = myUserInfo.userBalance,
+                                    fontSize = 48.sp
+                                )
+                            },
+                            sideContent = null
                         )
-                        Column(horizontalAlignment = Alignment.Start) {
-                            Caption(text = "Balance")
-                            MoneyAmount(
-                                moneyAmount = myUserInfo.userBalance,
-                                fontSize = 48.sp
-                            )
-                        }
                     }
                 },
                 actionButton = {
@@ -128,22 +125,19 @@ fun ActionAmountLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, myUserInfo.userBalance) },
                 topContent = {
-                    Row(
-                        horizontalArrangement = Arrangement
-                            .spacedBy(AppTheme.dimensions.spacingLarge),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ProfileIcon(
-                            imageVector = Icons.Default.Face,
-                            iconSize = 90.dp
+                    Row(modifier = Modifier.width(IntrinsicSize.Min)) {
+                        UserInfoRowCard(
+                            userInfo = myUserInfo,
+                            iconSize = 90.dp,
+                            mainContent = {
+                                Caption(text = "Remaining Amount")
+                                MoneyAmount(
+                                    moneyAmount = myUserInfo.userBalance,
+                                    fontSize = 48.sp
+                                )
+                            },
+                            sideContent = {}
                         )
-                        Column(horizontalAlignment = Alignment.Start) {
-                            Caption(text = "Balance")
-                            MoneyAmount(
-                                moneyAmount = myUserInfo.userBalance,
-                                fontSize = 48.sp
-                            )
-                        }
                     }
                 },
                 actionButton = {
@@ -165,22 +159,19 @@ fun ActionAmountLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, settleAction.remainingAmount) },
                 topContent = {
-                    Row(
-                        horizontalArrangement = Arrangement
-                            .spacedBy(AppTheme.dimensions.spacingLarge),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ProfileIcon(
-                            imageVector = Icons.Default.Face,
-                            iconSize = 90.dp
+                    Row(modifier = Modifier.width(IntrinsicSize.Min)) {
+                        UserInfoRowCard(
+                            userInfo = settleAction.debteeUserInfo!!,
+                            iconSize = 90.dp,
+                            mainContent = {
+                                Caption(text = "Remaining Amount")
+                                MoneyAmount(
+                                    moneyAmount = settleAction.remainingAmount,
+                                    fontSize = 48.sp
+                                )
+                            },
+                            sideContent = {}
                         )
-                        Column(horizontalAlignment = Alignment.Start) {
-                            Caption(text = "Remaining Amount")
-                            MoneyAmount(
-                                moneyAmount = settleAction.remainingAmount,
-                                fontSize = 48.sp
-                            )
-                        }
                     }
                 },
                 actionButton = {

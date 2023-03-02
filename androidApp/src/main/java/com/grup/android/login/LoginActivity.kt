@@ -1,7 +1,6 @@
 package com.grup.android.login
 
 import LoadingSpinner
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,7 +52,7 @@ class LoginActivity : AppCompatActivity() {
         // Set up Google Sign-In options
         val gso = GoogleSignInOptions
             .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(web_client_id)
+            .requestIdToken(WEB_CLIENT_ID)
             .build()
         val googleSignInClient = GoogleSignIn.getClient(this, gso)
 

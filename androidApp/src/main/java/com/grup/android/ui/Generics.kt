@@ -1,10 +1,7 @@
 package com.grup.android.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,12 +20,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.*
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import com.grup.android.*
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
@@ -161,7 +163,25 @@ fun ProfileIcon(
     Icon(
         imageVector = imageVector,
         contentDescription = contentDescription,
-        modifier = modifier.size(iconSize)
+        modifier = modifier
+            .size(iconSize)
+            .clip(AppTheme.shapes.CircleShape)
+    )
+}
+
+@Composable
+fun ProfileIcon(
+    modifier: Modifier = Modifier,
+    painter: Painter,
+    contentDescription: String = "Profile Picture",
+    iconSize: Dp = 70.dp
+) {
+    Image(
+        painter = painter,
+        contentDescription = contentDescription,
+        modifier = modifier
+            .size(iconSize)
+            .clip(AppTheme.shapes.CircleShape)
     )
 }
 
@@ -197,10 +217,10 @@ fun SmallIconButton(
 @Composable
 fun IconRowCard(
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Default.Face,
+    painter: Painter = rememberVectorPainter(image = Icons.Default.Face),
     iconSize: Dp = 70.dp,
     mainContent: @Composable () -> Unit,
-    sideContent: @Composable () -> Unit = {}
+    sideContent: (@Composable () -> Unit)? = {}
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -213,13 +233,15 @@ fun IconRowCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             ProfileIcon(
-                imageVector = icon,
+                painter = painter,
                 iconSize = iconSize
             )
-            mainContent()
+            mainContent
         }
-        Row(modifier = Modifier.padding(horizontal = AppTheme.dimensions.paddingSmall)) {
-            sideContent()
+        if (sideContent != null) {
+            Row(modifier = Modifier.padding(horizontal = AppTheme.dimensions.paddingSmall)) {
+                sideContent()
+            }
         }
     }
 }
@@ -231,7 +253,7 @@ fun UserInfoRowCard(
     mainContent: @Composable ColumnScope.() -> Unit = {
         H1Text(text = userInfo.nickname!!)
     },
-    sideContent: @Composable () -> Unit = {
+    sideContent: (@Composable () -> Unit)? = {
         MoneyAmount(
             moneyAmount = userInfo.userBalance,
             fontSize = 24.sp
@@ -239,7 +261,12 @@ fun UserInfoRowCard(
     },
     iconSize: Dp = 50.dp
 ) {
+    val asyncPainter = rememberAsyncImagePainter(
+        model = getProfilePictureURI(userInfo.userId!!),
+        error = rememberVectorPainter(image = Icons.Default.Face)
+    )
     IconRowCard(
+        painter = asyncPainter,
         mainContent = {
             Column(
                 verticalArrangement = Arrangement.Top,

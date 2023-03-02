@@ -1,5 +1,6 @@
 package com.grup
 
+import com.grup.aws.Images
 import com.grup.controllers.*
 import com.grup.di.httpClientModule
 import com.grup.di.openSyncedRealm
@@ -115,18 +116,28 @@ object APIServer {
         }
     }
 
-    fun registerUser(username: String, displayName: String) {
+    object Image {
+        fun getProfilePictureURI(userId: String) = Images.getProfilePictureURI(userId)
+    }
+
+    suspend fun registerUser(
+        username: String,
+        displayName: String,
+        profilePicture: ByteArray
+    ) {
         registerUserObject(
             User(realmUser.id).apply {
                 this.username = username
                 this.displayName = displayName
             }
         )
+        Images.uploadProfilePicture(user, profilePicture)
     }
 
     fun logOut() {
         stopSubscriptionSyncJob()
         stopKoin()
+        realm.close()
         runBlocking {
             realmUser.logOut()
         }

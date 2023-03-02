@@ -4,6 +4,7 @@ val composeVersion: String by project
 val lifecycleVersion: String by project
 val navigationVersion: String by project
 val accompanistVersion: String by project
+val coilComposeVersion: String by project
 
 plugins {
     id("com.android.application")
@@ -62,6 +63,13 @@ dependencies {
 
     // Animation
     implementation("androidx.compose.animation:animation:1.3.3")
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:$coilComposeVersion")
+
+    // Image Cropper
+    implementation("com.vanniktech:android-image-cropper:4.5.0")
+    implementation("io.github.mr0xf00:easycrop:0.1.1")
 
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")

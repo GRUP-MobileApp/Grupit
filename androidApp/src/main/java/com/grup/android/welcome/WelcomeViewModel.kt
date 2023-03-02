@@ -1,5 +1,7 @@
 package com.grup.android.welcome
 
+import android.graphics.Bitmap
+import android.graphics.Picture
 import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
 import com.grup.android.ViewModel
@@ -8,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 
 class WelcomeViewModel : ViewModel() {
     val hasUserObject: Boolean
@@ -46,6 +49,15 @@ class WelcomeViewModel : ViewModel() {
         }
     }
 
-    fun registerUserObject(username: String, displayName: String) =
-        APIServer.registerUser(username, displayName)
+    fun registerUserObject(
+        username: String,
+        displayName: String,
+        profilePicture: ByteArray
+    ) = viewModelScope.launch {
+        APIServer.registerUser(
+            username,
+            displayName,
+            profilePicture
+        )
+    }
 }

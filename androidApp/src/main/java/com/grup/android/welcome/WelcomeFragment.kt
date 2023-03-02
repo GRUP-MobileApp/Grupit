@@ -1,10 +1,14 @@
 package com.grup.android.welcome
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -15,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,8 +29,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import com.google.accompanist.pager.*
 import com.grup.android.R
+import com.grup.android.ui.H1ConfirmTextButton
+import com.grup.android.ui.H1Text
 import com.grup.android.ui.apptheme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -70,11 +81,39 @@ fun WelcomeLayout(
 ) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
+    val context = LocalContext.current
 
     var username: String by remember { mutableStateOf("") }
     val usernameValidity: WelcomeViewModel.UsernameValidity
         by welcomeViewModel.usernameValidity.collectAsStateWithLifecycle()
     var displayName: String by remember { mutableStateOf("") }
+    var pfpUri: Uri by remember { mutableStateOf(Uri.EMPTY) }
+
+    val imageCropLauncher = rememberLauncherForActivityResult(
+        CropImageContract()
+    ) { result ->
+        if (result.isSuccessful) {
+            pfpUri = result.uriContent!!
+        } else {
+            // an error occurred cropping
+        }
+    }
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageCropLauncher.launch(
+            CropImageContractOptions(
+                uri,
+                CropImageOptions(
+                    cropShape = CropImageView.CropShape.OVAL,
+                    cornerShape = CropImageView.CropCornerShape.OVAL,
+                    guidelines = CropImageView.Guidelines.ON,
+                    fixAspectRatio = true,
+                    outputCompressFormat = Bitmap.CompressFormat.PNG
+                )
+            )
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -82,7 +121,7 @@ fun WelcomeLayout(
             .background(AppTheme.colors.primary)
     ) {
         HorizontalPager(
-            count = 2,
+            count = 3,
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth(),
@@ -104,14 +143,29 @@ fun WelcomeLayout(
                         }
                     )
                 1 ->
+                    SetProfilePicture(
+                        promptProfilePictureOnClick = {
+                            imagePickerLauncher.launch("image/*")
+                        }
+                    )
+                2 ->
                     SetDisplayName(
                         displayName = displayName,
                         onDisplayNameChange = { displayName = it },
                         registerOnClick = {
-                            welcomeViewModel.registerUserObject(username, displayName)
+                            val pictureInputStream =
+                                context.contentResolver
+                                    .openInputStream(pfpUri)
+                            welcomeViewModel.registerUserObject(
+                                username,
+                                displayName,
+                                pictureInputStream!!.readBytes()
+                            )
+                            pictureInputStream.close()
                             navController.navigate(R.id.startMainFragment)
                         }
                     )
+
             }
         }
 
@@ -132,7 +186,6 @@ fun WelcomeLayout(
     }
 }
 
-@ExperimentalPagerApi
 @Composable
 fun SetUsername(
     username: String,
@@ -156,25 +209,18 @@ fun SetUsername(
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-
     ) {
-        Text(
+        H1Text(
             text = "Welcome!",
             fontSize = 50.sp,
-            style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            ),
+            fontWeight = FontWeight.Bold,
             color = AppTheme.colors.onSecondary
         )
         Spacer(modifier = Modifier.height(50.dp))
-        Text(
+        H1Text(
             text = "Enter a Username",
             fontSize = 23.sp,
-            style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            ),
+            fontWeight = FontWeight.Bold,
             color = AppTheme.colors.onSecondary
         )
 
@@ -187,14 +233,8 @@ fun SetUsername(
             OutlinedTextField(
                 value = username,
                 onValueChange = onUsernameChange,
-                label = {
-                    Text(
-                        text = "",
-                        color = AppTheme.colors.onSecondary
-                    )
-                },
                 textStyle = TextStyle(color = AppTheme.colors.onSecondary),
-                placeholder = { Text(text = "Username") },
+                placeholder = { H1Text(text = "Username") },
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = borderColor,
@@ -218,7 +258,7 @@ fun SetUsername(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
                     .height(50.dp)) {
-                Text(
+                H1Text(
                     text = "Confirm",
                     fontSize = 20.sp,
                     color = AppTheme.colors.onSecondary,
@@ -228,7 +268,6 @@ fun SetUsername(
     }
 }
 
-@ExperimentalPagerApi
 @Composable
 fun SetDisplayName(
     displayName: String,
@@ -244,25 +283,18 @@ fun SetDisplayName(
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-
-        ) {
-        Text(
+    ) {
+        H1Text(
             text = "Welcome!",
             fontSize = 50.sp,
-            style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            ),
+            fontWeight = FontWeight.Bold,
             color = AppTheme.colors.onSecondary
         )
         Spacer(modifier = Modifier.height(50.dp))
-        Text(
+        H1Text(
             text = "Enter your display name",
             fontSize = 23.sp,
-            style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            ),
+            fontWeight = FontWeight.Bold,
             color = AppTheme.colors.onSecondary
         )
 
@@ -275,13 +307,8 @@ fun SetDisplayName(
             TextField(
                 value = displayName,
                 onValueChange = onDisplayNameChange,
-                label = {
-                    Text(
-                        text = "",
-                        color = AppTheme.colors.onSecondary)
-                },
                 textStyle = TextStyle(color = AppTheme.colors.onSecondary),
-                placeholder = { Text(text = "Display Name") },
+                placeholder = { H1Text(text = "Display Name") },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -298,12 +325,34 @@ fun SetDisplayName(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
                     .height(50.dp)) {
-                Text(
+                H1Text(
                     text = "Confirm",
                     fontSize = 20.sp,
                     color = AppTheme.colors.onSecondary,
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SetProfilePicture(
+    promptProfilePictureOnClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = AppTheme.dimensions.paddingExtraLarge,
+                bottom = 100.dp,
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        H1Text(text = "Upload Profile Picture")
+        H1ConfirmTextButton(
+            text = "Choose Photo",
+            onClick = promptProfilePictureOnClick
+        )
     }
 }
