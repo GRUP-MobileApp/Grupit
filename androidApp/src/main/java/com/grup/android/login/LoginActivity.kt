@@ -254,7 +254,7 @@ fun GoogleSignInButton(
 fun crashButton () {
     Button(
         onClick = {
-            2 / 0
+            throw RuntimeException("Test Crash")
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -265,6 +265,6 @@ fun crashButton () {
             contentColor = Color.White
         )
     ) {
-        Text(text = "CRASH THE APP", modifier = Modifier.padding(6.dp))
+        Text(text = "TEST CRASH", modifier = Modifier.padding(6.dp))
     }
 }

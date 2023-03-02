@@ -11,6 +11,7 @@ plugins {
     kotlin("android")
     id("io.realm.kotlin")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -93,8 +94,18 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth:20.4.1")
     implementation("com.google.android.gms:play-services-base:18.2.0")
 
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:31.2.2"))
 
-    //Firebase
-    //implementation("com.google.firebase:firebase-bom:31.2.2")
-    //implementation("com.google.firebase:firebase-analytics-ktx")
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+
+    // Add the dependency for the Firebase SDK for Google Analytics
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
+    //Firebase Crashlytics
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+
+    // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
 }
