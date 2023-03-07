@@ -3,6 +3,7 @@ package com.grup.di
 import com.grup.models.*
 import com.grup.other.RealmUser
 import com.grup.other.idSerialName
+import com.grup.service.Notifications
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.subscriptions
@@ -72,6 +73,7 @@ internal fun MutableSubscriptionSet.addGroup(groupId: String) {
         "${groupId}_DebtAction")
     add(realm.query<SettleAction>("groupId == $0", groupId),
         "${groupId}_SettleAction")
+    Notifications.subscribeGroupNotifications(groupId)
 }
 
 internal fun MutableSubscriptionSet.removeGroup(groupId: String) {
@@ -79,6 +81,7 @@ internal fun MutableSubscriptionSet.removeGroup(groupId: String) {
     remove("${groupId}_UserInfo")
     remove("${groupId}_DebtAction")
     remove("${groupId}_SettleAction")
+    Notifications.unsubscribeGroupNotifications(groupId)
 }
 
 internal fun <T: BaseEntity> MutableRealm.getLatestFields(obj: T): T {

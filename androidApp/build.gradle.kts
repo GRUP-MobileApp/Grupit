@@ -50,9 +50,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
-    implementation("com.google.android.material:material:1.7.0")
+    implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.appcompat:appcompat:1.6.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("androidx.core:core-ktx:1.9.0")
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
@@ -97,15 +98,10 @@ dependencies {
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:31.2.2"))
 
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-
-    // Add the dependency for the Firebase SDK for Google Analytics
-    implementation("com.google.firebase:firebase-analytics-ktx")
-
     //Firebase Crashlytics
+    implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     // Firebase Cloud Messaging
     implementation("com.google.firebase:firebase-messaging-ktx")
-
 }

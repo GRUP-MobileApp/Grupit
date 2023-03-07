@@ -63,19 +63,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
-                // Import the Firebase BoM
-                implementation(platform("com.google.firebase:firebase-bom:31.2.2"))
-
-                // When using the BoM, you don't specify versions in Firebase library dependencies
-
-                // Add the dependency for the Firebase SDK for Google Analytics
-                implementation("com.google.firebase:firebase-analytics-ktx")
-
-                //Firebase Crashlytics
-                implementation("com.google.firebase:firebase-crashlytics-ktx")
-
-                // Firebase Cloud Messaging
-                implementation("com.google.firebase:firebase-messaging-ktx")
             }
         }
         val commonTest by getting {
@@ -95,6 +82,17 @@ kotlin {
 
                 // AWS
                 implementation("aws.sdk.kotlin:s3:$awsVersion")
+
+                // Import the Firebase BoM
+                implementation(platform("com.google.firebase:firebase-bom:31.2.2"))
+
+                // Firebase Crashlytics
+                implementation("com.google.firebase:firebase-analytics-ktx")
+                implementation("com.google.firebase:firebase-crashlytics-ktx")
+
+                // Firebase Cloud Messaging
+                implementation("com.google.firebase:firebase-messaging-ktx")
+
             }
         }
         val androidInstrumentedTest by getting {

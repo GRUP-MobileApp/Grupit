@@ -1,15 +1,11 @@
 package com.grup.android
 
-import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -42,7 +37,6 @@ import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.*
 import com.grup.models.*
 import kotlinx.coroutines.launch
-import android.Manifest.permission.POST_NOTIFICATIONS
 
 class MainFragment : Fragment() {
     private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
