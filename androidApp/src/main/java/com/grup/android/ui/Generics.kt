@@ -23,15 +23,21 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.*
+import coil.ImageLoader
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.grup.android.*
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
@@ -262,8 +268,32 @@ fun UserInfoRowCard(
     },
     iconSize: Dp = 50.dp
 ) {
+    val context = LocalContext.current
+    val imageLoader: ImageLoader = ImageLoader.Builder(context)
+        .respectCacheHeaders(false)
+        .memoryCache {
+            MemoryCache
+                .Builder(context)
+                .build()
+        }
+        .diskCache {
+            DiskCache.Builder()
+                .directory(context.cacheDir.resolve("image_cache"))
+                .build()
+        }
+        .build()
+    val profilePictureURI = getProfilePictureURI(userInfo.userId!!)
+    val imageRequest: ImageRequest =
+        ImageRequest.Builder(context)
+            .data(profilePictureURI)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .allowHardware(true)
+            .diskCacheKey(profilePictureURI)
+            .memoryCacheKey(profilePictureURI)
+            .build()
     val asyncPainter = rememberAsyncImagePainter(
-        model = getProfilePictureURI(userInfo.userId!!),
+        model = imageLoader.enqueue(imageRequest),
         error = rememberVectorPainter(image = Icons.Default.Face)
     )
 
