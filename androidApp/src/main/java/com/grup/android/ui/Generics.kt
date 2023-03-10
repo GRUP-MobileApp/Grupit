@@ -268,32 +268,33 @@ fun UserInfoRowCard(
     },
     iconSize: Dp = 50.dp
 ) {
-    val context = LocalContext.current
-    val imageLoader: ImageLoader = ImageLoader.Builder(context)
-        .respectCacheHeaders(false)
-        .memoryCache {
-            MemoryCache
-                .Builder(context)
-                .build()
-        }
-        .diskCache {
-            DiskCache.Builder()
-                .directory(context.cacheDir.resolve("image_cache"))
-                .build()
-        }
-        .build()
+//    val context = LocalContext.current
+//    val imageLoader: ImageLoader = ImageLoader.Builder(context)
+//        .respectCacheHeaders(false)
+//        .memoryCache {
+//            MemoryCache
+//                .Builder(context)
+//                .build()
+//        }
+//        .diskCache {
+//            DiskCache.Builder()
+//                .directory(context.cacheDir.resolve("image_cache"))
+//                .build()
+//        }
+//        .build()
     val profilePictureURI = getProfilePictureURI(userInfo.userId!!)
-    val imageRequest: ImageRequest =
-        ImageRequest.Builder(context)
-            .data(profilePictureURI)
-            .memoryCachePolicy(CachePolicy.ENABLED)
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .allowHardware(true)
-            .diskCacheKey(profilePictureURI)
-            .memoryCacheKey(profilePictureURI)
-            .build()
+//    val imageRequest: ImageRequest =
+//        ImageRequest.Builder(context)
+//            .data(profilePictureURI)
+//            .memoryCachePolicy(CachePolicy.ENABLED)
+//            .diskCachePolicy(CachePolicy.ENABLED)
+//            .allowHardware(true)
+//            .diskCacheKey(profilePictureURI)
+//            .memoryCacheKey(profilePictureURI)
+//            .build()
     val asyncPainter = rememberAsyncImagePainter(
-        model = imageLoader.enqueue(imageRequest),
+//        model = imageLoader.enqueue(imageRequest),
+        model = profilePictureURI,
         error = rememberVectorPainter(image = Icons.Default.Face)
     )
 

@@ -36,6 +36,7 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
         .build()
     )
     realm.subscriptions.waitForSynchronization()
+    Notifications.subscribePersonalNotifications(realmUser.id)
     subscriptionsJob = startSubscriptionSyncJob()
     return realm
 }

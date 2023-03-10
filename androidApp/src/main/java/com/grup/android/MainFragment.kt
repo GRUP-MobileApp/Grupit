@@ -233,15 +233,17 @@ fun MainLayout(
                                     )
                                 },
                                 navigateSettleActionAmountOnClick = {
-                                    navController.navigate(
-                                        R.id.enterActionAmount,
-                                        Bundle().apply {
-                                            this.putString(
-                                                "actionType",
-                                                TransactionViewModel.SETTLE
-                                            )
-                                        }
-                                    )
+                                    if (myUserInfo.userBalance > 0) {
+                                        navController.navigate(
+                                            R.id.enterActionAmount,
+                                            Bundle().apply {
+                                                this.putString(
+                                                    "actionType",
+                                                    TransactionViewModel.SETTLE
+                                                )
+                                            }
+                                        )
+                                    }
                                 }
                             )
                             Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingLarge))
@@ -579,7 +581,7 @@ fun ActiveSettleActions(
                                     settleActionCardOnClick = {
                                         settleActionCardOnClick(settleAction)
                                     },
-                                    showPendingNotification = true
+                                    showPendingNotification = false
                                 )
                             }
                             else -> SettleActionCard(
@@ -587,7 +589,7 @@ fun ActiveSettleActions(
                                 settleActionCardOnClick = {
                                     settleActionCardOnClick(settleAction)
                                 },
-                                showPendingNotification = true
+                                showPendingNotification = false
                             )
                         }
                     }
@@ -770,7 +772,7 @@ fun SettleActionDetails(
     var selectedTabIndex: Int by remember { mutableStateOf(0) }
     var selectedTransaction: TransactionRecord? by remember { mutableStateOf(null) }
 
-    val isMyAction: Boolean = myUserInfo.userId!! == settleAction.debteeUserInfo!!.userId!!
+    val isMyAction: Boolean = (myUserInfo.userId!! == settleAction.debteeUserInfo!!.userId!!)
     if (
         isMyAction &&
         settleAction.remainingAmount > 0 &&
@@ -862,7 +864,8 @@ fun SettleActionDetails(
 
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .weight(1f)
                     .clip(AppTheme.shapes.extraLarge)
                     .background(AppTheme.colors.secondary)
             ) {

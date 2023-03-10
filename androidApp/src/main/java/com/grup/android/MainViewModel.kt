@@ -36,7 +36,9 @@ class MainViewModel : ViewModel() {
     val myUserInfo: StateFlow<UserInfo?> by lazy {
         _myUserInfosFlow.combine(selectedGroup) { userInfos, selectedGroup ->
             selectedGroup?.let { nonNullGroup ->
-                userInfos.find { it.groupId == nonNullGroup.getId() }
+                userInfos.find { userInfo ->
+                    userInfo.groupId == nonNullGroup.getId()
+                }
             }
         }.asState()
     }

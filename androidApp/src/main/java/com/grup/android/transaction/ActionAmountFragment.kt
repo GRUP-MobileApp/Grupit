@@ -92,7 +92,7 @@ fun ActionAmountLayout(
                             userInfo = myUserInfo,
                             iconSize = 90.dp,
                             mainContent = {
-                                Caption(text = "Remaining Amount")
+                                Caption(text = "Balance")
                                 MoneyAmount(
                                     moneyAmount = myUserInfo.userBalance,
                                     fontSize = 48.sp
@@ -106,13 +106,17 @@ fun ActionAmountLayout(
                     H1ConfirmTextButton(
                         text = actionType,
                         onClick = {
-                            navController.navigate(
-                                R.id.createDebtAction,
-                                Bundle().apply {
-                                    this.putDouble("amount", actionAmount.toDouble())
-                                    this.putString("message", message)
+                            actionAmount.toDouble().let { amount ->
+                                if (amount > 0) {
+                                    navController.navigate(
+                                        R.id.createDebtAction,
+                                        Bundle().apply {
+                                            this.putDouble("amount", amount)
+                                            this.putString("message", message)
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
                     )
                 },
@@ -120,7 +124,6 @@ fun ActionAmountLayout(
             )
         }
         TransactionViewModel.SETTLE -> {
-            // TODO: Check for positive user balance
             ActionAmountScreenLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, myUserInfo.userBalance) },
@@ -130,7 +133,7 @@ fun ActionAmountLayout(
                             userInfo = myUserInfo,
                             iconSize = 90.dp,
                             mainContent = {
-                                Caption(text = "Remaining Amount")
+                                Caption(text = "Balance")
                                 MoneyAmount(
                                     moneyAmount = myUserInfo.userBalance,
                                     fontSize = 48.sp

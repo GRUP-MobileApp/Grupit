@@ -77,7 +77,6 @@ object APIServer {
         SettleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = SettleActionController.getAllSettleActionsAsFlow()
 
-
     object Login {
         private suspend fun login(credentials: Credentials) {
             app.login(credentials)
