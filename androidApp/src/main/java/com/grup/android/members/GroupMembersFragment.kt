@@ -22,23 +22,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.navGraphViewModels
 import com.grup.android.MainViewModel
-import com.grup.android.R
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.android.ui.*
-
 import com.grup.android.ui.SmallIcon
 import com.grup.models.UserInfo
 import kotlinx.coroutines.launch
 
 class GroupMembersFragment : Fragment() {
-    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
-    private val groupMembersViewModel: GroupMembersViewModel by navGraphViewModels(R.id.main_graph)
+    private val mainViewModel: MainViewModel by viewModels()
+    private val groupMembersViewModel: GroupMembersViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

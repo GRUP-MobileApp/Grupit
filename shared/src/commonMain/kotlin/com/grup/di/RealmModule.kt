@@ -32,7 +32,7 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
                 "GroupInvites"
             )
         }
-        .name("syncedRealm")
+        .name("user${realmUser.id}_SyncedRealm")
         .build()
     )
     realm.subscriptions.waitForSynchronization()

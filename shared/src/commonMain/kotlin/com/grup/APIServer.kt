@@ -136,7 +136,6 @@ object APIServer {
     fun logOut() {
         stopSubscriptionSyncJob()
         stopKoin()
-        realm.close()
         runBlocking {
             realmUser.logOut()
         }

@@ -64,9 +64,7 @@ class LoginActivity : AppCompatActivity() {
                 )
             }
         }
-
     }
-
 }
 
 @Composable

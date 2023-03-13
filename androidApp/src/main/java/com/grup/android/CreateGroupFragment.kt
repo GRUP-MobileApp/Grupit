@@ -19,13 +19,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.navGraphViewModels
 import com.grup.android.ui.apptheme.AppTheme
 
 class CreateGroupFragment : Fragment() {
-    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

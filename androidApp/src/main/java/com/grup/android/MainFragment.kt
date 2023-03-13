@@ -1,5 +1,6 @@
 package com.grup.android
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -26,10 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import com.grup.android.login.LoginActivity
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.transaction.TransactionViewModel
@@ -39,8 +40,7 @@ import com.grup.models.*
 import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
-    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
-
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -337,6 +337,7 @@ fun GroupNavigationMenu(
                         icon = Icons.Default.ExitToApp,
                         onClick = {
                             logOutOnClick()
+                            (context as Activity).finish()
                             context.startActivity(
                                 Intent(context, LoginActivity::class.java)
                                     .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
