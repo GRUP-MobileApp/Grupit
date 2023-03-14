@@ -121,5 +121,8 @@ class MainViewModel : LoggedInViewModel() {
                                       transactionRecord: TransactionRecord) =
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
 
-    fun logOut() = viewModelScope.launch { closeApiServer() }
+    fun logOut() = viewModelScope.launch {
+        selectedGroupMutable.value = null
+        closeApiServer()
+    }
 }

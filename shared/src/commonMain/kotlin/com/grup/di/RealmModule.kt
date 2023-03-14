@@ -11,6 +11,7 @@ import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.sync.MutableSubscriptionSet
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
+import io.realm.kotlin.mongodb.sync.asQuery
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.*
 
@@ -22,7 +23,7 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
                 SettleAction::class, TransactionRecord::class
             )
         )
-        .initialSubscriptions { realm ->
+        .initialSubscriptions(rerunOnOpen = true) { realm ->
             removeAll()
             add(realm.query<User>("$idSerialName == $0", realmUser.id), "User")
             add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
@@ -31,6 +32,7 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
                 "GroupInvites"
             )
         }
+        .waitForInitialRemoteData()
         .name("user${realmUser.id}_SyncedRealm")
         .build()
     ).also { realm ->
@@ -41,22 +43,21 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
 
 @OptIn(DelicateCoroutinesApi::class)
 internal fun APIServer.startSubscriptionSyncJob(): Job = GlobalScope.launch {
-    realm.query<UserInfo>().find().asFlow().collect { resultsChange ->
-        realm.subscriptions.update {
-            val currentUserInfoGroupIds = resultsChange.list.map { it.groupId!! }
-            val currentSubscribedGroupIds = realm.subscriptions.toList().filter {
-                it.name?.endsWith("_Group") ?: false
-            }.map { it.name!!.removeSuffix("_Group") }
-            currentSubscribedGroupIds.minus(currentUserInfoGroupIds.toSet()).forEach { groupId ->
-                this.removeGroup(groupId)
-                println("removing $groupId")
+    var prevSubscribedGroupIds: Set<String> = emptySet()
+    realm.subscriptions.findByName("UserInfos")?.asQuery<UserInfo>()!!.asFlow()
+        .collect { resultsChange ->
+            val newGroupIds: Set<String> = resultsChange.list.map { it.groupId!! }.toSet()
+
+            realm.subscriptions.update {
+                prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
+                    this.removeGroup(groupId)
+                }
+                newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
+                    this.addGroup(it, groupId)
+                }
             }
-            currentUserInfoGroupIds.minus(currentSubscribedGroupIds.toSet()).forEach { groupId ->
-                println("adding $groupId")
-                this.addGroup(realm, groupId)
-            }
+            prevSubscribedGroupIds = newGroupIds
         }
-    }
 }
 
 internal fun MutableSubscriptionSet.addGroup(realm: Realm, groupId: String) {

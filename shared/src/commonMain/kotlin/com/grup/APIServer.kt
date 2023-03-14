@@ -25,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 
 class APIServer private constructor(
@@ -37,7 +38,7 @@ class APIServer private constructor(
 
     val user: User
         get() = realm.query<User>().first().find()
-            ?: runBlocking { UserController.getUserById(realmUser.id) }
+            ?: runBlocking { userController.getUserById(realmUser.id) }
             ?: throw UserObjectNotFoundException()
 
     companion object Login {
@@ -94,45 +95,52 @@ class APIServer private constructor(
         }
     }
 
+    private val userController = UserController()
+    private val groupController = GroupController()
+    private val userInfoController = UserInfoController()
+    private val groupInviteController = GroupInviteController()
+    private val debtActionController = DebtActionController()
+    private val settleActionController = SettleActionController()
+
     // User
-    suspend fun validUsername(username: String) = !UserController.usernameExists(username)
+    suspend fun validUsername(username: String) = !userController.usernameExists(username)
 
     // Group
-    fun createGroup(groupName: String) = GroupController.createGroup(user, groupName)
-    fun getAllGroupsAsFlow() = GroupController.getAllGroupsAsFlow()
+    fun createGroup(groupName: String) = groupController.createGroup(user, groupName)
+    fun getAllGroupsAsFlow() = groupController.getAllGroupsAsFlow()
 
     // UserInfo
-    fun getMyUserInfosAsFlow() = UserInfoController.getMyUserInfosAsFlow(user)
-    fun getAllUserInfosAsFlow() = UserInfoController.getAllUserInfosAsFlow()
+    fun getMyUserInfosAsFlow() = userInfoController.getMyUserInfosAsFlow(user)
+    fun getAllUserInfosAsFlow() = userInfoController.getAllUserInfosAsFlow()
 
     // GroupInvite
     suspend fun inviteUserToGroup(username: String, group: Group) =
-        GroupInviteController.createGroupInvite(user, username, group)
+        groupInviteController.createGroupInvite(user, username, group)
     fun acceptInviteToGroup(groupInvite: GroupInvite) =
-        GroupInviteController.acceptInviteToGroup(groupInvite, user)
-    fun getAllGroupInvitesAsFlow() = GroupInviteController.getAllGroupInvitesAsFlow()
+        groupInviteController.acceptInviteToGroup(groupInvite, user)
+    fun getAllGroupInvitesAsFlow() = groupInviteController.getAllGroupInvitesAsFlow()
 
     // DebtAction
     fun createDebtAction(
         transactionRecords: List<TransactionRecord>,
         debtee: UserInfo,
         message: String
-    ) = DebtActionController.createDebtAction(transactionRecords, debtee, message)
+    ) = debtActionController.createDebtAction(transactionRecords, debtee, message)
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        DebtActionController.acceptDebtAction(debtAction, myTransactionRecord)
-    fun getAllDebtActionsAsFlow() = DebtActionController.getAllDebtActionsAsFlow()
+        debtActionController.acceptDebtAction(debtAction, myTransactionRecord)
+    fun getAllDebtActionsAsFlow() = debtActionController.getAllDebtActionsAsFlow()
 
     // SettleAction
     fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
-        SettleActionController.createSettleAction(settleAmount, debtee)
+        settleActionController.createSettleAction(settleAmount, debtee)
     fun createSettleActionTransaction(
         settleAction: SettleAction,
         myTransactionRecord: TransactionRecord
-    ) = SettleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)
+    ) = settleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)
     fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
-        SettleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
-    fun getAllSettleActionsAsFlow() = SettleActionController.getAllSettleActionsAsFlow()
+        settleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
+    fun getAllSettleActionsAsFlow() = settleActionController.getAllSettleActionsAsFlow()
 
 
     object Image {

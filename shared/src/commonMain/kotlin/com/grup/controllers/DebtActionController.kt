@@ -9,7 +9,7 @@ import com.grup.service.UserInfoService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-object DebtActionController : KoinComponent {
+class DebtActionController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
     private val debtActionService: DebtActionService by inject()
 

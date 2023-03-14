@@ -5,7 +5,7 @@ import com.grup.service.UserService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-object UserController : KoinComponent {
+class UserController : KoinComponent {
     private val userService: UserService by inject()
 
     suspend fun getUserById(userId: String): User? {

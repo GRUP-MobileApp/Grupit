@@ -5,7 +5,6 @@ import io.realm.kotlin.Realm
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class SyncedDebtActionRepository
-    : RealmDebtActionRepository(), KoinComponent {
+internal class SyncedDebtActionRepository : RealmDebtActionRepository(), KoinComponent {
     override val realm: Realm by inject()
 }

@@ -66,6 +66,7 @@ class MainFragment : Fragment() {
                                     .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             )
                             requireActivity().finish()
+                            mainViewModel.logOut()
                         }
                     )
                 }
@@ -210,10 +211,7 @@ fun MainLayout(
                         closeDrawer()
                         navController.navigate(R.id.createGroup)
                     },
-                    logOutOnClick = {
-                        mainViewModel.logOut()
-                        returnToLoginOnClick()
-                    }
+                    logOutOnClick = returnToLoginOnClick
                 )
             },
             backgroundColor = AppTheme.colors.primary,

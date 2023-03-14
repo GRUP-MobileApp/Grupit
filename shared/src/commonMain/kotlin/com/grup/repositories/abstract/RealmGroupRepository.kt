@@ -18,7 +18,6 @@ internal abstract class RealmGroupRepository : IGroupRepository {
         runBlocking {
             realm.syncSession.downloadAllServerChanges()
         }
-        print(realm.subscriptions.toString())
         return realm.writeBlocking {
             copyToRealm(group)
         }
