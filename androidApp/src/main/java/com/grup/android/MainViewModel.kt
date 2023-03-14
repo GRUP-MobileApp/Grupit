@@ -1,11 +1,12 @@
 package com.grup.android
 
-import com.grup.APIServer
+import androidx.lifecycle.viewModelScope
 import com.grup.android.transaction.TransactionActivity
 import com.grup.models.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel : LoggedInViewModel() {
     companion object {
         private val selectedGroupMutable:
                 MutableStateFlow<Group?> = MutableStateFlow(null)
@@ -20,7 +21,7 @@ class MainViewModel : ViewModel() {
     }
 
     // Hot flow containing all Groups the user is in. Updates selectedGroup if it's changed/deleted
-    private val _groupsFlow = APIServer.getAllGroupsAsFlow()
+    private val _groupsFlow = apiServer.getAllGroupsAsFlow()
     val groups: StateFlow<List<Group>> = _groupsFlow.onEach { newGroups ->
         selectedGroup.value?.let { nonNullGroup ->
             selectedGroupMutable.value = newGroups.find { group ->
@@ -32,7 +33,7 @@ class MainViewModel : ViewModel() {
     }.asState()
 
     // Hot flow containing User's UserInfos
-    private val _myUserInfosFlow by lazy { APIServer.getMyUserInfosAsFlow() }
+    private val _myUserInfosFlow by lazy { apiServer.getMyUserInfosAsFlow() }
     val myUserInfo: StateFlow<UserInfo?> by lazy {
         _myUserInfosFlow.combine(selectedGroup) { userInfos, selectedGroup ->
             selectedGroup?.let { nonNullGroup ->
@@ -44,7 +45,7 @@ class MainViewModel : ViewModel() {
     }
 
     // DebtActions belonging to the selectedGroup, mapped to TransactionActivity
-    private val _debtActionsFlow = APIServer.getAllDebtActionsAsFlow()
+    private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
         .combine(selectedGroup) { debtActions, selectedGroup ->
             selectedGroup?.let { group ->
                 debtActions.filter { debtAction ->
@@ -67,7 +68,7 @@ class MainViewModel : ViewModel() {
         }
 
     // SettleActions belonging to the selectedGroup, mapped to TransactionActivity
-    private val _settleActionsFlow = APIServer.getAllSettleActionsAsFlow()
+    private val _settleActionsFlow = apiServer.getAllSettleActionsAsFlow()
         .combine(selectedGroup) { settleActions, selectedGroup ->
             selectedGroup?.let { group ->
                 settleActions.filter { settleAction ->
@@ -113,12 +114,12 @@ class MainViewModel : ViewModel() {
 
 
     // Group
-    fun createGroup(groupName: String) = APIServer.createGroup(groupName)
+    fun createGroup(groupName: String) = apiServer.createGroup(groupName)
 
     // SettleAction
     fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
-        APIServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+        apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
 
-    fun logOut() = APIServer.logOut()
+    fun logOut() = viewModelScope.launch { closeApiServer() }
 }

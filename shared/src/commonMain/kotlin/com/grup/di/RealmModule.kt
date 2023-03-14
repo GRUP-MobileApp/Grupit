@@ -1,5 +1,6 @@
 package com.grup.di
 
+import com.grup.APIServer
 import com.grup.models.*
 import com.grup.other.RealmUser
 import com.grup.other.idSerialName
@@ -10,13 +11,11 @@ import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.sync.MutableSubscriptionSet
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
+import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.*
 
-internal lateinit var realm: Realm
-private lateinit var subscriptionsJob: Job
-
 internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
-    realm = Realm.open(
+    return Realm.open(
         SyncConfiguration.Builder(realmUser,
             setOf(
                 User::class, Group::class, UserInfo::class, GroupInvite::class, DebtAction::class,
@@ -34,40 +33,33 @@ internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
         }
         .name("user${realmUser.id}_SyncedRealm")
         .build()
-    )
-    realm.subscriptions.waitForSynchronization()
-    Notifications.subscribePersonalNotifications(realmUser.id)
-    subscriptionsJob = startSubscriptionSyncJob()
-    return realm
+    ).also { realm ->
+        realm.syncSession.downloadAllServerChanges()
+        Notifications.subscribePersonalNotifications(realmUser.id)
+    }
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-internal fun startSubscriptionSyncJob(): Job = GlobalScope.launch {
-    var prevUserInfoList: List<UserInfo> = emptyList()
+internal fun APIServer.startSubscriptionSyncJob(): Job = GlobalScope.launch {
     realm.query<UserInfo>().find().asFlow().collect { resultsChange ->
         realm.subscriptions.update {
-            prevUserInfoList.minus(resultsChange.list).forEach { userInfo ->
-                this.removeGroup(userInfo.groupId!!)
+            val currentUserInfoGroupIds = resultsChange.list.map { it.groupId!! }
+            val currentSubscribedGroupIds = realm.subscriptions.toList().filter {
+                it.name?.endsWith("_Group") ?: false
+            }.map { it.name!!.removeSuffix("_Group") }
+            currentSubscribedGroupIds.minus(currentUserInfoGroupIds.toSet()).forEach { groupId ->
+                this.removeGroup(groupId)
+                println("removing $groupId")
             }
-            resultsChange.list.minus(prevUserInfoList.toSet()).forEach { userInfo ->
-                this.addGroup(userInfo.groupId!!)
+            currentUserInfoGroupIds.minus(currentSubscribedGroupIds.toSet()).forEach { groupId ->
+                println("adding $groupId")
+                this.addGroup(realm, groupId)
             }
         }
-        prevUserInfoList = resultsChange.list
     }
 }
 
-internal fun stopSubscriptionSyncJob() {
-    subscriptionsJob.cancel()
-}
-
-internal suspend fun registerUserObject(newUser: User) {
-    realm.write {
-        copyToRealm(newUser)
-    }
-}
-
-internal fun MutableSubscriptionSet.addGroup(groupId: String) {
+internal fun MutableSubscriptionSet.addGroup(realm: Realm, groupId: String) {
     add(realm.query<Group>("$idSerialName == $0", groupId), "${groupId}_Group")
     add(realm.query<UserInfo>("groupId == $0", groupId), "${groupId}_UserInfo")
     add(realm.query<DebtAction>("groupId == $0", groupId),

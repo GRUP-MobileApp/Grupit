@@ -51,8 +51,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
     implementation("com.google.android.material:material:1.8.0")
-    implementation("androidx.appcompat:appcompat:1.6.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-ktx:1.9.0")
 
     // Lifecycle
@@ -87,7 +87,7 @@ dependencies {
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")
 
-    //Accompanist
+    // Accompanist
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
 

@@ -14,6 +14,21 @@ import org.koin.core.component.inject
 
 internal class UserRepository : IUserRepository, KoinComponent {
     private val client: HttpClient by inject()
+    override suspend fun findUserById(userId: String): User? {
+        var responseUser: User? = null
+        val response: HttpResponse = client.get(
+            "${MONGODB_API_ENDPOINT}/user/findUserById"
+        ) {
+            contentType(ContentType.Application.Json)
+            url {
+                parameters.append(idSerialName, userId)
+            }
+        }
+        if (response.status.value in 200..299) {
+            responseUser = response.body()
+        }
+        return responseUser
+    }
 
     override suspend fun findUserByUsername(username: String): User? {
         var responseUser: User? = null

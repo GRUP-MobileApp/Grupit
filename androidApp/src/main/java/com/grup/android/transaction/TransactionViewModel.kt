@@ -1,15 +1,14 @@
 package com.grup.android.transaction
 
-import com.grup.APIServer
 import com.grup.android.MainViewModel
-import com.grup.android.ViewModel
+import com.grup.android.LoggedInViewModel
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
-class TransactionViewModel : ViewModel() {
+class TransactionViewModel : LoggedInViewModel() {
     companion object {
         const val DEBT = "Request"
         const val SETTLE = "Settle"
@@ -21,7 +20,7 @@ class TransactionViewModel : ViewModel() {
 
     // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
     // change during lifecycle.
-    private val _userInfosFlow = APIServer.getAllUserInfosAsFlow()
+    private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
         .map { userInfos ->
             userInfos.filter { userInfo ->
                 userInfo.groupId == selectedGroup.getId()
@@ -55,7 +54,7 @@ class TransactionViewModel : ViewModel() {
     fun createDebtAction(userInfos: List<UserInfo>,
                          debtAmounts: List<Double>,
                          message: String) =
-        APIServer.createDebtAction(
+        apiServer.createDebtAction(
             userInfos.zip(debtAmounts).map { (userInfo, balanceChange) ->
                 TransactionRecord().apply {
                     this.debtorUserInfo = userInfo
@@ -68,13 +67,13 @@ class TransactionViewModel : ViewModel() {
 
     // SettleAction
     fun createSettleAction(settleAmount: Double) =
-        APIServer.createSettleAction(settleAmount, myUserInfo.value)
+        apiServer.createSettleAction(settleAmount, myUserInfo.value)
 
     fun createSettleActionTransaction(
         settleAction: SettleAction,
         amount: Double,
         myUserInfo: UserInfo
-    ) = APIServer.createSettleActionTransaction(
+    ) = apiServer.createSettleActionTransaction(
             settleAction,
             TransactionRecord().apply {
                 this.balanceChange = amount
@@ -83,7 +82,7 @@ class TransactionViewModel : ViewModel() {
         )
 
     fun getSettleAction(settleActionId: String) =
-        APIServer.getAllSettleActionsAsFlow().map { settleActions ->
+        apiServer.getAllSettleActionsAsFlow().map { settleActions ->
             settleActions.find { settleActionId == it.getId() }!!
         }.asState()
 }

@@ -1,6 +1,5 @@
 package com.grup.android
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -525,7 +524,6 @@ fun GroupBalanceCard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ActiveSettleActions(
     modifier: Modifier = Modifier,

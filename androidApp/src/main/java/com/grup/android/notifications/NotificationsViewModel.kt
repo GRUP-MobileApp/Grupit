@@ -1,17 +1,16 @@
 package com.grup.android.notifications
 
-import com.grup.APIServer
-import com.grup.android.ViewModel
+import com.grup.android.LoggedInViewModel
 import com.grup.models.DebtAction
 import com.grup.models.GroupInvite
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import kotlinx.coroutines.flow.*
 
-class NotificationsViewModel : ViewModel() {
+class NotificationsViewModel : LoggedInViewModel() {
     // TODO: Remove notifications after joinDate
     // Hot flow containing all subscribed GroupInvites
-    private val _groupInvitesFlow = APIServer.getAllGroupInvitesAsFlow()
+    private val _groupInvitesFlow = apiServer.getAllGroupInvitesAsFlow()
     private val incomingGroupInvitesAsNotification: Flow<List<Notification>> =
         _groupInvitesFlow.map { groupInvites ->
             groupInvites.filter { groupInvite ->
@@ -32,7 +31,7 @@ class NotificationsViewModel : ViewModel() {
         }
 
     // Hot flow containing all DebtActions across all groups that the user is a part of
-    private val _debtActionsFlow = APIServer.getAllDebtActionsAsFlow()
+    private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
     private val incomingDebtActionsAsNotification: Flow<List<Notification>> =
         _debtActionsFlow.map { debtActions ->
             debtActions.mapNotNull { debtAction ->
@@ -58,7 +57,7 @@ class NotificationsViewModel : ViewModel() {
         }
 
     // Hot flow containing all Settle across all groups that the user is a part of
-    private val _settleActionsFlow = APIServer.getAllSettleActionsAsFlow()
+    private val _settleActionsFlow = apiServer.getAllSettleActionsAsFlow()
     private val newSettleActionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.mapNotNull { settleAction ->
@@ -109,16 +108,16 @@ class NotificationsViewModel : ViewModel() {
         }.asNotification()
 
     // Group Invite
-    fun acceptInviteToGroup(groupInvite: GroupInvite) = APIServer.acceptInviteToGroup(groupInvite)
+    fun acceptInviteToGroup(groupInvite: GroupInvite) = apiServer.acceptInviteToGroup(groupInvite)
 
     // DebtAction
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        APIServer.acceptDebtAction(debtAction, myTransactionRecord)
+        apiServer.acceptDebtAction(debtAction, myTransactionRecord)
 
     // SettleAction
     fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
-        APIServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+        apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
 
     private fun <T: Iterable<Notification>> T.afterDate(date: String) =
         this.filter { it.date > date }

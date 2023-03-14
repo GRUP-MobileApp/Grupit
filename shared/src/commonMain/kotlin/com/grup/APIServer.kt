@@ -2,43 +2,100 @@ package com.grup
 
 import com.grup.aws.Images
 import com.grup.controllers.*
+import com.grup.di.*
 import com.grup.di.httpClientModule
 import com.grup.di.openSyncedRealm
-import com.grup.di.realm
-import com.grup.di.registerUserObject
 import com.grup.di.repositoriesModule
 import com.grup.di.servicesModule
-import com.grup.di.stopSubscriptionSyncJob
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
+import com.grup.models.User
 import com.grup.other.RealmUser
 import com.grup.repositories.APP_ID
+import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.mongodb.App
-import io.realm.kotlin.mongodb.Credentials
-import io.realm.kotlin.mongodb.GoogleAuthType
+import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
-object APIServer {
-    private val app: App = App.create(APP_ID)
-
+class APIServer private constructor(
+    internal val realm: Realm
+) {
     private val realmUser: RealmUser
         get() = app.currentUser ?: throw NotLoggedInException()
 
+    private val subscriptionsJob: Job = startSubscriptionSyncJob()
+
     val user: User
-        get() = realm.query<User>().first().find() ?: throw UserObjectNotFoundException()
+        get() = realm.query<User>().first().find()
+            ?: runBlocking { UserController.getUserById(realmUser.id) }
+            ?: throw UserObjectNotFoundException()
+
+    companion object Login {
+        private val app: App = App.create(APP_ID)
+
+        private suspend fun initializeAPIServer(credentials: Credentials): APIServer {
+            app.login(credentials)
+
+            val realm = openSyncedRealm(app.currentUser!!)
+            startKoin {
+                modules(listOf(
+                    module {
+                        single { realm }
+                    },
+                    servicesModule,
+                    repositoriesModule,
+                    httpClientModule
+                ))
+            }
+            return APIServer(realm)
+        }
+
+        suspend fun loginEmailAndPassword(email: String, password: String): APIServer {
+            try {
+                return initializeAPIServer(Credentials.emailPassword(email, password))
+            } catch (e: InvalidCredentialsException) {
+                throw InvalidEmailPasswordException()
+            } catch (e: IllegalArgumentException) {
+                throw InvalidEmailPasswordException(e.message)
+            }
+        }
+
+        suspend fun registerEmailAndPassword(email: String, password: String): APIServer {
+            try {
+                app.emailPasswordAuth.registerUser(email, password)
+            } catch (e: UserAlreadyExistsException) {
+                throw EntityAlreadyExistsException("Email already exists")
+            } catch (e: IllegalArgumentException) {
+                throw InvalidEmailPasswordException(e.message)
+            } catch (e: BadRequestException) {
+                // TODO: Bad email/bad password exception
+            }
+            return loginEmailAndPassword(email, password)
+        }
+
+        suspend fun loginGoogleAccountToken(googleAccountToken: String): APIServer {
+            try {
+                return initializeAPIServer(
+                    Credentials.google(googleAccountToken, GoogleAuthType.ID_TOKEN)
+                )
+            } catch (e: Exception) {
+                throw Exception()
+            }
+        }
+    }
 
     // User
-    suspend fun usernameExists(username: String) = UserController.usernameExists(username)
+    suspend fun validUsername(username: String) = !UserController.usernameExists(username)
 
     // Group
     fun createGroup(groupName: String) = GroupController.createGroup(user, groupName)
@@ -77,43 +134,6 @@ object APIServer {
         SettleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = SettleActionController.getAllSettleActionsAsFlow()
 
-    object Login {
-        private suspend fun login(credentials: Credentials) {
-            app.login(credentials)
-            initKoin()
-        }
-
-        suspend fun loginEmailAndPassword(email: String, password: String) {
-            try {
-                login(Credentials.emailPassword(email, password))
-            } catch (e: InvalidCredentialsException) {
-                throw InvalidEmailPasswordException()
-            } catch (e: IllegalArgumentException) {
-                throw InvalidEmailPasswordException(e.message)
-            }
-        }
-
-        suspend fun registerEmailAndPassword(email: String, password: String) {
-            try {
-                app.emailPasswordAuth.registerUser(email, password)
-            } catch (e: UserAlreadyExistsException) {
-                throw EntityAlreadyExistsException("Email already exists")
-            } catch (e: IllegalArgumentException) {
-                throw InvalidEmailPasswordException(e.message)
-            } catch (e: BadRequestException) {
-                // TODO: Bad email/bad password exception
-            }
-            loginEmailAndPassword(email, password)
-        }
-
-        suspend fun loginGoogleAccountToken(googleAccountToken: String) {
-            try {
-                login(Credentials.google(googleAccountToken, GoogleAuthType.ID_TOKEN))
-            } catch (e: Exception) {
-                // TODO: Handle Google login exception
-            }
-        }
-    }
 
     object Image {
         fun getProfilePictureURI(userId: String) = Images.getProfilePictureURI(userId)
@@ -124,34 +144,23 @@ object APIServer {
         displayName: String,
         profilePicture: ByteArray
     ) {
-        registerUserObject(
-            User(realmUser.id).apply {
-                this.username = username
-                this.displayName = displayName
-            }
-        )
+        realm.write {
+            copyToRealm(
+                User(realmUser.id).apply {
+                    this.username = username
+                    this.displayName = displayName
+                }
+            )
+        }
         Images.uploadProfilePicture(user, profilePicture)
     }
 
-    fun logOut() {
-        stopSubscriptionSyncJob()
+    suspend fun logOut() {
+        subscriptionsJob.cancel()
         stopKoin()
-        runBlocking {
-            realmUser.logOut()
+        realm.subscriptions.update {
+            removeAll()
         }
-    }
-
-    private suspend fun initKoin() {
-        val realm = openSyncedRealm(realmUser)
-        startKoin {
-            modules(listOf(
-                module {
-                    single { realm }
-                },
-                servicesModule,
-                repositoriesModule,
-                httpClientModule
-            ))
-        }
+        realmUser.logOut()
     }
 }

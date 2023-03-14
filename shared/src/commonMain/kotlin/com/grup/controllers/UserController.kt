@@ -8,6 +8,10 @@ import org.koin.core.component.inject
 object UserController : KoinComponent {
     private val userService: UserService by inject()
 
+    suspend fun getUserById(userId: String): User? {
+        return userService.getUserById(userId)
+    }
+
     private suspend fun getUserByUsername(username: String): User? {
         return userService.getUserByUsername(username)
     }

@@ -10,7 +10,8 @@
         android:allowBackup="true"
         android:label="GRUP"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".MainApplication">
 
 
         <activity

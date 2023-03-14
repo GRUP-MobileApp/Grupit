@@ -2,18 +2,30 @@ package com.grup.android
 
 import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
-import com.grup.models.Group
 import com.grup.models.User
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 
-abstract class ViewModel : androidx.lifecycle.ViewModel() {
+abstract class LoggedInViewModel : androidx.lifecycle.ViewModel() {
     companion object {
         private const val STOP_TIMEOUT_MILLIS: Long = 5000
+        private var loggedInApiServer: APIServer? = null
+
+        fun injectApiServer(apiServer: APIServer) {
+            loggedInApiServer = apiServer
+        }
     }
 
+    protected val apiServer: APIServer
+        get() = loggedInApiServer!!
+
     protected val userObject: User
-        get() = APIServer.user
+        get() = apiServer.user
+
+    protected suspend fun closeApiServer() {
+        apiServer.logOut()
+        loggedInApiServer = null
+    }
 
     protected fun <T> Flow<T>.asState() =
         this.let { flow ->

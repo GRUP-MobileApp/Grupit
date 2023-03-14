@@ -9,6 +9,8 @@ import org.koin.core.component.inject
 internal class UserService : KoinComponent {
     private val userRepository: IUserRepository by inject()
 
+    suspend fun getUserById(userId: String) = userRepository.findUserById(userId)
+
     suspend fun getUserByUsername(username: String): User? {
         if (username.isBlank()) {
             throw EmptyArgumentException("Please enter a username")

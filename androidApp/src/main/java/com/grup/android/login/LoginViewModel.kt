@@ -3,6 +3,7 @@ package com.grup.android.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grup.APIServer
+import com.grup.android.LoggedInViewModel
 import com.grup.exceptions.login.LoginException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,9 @@ class LoginViewModel : ViewModel() {
     fun loginEmailPassword(email: String, password: String) = viewModelScope.launch {
         _loginResult.value = LoginResult.PendingLogin
         try {
-            APIServer.Login.loginEmailAndPassword(email, password)
+            LoggedInViewModel.injectApiServer(
+                APIServer.Login.loginEmailAndPassword(email, password)
+            )
             _loginResult.value = LoginResult.Success
         } catch (e: LoginException) {
             _loginResult.value = LoginResult.Error(e)
@@ -33,7 +36,9 @@ class LoginViewModel : ViewModel() {
     fun registerEmailPassword(email: String, password: String) = viewModelScope.launch {
         _loginResult.value = LoginResult.PendingRegister
         try {
-            APIServer.Login.registerEmailAndPassword(email, password)
+            LoggedInViewModel.injectApiServer(
+                APIServer.Login.registerEmailAndPassword(email, password)
+            )
             _loginResult.value = LoginResult.Success
         } catch (e: LoginException) {
             _loginResult.value = LoginResult.Error(e)
@@ -43,7 +48,9 @@ class LoginViewModel : ViewModel() {
     fun loginGoogleAccountToken(googleAccountToken: String) = viewModelScope.launch {
         _loginResult.value = LoginResult.PendingLogin
         try {
-            APIServer.Login.loginGoogleAccountToken(googleAccountToken)
+            LoggedInViewModel.injectApiServer(
+                APIServer.Login.loginGoogleAccountToken(googleAccountToken)
+            )
             _loginResult.value = LoginResult.Success
         } catch (e: LoginException) {
             _loginResult.value = LoginResult.Error(e)

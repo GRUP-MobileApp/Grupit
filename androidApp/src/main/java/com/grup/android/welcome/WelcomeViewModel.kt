@@ -1,18 +1,14 @@
 package com.grup.android.welcome
 
-import android.graphics.Bitmap
-import android.graphics.Picture
 import androidx.lifecycle.viewModelScope
-import com.grup.APIServer
-import com.grup.android.ViewModel
+import com.grup.android.LoggedInViewModel
 import com.grup.exceptions.login.UserObjectNotFoundException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 
-class WelcomeViewModel : ViewModel() {
+class WelcomeViewModel : LoggedInViewModel() {
     val hasUserObject: Boolean
         get() = try {
             userObject
@@ -40,7 +36,7 @@ class WelcomeViewModel : ViewModel() {
         } else {
             _usernameValidity.value = UsernameValidity.Pending
             currentJob = viewModelScope.launch {
-                if (!APIServer.usernameExists(username)) {
+                if (apiServer.validUsername(username)) {
                     _usernameValidity.value = UsernameValidity.Valid
                 } else {
                     _usernameValidity.value = UsernameValidity.Invalid
@@ -54,7 +50,7 @@ class WelcomeViewModel : ViewModel() {
         displayName: String,
         profilePicture: ByteArray
     ) = viewModelScope.launch {
-        APIServer.registerUser(
+        apiServer.registerUser(
             username,
             displayName,
             profilePicture
