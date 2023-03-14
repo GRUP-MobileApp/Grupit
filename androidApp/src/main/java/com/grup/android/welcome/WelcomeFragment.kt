@@ -25,10 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
@@ -41,7 +41,7 @@ import com.grup.android.ui.apptheme.AppTheme
 import kotlinx.coroutines.launch
 
 class WelcomeFragment : Fragment() {
-    private val welcomeViewModel: WelcomeViewModel by viewModels()
+    private val welcomeViewModel: WelcomeViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

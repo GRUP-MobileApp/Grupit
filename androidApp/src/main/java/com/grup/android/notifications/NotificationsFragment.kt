@@ -25,10 +25,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.navGraphViewModels
+import com.grup.android.R
 import com.grup.android.ui.IconRowCard
 import com.grup.android.ui.SmallIcon
 import com.grup.android.ui.apptheme.AppTheme
@@ -36,7 +37,7 @@ import com.grup.android.ui.H1Text
 
 class NotificationsFragment : Fragment() {
     private val notificationsViewModel:
-            NotificationsViewModel by viewModels()
+            NotificationsViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,

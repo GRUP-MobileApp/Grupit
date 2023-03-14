@@ -27,10 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import com.grup.android.login.LoginActivity
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.transaction.TransactionViewModel
@@ -40,7 +40,7 @@ import com.grup.models.*
 import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,7 +60,14 @@ class MainFragment : Fragment() {
                 ) {
                     MainLayout(
                         mainViewModel = mainViewModel,
-                        navController = findNavController()
+                        navController = findNavController(),
+                        returnToLoginOnClick = {
+                            startActivity(
+                                Intent(activity, LoginActivity::class.java)
+                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            )
+                            requireActivity().finish()
+                        }
                     )
                 }
             }
@@ -74,7 +81,8 @@ class MainFragment : Fragment() {
 @Composable
 fun MainLayout(
     mainViewModel: MainViewModel,
-    navController: NavController
+    navController: NavController,
+    returnToLoginOnClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -203,7 +211,10 @@ fun MainLayout(
                         closeDrawer()
                         navController.navigate(R.id.createGroup)
                     },
-                    logOutOnClick = { mainViewModel.logOut() }
+                    logOutOnClick = {
+                        mainViewModel.logOut()
+                        returnToLoginOnClick()
+                    }
                 )
             },
             backgroundColor = AppTheme.colors.primary,
@@ -335,14 +346,7 @@ fun GroupNavigationMenu(
                         title = "Sign Out",
                         contentDescription = "Log out",
                         icon = Icons.Default.ExitToApp,
-                        onClick = {
-                            logOutOnClick()
-                            (context as Activity).finish()
-                            context.startActivity(
-                                Intent(context, LoginActivity::class.java)
-                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            )
-                        }
+                        onClick = logOutOnClick
                     ),
                 )
             )

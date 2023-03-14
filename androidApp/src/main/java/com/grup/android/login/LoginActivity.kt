@@ -60,7 +60,11 @@ class LoginActivity : AppCompatActivity() {
             AppTheme {
                 LoginPage(
                     loginViewModel = loginViewModel,
-                    googleSignInClient = googleSignInClient
+                    googleSignInClient = googleSignInClient,
+                    loginOnClick = {
+                        startActivity(Intent(applicationContext, MainActivity::class.java))
+                        finish()
+                    }
                 )
             }
         }
@@ -70,7 +74,8 @@ class LoginActivity : AppCompatActivity() {
 @Composable
 fun LoginPage(
     loginViewModel: LoginViewModel,
-    googleSignInClient: GoogleSignInClient
+    googleSignInClient: GoogleSignInClient,
+    loginOnClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -93,7 +98,7 @@ fun LoginPage(
             LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
 
     if (loginResult is LoginViewModel.LoginResult.Success) {
-        context.startActivity(Intent(context, MainActivity::class.java))
+        loginOnClick()
     }
 
     Box(modifier = Modifier
