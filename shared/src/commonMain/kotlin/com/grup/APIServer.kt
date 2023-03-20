@@ -1,6 +1,5 @@
 package com.grup
 
-import com.grup.aws.Images
 import com.grup.controllers.*
 import com.grup.di.*
 import com.grup.di.openSyncedRealm
@@ -12,15 +11,14 @@ import com.grup.models.*
 import com.grup.models.User
 import com.grup.other.RealmUser
 import com.grup.other.APP_ID
+import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import com.grup.service.Notifications
 import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
@@ -33,17 +31,11 @@ class APIServer private constructor(
 
     private val subscriptionsJob: Job = startSubscriptionSyncJob()
 
-    val user: User
-        get() = realm.query<User>().first().find()
-            ?: runBlocking { userController.getUserById(realmUser.id) }
-            ?: throw UserObjectNotFoundException()
-
     companion object Login {
-        private val app: App = App.create(APP_ID)
+        internal val app: App = App.create(APP_ID)
 
         private suspend fun initializeAPIServer(credentials: Credentials): APIServer {
             app.login(credentials)
-
             val realm = openSyncedRealm(app.currentUser!!)
             loadKoinModules(
                 module {
@@ -96,6 +88,14 @@ class APIServer private constructor(
     private val settleActionController = SettleActionController()
 
     // User
+    val user: User
+        get() = userController.getMyUser()
+            ?: throw UserObjectNotFoundException()
+    suspend fun registerUser(
+        username: String,
+        displayName: String,
+        profilePicture: ByteArray
+    ) = userController.createUser(username, displayName, profilePicture)
     suspend fun validUsername(username: String) = !userController.usernameExists(username)
 
     // Group
@@ -135,25 +135,8 @@ class APIServer private constructor(
         settleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = settleActionController.getAllSettleActionsAsFlow()
 
-
-    object Image {
-        fun getProfilePictureURI(userId: String) = Images.getProfilePictureURI(userId)
-    }
-
-    suspend fun registerUser(
-        username: String,
-        displayName: String,
-        profilePicture: ByteArray
-    ) {
-        realm.write {
-            copyToRealm(
-                User(realmUser.id).apply {
-                    this.username = username
-                    this.displayName = displayName
-                }
-            )
-        }
-        Images.uploadProfilePicture(user, profilePicture)
+    object Images {
+        fun getProfilePictureURI(userId: String) = "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
     }
 
     suspend fun logOut() {
@@ -167,7 +150,7 @@ class APIServer private constructor(
         realm.subscriptions.update {
             removeAll()
         }
-        Notifications.onLogout()
+        Notifications.unsubscribeAllNotifications()
         realmUser.logOut()
     }
 }

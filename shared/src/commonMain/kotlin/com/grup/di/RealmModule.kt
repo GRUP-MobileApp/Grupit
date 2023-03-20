@@ -2,6 +2,7 @@ package com.grup.di
 
 import com.grup.APIServer
 import com.grup.models.*
+import com.grup.other.APP_ID
 import com.grup.other.RealmUser
 import com.grup.other.idSerialName
 import com.grup.service.Notifications
@@ -9,11 +10,14 @@ import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.MutableSubscriptionSet
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.mongodb.sync.asQuery
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.*
+
+internal val app: App = App.create(APP_ID)
 
 internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
     return Realm.open(

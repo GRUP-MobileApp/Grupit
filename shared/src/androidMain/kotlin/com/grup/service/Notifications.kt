@@ -15,7 +15,7 @@ internal actual object Notifications {
         FirebaseMessaging.getInstance().subscribeToTopic("user_$userId")
     }
 
-    actual fun onLogout() {
+    actual fun unsubscribeAllNotifications() {
         FirebaseMessaging.getInstance().deleteToken()
     }
 }

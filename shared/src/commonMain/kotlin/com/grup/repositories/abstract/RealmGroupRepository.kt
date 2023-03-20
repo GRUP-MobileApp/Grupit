@@ -33,7 +33,7 @@ internal abstract class RealmGroupRepository : IGroupRepository {
 
     override fun updateGroup(group: Group, block: Group.() -> Unit): Group? {
         return realm.writeBlocking {
-            findLatest(group)?.apply(block)
+            findLatest(group)!!.apply(block)
         }
     }
 }

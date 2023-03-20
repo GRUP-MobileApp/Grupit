@@ -1,5 +1,6 @@
 package com.grup.android
 
+import GOOGLE_WEB_CLIENT_ID
 import android.app.Application
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -25,7 +26,7 @@ class MainApplication : Application() {
                         this@MainApplication,
                         GoogleSignInOptions
                             .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(System.getenv("GOOGLE_WEB_CLIENT_ID")!!)
+                            .requestIdToken(GOOGLE_WEB_CLIENT_ID)
                             .build()
                         )
                     }

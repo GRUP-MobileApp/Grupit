@@ -9,10 +9,12 @@ import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class UserRepository : IUserRepository, KoinComponent {
+internal abstract class UserRepository : IUserRepository, KoinComponent {
     private val client: HttpClient by inject()
     override suspend fun findUserById(userId: String): User? {
         var responseUser: User? = null
@@ -25,7 +27,11 @@ internal class UserRepository : IUserRepository, KoinComponent {
             }
         }
         if (response.status.value in 200..299) {
-            responseUser = response.body()
+            responseUser = try {
+                Json.decodeFromString(response.bodyAsText())
+            } catch (e: Exception) {
+                null
+            }
         }
         return responseUser
     }

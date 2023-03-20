@@ -6,5 +6,5 @@ internal expect object Notifications {
 
     fun subscribePersonalNotifications(userId: String)
 
-    fun onLogout()
+    fun unsubscribeAllNotifications()
 }

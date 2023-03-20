@@ -1,11 +1,13 @@
 package com.grup.di
 
+import TestUserRepository
 import com.grup.interfaces.*
 import com.grup.interfaces.IGroupRepository
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.interfaces.IUserRepository
 import com.grup.repositories.*
+import com.grup.repositories.SyncedUserRepository
 import com.grup.service.*
 import com.grup.service.GroupService
 import com.grup.service.DebtActionService
@@ -16,7 +18,6 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import org.koin.core.module.Module
 import org.koin.dsl.module
 
 internal val servicesModule = module {
@@ -29,16 +30,18 @@ internal val servicesModule = module {
 }
 
 internal val repositoriesModule = module {
-    single<IUserRepository> { UserRepository() }
+    single<IUserRepository> { SyncedUserRepository() }
     single<IGroupRepository> { SyncedGroupRepository() }
     single<IUserInfoRepository> { SyncedUserInfoRepository() }
     single<IGroupInviteRepository> { SyncedGroupInviteRepository() }
     single<IDebtActionRepository> { SyncedDebtActionRepository() }
     single<ISettleActionRepository> { SyncedSettleActionRepository() }
+
+    single<IImagesRepository> { AWSImagesRepository() }
 }
 
 internal val testRepositoriesModule = module {
-    single<IUserRepository> { UserRepository() }
+    single<IUserRepository> { TestUserRepository() }
     single<IGroupRepository> { TestGroupRepository() }
     single<IUserInfoRepository> { TestUserInfoRepository() }
     single<IGroupInviteRepository> { TestGroupInviteRepository() }
