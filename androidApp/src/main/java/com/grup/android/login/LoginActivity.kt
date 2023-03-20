@@ -18,7 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -31,30 +30,27 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
 import com.grup.android.R
+import com.grup.android.ui.H1Text
 import com.grup.android.ui.apptheme.AppTheme
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : KoinComponent, AppCompatActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
+    private val googleSignInClient: GoogleSignInClient by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
-        // Set up Google Sign-In options
-        val gso = GoogleSignInOptions
-            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(WEB_CLIENT_ID)
-            .build()
-        val googleSignInClient = GoogleSignIn.getClient(this, gso)
+        googleSignInClient.silentSignIn().addOnCompleteListener { task ->
+            loginViewModel.loginGoogleAccount(task)
+        }
 
         setContent {
             AppTheme {
@@ -77,21 +73,15 @@ fun LoginPage(
     googleSignInClient: GoogleSignInClient,
     loginOnClick: () -> Unit
 ) {
-    val context = LocalContext.current
-
     var email: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     val googleSignInLauncher =
         rememberLauncherForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
-            val task: Task<GoogleSignInAccount> =
+            loginViewModel.loginGoogleAccount(
                 GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            if (task.isSuccessful) {
-                val account: GoogleSignInAccount? = task.getResult(ApiException::class.java)
-                val token: String = account?.idToken!!
-                loginViewModel.loginGoogleAccountToken(token)
-            }
+            )
         }
 
     val loginResult:
@@ -100,6 +90,12 @@ fun LoginPage(
     if (loginResult is LoginViewModel.LoginResult.Success) {
         loginOnClick()
     }
+
+    val pendingLogin: Boolean =
+        loginResult is LoginViewModel.LoginResult.PendingLogin ||
+        loginResult is LoginViewModel.LoginResult.PendingRegister ||
+        loginResult is LoginViewModel.LoginResult.PendingGoogleLogin
+
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -125,16 +121,18 @@ fun LoginPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
+        H1Text(
             text = "Login",
-            style = TextStyle(fontSize = 40.sp, fontFamily = FontFamily.Monospace),
+            fontSize = 40.sp,
             color = AppTheme.colors.onSecondary
         )
 
         Spacer(modifier = Modifier.height(50.dp))
 
         TextField(
-            label = { Text(text = "Username", color = AppTheme.colors.onSecondary) },
+            label = {
+                H1Text(text = "Username", color = AppTheme.colors.onSecondary, fontSize = 20.sp)
+            },
             modifier = Modifier.background(AppTheme.colors.secondary),
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
             value = email,
@@ -145,7 +143,9 @@ fun LoginPage(
         Spacer(modifier = Modifier.height(20.dp))
 
         TextField(
-            label = { Text(text = "Password", color = AppTheme.colors.onSecondary) },
+            label = {
+                H1Text(text = "Password", color = AppTheme.colors.onSecondary, fontSize = 20.sp)
+            },
             modifier = Modifier.background(AppTheme.colors.secondary),
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
             value = password,
@@ -180,21 +180,26 @@ fun LoginPage(
                     .padding(top = 20.dp, bottom = 40.dp)
             ) {
                 Button(
-                    onClick = { loginViewModel.registerEmailPassword(email.text, password.text) },
-                    shape = AppTheme.shapes.CircleShape,
+                    onClick = {
+                        if (!pendingLogin) {
+                            loginViewModel.registerEmailPassword(email.text, password.text)
+                        }
+                    },
+                    shape = AppTheme.shapes.circleShape,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = AppTheme.colors.secondary
                     ),
                     modifier = Modifier
-                        .width(120.dp)
+                        .width(130.dp)
                         .height(50.dp)
                 ) {
                     if (loginResult is LoginViewModel.LoginResult.PendingRegister) {
                         LoadingSpinner()
                     } else {
-                        Text(
+                        H1Text(
                             text = "Sign Up",
-                            color = AppTheme.colors.onSecondary
+                            color = AppTheme.colors.onSecondary,
+                            fontSize = 18.sp
                         )
                     }
                 }
@@ -202,53 +207,61 @@ fun LoginPage(
                 Spacer(modifier = Modifier.width(20.dp))
 
                 Button(
-                    onClick = { loginViewModel.loginEmailPassword(email.text, password.text) },
-                    shape = AppTheme.shapes.CircleShape,
+                    onClick = {
+                        if (!pendingLogin) {
+                            loginViewModel.loginEmailPassword(email.text, password.text)
+                        }
+                    },
+                    shape = AppTheme.shapes.circleShape,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = AppTheme.colors.confirm
                     ),
                     modifier = Modifier
-                        .width(120.dp)
+                        .width(130.dp)
                         .height(50.dp)
                 ) {
                     if (loginResult is LoginViewModel.LoginResult.PendingLogin) {
                         LoadingSpinner()
                     } else {
-                        Text(
+                        H1Text(
                             text = "Login",
-                            color = AppTheme.colors.onSecondary
+                            color = AppTheme.colors.onSecondary,
+                            fontSize = 18.sp
                         )
                     }
                 }
             }
         }
-        GoogleSignInButton(
-            onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) }
-        )
+        Button(
+            onClick = {
+                if (!pendingLogin) {
+                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                }
+            },
+            shape = RoundedCornerShape(6.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color(0xFF4285F4),
+                contentColor = Color.White
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp),
+        ) {
+            if (loginResult is LoginViewModel.LoginResult.PendingGoogleLogin) {
+                LoadingSpinner()
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo_google),
+                    contentDescription = ""
+                )
+                H1Text(
+                    text = "Sign in with Google",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(6.dp)
+                )
+            }
+        }
         crashButton()
-    }
-}
-
-@Composable
-fun GoogleSignInButton(
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp),
-        shape = RoundedCornerShape(6.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFF4285F4),
-            contentColor = Color.White
-        )
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_logo_google),
-            contentDescription = ""
-        )
-        Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
     }
 }
 

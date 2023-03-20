@@ -1,10 +1,11 @@
+val koinVersion: String by project
 val realmVersion: String by project
 val kotlinVersion: String by project
 val composeVersion: String by project
 val lifecycleVersion: String by project
 val navigationVersion: String by project
-val accompanistVersion: String by project
 val coilComposeVersion: String by project
+val accompanistVersion: String by project
 
 plugins {
     id("com.android.application")
@@ -57,11 +58,15 @@ dependencies {
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.0-rc01")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
     // Datastore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // Koin
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Animation
     implementation("androidx.compose.animation:animation:1.3.3")

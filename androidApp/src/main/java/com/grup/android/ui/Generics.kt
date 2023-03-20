@@ -11,20 +11,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +31,6 @@ import androidx.compose.ui.unit.*
 import coil.ImageLoader
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
@@ -54,7 +51,8 @@ fun H1Text(
     text: String,
     color: Color = AppTheme.colors.onSecondary,
     fontSize: TextUnit = TextUnit.Unspecified,
-    fontWeight: FontWeight? = null
+    fontWeight: FontWeight? = null,
+    maxLines: Int = Int.MAX_VALUE,
 ) {
     Text(
         text = text,
@@ -62,6 +60,7 @@ fun H1Text(
         style = AppTheme.typography.h1,
         fontSize = fontSize,
         fontWeight = fontWeight,
+        maxLines = maxLines,
         modifier = modifier
     )
 }
@@ -141,14 +140,19 @@ fun H1ConfirmTextButton(
     width: Dp = 150.dp,
     height: Dp = 45.dp,
     fontSize: TextUnit = 20.sp,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     TextButton(
-        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = AppTheme.colors.confirm,
+            disabledBackgroundColor = AppTheme.colors.caption
+        ),
         modifier = modifier
             .width(width.times(scale))
             .height(height.times(scale)),
-        shape = AppTheme.shapes.CircleShape,
+        shape = AppTheme.shapes.circleShape,
+        enabled = enabled,
         onClick = onClick
     ) {
         H1Text(
@@ -171,8 +175,8 @@ fun ProfileIcon(
         imageVector = imageVector,
         contentDescription = contentDescription,
         modifier = modifier
+            .clip(AppTheme.shapes.circleShape)
             .size(iconSize)
-            .clip(AppTheme.shapes.CircleShape)
     )
 }
 
@@ -186,37 +190,45 @@ fun ProfileIcon(
     Image(
         painter = painter,
         contentDescription = contentDescription,
+        contentScale = ContentScale.Crop,
         modifier = modifier
+            .clip(AppTheme.shapes.circleShape)
             .size(iconSize)
-            .clip(AppTheme.shapes.CircleShape)
     )
 }
 
 @Composable
-fun SmallIconButton(
-    imageVector: ImageVector,
-    contentDescription: String,
-    modifier: Modifier = Modifier
+fun SimpleLazyListPage(
+    pageName: String,
+    onBackPress: () -> Unit,
+    content: LazyListScope.() -> Unit
 ) {
-    IconButton(onClick = {  },
-        modifier = Modifier
-            .size(AppTheme.dimensions.borderIconSize)
-            .shadow(
-                elevation = AppTheme.dimensions.shadowElevationSize,
-                shape = AppTheme.shapes.CircleShape,
-                clip = false
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { H1Text(text = pageName, color = AppTheme.colors.onSecondary) },
+                backgroundColor = AppTheme.colors.primary,
+                navigationIcon = {
+                    IconButton(onClick = onBackPress) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            Modifier.background(AppTheme.colors.primary)
+                        )
+                    }
+                }
             )
-            .clip(AppTheme.shapes.CircleShape)
-            .background(color = AppTheme.colors.caption)
-            .border(
-                border = BorderStroke(1.dp, AppTheme.colors.secondary),
-                shape = AppTheme.shapes.CircleShape
-            )
-    ) {
-        SmallIcon(
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            modifier = modifier.clip(AppTheme.shapes.CircleShape)
+        },
+        backgroundColor = AppTheme.colors.primary
+    ) { padding ->
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            content = content
         )
     }
 }
@@ -233,7 +245,6 @@ fun IconRowCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
             .height(IntrinsicSize.Min)
-            .fillMaxWidth()
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -246,11 +257,51 @@ fun IconRowCard(
             mainContent()
         }
         if (sideContent != null) {
-            Row(modifier = Modifier.padding(horizontal = AppTheme.dimensions.paddingSmall)) {
+            Row(
+                modifier = Modifier.padding(
+                    start = AppTheme.dimensions.spacingMedium,
+                    end = AppTheme.dimensions.paddingSmall
+                )
+            ) {
                 sideContent()
             }
         }
     }
+}
+
+@Composable
+fun profilePictureImagePainter(
+    userId: String
+): AsyncImagePainter {
+    val context = LocalContext.current
+    val imageLoader: ImageLoader = ImageLoader.Builder(context)
+        .respectCacheHeaders(false)
+        .memoryCache {
+            MemoryCache
+                .Builder(context)
+                .build()
+        }
+        .diskCache {
+            DiskCache.Builder()
+                .directory(context.cacheDir.resolve("image_cache"))
+                .build()
+        }
+        .build()
+    val profilePictureURI = getProfilePictureURI(userId)
+    val imageRequest: ImageRequest =
+        ImageRequest.Builder(context)
+            .data(profilePictureURI)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .allowHardware(true)
+            .diskCacheKey(profilePictureURI)
+            .memoryCacheKey(profilePictureURI)
+            .build()
+    return rememberAsyncImagePainter(
+        model = imageRequest,
+        imageLoader = imageLoader,
+        error = rememberVectorPainter(image = Icons.Default.Face)
+    )
 }
 
 @Composable
@@ -282,7 +333,7 @@ fun UserInfoRowCard(
 //                .build()
 //        }
 //        .build()
-    val profilePictureURI = getProfilePictureURI(userInfo.userId!!)
+//    val profilePictureURI = getProfilePictureURI(userInfo.userId!!)
 //    val imageRequest: ImageRequest =
 //        ImageRequest.Builder(context)
 //            .data(profilePictureURI)
@@ -292,14 +343,13 @@ fun UserInfoRowCard(
 //            .diskCacheKey(profilePictureURI)
 //            .memoryCacheKey(profilePictureURI)
 //            .build()
-    val asyncPainter = rememberAsyncImagePainter(
+//    val asyncPainter = rememberAsyncImagePainter(
 //        model = imageLoader.enqueue(imageRequest),
-        model = profilePictureURI,
-        error = rememberVectorPainter(image = Icons.Default.Face)
-    )
+//        error = rememberVectorPainter(image = Icons.Default.Face)
+//    )
 
     IconRowCard(
-        painter = asyncPainter,
+        painter = profilePictureImagePainter(userId = userInfo.userId!!),
         mainContent = {
             Column(
                 verticalArrangement = Arrangement.Top,
@@ -331,9 +381,7 @@ fun TransactionActivityRowCard(
             )
             H1Text(text = transactionActivity.displayText(), fontSize = 18.sp)
         },
-        sideContent = {
-
-        },
+        sideContent = { },
         modifier = modifier.height(70.dp)
     )
 }
@@ -355,6 +403,7 @@ fun MoneyAmount(
         )
         H1Text(
             text = moneyAmount.asMoneyAmount().substring(if (moneyAmount >= 0) 1 else 2),
+            maxLines = 1,
             fontSize = fontSize
         )
     }
@@ -364,6 +413,16 @@ fun LazyListScope.recentActivityList(
     groupActivity: List<TransactionActivity>,
     transactionActivityOnClick: (TransactionActivity) -> Unit = {}
 ) {
+//    private fun displayMultipleUsers(displayNames: List<String>): String {
+//        return when(displayNames.size) {
+//            1 -> displayNames[0]
+//            2 -> "${displayNames[0]} and + ${displayNames[1]}"
+//            3 -> "${displayNames[0]}, ${displayNames[1]}, and ${displayNames[2]}"
+//            else ->
+//                "${displayNames[0]}, ${displayNames[1]}, ${displayNames[2]}, " +
+//                        "and ${displayNames.size - 3} others"
+//        }
+//    }
     item {
         H1Text(
             text = "Recent Transactions",
@@ -373,14 +432,14 @@ fun LazyListScope.recentActivityList(
         )
     }
     groupActivity.groupBy {
-        isoDate(it.date)
+        isoFullDate(it.date)
     }.let { groupActivityByDate ->
         groupActivityByDate.keys.forEach { date ->
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = AppTheme.dimensions.spacing)
+                        .padding(top = AppTheme.dimensions.appPadding)
                 ) {
                     Caption(text = date)
                 }
@@ -389,7 +448,7 @@ fun LazyListScope.recentActivityList(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = AppTheme.dimensions.spacing)
+                        .padding(top = AppTheme.dimensions.appPadding)
                         .clip(AppTheme.shapes.large)
                         .background(AppTheme.colors.secondary)
                         .clickable { transactionActivityOnClick(transactionActivity) }
@@ -408,7 +467,7 @@ fun RecentActivityList(
     groupActivity: List<TransactionActivity>
 ) {
     val groupActivityByDate: Map<String, List<TransactionActivity>> =
-        groupActivity.groupBy { isoDate(it.date) }
+        groupActivity.groupBy { isoFullDate(it.date) }
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier.fillMaxWidth()
@@ -449,7 +508,7 @@ fun RecentActivityList(
 
 @Composable
 fun DrawerHeader(
-    navigateNotificationsOnClick: () -> Unit
+    navigateGroupInvitesOnClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -457,10 +516,13 @@ fun DrawerHeader(
             .padding(vertical = 20.dp, horizontal = 20.dp)
     ) {
         Text(text = "Groups", fontSize = 40.sp, color = AppTheme.colors.onSecondary)
-
         Spacer(modifier = Modifier.weight(1f))
-
-        NotificationsButton(navigateNotificationsOnClick = navigateNotificationsOnClick)
+        IconButton(onClick = navigateGroupInvitesOnClick) {
+            SmallIcon(
+                imageVector = Icons.Default.MailOutline,
+                contentDescription = "Notifications"
+            )
+        }
     }
 }
 
@@ -545,13 +607,14 @@ fun UsernameSearchBar(
 fun TransparentTextField(
     modifier: Modifier = Modifier,
     value: String,
+    fontSize: TextUnit = TextUnit.Unspecified,
     textColor: Color = AppTheme.colors.onSecondary,
     onValueChange: (String) -> Unit
 ) {
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        textStyle = TextStyle(color = textColor),
+        textStyle = TextStyle(color = textColor, fontSize = fontSize),
         singleLine = true,
         decorationBox = { innerTextField ->
             TextFieldDefaults.TextFieldDecorationBox(
@@ -560,8 +623,7 @@ fun TransparentTextField(
                 enabled = true,
                 singleLine = true,
                 visualTransformation = VisualTransformation.None,
-                interactionSource  = remember { MutableInteractionSource() },
-                label = { H1Text(text = "Message") }
+                interactionSource  = remember { MutableInteractionSource() }
             )
         },
         modifier = modifier.width(IntrinsicSize.Min)

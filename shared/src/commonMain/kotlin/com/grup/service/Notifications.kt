@@ -5,4 +5,6 @@ internal expect object Notifications {
     fun unsubscribeGroupNotifications(groupId: String)
 
     fun subscribePersonalNotifications(userId: String)
+
+    fun onLogout()
 }

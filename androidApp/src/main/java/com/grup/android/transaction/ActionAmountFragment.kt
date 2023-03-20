@@ -86,38 +86,35 @@ fun ActionAmountLayout(
                 message = message,
                 onMessageChange = { message = it },
                 topContent = {
-                    Row(modifier = Modifier.width(IntrinsicSize.Min)) {
-                        UserInfoRowCard(
-                            userInfo = myUserInfo,
-                            iconSize = 90.dp,
-                            mainContent = {
-                                Caption(text = "Balance")
-                                MoneyAmount(
-                                    moneyAmount = myUserInfo.userBalance,
-                                    fontSize = 48.sp
-                                )
-                            },
-                            sideContent = null
-                        )
-                    }
+                    UserInfoRowCard(
+                        userInfo = myUserInfo,
+                        iconSize = 80.dp,
+                        mainContent = {
+                            Caption(text = "Balance")
+                            MoneyAmount(
+                                moneyAmount = myUserInfo.userBalance,
+                                fontSize = 48.sp
+                            )
+                        },
+                        sideContent = null
+                    )
                 },
                 actionButton = {
-                    H1ConfirmTextButton(
-                        text = actionType,
-                        onClick = {
-                            actionAmount.toDouble().let { amount ->
-                                if (amount > 0) {
-                                    navController.navigate(
-                                        R.id.createDebtAction,
-                                        Bundle().apply {
-                                            this.putDouble("amount", amount)
-                                            this.putString("message", message)
-                                        }
-                                    )
-                                }
+                    actionAmount.toDouble().let { amount ->
+                        H1ConfirmTextButton(
+                            text = actionType,
+                            enabled = amount > 0,
+                            onClick = {
+                                navController.navigate(
+                                    R.id.createDebtAction,
+                                    Bundle().apply {
+                                        this.putDouble("amount", amount)
+                                        this.putString("message", message)
+                                    }
+                                )
                             }
-                        }
-                    )
+                        )
+                    }
                 },
                 onBackPress = onBackPress
             )
@@ -127,20 +124,18 @@ fun ActionAmountLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, myUserInfo.userBalance) },
                 topContent = {
-                    Row(modifier = Modifier.width(IntrinsicSize.Min)) {
-                        UserInfoRowCard(
-                            userInfo = myUserInfo,
-                            iconSize = 90.dp,
-                            mainContent = {
-                                Caption(text = "Balance")
-                                MoneyAmount(
-                                    moneyAmount = myUserInfo.userBalance,
-                                    fontSize = 48.sp
-                                )
-                            },
-                            sideContent = {}
-                        )
-                    }
+                    UserInfoRowCard(
+                        userInfo = myUserInfo,
+                        iconSize = 90.dp,
+                        mainContent = {
+                            Caption(text = "Balance")
+                            MoneyAmount(
+                                moneyAmount = myUserInfo.userBalance,
+                                fontSize = 48.sp
+                            )
+                        },
+                        sideContent = null
+                    )
                 },
                 actionButton = {
                     H1ConfirmTextButton(
@@ -161,20 +156,18 @@ fun ActionAmountLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, settleAction.remainingAmount) },
                 topContent = {
-                    Row(modifier = Modifier.width(IntrinsicSize.Min)) {
-                        UserInfoRowCard(
-                            userInfo = settleAction.debteeUserInfo!!,
-                            iconSize = 90.dp,
-                            mainContent = {
-                                Caption(text = "Remaining Amount")
-                                MoneyAmount(
-                                    moneyAmount = settleAction.remainingAmount,
-                                    fontSize = 48.sp
-                                )
-                            },
-                            sideContent = {}
-                        )
-                    }
+                    UserInfoRowCard(
+                        userInfo = settleAction.debteeUserInfo!!,
+                        iconSize = 90.dp,
+                        mainContent = {
+                            Caption(text = "Remaining Amount")
+                            MoneyAmount(
+                                moneyAmount = settleAction.remainingAmount,
+                                fontSize = 48.sp
+                            )
+                        },
+                        sideContent = null
+                    )
                 },
                 actionButton = {
                     H1ConfirmTextButton(
@@ -242,11 +235,20 @@ fun ActionAmountScreenLayout(
                     },
                     fontSize = 98.sp
                 )
-                Row(modifier = Modifier.height(40.dp)) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(65.dp)
+                        .padding(horizontal = AppTheme.dimensions.paddingSmall)
+                ) {
                     message?.let { message ->
+                        if (message.isEmpty()) {
+                            Caption(text = "Message", fontSize = 26.sp)
+                        }
                         TransparentTextField(
                             value = message,
-                            onValueChange = onMessageChange!!
+                            onValueChange = onMessageChange!!,
+                            fontSize = 24.sp
                         )
                     }
                 }
@@ -289,7 +291,7 @@ fun ActionAmountScreenLayout(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = 40.dp)
+                    .padding(top = 20.dp, bottom = AppTheme.dimensions.cardPadding)
             ) {
                 actionButton()
             }

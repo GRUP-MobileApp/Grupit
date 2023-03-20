@@ -100,8 +100,7 @@ fun DebtActionLayout(
                     .fillMaxSize()
                     .background(AppTheme.colors.primary)
                     .padding(padding)
-                    .padding(top = AppTheme.dimensions.appPadding)
-                    .padding(horizontal = AppTheme.dimensions.appPadding)
+                    .padding(AppTheme.dimensions.appPadding)
             ) {
                 MoneyAmount(
                     moneyAmount = debtActionAmount,
@@ -135,25 +134,15 @@ fun DebtActionLayout(
                             debtAmounts = debtAmounts,
                             modifier = Modifier.weight(1f)
                         )
-                        Button(
+                        H1ConfirmTextButton(
+                            text = "Create",
+                            enabled = debtAmounts.sum() == debtActionAmount,
                             onClick = {
                                 transactionViewModel.createDebtAction(debtors, debtAmounts, message)
                                 navController.popBackStack()
                                 navController.popBackStack()
-                            },
-                            shape = AppTheme.shapes.CircleShape,
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = AppTheme.colors.confirm
-                            ),
-                            modifier = Modifier
-                                .width(200.dp)
-                                .height(50.dp)
-                        ) {
-                            Text(
-                                text = "Create",
-                                color = AppTheme.colors.onSecondary
-                            )
-                        }
+                            }
+                        )
                     }
                 }
             }
@@ -284,7 +273,7 @@ fun AddDebtorBottomSheet(
                     )
                     Button(
                         onClick = { addDebtorsOnClick(selectedUsers) },
-                        shape = AppTheme.shapes.CircleShape,
+                        shape = AppTheme.shapes.circleShape,
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = AppTheme.colors.confirm
                         ),
@@ -352,7 +341,8 @@ fun SelectDebtorsChecklist(
                                 uncheckedColor = AppTheme.colors.onSecondary
                             )
                         )
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

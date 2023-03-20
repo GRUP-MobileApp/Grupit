@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,16 +29,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.grup.android.login.LoginActivity
+import com.grup.android.notifications.NotificationsViewModel
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.transaction.TransactionViewModel
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.*
 import com.grup.models.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class MainFragment : Fragment() {
+class MainFragment : KoinComponent, Fragment() {
     private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
+    private val googleSignInClient: GoogleSignInClient by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,12 +65,13 @@ class MainFragment : Fragment() {
                         mainViewModel = mainViewModel,
                         navController = findNavController(),
                         returnToLoginOnClick = {
+                            mainViewModel.logOut()
+                            googleSignInClient.signOut()
                             startActivity(
                                 Intent(activity, LoginActivity::class.java)
                                     .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             )
                             requireActivity().finish()
-                            mainViewModel.logOut()
                         }
                     )
                 }
@@ -99,6 +104,9 @@ fun MainLayout(
             mainViewModel.groupActivity.collectAsStateWithLifecycle()
     val activeSettleActions: List<SettleAction> by
             mainViewModel.activeSettleActions.collectAsStateWithLifecycle()
+
+    val notificationsAmount: Map<String, Int> by
+            NotificationsViewModel.notificationsAmount.collectAsStateWithLifecycle()
 
     var selectedAction: Action? by remember { mutableStateOf(null) }
 
@@ -138,42 +146,47 @@ fun MainLayout(
                         modifier = Modifier
                             .fillMaxSize()
                     ) { padding ->
-                        when (selectedAction) {
-                            is DebtAction -> DebtActionDetails(
-                                debtAction = selectedAction,
-                                myUserInfo = myUserInfo!!,
-                                modifier = Modifier
-                                    .padding(padding)
-                                    .padding(AppTheme.dimensions.appPadding)
-                            )
-                            is SettleAction -> SettleActionDetails(
-                                settleAction = selectedAction,
-                                myUserInfo = myUserInfo!!,
-                                navigateSettleActionTransactionOnClick = {
-                                    if (myUserInfo!!.userBalance < 0) {
-                                        navController.navigate(
-                                            R.id.actionAmountFragment,
-                                            Bundle().apply {
-                                                this.putString(
-                                                    "actionType",
-                                                    TransactionViewModel.SETTLE_TRANSACTION
-                                                )
-                                                this.putString("actionId", selectedAction.getId())
-                                            }
+                        myUserInfo?.let { userInfo ->
+                            when (selectedAction) {
+                                is DebtAction -> DebtActionDetails(
+                                    debtAction = selectedAction,
+                                    myUserInfo = userInfo,
+                                    modifier = Modifier
+                                        .padding(padding)
+                                        .padding(AppTheme.dimensions.appPadding)
+                                )
+                                is SettleAction -> SettleActionDetails(
+                                    settleAction = selectedAction,
+                                    myUserInfo = userInfo,
+                                    navigateSettleActionTransactionOnClick = {
+                                        if (userInfo.userBalance < 0) {
+                                            navController.navigate(
+                                                R.id.actionAmountFragment,
+                                                Bundle().apply {
+                                                    this.putString(
+                                                        "actionType",
+                                                        TransactionViewModel.SETTLE_TRANSACTION
+                                                    )
+                                                    this.putString(
+                                                        "actionId",
+                                                        selectedAction.getId()
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    },
+                                    acceptSettleActionTransactionOnClick = { transactionRecord ->
+                                        mainViewModel.acceptSettleActionTransaction(
+                                            selectedAction,
+                                            transactionRecord
                                         )
-                                    }
-                                },
-                                acceptSettleActionTransactionOnClick = { transactionRecord ->
-                                    mainViewModel.acceptSettleActionTransaction(
-                                        selectedAction,
-                                        transactionRecord
-                                    )
-                                    scope.launch { actionDetailsBottomSheetState.hide() }
-                                },
-                                modifier = Modifier
-                                    .padding(padding)
-                                    .padding(AppTheme.dimensions.appPadding)
-                            )
+                                        scope.launch { actionDetailsBottomSheetState.hide() }
+                                    },
+                                    modifier = Modifier
+                                        .padding(padding)
+                                        .padding(AppTheme.dimensions.appPadding)
+                                )
+                            }
                         }
                     }
                 },
@@ -186,10 +199,56 @@ fun MainLayout(
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
-                TopBar(
-                    group = selectedGroup,
-                    onNavigationIconClick = openDrawer,
-                    navigateGroupMembersOnClick = { navController.navigate(R.id.viewMembers) }
+                TopAppBar(
+                    title = { selectedGroup?.let { H1Text(text = it.groupName!!) } },
+                    backgroundColor = AppTheme.colors.primary,
+                    navigationIcon = {
+                        BadgedBox(
+                            badge = {
+                                (notificationsAmount[selectedGroup?.getId()]?: 0)
+                                    .let { selectedGroupNotificationsAmount ->
+                                        if (
+                                            notificationsAmount.values.sum() -
+                                            selectedGroupNotificationsAmount > 0
+                                        ) {
+                                            Badge(
+                                                backgroundColor = AppTheme.colors.error,
+                                                modifier = Modifier
+                                                    .offset((-8).dp, (10).dp)
+                                            )
+                                        }
+                                    }
+                            }
+                        ) {
+                            IconButton(onClick = openDrawer) {
+                                SmallIcon(
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = "Menu"
+                                )
+                            }
+                        }
+                    },
+                    actions = {
+                        selectedGroup?.let { group ->
+                            Row(
+                                horizontalArrangement = Arrangement
+                                    .spacedBy(AppTheme.dimensions.spacingSmall)
+                            ) {
+                                GroupNotificationsPopup(
+                                    groupNotificationsAmount =
+                                        notificationsAmount[group.getId()] ?: 0,
+                                    navigateGroupNotificationsOnClick = {
+                                        navController.navigate(R.id.openNotifications)
+                                    }
+                                )
+                                MembersButton(
+                                    navigateGroupMembersOnClick = {
+                                        navController.navigate(R.id.viewMembers)
+                                    }
+                                )
+                            }
+                        }
+                    }
                 )
             },
             drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
@@ -199,13 +258,13 @@ fun MainLayout(
                 GroupNavigationMenu(
                     groups = groups,
                     onGroupClick = { index ->
+                        closeDrawer()
                         mainViewModel.onSelectedGroupChange(groups[index])
-                        closeDrawer()
                     },
+                    notificationsAmount = notificationsAmount,
                     isSelectedGroup = { it.getId() == selectedGroup?.getId() },
-                    navigateNotificationsOnClick = {
-                        closeDrawer()
-                        navController.navigate(R.id.openNotifications)
+                    navigateGroupInvitesOnClick = {
+                        navController.navigate(R.id.openGroupInvites)
                     },
                     navigateCreateGroupOnClick = {
                         closeDrawer()
@@ -258,8 +317,7 @@ fun MainLayout(
                         }
                         item {
                             ActiveSettleActions(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                                 mySettleActions = activeSettleActions.filter { settleAction ->
                                     settleAction.debteeUserInfo!!.userId == myUserInfo.userId!!
                                 },
@@ -295,24 +353,24 @@ fun GroupNavigationMenu(
     groups: List<Group>,
     onGroupClick: (Int) -> Unit,
     isSelectedGroup: (Group) -> Boolean,
-    navigateNotificationsOnClick: () -> Unit,
+    notificationsAmount: Map<String, Int>,
+    navigateGroupInvitesOnClick: () -> Unit,
     navigateCreateGroupOnClick: () -> Unit,
     logOutOnClick: () -> Unit,
     background: Color = AppTheme.colors.primary
 ) {
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(background)
     ) {
-        DrawerHeader(navigateNotificationsOnClick = navigateNotificationsOnClick)
+        DrawerHeader(navigateGroupInvitesOnClick = navigateGroupInvitesOnClick)
         LazyColumn(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)) {
             itemsIndexed(groups) { index, group ->
                 GroupNavigationRow(
                     group = group,
                     onGroupClick = { onGroupClick(index) },
+                    groupNotificationsAmount = notificationsAmount[group.getId()] ?: 0,
                     isSelected = isSelectedGroup(group)
                 )
             }
@@ -355,6 +413,7 @@ fun GroupNavigationMenu(
 fun GroupNavigationRow(
     group: Group,
     onGroupClick: () -> Unit,
+    groupNotificationsAmount: Int,
     isSelected: Boolean
 ) {
     Box(
@@ -370,11 +429,23 @@ fun GroupNavigationRow(
                 .fillMaxSize()
                 .padding(horizontal = AppTheme.dimensions.paddingSmall)
         ) {
-            Box(
+            BadgedBox(
+                badge = {
+                    if (!isSelected && groupNotificationsAmount > 0) {
+                        Badge(
+                            backgroundColor = AppTheme.colors.error,
+                            modifier = Modifier
+                                .offset((-6).dp, (8).dp)
+                                .size(16.dp)
+                        ) {
+                            H1Text(text = groupNotificationsAmount.toString(), fontSize = 12.sp)
+                        }
+                    }
+                },
                 modifier =
                     if (isSelected)
                         Modifier.border(
-                            width = 2.dp,
+                            width = 1.dp,
                             color = Color.White
                         )
                     else
@@ -396,54 +467,32 @@ fun GroupNavigationRow(
 }
 
 @Composable
-fun TopBar(
-    group: Group?,
-    onNavigationIconClick: () -> Unit,
-    navigateGroupMembersOnClick: () -> Unit
+fun GroupNotificationsPopup(
+    groupNotificationsAmount: Int,
+    navigateGroupNotificationsOnClick: () -> Unit
 ) {
-    TopAppBar(
-        title = { group?.let { H1Text(text = it.groupName!!) } },
-        backgroundColor = AppTheme.colors.primary,
-        navigationIcon = {
-            BadgedBox(
-                badge = {
-                    Badge(
-                        backgroundColor = AppTheme.colors.error,
-                        modifier = Modifier
-                            .offset((-8).dp, (10).dp)
-                    ) {
-                        H1Text(
-                            text = "1",
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-            ) {
-                IconButton(onClick = onNavigationIconClick) {
-                    SmallIcon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = "Menu"
+    BadgedBox(
+        badge = {
+            if (groupNotificationsAmount > 0) {
+                Badge(
+                    backgroundColor = AppTheme.colors.error,
+                    modifier = Modifier
+                        .offset((-15).dp, (15).dp)
+                ) {
+                    H1Text(
+                        text = groupNotificationsAmount.toString(),
+                        fontSize = 14.sp
                     )
                 }
             }
-        },
-        actions = {
-            if (group != null) {
-                MembersButton(navigateGroupMembersOnClick = navigateGroupMembersOnClick)
-            }
         }
-    )
-}
-
-@Composable
-fun NotificationsButton(
-    navigateNotificationsOnClick: () -> Unit
-) {
-    IconButton(onClick = navigateNotificationsOnClick) {
-        SmallIcon(
-            imageVector = Icons.Default.Notifications,
-            contentDescription = "Notifications"
-        )
+    ) {
+        IconButton(onClick = navigateGroupNotificationsOnClick) {
+            SmallIcon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Notifications"
+            )
+        }
     }
 }
 
@@ -487,36 +536,15 @@ fun GroupBalanceCard(
                     .fillMaxWidth()
                     .padding(top = AppTheme.dimensions.spacing)
             ) {
-                TextButton(
-                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-                    modifier = Modifier
-                        .width(140.dp)
-                        .height(45.dp),
-                    shape = AppTheme.shapes.CircleShape,
+                H1ConfirmTextButton(
+                    text = "Debt",
                     onClick = navigateDebtActionAmountOnClick
-                ) {
-                    H1Text(
-                        text = "Request",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = AppTheme.colors.onSecondary,
-                    )
-                }
-                TextButton(
-                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-                    modifier = Modifier
-                        .width(140.dp)
-                        .height(45.dp),
-                    shape = AppTheme.shapes.CircleShape,
+                )
+                H1ConfirmTextButton(
+                    text = "Settle",
+                    enabled = myUserInfo.userBalance > 0,
                     onClick = navigateSettleActionAmountOnClick
-                ) {
-                    H1Text(
-                        text = "Settle",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = AppTheme.colors.onSecondary,
-                    )
-                }
+                )
             }
         }
     }
@@ -681,7 +709,7 @@ fun DebtActionDetails(
             sideContent = {
                 Column(horizontalAlignment = Alignment.End) {
                     Caption(text = "Request")
-                    Caption(text = isoDate(debtAction.date))
+                    Caption(text = isoFullDate(debtAction.date))
                 }
             },
             iconSize = 90.dp
@@ -718,7 +746,10 @@ fun DebtActionDetails(
                 debtAction.transactionRecords.filter { transactionRecord ->
                     transactionRecord.dateAccepted != TransactionRecord.PENDING
                 }.forEach { acceptedTransaction ->
-                    TransactionRecordRowCard(transactionRecord = acceptedTransaction)
+                    TransactionRecordRowCard(
+                        transactionRecord = acceptedTransaction,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -748,7 +779,10 @@ fun DebtActionDetails(
                     debtAction.transactionRecords.filter { transactionRecord ->
                         transactionRecord.dateAccepted == TransactionRecord.PENDING
                     }.forEach { pendingTransaction ->
-                        TransactionRecordRowCard(transactionRecord = pendingTransaction)
+                        TransactionRecordRowCard(
+                            transactionRecord = pendingTransaction,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -835,10 +869,11 @@ fun SettleActionDetails(
                 sideContent = {
                     Column(horizontalAlignment = Alignment.End) {
                         Caption(text = "Settle")
-                        Caption(text = isoDate(settleAction.date))
+                        Caption(text = isoFullDate(settleAction.date))
                     }
                 },
-                iconSize = 90.dp
+                iconSize = 90.dp,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Row(
@@ -881,7 +916,10 @@ fun SettleActionDetails(
                             }.let { acceptedTransactions ->
                                 if (acceptedTransactions.isNotEmpty()) {
                                     acceptedTransactions.forEach { acceptedTransaction ->
-                                        TransactionRecordRowCard(transactionRecord = acceptedTransaction)
+                                        TransactionRecordRowCard(
+                                            transactionRecord = acceptedTransaction,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
                                     }
                                 }
                             }
@@ -894,12 +932,15 @@ fun SettleActionDetails(
                                     pendingTransactions.forEach { pendingTransaction ->
                                         TransactionRecordRowCard(
                                             transactionRecord = pendingTransaction,
-                                            modifier = Modifier.clickable {
-                                                selectedTransaction = pendingTransaction
-                                                scope.launch {
-                                                    acceptPendingTransactionBottomSheetState.show()
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    selectedTransaction = pendingTransaction
+                                                    scope.launch {
+                                                        acceptPendingTransactionBottomSheetState
+                                                            .show()
+                                                    }
                                                 }
-                                            }
                                         )
                                     }
                                 }
@@ -908,19 +949,18 @@ fun SettleActionDetails(
                     }
                 }
             }
-            
-            if (
-                !isMyAction &&
-                myUserInfo.userBalance < 0 &&
-                settleAction.remainingAmount > 0
-            ) {
-                H1ConfirmTextButton(
-                    text = "Settle",
-                    onClick = navigateSettleActionTransactionOnClick,
-                    modifier = Modifier
-                        .padding(top = AppTheme.dimensions.appPadding)
+
+            H1ConfirmTextButton(
+                text = "Settle",
+                onClick = navigateSettleActionTransactionOnClick,
+                enabled = !isMyAction &&
+                        myUserInfo.userBalance < 0 &&
+                        settleAction.remainingAmount > 0,
+                modifier = Modifier.padding(
+                    top = AppTheme.dimensions.cardPadding,
+                    bottom = AppTheme.dimensions.cardPadding
                 )
-            }
+            )
         }
     }
 }
@@ -939,7 +979,7 @@ fun TransactionRecordRowCard(
                     .debtorUserInfo!!.nickname!!
             )
             Caption(
-                text = isoDate(
+                text = isoFullDate(
                     if (transactionRecord.dateAccepted != TransactionRecord.PENDING)
                         transactionRecord.dateAccepted
                     else

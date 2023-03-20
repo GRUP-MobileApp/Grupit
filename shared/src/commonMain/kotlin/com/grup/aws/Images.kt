@@ -2,9 +2,9 @@ package com.grup.aws
 
 import com.grup.exceptions.ImageUploadException
 import com.grup.models.User
-import com.grup.repositories.AWS_IMAGES_API_KEY
-import com.grup.repositories.AWS_IMAGES_API_URL
-import com.grup.repositories.AWS_IMAGES_BUCKET_NAME
+import com.grup.other.AWS_IMAGES_API_KEY
+import com.grup.other.AWS_IMAGES_API_URL
+import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*

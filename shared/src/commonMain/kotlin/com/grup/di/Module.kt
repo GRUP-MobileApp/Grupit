@@ -16,6 +16,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import org.koin.core.module.Module
 import org.koin.dsl.module
 
 internal val servicesModule = module {
@@ -61,3 +62,8 @@ internal val httpClientModule = module {
         }
     }
 }
+
+
+internal val releaseAppModules = listOf(
+    servicesModule, repositoriesModule, httpClientModule
+)

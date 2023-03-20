@@ -20,6 +20,9 @@
         <action
             android:id="@+id/openNotifications"
             app:destination="@id/notificationsFragment" />
+        <action
+            android:id="@+id/openGroupInvites"
+            app:destination="@id/groupInvitesFragment" />
     </fragment>
 
     <fragment
@@ -58,4 +61,8 @@
         android:name="com.grup.android.transaction.DebtActionFragment"
         android:label="DebtActionFragment" >
     </fragment>
+    <fragment
+        android:id="@+id/groupInvitesFragment"
+        android:name="com.grup.android.notifications.GroupInvitesFragment"
+        android:label="GroupInvitesFragment" />
 </navigation>

@@ -76,6 +76,9 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                // Datastore
+                implementation("androidx.datastore:datastore-preferences:1.0.0")
+
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
 

@@ -46,10 +46,10 @@ abstract class LoggedInViewModel : androidx.lifecycle.ViewModel() {
             emptyList()
         )
 
-    protected fun <T> Flow<List<T>>.asNotification() =
+    protected fun <T> Flow<T>.asNotification(initialValue: T) =
         this.stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
-            emptyList()
+            initialValue
         )
 }

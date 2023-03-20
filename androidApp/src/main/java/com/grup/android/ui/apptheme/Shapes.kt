@@ -1,5 +1,6 @@
 package com.grup.android.ui.apptheme
 
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -16,7 +17,7 @@ data class AppShapes (
         topEnd = 24.dp
     ),
 
-    val CircleShape: RoundedCornerShape = RoundedCornerShape(50)
+    val circleShape: RoundedCornerShape = CircleShape
 )
 
 internal val LocalShapes = staticCompositionLocalOf { AppShapes() }

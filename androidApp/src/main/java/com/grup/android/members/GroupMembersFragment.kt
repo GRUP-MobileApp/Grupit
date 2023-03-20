@@ -190,7 +190,9 @@ fun UsersList(
             UserInfoRowCard(
                 userInfo = userInfo,
                 iconSize = 70.dp,
-                modifier = Modifier.clickable { userInfoOnClick(userInfo) }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { userInfoOnClick(userInfo) }
             )
         }
     }
@@ -215,7 +217,11 @@ fun GroupMemberInfoBottomSheet(
                     .padding(top = AppTheme.dimensions.appPadding)
                     .padding(horizontal = AppTheme.dimensions.appPadding)
             ) {
-                UserInfoRowCard(userInfo = selectedUserInfo, iconSize = 64.dp)
+                UserInfoRowCard(
+                    userInfo = selectedUserInfo,
+                    iconSize = 64.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Divider()
                 RecentActivityList(groupActivity = groupActivity)
             }
@@ -284,7 +290,7 @@ fun AddToGroupBottomSheetLayout(
                 Button(
                     onClick = inviteUsernameToGroupOnClick,
                     colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-                    shape = AppTheme.shapes.CircleShape
+                    shape = AppTheme.shapes.circleShape
                 ) {
                     if (inviteResult is GroupMembersViewModel.InviteResult.Pending) {
                         LoadingSpinner()

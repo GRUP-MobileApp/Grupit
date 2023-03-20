@@ -6,33 +6,9 @@ import com.grup.models.*
 
 sealed class Notification {
     abstract val date: String
+    abstract val groupId: String
+    abstract val userInfo: UserInfo
     abstract fun displayText(): String
-
-    data class IncomingGroupInvite(
-        val groupInvite: GroupInvite
-    ) : Notification() {
-        override val date: String
-            get() = groupInvite.date
-
-        override fun displayText(): String =
-            "${groupInvite.inviterUsername} invited you to ${groupInvite.groupName}"
-    }
-
-    data class InviteeAcceptOutgoingGroupInvite(
-        val groupInvite: GroupInvite
-    ) : Notification() {
-        override val date: String
-            get() = groupInvite.dateAccepted.also { date ->
-                if (date == GroupInvite.PENDING) {
-                    throw PendingTransactionRecordException(
-                        "GroupInvite with id ${groupInvite.getId()} still pending"
-                    )
-                }
-            }
-
-        override fun displayText(): String =
-            "${groupInvite.inviteeUsername} has accepted your invite to ${groupInvite.groupName}"
-    }
 
     data class IncomingDebtAction(
         val debtAction: DebtAction,
@@ -40,6 +16,10 @@ sealed class Notification {
     ) : Notification() {
         override val date: String
             get() = debtAction.date
+        override val groupId: String
+            get() = debtAction.groupId!!
+        override val userInfo: UserInfo
+            get() = debtAction.debteeUserInfo!!
 
         override fun displayText(): String =
             "${debtAction.debteeUserInfo!!.nickname} is requesting " +
@@ -59,6 +39,10 @@ sealed class Notification {
                     )
                 }
             }
+        override val groupId: String
+            get() = debtAction.groupId!!
+        override val userInfo: UserInfo
+            get() = transactionRecord.debtorUserInfo!!
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} has accepted a debt of " +
@@ -70,6 +54,10 @@ sealed class Notification {
     ) : Notification() {
         override val date: String
             get() = settleAction.date
+        override val groupId: String
+            get() = settleAction.groupId!!
+        override val userInfo: UserInfo
+            get() = settleAction.debteeUserInfo!!
 
         override fun displayText(): String =
             "${settleAction.debteeUserInfo!!.nickname!!} is requesting " +
@@ -82,6 +70,10 @@ sealed class Notification {
     ) : Notification() {
         override val date: String
             get() = transactionRecord.dateCreated
+        override val groupId: String
+            get() = settleAction.groupId!!
+        override val userInfo: UserInfo
+            get() = transactionRecord.debtorUserInfo!!
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +
@@ -102,6 +94,10 @@ sealed class Notification {
                     )
                 }
             }
+        override val groupId: String
+            get() = settleAction.groupId!!
+        override val userInfo: UserInfo
+            get() = settleAction.debteeUserInfo!!
 
         override fun displayText(): String =
             "${settleAction.debteeUserInfo!!.nickname} accepted your settlement for " +

@@ -1,34 +1,15 @@
 package com.grup.android.notifications
 
 import com.grup.android.LoggedInViewModel
-import com.grup.models.DebtAction
-import com.grup.models.GroupInvite
-import com.grup.models.SettleAction
-import com.grup.models.TransactionRecord
+import com.grup.models.*
 import kotlinx.coroutines.flow.*
 
 class NotificationsViewModel : LoggedInViewModel() {
+    companion object {
+        var notificationsAmount: MutableStateFlow<Map<String, Int>> =
+            MutableStateFlow(emptyMap())
+    }
     // TODO: Remove notifications after joinDate
-    // Hot flow containing all subscribed GroupInvites
-    private val _groupInvitesFlow = apiServer.getAllGroupInvitesAsFlow()
-    private val incomingGroupInvitesAsNotification: Flow<List<Notification>> =
-        _groupInvitesFlow.map { groupInvites ->
-            groupInvites.filter { groupInvite ->
-                groupInvite.invitee!! == userObject.getId() &&
-                        groupInvite.dateAccepted == GroupInvite.PENDING
-            }.map { groupInvite ->
-                Notification.IncomingGroupInvite(groupInvite)
-            }
-        }
-    private val outgoingGroupInvitesAsNotification: Flow<List<Notification>> =
-        _groupInvitesFlow.map { groupInvites ->
-            groupInvites.filter { groupInvite ->
-                groupInvite.inviter!! == userObject.getId() &&
-                        groupInvite.dateAccepted != GroupInvite.PENDING
-            }.map { groupInvite ->
-                Notification.InviteeAcceptOutgoingGroupInvite(groupInvite)
-            }
-        }
 
     // Hot flow containing all DebtActions across all groups that the user is a part of
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
@@ -92,10 +73,8 @@ class NotificationsViewModel : LoggedInViewModel() {
             }
         }
 
-    val notifications: StateFlow<List<Notification>> =
+    val notifications: StateFlow<Map<String, List<Notification>>> =
         combine(
-            incomingGroupInvitesAsNotification,
-            outgoingGroupInvitesAsNotification,
             incomingDebtActionsAsNotification,
             outgoingDebtActionsAsNotification,
             newSettleActionsAsNotification,
@@ -104,11 +83,14 @@ class NotificationsViewModel : LoggedInViewModel() {
         ) { allNotifications: Array<List<Notification>> ->
             allNotifications.flatMap { it }.sortedByDescending { notification ->
                 notification.date
+            }.groupBy { notification ->
+                notification.groupId
+            }.also { notificationsMap ->
+                notificationsAmount.value = notificationsMap.mapValues { entry ->
+                    entry.value.size
+                }
             }
-        }.asNotification()
-
-    // Group Invite
-    fun acceptInviteToGroup(groupInvite: GroupInvite) = apiServer.acceptInviteToGroup(groupInvite)
+        }.asNotification(emptyMap())
 
     // DebtAction
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =

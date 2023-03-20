@@ -3,10 +3,7 @@ package com.grup
 import com.grup.aws.Images
 import com.grup.controllers.*
 import com.grup.di.*
-import com.grup.di.httpClientModule
 import com.grup.di.openSyncedRealm
-import com.grup.di.repositoriesModule
-import com.grup.di.servicesModule
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
@@ -14,7 +11,8 @@ import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import com.grup.models.User
 import com.grup.other.RealmUser
-import com.grup.repositories.APP_ID
+import com.grup.other.APP_ID
+import com.grup.service.Notifications
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.*
@@ -23,8 +21,7 @@ import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 
@@ -48,16 +45,12 @@ class APIServer private constructor(
             app.login(credentials)
 
             val realm = openSyncedRealm(app.currentUser!!)
-            startKoin {
-                modules(listOf(
-                    module {
-                        single { realm }
-                    },
-                    servicesModule,
-                    repositoriesModule,
-                    httpClientModule
-                ))
-            }
+            loadKoinModules(
+                module {
+                    single { realm }
+                }
+            )
+            loadKoinModules(releaseAppModules)
             return APIServer(realm)
         }
 
@@ -165,10 +158,16 @@ class APIServer private constructor(
 
     suspend fun logOut() {
         subscriptionsJob.cancel()
-        stopKoin()
+        unloadKoinModules(
+                module {
+                    single { realm }
+                }
+        )
+        unloadKoinModules(releaseAppModules)
         realm.subscriptions.update {
             removeAll()
         }
+        Notifications.onLogout()
         realmUser.logOut()
     }
 }

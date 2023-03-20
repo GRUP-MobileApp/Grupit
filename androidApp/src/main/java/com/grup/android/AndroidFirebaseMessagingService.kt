@@ -15,6 +15,7 @@ import com.google.firebase.messaging.RemoteMessage
 
 class AndroidFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
+        super.onNewToken(token)
         // TODO
     }
 
