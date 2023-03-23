@@ -13,6 +13,16 @@ import kotlin.coroutines.cancellation.CancellationException
 class APIServer private constructor(
     private val dbManager: DBManager
 ) {
+<<<<<<< HEAD
+=======
+    private val realmUser: RealmUser
+        get() = app.currentUser ?: throw NotLoggedInException()
+
+    private val subscriptionsJob: Job = startSubscriptionSyncJob()
+
+    companion object Login {
+        internal val app: App = App.create(getEnvVar("APP_ID"))
+>>>>>>> 4d00ec1 (created shared get env variable function, replaced key references with env var references)
 
     private val userController: UserController = UserController()
     private val groupController: GroupController = GroupController()
