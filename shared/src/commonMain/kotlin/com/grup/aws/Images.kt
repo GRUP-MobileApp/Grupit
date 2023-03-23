@@ -1,6 +1,7 @@
 package com.grup.aws
 
 import com.grup.exceptions.ImageUploadException
+import com.grup.getEnvVar
 import com.grup.models.User
 import com.grup.repositories.AWS_IMAGES_API_KEY
 import com.grup.repositories.AWS_IMAGES_API_URL
@@ -18,10 +19,10 @@ object Images : KoinComponent {
 
     suspend fun uploadProfilePicture(user: User, pfp: ByteArray): String {
         val response: HttpResponse = client.put(
-            "$AWS_IMAGES_API_URL/pfp_${user.getId()}.png"
+            "${getEnvVar("AWS_IMAGES_API_URL")}/pfp_${user.getId()}.png"
         ) {
             contentType(ContentType.Image.PNG)
-            header("X-Api-Key", AWS_IMAGES_API_KEY)
+            header("X-Api-Key", getEnvVar("AWS_IMAGES_API_KEY"))
             setBody(
                 ByteArrayContent(
                     bytes = pfp,

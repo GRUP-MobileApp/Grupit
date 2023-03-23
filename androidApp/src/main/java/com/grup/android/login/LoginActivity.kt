@@ -40,6 +40,7 @@ import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
 import com.grup.android.R
 import com.grup.android.ui.apptheme.AppTheme
+import java.lang.*
 
 
 class LoginActivity : AppCompatActivity() {
@@ -132,6 +133,7 @@ fun LoginPage(
             label = { Text(text = "Username", color = AppTheme.colors.onSecondary) },
             modifier = Modifier.background(AppTheme.colors.secondary),
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             value = email,
             onValueChange = { email = it },
             singleLine = true
@@ -220,9 +222,9 @@ fun LoginPage(
         GoogleSignInButton(
             onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) }
         )
-        crashButton()
     }
 }
+
 
 @Composable
 fun GoogleSignInButton(

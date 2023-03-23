@@ -29,7 +29,7 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
 object APIServer {
-    private val app: App = App.create(APP_ID)
+    private val app: App = App.create(System.getenv("APP_ID"))
 
     private val realmUser: RealmUser
         get() = app.currentUser ?: throw NotLoggedInException()

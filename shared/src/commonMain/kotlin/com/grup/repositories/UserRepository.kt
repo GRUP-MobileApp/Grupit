@@ -1,5 +1,6 @@
 package com.grup.repositories
 
+import com.grup.getEnvVar
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
 import com.grup.other.idSerialName
@@ -18,7 +19,7 @@ internal class UserRepository : IUserRepository, KoinComponent {
     override suspend fun findUserByUsername(username: String): User? {
         var responseUser: User? = null
         val response: HttpResponse = client.get(
-            "${MONGODB_API_ENDPOINT}/user/findUserByUsername"
+            "${getEnvVar(MONGODB_API_ENDPOINT)}/user/findUserByUsername"
         ) {
             contentType(ContentType.Application.Json)
             url {
