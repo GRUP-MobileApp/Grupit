@@ -136,7 +136,7 @@ class APIServer private constructor(
     fun getAllSettleActionsAsFlow() = settleActionController.getAllSettleActionsAsFlow()
 
     object Images {
-        fun getProfilePictureURI(userId: String) = "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
+        fun getProfilePictureURI(userId: String) = "https://${getEnvVar("AWS_IMAGES_BUCKET_NAME")}.s3.amazonaws.com/pfp_$userId.png"
     }
 
     suspend fun logOut() {
