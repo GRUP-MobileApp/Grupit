@@ -210,6 +210,7 @@ fun WelcomeLayout(
                         }
                     )
                 2 ->
+<<<<<<< HEAD
                     SetProfilePicture(
                         selectedPhotoAsByteArray = pfpByteArray,
                         promptProfilePictureOnClick = {
@@ -229,6 +230,32 @@ fun WelcomeLayout(
                         navController.navigate(R.id.startMainFragment)
                     }
                 )
+=======
+                    SetDisplayName(
+                        displayName = displayName,
+                        onDisplayNameChange = { displayName = it },
+                        registerOnClick = {
+                            val pictureInputStream =
+                                context.contentResolver
+                                    .openInputStream(pfpUri)
+                            welcomeViewModel.registerUserObject(
+                                username,
+                                displayName,
+                                pictureInputStream!!.readBytes()
+                            )
+                            pictureInputStream.close()
+                            scope.launch {
+                                pagerState.animateScrollToPage(3)
+                            }
+                        }
+                    )
+                3 ->
+                    TutorialRequest(
+                        onClick = {navController.navigate(R.id.startMainFragment)}
+                    )
+
+
+>>>>>>> 0494851 (created shared get env variable function, replaced key references with env var references)
             }
         }
 
