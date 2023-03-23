@@ -24,10 +24,34 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
         }
+
+        create("production") {
+            initWith(getByName("debug"))
+            isMinifyEnabled = false
+        }
+
+        create("development") {
+            initWith(getByName("debug"))
+            isMinifyEnabled = false
+        }
+
+    }
+
+    flavorDimensions("type")
+
+    productFlavors {
+
+        // same options as defaultConfig
+        create("flavor1") {
+            applicationId = "com.grup.android"
+        }
+
     }
 
     buildFeatures {
