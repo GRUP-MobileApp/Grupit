@@ -17,31 +17,67 @@ class WelcomeViewModel : LoggedInViewModel() {
             false
         }
 
-    sealed class UsernameValidity {
-        object Valid : UsernameValidity()
-        object Invalid : UsernameValidity()
-        object Pending : UsernameValidity()
-        object None : UsernameValidity()
+    sealed class NameValidity {
+        object Valid : NameValidity()
+        class Invalid(val error: String) : NameValidity()
+        object Pending : NameValidity()
+        object None : NameValidity()
     }
 
     private var currentJob: Job = viewModelScope.launch { }
 
-    private val _usernameValidity = MutableStateFlow<UsernameValidity>(UsernameValidity.None)
-    val usernameValidity: StateFlow<UsernameValidity> = _usernameValidity
+    private val _usernameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
+    val usernameValidity: StateFlow<NameValidity> = _usernameValidity
+
+    private val _firstNameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
+    val firstNameValidity: StateFlow<NameValidity> = _firstNameValidity
+
+    private val _lastNameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
+    val lastNameValidity: StateFlow<NameValidity> = _lastNameValidity
 
     fun checkUsername(username: String) {
+        _usernameValidity.value = NameValidity.Pending
         currentJob.cancel()
-        if (username.isBlank()) {
-            _usernameValidity.value = UsernameValidity.None
+        if (username.isEmpty()) {
+            _usernameValidity.value = NameValidity.None
+        } else if (!username.matches(Regex("^[a-zA-Z/d_.-]*$"))) {
+            _usernameValidity.value =
+                NameValidity.Invalid(
+                    "Only alphanumeric characters, \".\", \"-\", and \"_\" are " +
+                            "allowed"
+                )
+        } else if (username.length < 5) {
+            _usernameValidity.value =
+                NameValidity.Invalid("Username must be at least 5 characters")
         } else {
-            _usernameValidity.value = UsernameValidity.Pending
             currentJob = viewModelScope.launch {
-                if (apiServer.validUsername(username)) {
-                    _usernameValidity.value = UsernameValidity.Valid
+                if (!apiServer.validUsername(username)) {
+                    _usernameValidity.value = NameValidity.Invalid("Username taken")
                 } else {
-                    _usernameValidity.value = UsernameValidity.Invalid
+                    _usernameValidity.value = NameValidity.Valid
                 }
             }
+        }
+    }
+
+    fun checkFirstNameValidity(firstName: String) {
+        _firstNameValidity.value = NameValidity.Pending
+        if (firstName.isEmpty()) {
+            _firstNameValidity.value = NameValidity.None
+        } else if (!firstName.matches(Regex("^[a-zA-Z]*$"))) {
+            _firstNameValidity.value = NameValidity.Invalid("Alphabetic characters only")
+        } else {
+            _firstNameValidity.value = NameValidity.Valid
+        }
+    }
+    fun checkLastNameValidity(lastName: String) {
+        _lastNameValidity.value = NameValidity.Pending
+        if (lastName.isEmpty()) {
+            _lastNameValidity.value = NameValidity.None
+        } else if (!lastName.matches(Regex("^[a-zA-Z]*$"))) {
+            _lastNameValidity.value = NameValidity.Invalid("Alphabetic characters only")
+        } else {
+            _lastNameValidity.value = NameValidity.Valid
         }
     }
 

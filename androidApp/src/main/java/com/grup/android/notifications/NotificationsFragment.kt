@@ -37,6 +37,7 @@ class NotificationsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        notificationsViewModel.logGroupNotificationsDate()
         return ComposeView(requireContext()).apply {
             setContent {
                 CompositionLocalProvider(
@@ -70,35 +71,25 @@ fun NotificationsLayout(
                 when(notification) {
                     is Notification.IncomingDebtAction -> {
                         {
-                            IconButton(
+                            AcceptCheckButton(
                                 onClick = {
                                     notificationsViewModel.acceptDebtAction(
                                         notification.debtAction, notification.transactionRecord
                                     )
                                 }
-                            ) {
-                                SmallIcon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Accept debt"
-                                )
-                            }
+                            )
                         }
                     }
                     is Notification.IncomingTransactionOnSettleAction -> {
                         {
-                            IconButton(
+                            AcceptCheckButton(
                                 onClick = {
                                     notificationsViewModel.acceptSettleActionTransaction(
                                         notification.settleAction,
                                         notification.transactionRecord
                                     )
                                 }
-                            ) {
-                                SmallIcon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Accept invite"
-                                )
-                            }
+                            )
                         }
                     }
                     else -> null

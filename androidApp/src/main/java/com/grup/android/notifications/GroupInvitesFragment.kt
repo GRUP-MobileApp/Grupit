@@ -4,19 +4,32 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.LocalContentColor
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.R
-import com.grup.android.ui.SimpleLazyListPage
+import com.grup.android.isoDate
+import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.GroupInvite
 
@@ -56,7 +69,45 @@ fun GroupInvitesLayout(
         onBackPress = { navController.popBackStack() }
     ) {
         items(groupInvites) { groupInvite ->
-
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                GroupInviteRowCard(
+                    groupInvite = groupInvite,
+                    acceptGroupInviteOnClick = {
+                        groupInvitesViewModel.acceptGroupInvite(groupInvite)
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+fun GroupInviteRowCard(
+    groupInvite: GroupInvite,
+    acceptGroupInviteOnClick: () -> Unit
+) {
+    IconRowCard(
+        painter = profilePictureImagePainter(userId = groupInvite.inviter!!),
+        mainContent = {
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                Caption(text = isoDate(groupInvite.date))
+                H1Text(
+                    text = "${groupInvite.inviterUsername} is inviting you to " +
+                            "${groupInvite.groupName}",
+                    fontSize = 16.sp
+                )
+            }
+        },
+        sideContent = {
+            AcceptCheckButton(onClick = acceptGroupInviteOnClick)
+        },
+        iconSize = 50.dp
+    )
 }

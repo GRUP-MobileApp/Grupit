@@ -1,10 +1,27 @@
 package com.grup.android.notifications
 
+import androidx.lifecycle.viewModelScope
 import com.grup.android.LoggedInViewModel
+import com.grup.android.MainViewModel
 import com.grup.models.*
+import com.grup.repositories.PreferencesDataStore
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class NotificationsViewModel : LoggedInViewModel() {
+class NotificationsViewModel : KoinComponent, LoggedInViewModel() {
+    private val preferencesDataStore: PreferencesDataStore by inject()
+    private val _notificationLastViewDatesFlow = preferencesDataStore.getStringData().map { data ->
+        "notifications_${apiServer.user.getId()}_".let { keyPrefix ->
+            data.filter { entry ->
+                entry.key.startsWith(keyPrefix)
+            }.map { entry ->
+                entry.key.removePrefix(keyPrefix) to entry.value
+            }.toMap()
+        }
+    }
     companion object {
         var notificationsAmount: MutableStateFlow<Map<String, Int>> =
             MutableStateFlow(emptyMap())
@@ -39,16 +56,6 @@ class NotificationsViewModel : LoggedInViewModel() {
 
     // Hot flow containing all Settle across all groups that the user is a part of
     private val _settleActionsFlow = apiServer.getAllSettleActionsAsFlow()
-    private val newSettleActionsAsNotification: Flow<List<Notification>> =
-        _settleActionsFlow.map { settleActions ->
-            settleActions.mapNotNull { settleAction ->
-                if (settleAction.debteeUserInfo!!.userId!! != userObject.getId()) {
-                    Notification.NewSettleAction(settleAction)
-                } else {
-                    null
-                }
-            }
-        }
     private val incomingTransactionsOnSettleActionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
@@ -77,7 +84,6 @@ class NotificationsViewModel : LoggedInViewModel() {
         combine(
             incomingDebtActionsAsNotification,
             outgoingDebtActionsAsNotification,
-            newSettleActionsAsNotification,
             incomingTransactionsOnSettleActionsAsNotification,
             outgoingTransactionsOnSettleActionsAsNotification
         ) { allNotifications: Array<List<Notification>> ->
@@ -85,12 +91,24 @@ class NotificationsViewModel : LoggedInViewModel() {
                 notification.date
             }.groupBy { notification ->
                 notification.groupId
-            }.also { notificationsMap ->
-                notificationsAmount.value = notificationsMap.mapValues { entry ->
-                    entry.value.size
-                }
             }
+        }.combine(_notificationLastViewDatesFlow) { notifications, lastViewDates ->
+            notificationsAmount.value = notifications.map { groupEntry ->
+                groupEntry.key to groupEntry.value.count { notification ->
+                    lastViewDates[groupEntry.key]?.let { lastViewDate ->
+                        notification.date > lastViewDate
+                    } ?: true
+                }
+            }.toMap()
+            notifications
         }.asNotification(emptyMap())
+
+    fun logGroupNotificationsDate() = viewModelScope.launch {
+        preferencesDataStore.putString(
+            "notifications_${apiServer.user.getId()}_${MainViewModel.selectedGroup.getId()}",
+            Clock.System.now().toString()
+        )
+    }
 
     // DebtAction
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =

@@ -147,9 +147,6 @@ class APIServer private constructor(
                 }
         )
         unloadKoinModules(releaseAppModules)
-        realm.subscriptions.update {
-            removeAll()
-        }
         Notifications.unsubscribeAllNotifications()
         realmUser.logOut()
     }

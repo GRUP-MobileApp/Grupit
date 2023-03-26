@@ -46,22 +46,7 @@ sealed class Notification {
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} has accepted a debt of " +
-                    "${transactionRecord.balanceChange!!} from you"
-    }
-
-    data class NewSettleAction(
-        val settleAction: SettleAction
-    ) : Notification() {
-        override val date: String
-            get() = settleAction.date
-        override val groupId: String
-            get() = settleAction.groupId!!
-        override val userInfo: UserInfo
-            get() = settleAction.debteeUserInfo!!
-
-        override fun displayText(): String =
-            "${settleAction.debteeUserInfo!!.nickname!!} is requesting " +
-                    settleAction.settleAmount!!.asMoneyAmount()
+                    "${transactionRecord.balanceChange!!.asMoneyAmount()} from you"
     }
 
     data class IncomingTransactionOnSettleAction(
@@ -77,8 +62,8 @@ sealed class Notification {
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +
-                    "${transactionRecord.balanceChange} out of your " +
-                    "${settleAction.remainingAmount} request"
+                    "${transactionRecord.balanceChange!!.asMoneyAmount()} out of your " +
+                    "${settleAction.remainingAmount.asMoneyAmount()} request"
     }
 
     data class DebteeAcceptSettleActionTransaction(

@@ -35,7 +35,6 @@ class SettleActionService : KoinComponent {
             this.transactionRecords.find {
                 it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
                         it.dateCreated == transactionRecord.dateCreated
-
             }?.dateAccepted = getCurrentTime()
         }
     }

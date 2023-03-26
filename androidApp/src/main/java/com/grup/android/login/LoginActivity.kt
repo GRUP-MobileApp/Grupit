@@ -122,7 +122,7 @@ fun LoginPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         H1Text(
-            text = "Login",
+            text = "GRUP",
             fontSize = 40.sp,
             color = AppTheme.colors.onSecondary
         )
@@ -261,13 +261,13 @@ fun LoginPage(
                 )
             }
         }
-        crashButton()
+        // CrashButton()
     }
 }
 
 // test crash reports
 @Composable
-fun crashButton () {
+fun CrashButton() {
     Button(
         onClick = {
             throw RuntimeException("Test Crash")

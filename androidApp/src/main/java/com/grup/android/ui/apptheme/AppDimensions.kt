@@ -21,6 +21,7 @@ data class AppDimensions(
     val spacing: Dp = 10.dp,
     val spacingMedium: Dp = 15.dp,
     val spacingLarge: Dp = 20.dp,
+    val spacingExtraLarge: Dp = 30.dp,
 
     val groupDetailsSize: Dp = 350.dp,
     val topBarSize: Float = 0.07f,

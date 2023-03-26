@@ -36,6 +36,7 @@ import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.grup.android.*
+import com.grup.android.notifications.GroupInvitesViewModel
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.DebtAction
@@ -67,6 +68,26 @@ fun H1Text(
 
 @Composable
 fun H1Text(
+    modifier: Modifier = Modifier,
+    text: AnnotatedString,
+    color: Color = AppTheme.colors.onSecondary,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontWeight: FontWeight? = null,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = AppTheme.typography.h1,
+        fontSize = fontSize,
+        fontWeight = fontWeight,
+        maxLines = maxLines,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun AutoSizingH1Text(
     modifier: Modifier = Modifier,
     text: AnnotatedString,
     color: Color = AppTheme.colors.onSecondary,
@@ -120,15 +141,17 @@ fun Caption(
 
 @Composable
 fun SmallIcon(
+    modifier: Modifier = Modifier,
     imageVector: ImageVector,
     contentDescription: String,
-    modifier: Modifier = Modifier
+    iconSize: Dp = AppTheme.dimensions.iconSize,
+    tint: Color = AppTheme.colors.onSecondary
 ) {
     Icon(
         imageVector = imageVector,
         contentDescription = contentDescription,
-        tint = AppTheme.colors.onSecondary,
-        modifier = modifier.size(AppTheme.dimensions.iconSize)
+        tint = tint,
+        modifier = modifier.size(iconSize)
     )
 }
 
@@ -161,6 +184,33 @@ fun H1ConfirmTextButton(
             fontSize = fontSize.times(scale),
             color = AppTheme.colors.onSecondary,
         )
+    }
+}
+
+@Composable
+fun AcceptCheckButton(
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxHeight()
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .aspectRatio(1f)
+                .clip(AppTheme.shapes.circleShape)
+                .background(AppTheme.colors.caption)
+                .clickable(onClick = onClick)
+        ) {
+            SmallIcon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Add to Group",
+                tint = AppTheme.colors.confirm,
+                iconSize = 24.dp,
+                modifier = Modifier.padding(AppTheme.dimensions.paddingSmall)
+            )
+        }
     }
 }
 
@@ -258,10 +308,11 @@ fun IconRowCard(
         }
         if (sideContent != null) {
             Row(
-                modifier = Modifier.padding(
-                    start = AppTheme.dimensions.spacingMedium,
-                    end = AppTheme.dimensions.paddingSmall
-                )
+                modifier = Modifier
+                    .padding(
+                        start = AppTheme.dimensions.spacingMedium,
+                        end = AppTheme.dimensions.paddingSmall
+                    )
             ) {
                 sideContent()
             }
@@ -294,8 +345,8 @@ fun profilePictureImagePainter(
             .memoryCachePolicy(CachePolicy.ENABLED)
             .diskCachePolicy(CachePolicy.ENABLED)
             .allowHardware(true)
-            .diskCacheKey(profilePictureURI)
-            .memoryCacheKey(profilePictureURI)
+            .diskCacheKey(userId)
+            .memoryCacheKey(userId)
             .build()
     return rememberAsyncImagePainter(
         model = imageRequest,
@@ -319,35 +370,6 @@ fun UserInfoRowCard(
     },
     iconSize: Dp = 50.dp
 ) {
-//    val context = LocalContext.current
-//    val imageLoader: ImageLoader = ImageLoader.Builder(context)
-//        .respectCacheHeaders(false)
-//        .memoryCache {
-//            MemoryCache
-//                .Builder(context)
-//                .build()
-//        }
-//        .diskCache {
-//            DiskCache.Builder()
-//                .directory(context.cacheDir.resolve("image_cache"))
-//                .build()
-//        }
-//        .build()
-//    val profilePictureURI = getProfilePictureURI(userInfo.userId!!)
-//    val imageRequest: ImageRequest =
-//        ImageRequest.Builder(context)
-//            .data(profilePictureURI)
-//            .memoryCachePolicy(CachePolicy.ENABLED)
-//            .diskCachePolicy(CachePolicy.ENABLED)
-//            .allowHardware(true)
-//            .diskCacheKey(profilePictureURI)
-//            .memoryCacheKey(profilePictureURI)
-//            .build()
-//    val asyncPainter = rememberAsyncImagePainter(
-//        model = imageLoader.enqueue(imageRequest),
-//        error = rememberVectorPainter(image = Icons.Default.Face)
-//    )
-
     IconRowCard(
         painter = profilePictureImagePainter(userId = userInfo.userId!!),
         mainContent = {
@@ -502,26 +524,6 @@ fun RecentActivityList(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun DrawerHeader(
-    navigateGroupInvitesOnClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp, horizontal = 20.dp)
-    ) {
-        Text(text = "Groups", fontSize = 40.sp, color = AppTheme.colors.onSecondary)
-        Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = navigateGroupInvitesOnClick) {
-            SmallIcon(
-                imageVector = Icons.Default.MailOutline,
-                contentDescription = "Notifications"
-            )
         }
     }
 }

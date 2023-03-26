@@ -85,20 +85,6 @@ fun ActionAmountLayout(
                 onActionAmountChange = { onActionAmountChange(it) },
                 message = message,
                 onMessageChange = { message = it },
-                topContent = {
-                    UserInfoRowCard(
-                        userInfo = myUserInfo,
-                        iconSize = 80.dp,
-                        mainContent = {
-                            Caption(text = "Balance")
-                            MoneyAmount(
-                                moneyAmount = myUserInfo.userBalance,
-                                fontSize = 48.sp
-                            )
-                        },
-                        sideContent = null
-                    )
-                },
                 actionButton = {
                     actionAmount.toDouble().let { amount ->
                         H1ConfirmTextButton(
@@ -123,20 +109,6 @@ fun ActionAmountLayout(
             ActionAmountScreenLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, myUserInfo.userBalance) },
-                topContent = {
-                    UserInfoRowCard(
-                        userInfo = myUserInfo,
-                        iconSize = 90.dp,
-                        mainContent = {
-                            Caption(text = "Balance")
-                            MoneyAmount(
-                                moneyAmount = myUserInfo.userBalance,
-                                fontSize = 48.sp
-                            )
-                        },
-                        sideContent = null
-                    )
-                },
                 actionButton = {
                     H1ConfirmTextButton(
                         text = actionType,
@@ -155,20 +127,6 @@ fun ActionAmountLayout(
             ActionAmountScreenLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, settleAction.remainingAmount) },
-                topContent = {
-                    UserInfoRowCard(
-                        userInfo = settleAction.debteeUserInfo!!,
-                        iconSize = 90.dp,
-                        mainContent = {
-                            Caption(text = "Remaining Amount")
-                            MoneyAmount(
-                                moneyAmount = settleAction.remainingAmount,
-                                fontSize = 48.sp
-                            )
-                        },
-                        sideContent = null
-                    )
-                },
                 actionButton = {
                     H1ConfirmTextButton(
                         text = actionType,
@@ -194,7 +152,6 @@ fun ActionAmountScreenLayout(
     onActionAmountChange: (String) -> Unit,
     message: String? = null,
     onMessageChange: ((String) -> Unit)? = null,
-    topContent: @Composable () -> Unit,
     actionButton: @Composable () -> Unit,
     onBackPress: () -> Unit,
 ) {
@@ -216,7 +173,6 @@ fun ActionAmountScreenLayout(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                topContent()
                 H1Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(color = AppTheme.colors.onSecondary)) {
@@ -243,7 +199,7 @@ fun ActionAmountScreenLayout(
                 ) {
                     message?.let { message ->
                         if (message.isEmpty()) {
-                            Caption(text = "Message", fontSize = 26.sp)
+                            Caption(text = "Message", fontSize = 24.sp)
                         }
                         TransparentTextField(
                             value = message,
@@ -332,7 +288,7 @@ fun KeyPad(
         listOf('.', '0', '<')
     )
     Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()

@@ -1,6 +1,5 @@
 package com.grup.android
 
-import GOOGLE_WEB_CLIENT_ID
 import android.app.Application
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions

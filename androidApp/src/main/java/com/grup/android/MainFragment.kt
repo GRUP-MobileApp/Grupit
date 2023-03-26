@@ -31,6 +31,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.grup.android.login.LoginActivity
+import com.grup.android.notifications.GroupInvitesViewModel
 import com.grup.android.notifications.NotificationsViewModel
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.transaction.TransactionViewModel
@@ -65,12 +66,12 @@ class MainFragment : KoinComponent, Fragment() {
                         mainViewModel = mainViewModel,
                         navController = findNavController(),
                         returnToLoginOnClick = {
-                            mainViewModel.logOut()
-                            googleSignInClient.signOut()
                             startActivity(
                                 Intent(activity, LoginActivity::class.java)
                                     .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             )
+                            mainViewModel.logOut()
+                            googleSignInClient.signOut()
                             requireActivity().finish()
                         }
                     )
@@ -105,9 +106,12 @@ fun MainLayout(
     val activeSettleActions: List<SettleAction> by
             mainViewModel.activeSettleActions.collectAsStateWithLifecycle()
 
+    val groupInvitesAmount: Int by
+            GroupInvitesViewModel.groupInvitesAmount.collectAsStateWithLifecycle()
     val notificationsAmount: Map<String, Int> by
             NotificationsViewModel.notificationsAmount.collectAsStateWithLifecycle()
 
+    // Not getting updated
     var selectedAction: Action? by remember { mutableStateOf(null) }
 
     val openDrawer: () -> Unit = { scope.launch { scaffoldState.drawerState.open() } }
@@ -150,7 +154,6 @@ fun MainLayout(
                             when (selectedAction) {
                                 is DebtAction -> DebtActionDetails(
                                     debtAction = selectedAction,
-                                    myUserInfo = userInfo,
                                     modifier = Modifier
                                         .padding(padding)
                                         .padding(AppTheme.dimensions.appPadding)
@@ -209,7 +212,8 @@ fun MainLayout(
                                     .let { selectedGroupNotificationsAmount ->
                                         if (
                                             notificationsAmount.values.sum() -
-                                            selectedGroupNotificationsAmount > 0
+                                            selectedGroupNotificationsAmount +
+                                            groupInvitesAmount > 0
                                         ) {
                                             Badge(
                                                 backgroundColor = AppTheme.colors.error,
@@ -261,6 +265,7 @@ fun MainLayout(
                         closeDrawer()
                         mainViewModel.onSelectedGroupChange(groups[index])
                     },
+                    groupInvitesAmount = groupInvitesAmount,
                     notificationsAmount = notificationsAmount,
                     isSelectedGroup = { it.getId() == selectedGroup?.getId() },
                     navigateGroupInvitesOnClick = {
@@ -315,18 +320,20 @@ fun MainLayout(
                             )
                             Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingLarge))
                         }
-                        item {
-                            ActiveSettleActions(
-                                modifier = Modifier.fillMaxWidth(),
-                                mySettleActions = activeSettleActions.filter { settleAction ->
-                                    settleAction.debteeUserInfo!!.userId == myUserInfo.userId!!
-                                },
-                                activeSettleActions = activeSettleActions.filter { settleAction ->
-                                    settleAction.debteeUserInfo!!.userId != myUserInfo.userId!!
-                                },
-                                settleActionCardOnClick = selectAction
-                            )
-                            Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingLarge))
+                        if (activeSettleActions.isNotEmpty()) {
+                            item {
+                                ActiveSettleActions(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    mySettleActions = activeSettleActions.filter { settleAction ->
+                                        settleAction.debteeUserInfo!!.userId == myUserInfo.userId!!
+                                    },
+                                    activeSettleActions = activeSettleActions.filter { settleAction ->
+                                        settleAction.debteeUserInfo!!.userId != myUserInfo.userId!!
+                                    },
+                                    settleActionCardOnClick = selectAction
+                                )
+                                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingLarge))
+                            }
                         }
                         recentActivityList(
                             groupActivity = groupActivity,
@@ -345,7 +352,7 @@ fun MainLayout(
 
 @Composable
 fun NoGroupsDisplay() {
-    Text(text = "Yaint in any groups bozo", color = AppTheme.colors.onSecondary)
+    Text(text = " ^ Create or join a group", color = AppTheme.colors.onSecondary)
 }
 
 @Composable
@@ -353,6 +360,7 @@ fun GroupNavigationMenu(
     groups: List<Group>,
     onGroupClick: (Int) -> Unit,
     isSelectedGroup: (Group) -> Boolean,
+    groupInvitesAmount: Int,
     notificationsAmount: Map<String, Int>,
     navigateGroupInvitesOnClick: () -> Unit,
     navigateCreateGroupOnClick: () -> Unit,
@@ -364,7 +372,36 @@ fun GroupNavigationMenu(
             .fillMaxSize()
             .background(background)
     ) {
-        DrawerHeader(navigateGroupInvitesOnClick = navigateGroupInvitesOnClick)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp, horizontal = 20.dp)
+        ) {
+            Text(text = "Groups", fontSize = 40.sp, color = AppTheme.colors.onSecondary)
+            Spacer(modifier = Modifier.weight(1f))
+            BadgedBox(
+                badge = {
+                    if (groupInvitesAmount > 0) {
+                        Badge(
+                            backgroundColor = AppTheme.colors.error,
+                            modifier = Modifier
+                                .offset((-8).dp, (10).dp)
+                                .clip(AppTheme.shapes.circleShape)
+                                .align(Alignment.Center)
+                        ) {
+                            H1Text(text = groupInvitesAmount.toString(), fontSize = 14.sp)
+                        }
+                    }
+                }
+            ) {
+                IconButton(onClick = navigateGroupInvitesOnClick) {
+                    SmallIcon(
+                        imageVector = Icons.Default.MailOutline,
+                        contentDescription = "Notifications"
+                    )
+                }
+            }
+        }
         LazyColumn(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)) {
             itemsIndexed(groups) { index, group ->
                 GroupNavigationRow(
@@ -437,6 +474,8 @@ fun GroupNavigationRow(
                             modifier = Modifier
                                 .offset((-6).dp, (8).dp)
                                 .size(16.dp)
+                                .clip(AppTheme.shapes.circleShape)
+                                .align(Alignment.Center)
                         ) {
                             H1Text(text = groupNotificationsAmount.toString(), fontSize = 12.sp)
                         }
@@ -478,6 +517,8 @@ fun GroupNotificationsPopup(
                     backgroundColor = AppTheme.colors.error,
                     modifier = Modifier
                         .offset((-15).dp, (15).dp)
+                        .clip(AppTheme.shapes.circleShape)
+                        .align(Alignment.Center)
                 ) {
                     H1Text(
                         text = groupNotificationsAmount.toString(),
@@ -531,19 +572,22 @@ fun GroupBalanceCard(
             H1Text(text = "Your Balance")
             MoneyAmount(moneyAmount = myUserInfo.userBalance)
             Row(
-                horizontalArrangement = Arrangement.SpaceAround,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = AppTheme.dimensions.spacing)
             ) {
                 H1ConfirmTextButton(
                     text = "Debt",
-                    onClick = navigateDebtActionAmountOnClick
+                    onClick = navigateDebtActionAmountOnClick,
+                    modifier = Modifier.weight(1f)
                 )
+                Spacer(modifier = Modifier.width(AppTheme.dimensions.spacing))
                 H1ConfirmTextButton(
                     text = "Settle",
                     enabled = myUserInfo.userBalance > 0,
-                    onClick = navigateSettleActionAmountOnClick
+                    onClick = navigateSettleActionAmountOnClick,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -562,58 +606,47 @@ fun ActiveSettleActions(
         modifier = modifier
     ) {
         H1Text(text = "Active Settle", fontWeight = FontWeight.Medium)
-        if (mySettleActions.isEmpty() && activeSettleActions.isEmpty()) {
-            // TODO: No requests display
-        } else {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                if (mySettleActions.isNotEmpty()) {
-                    itemsIndexed(mySettleActions) { index, settleAction ->
-                        when(index) {
-                            0 -> {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                                    horizontalAlignment = Alignment.Start
-                                ) {
-                                    Caption(text = "My Settle")
-                                    SettleActionCard(
-                                        settleAction = settleAction,
-                                        settleActionCardOnClick = {
-                                            settleActionCardOnClick(settleAction)
-                                        },
-                                        showPendingNotification = true
-                                    )
-                                }
-                            }
-                            else -> SettleActionCard(
-                                settleAction = settleAction,
-                                settleActionCardOnClick = {
-                                    settleActionCardOnClick(settleAction)
-                                },
-                                showPendingNotification = true
-                            )
-                        }
-                    }
-                }
-                if (activeSettleActions.isNotEmpty()) {
-                    itemsIndexed(activeSettleActions) { index, settleAction ->
-                        when(index) {
-                            0 -> Column(
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            if (mySettleActions.isNotEmpty()) {
+                itemsIndexed(mySettleActions) { index, settleAction ->
+                    when(index) {
+                        0 -> {
+                            Column(
                                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                                 horizontalAlignment = Alignment.Start
                             ) {
-                                Caption(text = "Other Settle")
+                                Caption(text = "My Settle")
                                 SettleActionCard(
                                     settleAction = settleAction,
                                     settleActionCardOnClick = {
                                         settleActionCardOnClick(settleAction)
                                     },
-                                    showPendingNotification = false
+                                    showPendingNotification = true
                                 )
                             }
-                            else -> SettleActionCard(
+                        }
+                        else -> SettleActionCard(
+                            settleAction = settleAction,
+                            settleActionCardOnClick = {
+                                settleActionCardOnClick(settleAction)
+                            },
+                            showPendingNotification = true
+                        )
+                    }
+                }
+            }
+            if (activeSettleActions.isNotEmpty()) {
+                itemsIndexed(activeSettleActions) { index, settleAction ->
+                    when(index) {
+                        0 -> Column(
+                            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Caption(text = "Other Settle")
+                            SettleActionCard(
                                 settleAction = settleAction,
                                 settleActionCardOnClick = {
                                     settleActionCardOnClick(settleAction)
@@ -621,6 +654,13 @@ fun ActiveSettleActions(
                                 showPendingNotification = false
                             )
                         }
+                        else -> SettleActionCard(
+                            settleAction = settleAction,
+                            settleActionCardOnClick = {
+                                settleActionCardOnClick(settleAction)
+                            },
+                            showPendingNotification = false
+                        )
                     }
                 }
             }
@@ -644,6 +684,8 @@ fun SettleActionCard(
                         backgroundColor = AppTheme.colors.error,
                         modifier = Modifier
                             .offset((-18).dp, (18.dp))
+                            .clip(AppTheme.shapes.circleShape)
+                            .align(Alignment.Center)
                     ) {
                         H1Text(
                             text = notificationCount.toString(),
@@ -686,9 +728,16 @@ fun SettleActionCard(
 fun DebtActionDetails(
     modifier: Modifier = Modifier,
     debtAction: DebtAction,
-    myUserInfo: UserInfo
 ) {
-    val isMyAction: Boolean = myUserInfo.userId!! == debtAction.debteeUserInfo!!.userId!!
+    val tabTitles: List<String> = mutableListOf<String>().apply {
+        if (debtAction.transactionRecords.any { it.dateAccepted != TransactionRecord.PENDING }) {
+            this.add("Accepted")
+        }
+        if (debtAction.transactionRecords.any { it.dateAccepted == TransactionRecord.PENDING }) {
+            this.add("Pending")
+        }
+    }
+    var selectedTabIndex: Int by remember { mutableStateOf(0) }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -700,19 +749,18 @@ fun DebtActionDetails(
             mainContent = {
                 Caption(text = debtAction.debteeUserInfo!!.nickname!!)
                 MoneyAmount(
-                    moneyAmount =
-                        if (isMyAction) debtAction.totalAmount
-                        else debtAction.acceptedAmount,
+                    moneyAmount = debtAction.totalAmount,
                     fontSize = 60.sp
                 )
             },
             sideContent = {
                 Column(horizontalAlignment = Alignment.End) {
-                    Caption(text = "Request")
+                    Caption(text = "Debt")
                     Caption(text = isoFullDate(debtAction.date))
                 }
             },
-            iconSize = 90.dp
+            iconSize = 90.dp,
+            modifier = Modifier.fillMaxWidth()
         )
 
         if (debtAction.message.isNotBlank()) {
@@ -729,7 +777,19 @@ fun DebtActionDetails(
                 .fillMaxWidth()
                 .padding(top = AppTheme.dimensions.paddingMedium)
         ) {
-            H1Text(text = "Requests")
+            tabTitles.forEachIndexed { index, tabTitle ->
+                if (tabTitle == tabTitles[selectedTabIndex]) {
+                    H1Text(
+                        text = tabTitle,
+                        modifier = Modifier.clickable { selectedTabIndex = index }
+                    )
+                } else {
+                    Caption(
+                        text = tabTitle,
+                        modifier = Modifier.clickable { selectedTabIndex = index }
+                    )
+                }
+            }
         }
 
         Box(
@@ -743,46 +803,30 @@ fun DebtActionDetails(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
             ) {
-                debtAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.dateAccepted != TransactionRecord.PENDING
-                }.forEach { acceptedTransaction ->
-                    TransactionRecordRowCard(
-                        transactionRecord = acceptedTransaction,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-        }
-
-        if (isMyAction) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = AppTheme.dimensions.paddingMedium)
-            ) {
-                H1Text(text = "Pending")
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .clip(AppTheme.shapes.extraLarge)
-                    .background(AppTheme.colors.secondary)
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                    modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
-                ) {
-                    debtAction.transactionRecords.filter { transactionRecord ->
-                        transactionRecord.dateAccepted == TransactionRecord.PENDING
-                    }.forEach { pendingTransaction ->
-                        TransactionRecordRowCard(
-                            transactionRecord = pendingTransaction,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                when (tabTitles[selectedTabIndex]) {
+                    "Accepted" -> {
+                        debtAction.transactionRecords.filter { transactionRecord ->
+                            transactionRecord.dateAccepted != TransactionRecord.PENDING
+                        }.let { acceptedTransactions ->
+                            acceptedTransactions.forEach { acceptedTransaction ->
+                                TransactionRecordRowCard(
+                                    transactionRecord = acceptedTransaction,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                    "Pending" -> {
+                        debtAction.transactionRecords.filter { transactionRecord ->
+                            transactionRecord.dateAccepted == TransactionRecord.PENDING
+                        }.let { pendingTransactions ->
+                            pendingTransactions.forEach { pendingTransaction ->
+                                TransactionRecordRowCard(
+                                    transactionRecord = pendingTransaction,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -909,40 +953,36 @@ fun SettleActionDetails(
                     verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                     modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
                 ) {
-                    when (selectedTabIndex) {
-                        0 -> {
+                    when (tabTitles[selectedTabIndex]) {
+                        "Accepted" -> {
                             settleAction.transactionRecords.filter { transactionRecord ->
                                 transactionRecord.dateAccepted != TransactionRecord.PENDING
                             }.let { acceptedTransactions ->
-                                if (acceptedTransactions.isNotEmpty()) {
-                                    acceptedTransactions.forEach { acceptedTransaction ->
-                                        TransactionRecordRowCard(
-                                            transactionRecord = acceptedTransaction,
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                    }
+                                acceptedTransactions.forEach { acceptedTransaction ->
+                                    TransactionRecordRowCard(
+                                        transactionRecord = acceptedTransaction,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
                                 }
                             }
                         }
-                        1 -> {
+                        "Pending" -> {
                             settleAction.transactionRecords.filter { transactionRecord ->
                                 transactionRecord.dateAccepted == TransactionRecord.PENDING
                             }.let { pendingTransactions ->
-                                if (pendingTransactions.isNotEmpty()) {
-                                    pendingTransactions.forEach { pendingTransaction ->
-                                        TransactionRecordRowCard(
-                                            transactionRecord = pendingTransaction,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    selectedTransaction = pendingTransaction
-                                                    scope.launch {
-                                                        acceptPendingTransactionBottomSheetState
-                                                            .show()
-                                                    }
+                                pendingTransactions.forEach { pendingTransaction ->
+                                    TransactionRecordRowCard(
+                                        transactionRecord = pendingTransaction,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                selectedTransaction = pendingTransaction
+                                                scope.launch {
+                                                    acceptPendingTransactionBottomSheetState
+                                                        .show()
                                                 }
-                                        )
-                                    }
+                                            }
+                                    )
                                 }
                             }
                         }

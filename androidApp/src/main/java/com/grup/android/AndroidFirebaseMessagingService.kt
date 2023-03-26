@@ -46,7 +46,7 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
             .setContentTitle(notification.title)
             .setContentText(notification.body)
             .setAutoCancel(true)
-            .setSmallIcon(R.drawable.ic_profile_icon)
+            .setSmallIcon(R.drawable.grup_logo)
             .setContentIntent(pendingIntent)
             .setDefaults(Notification.DEFAULT_VIBRATE)
 

@@ -5,8 +5,9 @@ import com.grup.android.transaction.TransactionActivity
 import com.grup.models.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 
-class MainViewModel : LoggedInViewModel() {
+class MainViewModel : KoinComponent, LoggedInViewModel() {
     companion object {
         private val selectedGroupMutable:
                 MutableStateFlow<Group?> = MutableStateFlow(null)
@@ -84,20 +85,25 @@ class MainViewModel : LoggedInViewModel() {
             }.sortedBy { it.date }
         }.asState()
 
+    private val completedSettleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
+        _settleActionsFlow.map { settleActions ->
+            settleActions.filter { settleAction ->
+                settleAction.remainingAmount == 0.0
+            }.map { settleAction ->
+                TransactionActivity.CreateSettleAction(settleAction)
+            }
+        }
     private val settleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.flatMap { settleAction ->
-                listOf(
-                    TransactionActivity.CreateSettleAction(settleAction),
-                    *settleAction.transactionRecords.filter { transactionRecord ->
-                        transactionRecord.dateAccepted != TransactionRecord.PENDING
-                    }.map { transactionRecord ->
-                        TransactionActivity.SettlePartialSettleAction(
-                            settleAction,
-                            transactionRecord
-                        )
-                    }.toTypedArray()
-                )
+                settleAction.transactionRecords.filter { transactionRecord ->
+                    transactionRecord.dateAccepted != TransactionRecord.PENDING
+                }.map { transactionRecord ->
+                    TransactionActivity.SettlePartialSettleAction(
+                        settleAction,
+                        transactionRecord
+                    )
+                }
             }
         }
 
@@ -105,6 +111,7 @@ class MainViewModel : LoggedInViewModel() {
     val groupActivity: StateFlow<List<TransactionActivity>> =
         combine(
             debtActionsAsTransactionActivity,
+            completedSettleActionsAsTransactionActivity,
             settleActionsAsTransactionActivity
         ) { allTransactionActivities: Array<List<TransactionActivity>> ->
             allTransactionActivities.flatMap { it }.sortedByDescending { transactionActivity ->

@@ -11,7 +11,8 @@
         android:label="GRUP"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".MainApplication">
+        android:name=".MainApplication"
+        android:icon="@drawable/grup_logo">
 
 
         <activity
