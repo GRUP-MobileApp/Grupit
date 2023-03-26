@@ -22,7 +22,7 @@ class DebtActionController : KoinComponent {
         return debtActionService.createDebtAction(transactionRecords, debtee, message)
     }
 
-    fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
+    suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionService.acceptDebtAction(debtAction, myTransactionRecord)
         userInfoService.applyDebtActionTransactionRecord(debtAction, myTransactionRecord)
     }

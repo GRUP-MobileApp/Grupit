@@ -34,8 +34,8 @@ class MainViewModel : KoinComponent, LoggedInViewModel() {
     }.asState()
 
     // Hot flow containing User's UserInfos
-    private val _myUserInfosFlow by lazy { apiServer.getMyUserInfosAsFlow() }
-    val myUserInfo: StateFlow<UserInfo?> by lazy {
+    private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
+    val myUserInfo: StateFlow<UserInfo?> =
         _myUserInfosFlow.combine(selectedGroup) { userInfos, selectedGroup ->
             selectedGroup?.let { nonNullGroup ->
                 userInfos.find { userInfo ->
@@ -43,7 +43,6 @@ class MainViewModel : KoinComponent, LoggedInViewModel() {
                 }
             }
         }.asState()
-    }
 
     // DebtActions belonging to the selectedGroup, mapped to TransactionActivity
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
@@ -124,9 +123,12 @@ class MainViewModel : KoinComponent, LoggedInViewModel() {
     fun createGroup(groupName: String) = apiServer.createGroup(groupName)
 
     // SettleAction
-    fun acceptSettleActionTransaction(settleAction: SettleAction,
-                                      transactionRecord: TransactionRecord) =
+    fun acceptSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = viewModelScope.launch {
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+    }
 
     fun logOut() = viewModelScope.launch {
         selectedGroupMutable.value = null

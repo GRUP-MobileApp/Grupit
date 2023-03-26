@@ -1,5 +1,6 @@
 package com.grup.android.transaction
 
+import androidx.lifecycle.viewModelScope
 import com.grup.android.MainViewModel
 import com.grup.android.LoggedInViewModel
 import com.grup.models.SettleAction
@@ -7,6 +8,7 @@ import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class TransactionViewModel : LoggedInViewModel() {
     companion object {
@@ -66,8 +68,9 @@ class TransactionViewModel : LoggedInViewModel() {
         )
 
     // SettleAction
-    fun createSettleAction(settleAmount: Double) =
+    fun createSettleAction(settleAmount: Double) = viewModelScope.launch {
         apiServer.createSettleAction(settleAmount, myUserInfo.value)
+    }
 
     fun createSettleActionTransaction(
         settleAction: SettleAction,

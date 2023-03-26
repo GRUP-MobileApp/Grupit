@@ -1,5 +1,6 @@
 package com.grup.repositories.abstract
 
+import com.grup.di.app
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.UserInfo
 import io.realm.kotlin.Realm
@@ -28,8 +29,8 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
         return realm.query<UserInfo>().find().asFlow().map { it.list }
     }
 
-    override fun updateUserInfo(userInfo: UserInfo, block: (UserInfo) -> Unit): UserInfo? {
-        return realm.writeBlocking {
+    override suspend fun updateUserInfo(userInfo: UserInfo, block: (UserInfo) -> Unit): UserInfo? {
+        return realm.write {
             findLatest(userInfo)?.apply {
                 block(this)
             }

@@ -11,22 +11,20 @@ import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class NotificationsViewModel : KoinComponent, LoggedInViewModel() {
-    private val preferencesDataStore: PreferencesDataStore by inject()
-    private val _notificationLastViewDatesFlow = preferencesDataStore.getStringData().map { data ->
-        "notifications_${apiServer.user.getId()}_".let { keyPrefix ->
-            data.filter { entry ->
-                entry.key.startsWith(keyPrefix)
-            }.map { entry ->
-                entry.key.removePrefix(keyPrefix) to entry.value
-            }.toMap()
-        }
-    }
+class NotificationsViewModel : LoggedInViewModel() {
     companion object {
         var notificationsAmount: MutableStateFlow<Map<String, Int>> =
             MutableStateFlow(emptyMap())
     }
     // TODO: Remove notifications after joinDate
+
+    private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
+    private val latestDatesFlow: Flow<Map<String, String>> =
+        _myUserInfosFlow.map { myUserInfos ->
+            myUserInfos.associate { userInfo ->
+                userInfo.groupId!! to userInfo.latestViewDate
+            }
+        }
 
     // Hot flow containing all DebtActions across all groups that the user is a part of
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
@@ -92,9 +90,10 @@ class NotificationsViewModel : KoinComponent, LoggedInViewModel() {
             }.groupBy { notification ->
                 notification.groupId
             }
-        }.combine(_notificationLastViewDatesFlow) { notifications, lastViewDates ->
+        }.combine(latestDatesFlow) { notifications, lastViewDates ->
             notificationsAmount.value = notifications.map { groupEntry ->
                 groupEntry.key to groupEntry.value.count { notification ->
+                    !notification.dismissable ||
                     lastViewDates[groupEntry.key]?.let { lastViewDate ->
                         notification.date > lastViewDate
                     } ?: true
@@ -104,20 +103,22 @@ class NotificationsViewModel : KoinComponent, LoggedInViewModel() {
         }.asNotification(emptyMap())
 
     fun logGroupNotificationsDate() = viewModelScope.launch {
-        preferencesDataStore.putString(
-            "notifications_${apiServer.user.getId()}_${MainViewModel.selectedGroup.getId()}",
-            Clock.System.now().toString()
-        )
+        apiServer.updateLatestTime(MainViewModel.selectedGroup)
     }
 
     // DebtAction
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        apiServer.acceptDebtAction(debtAction, myTransactionRecord)
+        viewModelScope.launch {
+            apiServer.acceptDebtAction(debtAction, myTransactionRecord)
+        }
 
     // SettleAction
-    fun acceptSettleActionTransaction(settleAction: SettleAction,
-                                      transactionRecord: TransactionRecord) =
+    fun acceptSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = viewModelScope.launch {
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+    }
 
     private fun <T: Iterable<Notification>> T.afterDate(date: String) =
         this.filter { it.date > date }

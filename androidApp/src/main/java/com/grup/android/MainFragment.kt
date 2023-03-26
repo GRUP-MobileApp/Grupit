@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -51,6 +52,10 @@ class MainFragment : KoinComponent, Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Eagerly start getting notifications
+        ViewModelProvider(this)[NotificationsViewModel::class.java]
+        ViewModelProvider(this)[GroupInvitesViewModel::class.java]
+        
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {

@@ -4,6 +4,7 @@ import com.grup.exceptions.NegativeBalanceException
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.*
 import com.grup.other.getCurrentTime
+import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -16,7 +17,6 @@ class UserInfoService : KoinComponent {
                 this.userId = user.getId()
                 this.groupId = groupId
                 this.nickname = user.displayName
-                this.joinDate = getCurrentTime()
             }
         )
     }
@@ -28,7 +28,7 @@ class UserInfoService : KoinComponent {
     fun findMyUserInfosAsFlow(user: User) = userInfoRepository.findMyUserInfosAsFlow(user.getId())
     fun findAllUserInfosAsFlow() = userInfoRepository.findAllUserInfosAsFlow()
 
-    fun applyDebtActionTransactionRecord(
+    suspend fun applyDebtActionTransactionRecord(
         debtAction: DebtAction,
         transactionRecord: TransactionRecord,
         allowNegative: Boolean = true
@@ -50,7 +50,7 @@ class UserInfoService : KoinComponent {
         }
     }
 
-    fun applySettleAction(settleAction: SettleAction) {
+    suspend fun applySettleAction(settleAction: SettleAction) {
         val debteeUserInfo: UserInfo = settleAction.debteeUserInfo!!
 
         if (debteeUserInfo.userBalance < settleAction.settleAmount!!) {
@@ -63,7 +63,7 @@ class UserInfoService : KoinComponent {
         }
     }
 
-    fun applyPartialSettleActionTransactionRecord(
+    suspend fun applyPartialSettleActionTransactionRecord(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) {
@@ -78,6 +78,17 @@ class UserInfoService : KoinComponent {
 
         userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->
             userInfo.userBalance += transactionRecord.balanceChange!!
+        }
+    }
+
+    suspend fun updateLatestTime(user: User, group: Group) {
+        val myUserInfo: UserInfo =
+            findMyUserInfosAsFlow(user).first().find {
+                it.groupId == group.getId()
+            }!!
+
+        userInfoRepository.updateUserInfo(myUserInfo) { userInfo ->
+            userInfo.latestViewDate = getCurrentTime()
         }
     }
 }

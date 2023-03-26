@@ -105,6 +105,7 @@ class APIServer private constructor(
     // UserInfo
     fun getMyUserInfosAsFlow() = userInfoController.getMyUserInfosAsFlow(user)
     fun getAllUserInfosAsFlow() = userInfoController.getAllUserInfosAsFlow()
+    suspend fun updateLatestTime(group: Group) = userInfoController.updateLatestTime(user, group)
 
     // GroupInvite
     suspend fun inviteUserToGroup(username: String, group: Group) =
@@ -119,18 +120,18 @@ class APIServer private constructor(
         debtee: UserInfo,
         message: String
     ) = debtActionController.createDebtAction(transactionRecords, debtee, message)
-    fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
+    suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
         debtActionController.acceptDebtAction(debtAction, myTransactionRecord)
     fun getAllDebtActionsAsFlow() = debtActionController.getAllDebtActionsAsFlow()
 
     // SettleAction
-    fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
+    suspend fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
         settleActionController.createSettleAction(settleAmount, debtee)
     fun createSettleActionTransaction(
         settleAction: SettleAction,
         myTransactionRecord: TransactionRecord
     ) = settleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)
-    fun acceptSettleActionTransaction(settleAction: SettleAction,
+    suspend fun acceptSettleActionTransaction(settleAction: SettleAction,
                                       transactionRecord: TransactionRecord) =
         settleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = settleActionController.getAllSettleActionsAsFlow()

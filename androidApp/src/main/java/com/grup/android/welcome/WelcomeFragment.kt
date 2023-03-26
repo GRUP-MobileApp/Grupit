@@ -364,7 +364,8 @@ fun SetProfilePicture(
                 },
                 contentDescription = "Selected picture",
                 modifier = Modifier
-                    .size(300.dp)
+                    .fillMaxHeight(0.3f)
+                    .aspectRatio(1f)
                     .clip(AppTheme.shapes.circleShape)
             )
         }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class WelcomeViewModel : LoggedInViewModel() {
     val hasUserObject: Boolean
@@ -85,7 +86,7 @@ class WelcomeViewModel : LoggedInViewModel() {
         username: String,
         displayName: String,
         profilePicture: ByteArray
-    ) = viewModelScope.launch {
+    ) = runBlocking {
         apiServer.registerUser(
             username,
             displayName,

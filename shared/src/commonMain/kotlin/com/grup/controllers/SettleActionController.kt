@@ -13,7 +13,7 @@ class SettleActionController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
     private val settleActionService: SettleActionService by inject()
 
-    fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
+    suspend fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
         return settleActionService.createSettleAction(settleAmount, debtee).also { settleAction ->
             userInfoService.applySettleAction(settleAction)
         }
@@ -26,7 +26,7 @@ class SettleActionController : KoinComponent {
         settleActionService.createSettleActionTransaction(settleAction, myTransactionRecord)
     }
 
-    fun acceptSettleActionTransaction(
+    suspend fun acceptSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) {

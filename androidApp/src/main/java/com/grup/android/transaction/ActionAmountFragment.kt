@@ -167,7 +167,7 @@ fun ActionAmountScreenLayout(
                 .padding(AppTheme.dimensions.appPadding)
         ) {
             Column(
-                verticalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.SpaceAround,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -291,6 +291,7 @@ fun KeyPad(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
+            .fillMaxHeight(0.4f)
             .fillMaxWidth()
     ) {
         keys.forEach { row ->
