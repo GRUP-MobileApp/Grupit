@@ -16,8 +16,6 @@ import org.koin.core.component.KoinComponent
 class LoginViewModel : KoinComponent, ViewModel() {
     sealed class LoginResult {
         object Success : LoginResult()
-        object PendingLogin: LoginResult()
-        object PendingRegister : LoginResult()
         object PendingGoogleLogin: LoginResult()
         data class Error(val exception: Exception) : LoginResult()
         object None : LoginResult()
@@ -25,30 +23,6 @@ class LoginViewModel : KoinComponent, ViewModel() {
 
     private val _loginResult = MutableStateFlow<LoginResult>(LoginResult.None)
     val loginResult: StateFlow<LoginResult> = _loginResult
-
-    fun loginEmailPassword(email: String, password: String) = viewModelScope.launch {
-        _loginResult.value = LoginResult.PendingLogin
-        try {
-            LoggedInViewModel.injectApiServer(
-                APIServer.Login.loginEmailAndPassword(email, password)
-            )
-            _loginResult.value = LoginResult.Success
-        } catch (e: LoginException) {
-            _loginResult.value = LoginResult.Error(e)
-        }
-    }
-
-    fun registerEmailPassword(email: String, password: String) = viewModelScope.launch {
-        _loginResult.value = LoginResult.PendingRegister
-        try {
-            LoggedInViewModel.injectApiServer(
-                APIServer.Login.registerEmailAndPassword(email, password)
-            )
-            _loginResult.value = LoginResult.Success
-        } catch (e: LoginException) {
-            _loginResult.value = LoginResult.Error(e)
-        }
-    }
 
     fun loginGoogleAccount(task: Task<GoogleSignInAccount>) = viewModelScope.launch {
         if (task.isSuccessful) {
@@ -65,8 +39,5 @@ class LoginViewModel : KoinComponent, ViewModel() {
                 _loginResult.value = LoginResult.Error(e)
             }
         }
-    }
-
-    fun loginSavedCredentials() = viewModelScope.launch {
     }
 }
