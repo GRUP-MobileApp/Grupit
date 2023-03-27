@@ -33,7 +33,7 @@ class APIServer private constructor(
     private val subscriptionsJob: Job = startSubscriptionSyncJob()
 
     companion object Login {
-        internal val app: App = App.create(TEST_APP_ID)
+        internal val app: App = App.create(APP_ID)
 
         private suspend fun initializeAPIServer(credentials: Credentials): APIServer {
             app.login(credentials)

@@ -2,7 +2,7 @@ package com.grup.repositories
 
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
-import com.grup.other.TEST_MONGODB_API_ENDPOINT
+import com.grup.other.MONGODB_API_ENDPOINT
 import io.ktor.client.*
 import io.ktor.client.statement.*
 import io.ktor.client.request.*
@@ -18,7 +18,7 @@ internal abstract class UserRepository : IUserRepository, KoinComponent {
     override suspend fun findUserByUsername(username: String): User? {
         var responseUser: User? = null
         val response: HttpResponse = client.get(
-            "$TEST_MONGODB_API_ENDPOINT/user/findUserByUsername"
+            "$MONGODB_API_ENDPOINT/user/findUserByUsername"
         ) {
             contentType(ContentType.Application.Json)
             url {
