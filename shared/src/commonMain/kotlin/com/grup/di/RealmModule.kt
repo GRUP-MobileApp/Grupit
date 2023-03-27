@@ -17,8 +17,6 @@ import io.realm.kotlin.mongodb.sync.asQuery
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.*
 
-internal val app: App = App.create(APP_ID)
-
 internal suspend fun openSyncedRealm(realmUser: RealmUser): Realm {
     return Realm.open(
         SyncConfiguration.Builder(realmUser,

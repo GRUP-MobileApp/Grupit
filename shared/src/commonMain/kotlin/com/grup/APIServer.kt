@@ -12,6 +12,7 @@ import com.grup.models.User
 import com.grup.other.RealmUser
 import com.grup.other.APP_ID
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
+import com.grup.other.TEST_APP_ID
 import com.grup.service.Notifications
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.*
@@ -32,7 +33,7 @@ class APIServer private constructor(
     private val subscriptionsJob: Job = startSubscriptionSyncJob()
 
     companion object Login {
-        internal val app: App = App.create(APP_ID)
+        internal val app: App = App.create(TEST_APP_ID)
 
         private suspend fun initializeAPIServer(credentials: Credentials): APIServer {
             app.login(credentials)
