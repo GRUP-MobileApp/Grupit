@@ -1,12 +1,10 @@
 package com.grup.repositories
 
-import com.grup.di.app
+import com.grup.APIServer.Login.app
 import com.grup.models.User
 import com.grup.repositories.abstract.RealmUserRepository
 import io.realm.kotlin.Realm
-import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.syncSession
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

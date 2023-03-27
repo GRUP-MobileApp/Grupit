@@ -20,10 +20,6 @@ class UserController : KoinComponent {
         return userService.getMyUser()
     }
 
-    suspend fun getUserById(userId: String): User? {
-        return userService.getUserById(userId)
-    }
-
     suspend fun usernameExists(username: String): Boolean {
         return userService.getUserByUsername(username) != null
     }

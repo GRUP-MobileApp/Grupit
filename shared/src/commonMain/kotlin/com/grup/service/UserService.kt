@@ -31,9 +31,6 @@ internal class UserService : KoinComponent {
     fun getMyUser(): User? {
         return userRepository.findMyUser()
     }
-    suspend fun getUserById(userId: String): User? {
-        return userRepository.findUserById(userId)
-    }
 
     suspend fun getUserByUsername(username: String): User? {
         if (username.isBlank()) {

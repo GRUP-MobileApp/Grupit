@@ -1,6 +1,5 @@
 package com.grup.repositories.abstract
 
-import com.grup.di.app
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.UserInfo
 import io.realm.kotlin.Realm
