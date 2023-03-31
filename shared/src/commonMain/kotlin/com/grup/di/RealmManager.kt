@@ -29,6 +29,7 @@ import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
+import kotlin.random.Random
 
 class RealmManager : KoinComponent, DBManager {
     private val realm: Realm by inject()
@@ -127,6 +128,7 @@ class RealmManager : KoinComponent, DBManager {
                     }
                     .waitForInitialRemoteData()
                     .name("syncedRealm")
+                    .encryptionKey(getRandomKey())
                     .build()
             ).also { realm ->
                 realm.syncSession.downloadAllServerChanges()
@@ -138,6 +140,16 @@ class RealmManager : KoinComponent, DBManager {
             }
             Notifications.subscribePersonalNotifications(realmUser.id)
             return RealmManager()
+        }
+
+        private fun getRandomKey(seed: Long? = null): ByteArray {
+            val key = ByteArray(64)
+            if (seed != null) {
+                Random(seed).nextBytes(key)
+            } else {
+                Random.nextBytes(key)
+            }
+            return key
         }
     }
 
