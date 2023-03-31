@@ -6,7 +6,7 @@ import com.grup.service.UserInfoService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class UserInfoController : KoinComponent {
+internal class UserInfoController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
 
     fun getMyUserInfosAsFlow(user: User) = userInfoService.findMyUserInfosAsFlow(user)

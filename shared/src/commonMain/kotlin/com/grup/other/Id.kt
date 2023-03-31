@@ -2,7 +2,6 @@ package com.grup.other
 
 import io.realm.kotlin.types.RealmUUID
 
-const val idSerialName = "_id"
+internal const val idSerialName = "_id"
 
-fun createId(): String = RealmUUID.random().toString()
-
+internal fun createId(): String = RealmUUID.random().toString()

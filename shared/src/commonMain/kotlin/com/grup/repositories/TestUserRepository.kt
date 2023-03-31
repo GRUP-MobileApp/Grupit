@@ -1,3 +1,5 @@
+package com.grup.repositories
+
 import com.grup.models.User
 import com.grup.repositories.abstract.RealmUserRepository
 import io.realm.kotlin.Realm

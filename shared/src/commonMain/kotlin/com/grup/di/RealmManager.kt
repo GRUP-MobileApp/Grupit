@@ -30,7 +30,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 
-class RealmManager : KoinComponent, DBManager {
+internal class RealmManager : KoinComponent, DBManager {
     private val realm: Realm by inject()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -41,7 +41,7 @@ class RealmManager : KoinComponent, DBManager {
                 val newGroupIds: Set<String> = resultsChange.list.map { it.groupId!! }.toSet()
 
                 realm.subscriptions.update {
-                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
+                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
                         add(realm.query<Group>("$idSerialName == $0", groupId),
                             "${groupId}_Group")
                         add(realm.query<UserInfo>("groupId == $0", groupId),
@@ -52,7 +52,7 @@ class RealmManager : KoinComponent, DBManager {
                             "${groupId}_SettleAction")
                         Notifications.subscribeGroupNotifications(groupId)
                     }
-                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
+                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
                         remove("${groupId}_Group")
                         remove("${groupId}_UserInfo")
                         remove("${groupId}_DebtAction")
@@ -84,8 +84,6 @@ class RealmManager : KoinComponent, DBManager {
                 return loginRealmManager(Credentials.emailPassword(email, password))
             } catch (e: InvalidCredentialsException) {
                 throw InvalidEmailPasswordException()
-            } catch (e: IllegalArgumentException) {
-                throw InvalidEmailPasswordException(e.message)
             }
         }
 
@@ -94,8 +92,6 @@ class RealmManager : KoinComponent, DBManager {
                 app.emailPasswordAuth.registerUser(email, password)
             } catch (e: UserAlreadyExistsException) {
                 throw EntityAlreadyExistsException("Email already exists")
-            } catch (e: IllegalArgumentException) {
-                throw InvalidEmailPasswordException(e.message)
             } catch (e: BadRequestException) {
                 // TODO: Bad email/bad password exception
             }
@@ -141,7 +137,7 @@ class RealmManager : KoinComponent, DBManager {
         }
     }
 
-    override suspend fun logOut() {
+    override suspend fun close() {
         subscriptionsJob.cancel()
         unloadKoinModules(
             module {

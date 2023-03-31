@@ -1,6 +1,6 @@
 package com.grup.di
 
-import TestUserRepository
+import com.grup.repositories.TestUserRepository
 import com.grup.interfaces.*
 import com.grup.interfaces.IGroupRepository
 import com.grup.interfaces.IDebtActionRepository

@@ -40,7 +40,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 
-class LoginActivity : KoinComponent, AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), KoinComponent {
     private val loginViewModel: LoginViewModel by viewModels()
     private val googleSignInClient: GoogleSignInClient by inject()
 

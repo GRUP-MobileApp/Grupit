@@ -10,7 +10,7 @@ import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class SettleActionService : KoinComponent {
+internal class SettleActionService : KoinComponent {
     private val settleActionRepository: ISettleActionRepository by inject()
 
     fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {

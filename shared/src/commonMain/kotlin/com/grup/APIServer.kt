@@ -7,6 +7,7 @@ import com.grup.models.*
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import com.grup.interfaces.DBManager
 import org.koin.core.context.loadKoinModules
+import org.koin.core.context.unloadKoinModules
 
 class APIServer private constructor(
     private val dbManager: DBManager
@@ -73,7 +74,8 @@ class APIServer private constructor(
 
     // TODO: Get rid of this lol
     object Images {
-        fun getProfilePictureURI(userId: String) = "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
+        fun getProfilePictureURI(userId: String) =
+            "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
     }
 
     companion object Login {
@@ -87,5 +89,8 @@ class APIServer private constructor(
             APIServer(RealmManager.loginGoogle(googleAccountToken))
     }
 
-    suspend fun logOut() = dbManager.logOut()
+    suspend fun logOut() {
+        dbManager.close()
+        unloadKoinModules(releaseAppModules)
+    }
 }

@@ -20,7 +20,7 @@ class UserInfo internal constructor() : BaseEntity(), RealmObject {
         internal set
     var profilePictureURL: String = ""
         internal set
-    var order: Int = 0
+    var order: Int = Int.MAX_VALUE
         internal set
     var userBalance: Double = 0.0
         internal set

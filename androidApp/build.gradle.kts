@@ -24,11 +24,6 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
-    }
 
     buildFeatures {
         compose = true
@@ -58,7 +53,7 @@ dependencies {
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
     // Datastore
@@ -69,7 +64,7 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Animation
-    implementation("androidx.compose.animation:animation:1.3.3")
+    implementation("androidx.compose.animation:animation:1.4.0")
 
     // Coil
     implementation("io.coil-kt:coil-compose:$coilComposeVersion")
@@ -86,7 +81,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.activity:activity-compose:1.7.0")
     implementation("androidx.ui:ui-tooling:1.0.0-alpha07")
 
     // Realm

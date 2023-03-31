@@ -9,7 +9,7 @@ import com.grup.service.UserInfoService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class SettleActionController : KoinComponent {
+internal class SettleActionController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
     private val settleActionService: SettleActionService by inject()
 

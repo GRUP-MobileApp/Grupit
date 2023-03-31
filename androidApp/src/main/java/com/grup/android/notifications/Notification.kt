@@ -8,7 +8,7 @@ sealed class Notification {
     abstract val date: String
     abstract val groupId: String
     abstract val userInfo: UserInfo
-    open val dismissable: Boolean = true
+    open val dismissible: Boolean = true
     abstract fun displayText(): String
 
     data class IncomingDebtAction(
@@ -21,7 +21,7 @@ sealed class Notification {
             get() = debtAction.groupId!!
         override val userInfo: UserInfo
             get() = debtAction.debteeUserInfo!!
-        override val dismissable: Boolean = false
+        override val dismissible: Boolean = false
 
         override fun displayText(): String =
             "${debtAction.debteeUserInfo!!.nickname} is requesting " +
@@ -61,7 +61,7 @@ sealed class Notification {
             get() = settleAction.groupId!!
         override val userInfo: UserInfo
             get() = transactionRecord.debtorUserInfo!!
-        override val dismissable: Boolean = false
+        override val dismissible: Boolean = false
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +

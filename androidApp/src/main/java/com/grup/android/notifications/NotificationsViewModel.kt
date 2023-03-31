@@ -4,12 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.grup.android.LoggedInViewModel
 import com.grup.android.MainViewModel
 import com.grup.models.*
-import com.grup.repositories.PreferencesDataStore
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class NotificationsViewModel : LoggedInViewModel() {
     companion object {
@@ -93,7 +89,7 @@ class NotificationsViewModel : LoggedInViewModel() {
         }.combine(latestDatesFlow) { notifications, lastViewDates ->
             notificationsAmount.value = notifications.map { groupEntry ->
                 groupEntry.key to groupEntry.value.count { notification ->
-                    !notification.dismissable ||
+                    !notification.dismissible ||
                     lastViewDates[groupEntry.key]?.let { lastViewDate ->
                         notification.date > lastViewDate
                     } ?: true

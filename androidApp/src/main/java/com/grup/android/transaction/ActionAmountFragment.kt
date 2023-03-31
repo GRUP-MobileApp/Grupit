@@ -111,13 +111,16 @@ fun ActionAmountLayout(
                 actionAmount = actionAmount,
                 onActionAmountChange = { onActionAmountChange(it, myUserInfo.userBalance) },
                 actionButton = {
-                    H1ConfirmTextButton(
-                        text = actionType,
-                        onClick = {
-                            transactionViewModel.createSettleAction(actionAmount.toDouble())
-                            onBackPress()
-                        }
-                    )
+                    actionAmount.toDouble().let { amount ->
+                        H1ConfirmTextButton(
+                            text = actionType,
+                            enabled = amount > 0,
+                            onClick = {
+                                transactionViewModel.createSettleAction(amount)
+                                onBackPress()
+                            }
+                        )
+                    }
                 },
                 onBackPress = onBackPress
             )
@@ -134,17 +137,20 @@ fun ActionAmountLayout(
                     )
                 },
                 actionButton = {
-                    H1ConfirmTextButton(
-                        text = actionType,
-                        onClick = {
-                            transactionViewModel.createSettleActionTransaction(
-                                settleAction,
-                                actionAmount.toDouble(),
-                                myUserInfo
-                            )
-                            onBackPress()
-                        }
-                    )
+                    actionAmount.toDouble().let { amount ->
+                        H1ConfirmTextButton(
+                            text = actionType,
+                            enabled = amount > 0,
+                            onClick = {
+                                transactionViewModel.createSettleActionTransaction(
+                                    settleAction,
+                                    amount,
+                                    myUserInfo
+                                )
+                                onBackPress()
+                            }
+                        )
+                    }
                 },
                 onBackPress = onBackPress,
             )
@@ -177,9 +183,10 @@ fun ActionAmountScreenLayout(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight()
                     .weight(1f)
             ) {
-                H1Text(
+                AutoSizingH1Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(color = AppTheme.colors.onSecondary)) {
                             append(getCurrencySymbol())
