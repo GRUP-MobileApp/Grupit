@@ -5,6 +5,7 @@ import com.grup.exceptions.NotFoundException
 import com.grup.models.Group
 import com.grup.models.GroupInvite
 import com.grup.models.User
+import com.grup.models.UserInfo
 import com.grup.service.GroupInviteService
 import com.grup.service.UserInfoService
 import com.grup.service.UserService
@@ -24,10 +25,9 @@ class GroupInviteController : KoinComponent {
     ): GroupInvite {
         val foundInvitee: User = userService.getUserByUsername(inviteeUsername)
             ?: throw NotFoundException("User with username $inviteeUsername not found")
-        val userIdsInGroup: List<String> =
-            userInfoService.findUserInfosByGroupId(group.getId()).map { it.userId!! }
+        val groupUserInfos: List<UserInfo> = userInfoService.findUserInfosByGroupId(group.getId())
 
-        if (userIdsInGroup.contains(foundInvitee.getId())) {
+        if (groupUserInfos.any { it.userId == foundInvitee.getId() }) {
             throw EntityAlreadyExistsException("$inviteeUsername is already in Group " +
                     group.groupName!!
             )

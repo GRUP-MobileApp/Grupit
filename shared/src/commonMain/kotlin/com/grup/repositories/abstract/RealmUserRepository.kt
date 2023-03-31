@@ -1,11 +1,11 @@
 package com.grup.repositories.abstract
 
+import com.grup.interfaces.IUserRepository
 import com.grup.models.User
-import com.grup.repositories.UserRepository
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 
-internal abstract class RealmUserRepository : UserRepository() {
+internal abstract class RealmUserRepository : IUserRepository {
     protected abstract val realm: Realm
 
     override suspend fun createMyUser(

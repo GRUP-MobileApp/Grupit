@@ -17,6 +17,7 @@ class UserInfoService : KoinComponent {
                 this.userId = user.getId()
                 this.groupId = groupId
                 this.nickname = user.displayName
+                this.profilePictureURL = user.profilePictureURL
             }
         )
     }

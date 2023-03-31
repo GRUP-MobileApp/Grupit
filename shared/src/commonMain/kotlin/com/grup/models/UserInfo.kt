@@ -18,6 +18,8 @@ class UserInfo internal constructor() : BaseEntity(), RealmObject {
     var nickname: String? = null
         get() = field ?: throw MissingFieldException("UserInfo with id $_id missing nickname")
         internal set
+    var profilePictureURL: String = ""
+        internal set
     var order: Int = 0
         internal set
     var userBalance: Double = 0.0

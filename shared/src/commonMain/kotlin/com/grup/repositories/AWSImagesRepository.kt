@@ -35,7 +35,7 @@ internal class AWSImagesRepository : KoinComponent, IImagesRepository {
             if (response.status.value !in 200..299) {
                 throw ImageUploadException(response.bodyAsText())
             }
-            return "$AWS_IMAGES_API_URL/pfp_${user.getId()}.png"
+            return "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_${user.getId()}.png"
         }
         return ""
     }

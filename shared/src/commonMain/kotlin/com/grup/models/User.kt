@@ -17,6 +17,8 @@ class User internal constructor() : BaseEntity(), RealmObject {
     var displayName: String? = null
         get() = field ?: throw MissingFieldException("User with id $_id missing displayName")
         internal set
+    var profilePictureURL: String = ""
+        internal set
 
     internal constructor(realmId: String) : this() {
         this._id = realmId
