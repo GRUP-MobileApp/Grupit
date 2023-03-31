@@ -18,12 +18,13 @@ internal class UserService : KoinComponent {
     ): User? {
         return userRepository.createMyUser(username, displayName)?.also { user ->
             if (profilePicture.isNotEmpty()) {
-                imagesRepository.uploadProfilePicture(user, profilePicture)
-                    .let { profilePictureURL ->
+                imagesRepository.uploadProfilePicture(user, profilePicture).let { profilePictureURL ->
+                    if (profilePictureURL.isNotEmpty()) {
                         userRepository.updateUser(user) {
-//                            this.profilePictureURL = profilePictureURL
+                            this.profilePictureURL = profilePictureURL
                         }
                     }
+                }
             }
         }
     }

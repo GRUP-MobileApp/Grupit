@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +28,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
+import coil.compose.rememberAsyncImagePainter
+import coil.imageLoader
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import com.grup.android.R
+import com.grup.android.applyCachingAndBuild
+import com.grup.android.getProfilePictureURI
 import com.grup.android.isoDate
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
@@ -89,8 +97,17 @@ fun GroupInviteRowCard(
     groupInvite: GroupInvite,
     acceptGroupInviteOnClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val imageRequest: ImageRequest =
+        ImageRequest.Builder(context)
+            .data(getProfilePictureURI(groupInvite.invitee!!))
+            .applyCachingAndBuild(groupInvite.invitee!!)
+    val pfpPainter = rememberAsyncImagePainter(
+        model = imageRequest,
+        imageLoader = context.imageLoader
+    )
     IconRowCard(
-        painter = profilePictureImagePainter(userId = groupInvite.inviter!!),
+        painter = pfpPainter,
         mainContent = {
             Column(
                 verticalArrangement = Arrangement.Top,
@@ -99,7 +116,7 @@ fun GroupInviteRowCard(
             ) {
                 Caption(text = isoDate(groupInvite.date))
                 H1Text(
-                    text = "${groupInvite.inviterUsername} is inviting you to " +
+                    text = "${groupInvite.inviterUsername!!} is inviting you to " +
                             "${groupInvite.groupName}",
                     fontSize = 16.sp
                 )

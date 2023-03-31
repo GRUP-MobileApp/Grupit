@@ -356,9 +356,7 @@ fun SetProfilePicture(
             Image(
                 painter =
                 if (selectedPhotoAsByteArray.isNotEmpty()) {
-                    rememberAsyncImagePainter(
-                        model = selectedPhotoAsByteArray
-                    )
+                    rememberAsyncImagePainter(model = selectedPhotoAsByteArray)
                 } else {
                     rememberVectorPainter(image = Icons.Default.Face)
                 },

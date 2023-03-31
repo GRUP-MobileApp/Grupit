@@ -2,91 +2,25 @@ package com.grup
 
 import com.grup.controllers.*
 import com.grup.di.*
-import com.grup.di.openSyncedRealm
-import com.grup.exceptions.EntityAlreadyExistsException
-import com.grup.exceptions.login.InvalidEmailPasswordException
-import com.grup.exceptions.login.NotLoggedInException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
-import com.grup.models.User
-import com.grup.other.RealmUser
-import com.grup.other.APP_ID
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
-import com.grup.other.TEST_APP_ID
-import com.grup.service.Notifications
-import io.realm.kotlin.Realm
-import io.realm.kotlin.mongodb.*
-import io.realm.kotlin.mongodb.exceptions.BadRequestException
-import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
-import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
-import kotlinx.coroutines.Job
+import com.grup.interfaces.DBManager
 import org.koin.core.context.loadKoinModules
-import org.koin.core.context.unloadKoinModules
-import org.koin.dsl.module
 
 class APIServer private constructor(
-    internal val realm: Realm
+    private val dbManager: DBManager
 ) {
-    private val realmUser: RealmUser
-        get() = app.currentUser ?: throw NotLoggedInException()
-
-    private val subscriptionsJob: Job = startSubscriptionSyncJob()
-
-    companion object Login {
-        internal val app: App = App.create(APP_ID)
-
-        private suspend fun initializeAPIServer(credentials: Credentials): APIServer {
-            app.login(credentials)
-            val realm = openSyncedRealm(app.currentUser!!)
-            loadKoinModules(
-                module {
-                    single { realm }
-                }
-            )
-            loadKoinModules(releaseAppModules)
-            return APIServer(realm)
-        }
-
-        suspend fun loginEmailAndPassword(email: String, password: String): APIServer {
-            try {
-                return initializeAPIServer(Credentials.emailPassword(email, password))
-            } catch (e: InvalidCredentialsException) {
-                throw InvalidEmailPasswordException()
-            } catch (e: IllegalArgumentException) {
-                throw InvalidEmailPasswordException(e.message)
-            }
-        }
-
-        suspend fun registerEmailAndPassword(email: String, password: String): APIServer {
-            try {
-                app.emailPasswordAuth.registerUser(email, password)
-            } catch (e: UserAlreadyExistsException) {
-                throw EntityAlreadyExistsException("Email already exists")
-            } catch (e: IllegalArgumentException) {
-                throw InvalidEmailPasswordException(e.message)
-            } catch (e: BadRequestException) {
-                // TODO: Bad email/bad password exception
-            }
-            return loginEmailAndPassword(email, password)
-        }
-
-        suspend fun loginGoogleAccountToken(googleAccountToken: String): APIServer {
-            try {
-                return initializeAPIServer(
-                    Credentials.google(googleAccountToken, GoogleAuthType.ID_TOKEN)
-                )
-            } catch (e: Exception) {
-                throw Exception()
-            }
-        }
+    init {
+        loadKoinModules(releaseAppModules)
     }
 
-    private val userController = UserController()
-    private val groupController = GroupController()
-    private val userInfoController = UserInfoController()
-    private val groupInviteController = GroupInviteController()
-    private val debtActionController = DebtActionController()
-    private val settleActionController = SettleActionController()
+    private val userController: UserController = UserController()
+    private val groupController: GroupController = GroupController()
+    private val userInfoController: UserInfoController = UserInfoController()
+    private val groupInviteController: GroupInviteController = GroupInviteController()
+    private val debtActionController: DebtActionController = DebtActionController()
+    private val settleActionController: SettleActionController = SettleActionController()
 
     // User
     val user: User
@@ -137,19 +71,21 @@ class APIServer private constructor(
         settleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = settleActionController.getAllSettleActionsAsFlow()
 
+    // TODO: Get rid of this lol
     object Images {
         fun getProfilePictureURI(userId: String) = "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
     }
 
-    suspend fun logOut() {
-        subscriptionsJob.cancel()
-        unloadKoinModules(
-                module {
-                    single { realm }
-                }
-        )
-        unloadKoinModules(releaseAppModules)
-        Notifications.unsubscribeAllNotifications()
-        realmUser.logOut()
+    companion object Login {
+        suspend fun loginEmailAndPassword(email: String, password: String): APIServer =
+            APIServer(RealmManager.loginEmailPassword(email, password))
+
+        suspend fun registerEmailAndPassword(email: String, password: String): APIServer =
+            APIServer(RealmManager.registerEmailPassword(email, password))
+
+        suspend fun loginGoogleAccountToken(googleAccountToken: String): APIServer =
+            APIServer(RealmManager.loginGoogle(googleAccountToken))
     }
+
+    suspend fun logOut() = dbManager.logOut()
 }

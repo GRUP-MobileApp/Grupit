@@ -31,6 +31,7 @@ import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.SettleAction
 import com.grup.models.UserInfo
+import kotlin.math.min
 
 class ActionAmountFragment : Fragment() {
     private val transactionViewModel: TransactionViewModel by navGraphViewModels(R.id.main_graph)
@@ -126,7 +127,12 @@ fun ActionAmountLayout(
             transactionViewModel.getSettleAction(existingActionId!!).collectAsStateWithLifecycle()
             ActionAmountScreenLayout(
                 actionAmount = actionAmount,
-                onActionAmountChange = { onActionAmountChange(it, settleAction.remainingAmount) },
+                onActionAmountChange = {
+                    onActionAmountChange(
+                        it,
+                        min(settleAction.remainingAmount, -1 * myUserInfo.userBalance)
+                    )
+                },
                 actionButton = {
                     H1ConfirmTextButton(
                         text = actionType,

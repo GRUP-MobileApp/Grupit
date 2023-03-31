@@ -32,9 +32,11 @@ import coil.ImageLoader
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.disk.DiskCache
+import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import com.grup.android.*
 import com.grup.android.notifications.GroupInvitesViewModel
 import com.grup.android.transaction.TransactionActivity
@@ -321,41 +323,6 @@ fun IconRowCard(
 }
 
 @Composable
-fun profilePictureImagePainter(
-    userId: String
-): AsyncImagePainter {
-    val context = LocalContext.current
-    val imageLoader: ImageLoader = ImageLoader.Builder(context)
-        .respectCacheHeaders(false)
-        .memoryCache {
-            MemoryCache
-                .Builder(context)
-                .build()
-        }
-        .diskCache {
-            DiskCache.Builder()
-                .directory(context.cacheDir.resolve("image_cache"))
-                .build()
-        }
-        .build()
-    val profilePictureURI = getProfilePictureURI(userId)
-    val imageRequest: ImageRequest =
-        ImageRequest.Builder(context)
-            .data(profilePictureURI)
-            .memoryCachePolicy(CachePolicy.ENABLED)
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .allowHardware(true)
-            .diskCacheKey(userId)
-            .memoryCacheKey(userId)
-            .build()
-    return rememberAsyncImagePainter(
-        model = imageRequest,
-        imageLoader = imageLoader,
-        error = rememberVectorPainter(image = Icons.Default.Face)
-    )
-}
-
-@Composable
 fun UserInfoRowCard(
     modifier: Modifier = Modifier,
     userInfo: UserInfo,
@@ -370,8 +337,19 @@ fun UserInfoRowCard(
     },
     iconSize: Dp = 50.dp
 ) {
+    val context = LocalContext.current
+    val imageRequest: ImageRequest =
+        ImageRequest.Builder(context)
+            .data(userInfo.profilePictureURL)
+            .applyCachingAndBuild(userInfo.userId!!)
+
+    val pfpPainter =
+        rememberAsyncImagePainter(
+        model = imageRequest,
+        imageLoader = context.imageLoader
+    )
     IconRowCard(
-        painter = profilePictureImagePainter(userId = userInfo.userId!!),
+        painter = pfpPainter,
         mainContent = {
             Column(
                 verticalArrangement = Arrangement.Top,

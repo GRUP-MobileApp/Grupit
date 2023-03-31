@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +31,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
+import coil.compose.rememberAsyncImagePainter
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.grup.android.login.LoginActivity
 import com.grup.android.notifications.GroupInvitesViewModel
@@ -679,6 +683,16 @@ fun SettleActionCard(
     settleActionCardOnClick: () -> Unit,
     showPendingNotification: Boolean = false
 ) {
+    val context = LocalContext.current
+    val imageRequest: ImageRequest =
+        ImageRequest.Builder(context)
+            .data(settleAction.debteeUserInfo!!.profilePictureURL)
+            .applyCachingAndBuild(settleAction.debteeUserInfo!!.userId!!)
+    val pfpPainter = rememberAsyncImagePainter(
+        model = imageRequest,
+        imageLoader = context.imageLoader
+    )
+
     BadgedBox(
         badge = {
             settleAction.transactionRecords.count {
@@ -717,7 +731,7 @@ fun SettleActionCard(
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
                 ProfileIcon(
-                    imageVector = Icons.Default.Face,
+                    painter = pfpPainter,
                     iconSize = 50.dp
                 )
                 MoneyAmount(
