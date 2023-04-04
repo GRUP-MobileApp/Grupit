@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class UserInfoService : KoinComponent {
+internal class UserInfoService : KoinComponent {
     private val userInfoRepository: IUserInfoRepository by inject()
 
     fun createUserInfo(user: User, groupId: String): UserInfo? {

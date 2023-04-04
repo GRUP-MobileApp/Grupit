@@ -7,6 +7,7 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 class TransactionRecord : EmbeddedRealmObject {
     companion object {
         const val PENDING = "PENDING"
+        const val REJECTED = "REJECTED"
     }
 
     var debtorUserInfo: UserInfo? = null
@@ -17,4 +18,7 @@ class TransactionRecord : EmbeddedRealmObject {
             ?: throw MissingFieldException("TransactionRecord missing balanceChange")
     var dateCreated: String = getCurrentTime()
     var dateAccepted: String = PENDING
+
+    val isAccepted: Boolean
+        get() = !(dateAccepted == PENDING || dateAccepted == REJECTED)
 }

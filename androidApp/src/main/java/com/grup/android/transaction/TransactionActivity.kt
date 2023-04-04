@@ -34,13 +34,14 @@ sealed class TransactionActivity {
         override val userInfo: UserInfo
             get() = transactionRecord.debtorUserInfo!!
         override val date: String
-            get() = transactionRecord.dateAccepted.also { dateAccepted ->
-                if (dateAccepted == TransactionRecord.PENDING) {
+            get() = transactionRecord.let { transactionRecord ->
+                if (!transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
                         "TransactionRecord still pending for Debt Action " +
                                 "with id ${debtAction.getId()}"
                     )
                 }
+                transactionRecord.dateAccepted
             }
 
         override fun displayText() =
@@ -73,13 +74,14 @@ sealed class TransactionActivity {
         override val userInfo: UserInfo
             get() = transactionRecord.debtorUserInfo!!
         override val date: String
-            get() = transactionRecord.dateAccepted.also { dateAccepted ->
-                if (dateAccepted == TransactionRecord.PENDING) {
+            get() = transactionRecord.let { transactionRecord ->
+                if (!transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
-                        "TransactionRecord still pending for SettleAction " +
+                        "TransactionRecord still pending for Settle Action " +
                                 "with id ${settleAction.getId()}"
                     )
                 }
+                transactionRecord.dateAccepted
             }
         override fun displayText(): String =
             "${userInfo.nickname!!} paid ${transactionRecord.balanceChange!!.asMoneyAmount()} to " +

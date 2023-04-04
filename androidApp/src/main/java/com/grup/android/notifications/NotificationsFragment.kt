@@ -7,13 +7,13 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -21,9 +21,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
-import com.grup.android.MainViewModel
+import coil.compose.rememberAsyncImagePainter
+import coil.imageLoader
+import coil.request.ImageRequest
+import com.grup.android.*
 import com.grup.android.R
-import com.grup.android.isoDate
 import com.grup.android.ui.*
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.Group
@@ -68,13 +70,20 @@ fun NotificationsLayout(
     ) {
         items(notifications[selectedGroup.getId()] ?: emptyList()) { notification ->
             val sideContent: (@Composable () -> Unit)? =
-                when(notification) {
+                when (notification) {
                     is Notification.IncomingDebtAction -> {
                         {
-                            AcceptCheckButton(
-                                onClick = {
+                            AcceptRejectColumn(
+                                acceptOnClick = {
                                     notificationsViewModel.acceptDebtAction(
-                                        notification.debtAction, notification.transactionRecord
+                                        notification.debtAction,
+                                        notification.transactionRecord
+                                    )
+                                },
+                                rejectOnClick = {
+                                    notificationsViewModel.rejectDebtAction(
+                                        notification.debtAction,
+                                        notification.transactionRecord
                                     )
                                 }
                             )
@@ -82,9 +91,15 @@ fun NotificationsLayout(
                     }
                     is Notification.IncomingTransactionOnSettleAction -> {
                         {
-                            AcceptCheckButton(
-                                onClick = {
+                            AcceptRejectColumn(
+                                acceptOnClick = {
                                     notificationsViewModel.acceptSettleActionTransaction(
+                                        notification.settleAction,
+                                        notification.transactionRecord
+                                    )
+                                },
+                                rejectOnClick = {
+                                    notificationsViewModel.rejectSettleActionTransaction(
                                         notification.settleAction,
                                         notification.transactionRecord
                                     )
@@ -93,7 +108,7 @@ fun NotificationsLayout(
                         }
                     }
                     else -> null
-                }
+            }
             NotificationRowCard(
                 notification = notification,
                 sideContent = sideContent
@@ -105,20 +120,19 @@ fun NotificationsLayout(
 @Composable
 fun NotificationRowCard(
     notification: Notification,
-    sideContent: (@Composable () -> Unit)?,
     mainContent: @Composable ColumnScope.() -> Unit = {
         Caption(text = isoDate(notification.date), fontSize = 12.sp)
         H1Text(
             text = notification.displayText(),
-            fontSize = 16.sp,
-            modifier = Modifier.fillMaxWidth(if (sideContent == null) 1f else 0.85f)
+            fontSize = 16.sp
         )
-    }
+    },
+    sideContent: (@Composable () -> Unit)?,
 ) {
     UserInfoRowCard(
         userInfo = notification.userInfo,
         iconSize = 60.dp,
         mainContent = mainContent,
-        sideContent = sideContent ?: { }
+        sideContent = sideContent
     )
 }

@@ -24,11 +24,6 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
-    }
 
     buildFeatures {
         compose = true
@@ -58,7 +53,7 @@ dependencies {
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
     // Datastore
@@ -69,7 +64,7 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Animation
-    implementation("androidx.compose.animation:animation:1.3.3")
+    implementation("androidx.compose.animation:animation:1.4.0")
 
     // Coil
     implementation("io.coil-kt:coil-compose:$coilComposeVersion")
@@ -86,7 +81,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.activity:activity-compose:1.7.0")
     implementation("androidx.ui:ui-tooling:1.0.0-alpha07")
 
     // Realm
@@ -97,8 +92,10 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
 
     // Google Play Services
-    implementation ("com.google.android.gms:play-services-auth:20.4.1")
+    implementation("com.google.android.gms:play-services-auth:20.4.1")
     implementation("com.google.android.gms:play-services-base:18.2.0")
+    implementation("com.google.android.play:app-update:2.0.1")
+    implementation("com.google.android.play:app-update-ktx:2.0.1")
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:31.2.2"))

@@ -55,11 +55,13 @@ class MainViewModel : KoinComponent, LoggedInViewModel() {
         }
     private val debtActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
         _debtActionsFlow.map { debtActions ->
-            debtActions.flatMap { debtAction ->
+            debtActions.filter { debtAction ->
+                debtAction.totalAmount > 0
+            }.flatMap { debtAction ->
                 listOf(
                     TransactionActivity.CreateDebtAction(debtAction),
                     *debtAction.transactionRecords.filter { transactionRecord ->
-                        transactionRecord.dateAccepted != TransactionRecord.PENDING
+                        transactionRecord.isAccepted
                     }.map { transactionRecord ->
                         TransactionActivity.AcceptDebtAction(debtAction, transactionRecord)
                     }.toTypedArray()
@@ -92,11 +94,11 @@ class MainViewModel : KoinComponent, LoggedInViewModel() {
                 TransactionActivity.CreateSettleAction(settleAction)
             }
         }
-    private val settleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
+    private val settleActionTransactionsAsTransactionActivity: Flow<List<TransactionActivity>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.flatMap { settleAction ->
                 settleAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.dateAccepted != TransactionRecord.PENDING
+                    transactionRecord.isAccepted
                 }.map { transactionRecord ->
                     TransactionActivity.SettlePartialSettleAction(
                         settleAction,
@@ -111,7 +113,7 @@ class MainViewModel : KoinComponent, LoggedInViewModel() {
         combine(
             debtActionsAsTransactionActivity,
             completedSettleActionsAsTransactionActivity,
-            settleActionsAsTransactionActivity
+            settleActionTransactionsAsTransactionActivity
         ) { allTransactionActivities: Array<List<TransactionActivity>> ->
             allTransactionActivities.flatMap { it }.sortedByDescending { transactionActivity ->
                 transactionActivity.date

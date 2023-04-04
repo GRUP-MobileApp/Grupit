@@ -18,11 +18,11 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
         }
     }
 
-    override fun updateSettleAction(
+    override suspend fun updateSettleAction(
         settleAction: SettleAction,
         block: SettleAction.() -> Unit
     ): SettleAction? {
-        return realm.writeBlocking {
+        return realm.write {
             findLatest(settleAction)!!.apply(block)
         }
     }

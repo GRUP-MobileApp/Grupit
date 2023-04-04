@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 internal interface ISettleActionRepository : IRepository {
     fun createSettleAction(settleAction: SettleAction): SettleAction?
 
-    fun updateSettleAction(settleAction: SettleAction,
+    suspend fun updateSettleAction(settleAction: SettleAction,
                            block: SettleAction.() -> Unit): SettleAction?
     fun addSettleActionTransaction(settleAction: SettleAction,
                                    transactionRecord: TransactionRecord): SettleAction?

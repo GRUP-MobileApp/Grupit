@@ -29,9 +29,8 @@ import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
-import kotlin.random.Random
 
-class RealmManager : KoinComponent, DBManager {
+internal class RealmManager : KoinComponent, DBManager {
     private val realm: Realm by inject()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -42,7 +41,7 @@ class RealmManager : KoinComponent, DBManager {
                 val newGroupIds: Set<String> = resultsChange.list.map { it.groupId!! }.toSet()
 
                 realm.subscriptions.update {
-                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
+                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
                         add(realm.query<Group>("$idSerialName == $0", groupId),
                             "${groupId}_Group")
                         add(realm.query<UserInfo>("groupId == $0", groupId),
@@ -53,7 +52,7 @@ class RealmManager : KoinComponent, DBManager {
                             "${groupId}_SettleAction")
                         Notifications.subscribeGroupNotifications(groupId)
                     }
-                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
+                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
                         remove("${groupId}_Group")
                         remove("${groupId}_UserInfo")
                         remove("${groupId}_DebtAction")
@@ -67,6 +66,7 @@ class RealmManager : KoinComponent, DBManager {
 
     companion object {
         private val app: App = App.create(APP_ID)
+
         private val realmUser: RealmUser
             get() = app.currentUser ?: throw NotLoggedInException()
 
@@ -128,7 +128,6 @@ class RealmManager : KoinComponent, DBManager {
                     }
                     .waitForInitialRemoteData()
                     .name("syncedRealm")
-                    .encryptionKey(getRandomKey())
                     .build()
             ).also { realm ->
                 realm.syncSession.downloadAllServerChanges()
@@ -141,19 +140,9 @@ class RealmManager : KoinComponent, DBManager {
             Notifications.subscribePersonalNotifications(realmUser.id)
             return RealmManager()
         }
-
-        private fun getRandomKey(seed: Long? = null): ByteArray {
-            val key = ByteArray(64)
-            if (seed != null) {
-                Random(seed).nextBytes(key)
-            } else {
-                Random.nextBytes(key)
-            }
-            return key
-        }
     }
 
-    override suspend fun logOut() {
+    override suspend fun close() {
         subscriptionsJob.cancel()
         unloadKoinModules(
             module {

@@ -8,7 +8,7 @@ sealed class Notification {
     abstract val date: String
     abstract val groupId: String
     abstract val userInfo: UserInfo
-    open val dismissable: Boolean = true
+    open val dismissible: Boolean = true
     abstract fun displayText(): String
 
     data class IncomingDebtAction(
@@ -21,7 +21,7 @@ sealed class Notification {
             get() = debtAction.groupId!!
         override val userInfo: UserInfo
             get() = debtAction.debteeUserInfo!!
-        override val dismissable: Boolean = false
+        override val dismissible: Boolean = false
 
         override fun displayText(): String =
             "${debtAction.debteeUserInfo!!.nickname} is requesting " +
@@ -33,13 +33,14 @@ sealed class Notification {
         val transactionRecord: TransactionRecord
     ) : Notification() {
         override val date: String
-            get() = transactionRecord.dateAccepted.also { date ->
-                if (date == TransactionRecord.PENDING) {
+            get() = transactionRecord.let { transactionRecord ->
+                if (!transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
-                        "TransactionRecord still pending for" +
-                                "DebtAction with id ${debtAction.getId()}"
+                        "TransactionRecord still pending for Debt Action " +
+                                "with id ${debtAction.getId()}"
                     )
                 }
+                transactionRecord.dateAccepted
             }
         override val groupId: String
             get() = debtAction.groupId!!
@@ -61,7 +62,7 @@ sealed class Notification {
             get() = settleAction.groupId!!
         override val userInfo: UserInfo
             get() = transactionRecord.debtorUserInfo!!
-        override val dismissable: Boolean = false
+        override val dismissible: Boolean = false
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +
@@ -74,13 +75,14 @@ sealed class Notification {
         val transactionRecord: TransactionRecord
     ) : Notification() {
         override val date: String
-            get() = transactionRecord.dateAccepted.also { date ->
-                if (date == TransactionRecord.PENDING) {
+            get() = transactionRecord.let { transactionRecord ->
+                if (!transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
-                        "TransactionRecord still pending for" +
-                                "DebtAction with id ${settleAction.getId()}"
+                        "TransactionRecord still pending for Settle Action " +
+                                "with id ${settleAction.getId()}"
                     )
                 }
+                transactionRecord.dateAccepted
             }
         override val groupId: String
             get() = settleAction.groupId!!

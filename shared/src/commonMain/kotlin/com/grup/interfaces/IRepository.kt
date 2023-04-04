@@ -1,3 +1,3 @@
 package com.grup.interfaces
 
-interface IRepository
+internal interface IRepository

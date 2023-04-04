@@ -26,11 +26,11 @@ class MainApplication : Application(), ImageLoaderFactory {
                     single { PreferencesDataStore(get()) }
                     single {
                         GoogleSignIn.getClient(
-                        this@MainApplication,
-                        GoogleSignInOptions
-                            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(GOOGLE_WEB_CLIENT_ID)
-                            .build()
+                            this@MainApplication,
+                            GoogleSignInOptions
+                                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(GOOGLE_WEB_CLIENT_ID)
+                                .build()
                         )
                     }
                 }

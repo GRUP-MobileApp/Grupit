@@ -11,7 +11,9 @@ fun getCurrencySymbol(): String =
     NumberFormat.getCurrencyInstance().currency!!.symbol
 
 fun Double.asMoneyAmount(): String =
-    NumberFormat.getCurrencyInstance().format(this)
+    NumberFormat
+        .getCurrencyInstance()
+        .format(this)
 
 fun isoDate(date: String) = date.substring(5, 10)
 fun isoFullDate(date: String) = date.substring(0, 10)

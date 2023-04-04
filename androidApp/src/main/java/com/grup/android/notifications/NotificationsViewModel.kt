@@ -4,12 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.grup.android.LoggedInViewModel
 import com.grup.android.MainViewModel
 import com.grup.models.*
-import com.grup.repositories.PreferencesDataStore
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class NotificationsViewModel : LoggedInViewModel() {
     companion object {
@@ -45,7 +41,7 @@ class NotificationsViewModel : LoggedInViewModel() {
                 debtAction.debteeUserInfo!!.userId!! == userObject.getId()
             }.flatMap { debtAction ->
                 debtAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.dateAccepted != TransactionRecord.PENDING
+                    transactionRecord.isAccepted
                 }.map { transactionRecord ->
                     Notification.DebtorAcceptOutgoingDebtAction(debtAction, transactionRecord)
                 }
@@ -71,7 +67,7 @@ class NotificationsViewModel : LoggedInViewModel() {
             settleActions.mapNotNull { settleAction ->
                 settleAction.transactionRecords.find { transactionRecord ->
                     transactionRecord.debtorUserInfo!!.userId!! == userObject.getId()
-                            && transactionRecord.dateAccepted != TransactionRecord.PENDING
+                            && transactionRecord.isAccepted
                 }?.let { transactionRecord ->
                     Notification.DebteeAcceptSettleActionTransaction(settleAction, transactionRecord)
                 }
@@ -93,7 +89,7 @@ class NotificationsViewModel : LoggedInViewModel() {
         }.combine(latestDatesFlow) { notifications, lastViewDates ->
             notificationsAmount.value = notifications.map { groupEntry ->
                 groupEntry.key to groupEntry.value.count { notification ->
-                    !notification.dismissable ||
+                    !notification.dismissible ||
                     lastViewDates[groupEntry.key]?.let { lastViewDate ->
                         notification.date > lastViewDate
                     } ?: true
@@ -111,6 +107,10 @@ class NotificationsViewModel : LoggedInViewModel() {
         viewModelScope.launch {
             apiServer.acceptDebtAction(debtAction, myTransactionRecord)
         }
+    fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
+        viewModelScope.launch {
+            apiServer.rejectDebtAction(debtAction, myTransactionRecord)
+        }
 
     // SettleAction
     fun acceptSettleActionTransaction(
@@ -118,6 +118,12 @@ class NotificationsViewModel : LoggedInViewModel() {
         transactionRecord: TransactionRecord
     ) = viewModelScope.launch {
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+    }
+    fun rejectSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = viewModelScope.launch {
+        apiServer.rejectSettleActionTransaction(settleAction, transactionRecord)
     }
 
     private fun <T: Iterable<Notification>> T.afterDate(date: String) =

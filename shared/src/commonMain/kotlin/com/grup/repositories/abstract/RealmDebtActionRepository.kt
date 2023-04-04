@@ -17,11 +17,11 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
         }
     }
 
-    override fun updateDebtAction(
+    override suspend fun updateDebtAction(
         debtAction: DebtAction,
         block: DebtAction.() -> Unit
     ): DebtAction? {
-        return realm.writeBlocking {
+        return realm.write {
             findLatest(debtAction)!!.apply(block)
         }
     }

@@ -229,8 +229,7 @@ fun SelectedDebtorsList(
                             text = "pays ${debtAmounts[index].asMoneyAmount()}",
                             color = AppTheme.colors.onSecondary
                         )
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    }
                 )
             }
         }
@@ -341,8 +340,7 @@ fun SelectDebtorsChecklist(
                                 uncheckedColor = AppTheme.colors.onSecondary
                             )
                         )
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    }
                 )
             }
         }

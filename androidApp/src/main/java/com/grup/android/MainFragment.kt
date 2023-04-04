@@ -695,8 +695,8 @@ fun SettleActionCard(
 
     BadgedBox(
         badge = {
-            settleAction.transactionRecords.count {
-                it.dateAccepted == TransactionRecord.PENDING
+            settleAction.transactionRecords.count { transactionRecord ->
+                transactionRecord.dateAccepted == TransactionRecord.PENDING
             }.let { notificationCount ->
                 if (showPendingNotification && notificationCount > 0) {
                     Badge(
@@ -749,7 +749,7 @@ fun DebtActionDetails(
     debtAction: DebtAction,
 ) {
     val tabTitles: List<String> = mutableListOf<String>().apply {
-        if (debtAction.transactionRecords.any { it.dateAccepted != TransactionRecord.PENDING }) {
+        if (debtAction.transactionRecords.any { it.isAccepted }) {
             this.add("Accepted")
         }
         if (debtAction.transactionRecords.any { it.dateAccepted == TransactionRecord.PENDING }) {
@@ -778,8 +778,7 @@ fun DebtActionDetails(
                     Caption(text = isoFullDate(debtAction.date))
                 }
             },
-            iconSize = 90.dp,
-            modifier = Modifier.fillMaxWidth()
+            iconSize = 80.dp
         )
 
         if (debtAction.message.isNotBlank()) {
@@ -825,13 +824,10 @@ fun DebtActionDetails(
                 when (tabTitles[selectedTabIndex]) {
                     "Accepted" -> {
                         debtAction.transactionRecords.filter { transactionRecord ->
-                            transactionRecord.dateAccepted != TransactionRecord.PENDING
+                            transactionRecord.isAccepted
                         }.let { acceptedTransactions ->
                             acceptedTransactions.forEach { acceptedTransaction ->
-                                TransactionRecordRowCard(
-                                    transactionRecord = acceptedTransaction,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                TransactionRecordRowCard(transactionRecord = acceptedTransaction)
                             }
                         }
                     }
@@ -840,10 +836,7 @@ fun DebtActionDetails(
                             transactionRecord.dateAccepted == TransactionRecord.PENDING
                         }.let { pendingTransactions ->
                             pendingTransactions.forEach { pendingTransaction ->
-                                TransactionRecordRowCard(
-                                    transactionRecord = pendingTransaction,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                TransactionRecordRowCard(transactionRecord = pendingTransaction)
                             }
                         }
                     }
@@ -925,7 +918,9 @@ fun SettleActionDetails(
                 mainContent = {
                     Caption(text = settleAction.debteeUserInfo!!.nickname!!)
                     MoneyAmount(
-                        moneyAmount = settleAction.remainingAmount,
+                        moneyAmount =
+                            if (settleAction.remainingAmount > 0) settleAction.remainingAmount
+                            else settleAction.totalAmount,
                         fontSize = 60.sp
                     )
                 },
@@ -935,8 +930,7 @@ fun SettleActionDetails(
                         Caption(text = isoFullDate(settleAction.date))
                     }
                 },
-                iconSize = 90.dp,
-                modifier = Modifier.fillMaxWidth()
+                iconSize = 80.dp
             )
 
             Row(
@@ -975,7 +969,7 @@ fun SettleActionDetails(
                     when (tabTitles[selectedTabIndex]) {
                         "Accepted" -> {
                             settleAction.transactionRecords.filter { transactionRecord ->
-                                transactionRecord.dateAccepted != TransactionRecord.PENDING
+                                transactionRecord.isAccepted
                             }.let { acceptedTransactions ->
                                 acceptedTransactions.forEach { acceptedTransaction ->
                                     TransactionRecordRowCard(
@@ -1039,7 +1033,7 @@ fun TransactionRecordRowCard(
             )
             Caption(
                 text = isoFullDate(
-                    if (transactionRecord.dateAccepted != TransactionRecord.PENDING)
+                    if (transactionRecord.isAccepted)
                         transactionRecord.dateAccepted
                     else
                         transactionRecord.dateCreated

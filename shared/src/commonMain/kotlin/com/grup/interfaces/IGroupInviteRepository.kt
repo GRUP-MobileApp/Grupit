@@ -8,5 +8,5 @@ internal interface IGroupInviteRepository : IRepository {
 
     fun findAllGroupInvitesAsFlow(): Flow<List<GroupInvite>>
 
-    fun updateGroupInviteStatus(groupInvite: GroupInvite, status: String): GroupInvite
+    suspend fun deleteGroupInvite(groupInvite: GroupInvite)
 }

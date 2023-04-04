@@ -1,5 +1,5 @@
 package com.grup.interfaces
 
-interface DBManager {
-    suspend fun logOut()
+internal interface DBManager {
+    suspend fun close()
 }

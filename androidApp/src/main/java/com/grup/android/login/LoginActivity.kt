@@ -23,6 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.grup.android.ExceptionHandler
 import com.grup.android.MainActivity
 import com.grup.android.R
@@ -32,13 +35,30 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 
-class LoginActivity : KoinComponent, AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), KoinComponent {
     private val loginViewModel: LoginViewModel by viewModels()
     private val googleSignInClient: GoogleSignInClient by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
+
+        val appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (
+                appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                && appUpdateInfo.updatePriority() >= 3
+                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    AppUpdateType.IMMEDIATE,
+                    this,
+                    0
+                )
+            }
+        }
 
         googleSignInClient.silentSignIn().addOnCompleteListener { task ->
             loginViewModel.loginGoogleAccount(task)

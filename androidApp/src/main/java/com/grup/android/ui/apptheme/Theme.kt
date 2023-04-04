@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
 
 object AppTheme {
     val colors: AppColors
@@ -32,10 +33,13 @@ fun AppTheme(
     shapes: AppShapes = AppTheme.shapes,
     content: @Composable () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
     val rememberedColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
+    val sizedDimensions = if (configuration.screenHeightDp < 640) smallDimensions else dimensions
+
     CompositionLocalProvider(
         LocalColors provides rememberedColors,
-        LocalDimensions provides dimensions,
+        LocalDimensions provides sizedDimensions,
         LocalTypography provides typography,
         LocalShapes provides shapes
     ) {

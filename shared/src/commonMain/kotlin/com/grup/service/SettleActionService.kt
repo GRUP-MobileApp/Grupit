@@ -10,7 +10,7 @@ import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class SettleActionService : KoinComponent {
+internal class SettleActionService : KoinComponent {
     private val settleActionRepository: ISettleActionRepository by inject()
 
     fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
@@ -26,16 +26,27 @@ class SettleActionService : KoinComponent {
                 " ${debtee.groupId}")
     }
 
-    fun createSettleActionTransaction(settleAction: SettleAction, myTransactionRecord: TransactionRecord) {
+    fun createSettleActionTransaction(
+        settleAction: SettleAction,
+        myTransactionRecord: TransactionRecord
+    ) {
         settleActionRepository.addSettleActionTransaction(settleAction, myTransactionRecord)
     }
 
-    fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
+    suspend fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.transactionRecords.find {
                 it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
                         it.dateCreated == transactionRecord.dateCreated
             }?.dateAccepted = getCurrentTime()
+        }
+    }
+    suspend fun rejectTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
+        settleActionRepository.updateSettleAction(settleAction) {
+            this.transactionRecords.find {
+                it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
+                        it.dateCreated == transactionRecord.dateCreated
+            }?.dateAccepted = TransactionRecord.REJECTED
         }
     }
 

@@ -90,4 +90,4 @@ fun appColors(
     error = error
 )
 
-internal val LocalColors = staticCompositionLocalOf{ appColors() }
+internal val LocalColors = staticCompositionLocalOf { appColors() }
