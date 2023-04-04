@@ -23,22 +23,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.*
-import coil.ImageLoader
-import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import coil.disk.DiskCache
 import coil.imageLoader
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import com.grup.android.*
-import com.grup.android.notifications.GroupInvitesViewModel
 import com.grup.android.transaction.TransactionActivity
 import com.grup.android.ui.apptheme.AppTheme
 import com.grup.models.DebtAction
@@ -143,17 +136,16 @@ fun Caption(
 
 @Composable
 fun SmallIcon(
-    modifier: Modifier = Modifier,
     imageVector: ImageVector,
     contentDescription: String,
-    iconSize: Dp = AppTheme.dimensions.iconSize,
+    iconSize: Dp = AppTheme.dimensions.smallIconSize,
     tint: Color = AppTheme.colors.onSecondary
 ) {
     Icon(
         imageVector = imageVector,
         contentDescription = contentDescription,
         tint = tint,
-        modifier = modifier.size(iconSize)
+        modifier = Modifier.size(iconSize)
     )
 }
 
@@ -190,46 +182,56 @@ fun H1ConfirmTextButton(
 }
 
 @Composable
-fun AcceptCheckButton(
-    onClick: () -> Unit
+fun AcceptRejectColumn(
+    acceptOnClick: () -> Unit,
+    rejectOnClick: () -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxHeight()
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .aspectRatio(1f)
-                .clip(AppTheme.shapes.circleShape)
-                .background(AppTheme.colors.caption)
-                .clickable(onClick = onClick)
-        ) {
-            SmallIcon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Add to Group",
-                tint = AppTheme.colors.confirm,
-                iconSize = 24.dp,
-                modifier = Modifier.padding(AppTheme.dimensions.paddingSmall)
-            )
-        }
+        AcceptCheckButton(acceptOnClick)
+        RejectButton(rejectOnClick)
     }
 }
 
 @Composable
-fun ProfileIcon(
-    modifier: Modifier = Modifier,
-    imageVector: ImageVector,
-    contentDescription: String = "Profile Picture",
-    iconSize: Dp = 70.dp
-) {
-    Icon(
-        imageVector = imageVector,
-        contentDescription = contentDescription,
-        modifier = modifier
+fun AcceptCheckButton(onClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
             .clip(AppTheme.shapes.circleShape)
-            .size(iconSize)
-    )
+            .background(AppTheme.colors.caption)
+            .clickable(onClick = onClick)
+            .padding(AppTheme.dimensions.paddingSmall)
+    ) {
+        SmallIcon(
+            imageVector = Icons.Default.Check,
+            contentDescription = "Accept",
+            tint = AppTheme.colors.confirm,
+            iconSize = AppTheme.dimensions.smallButtonSize
+        )
+    }
+}
+
+@Composable
+fun RejectButton(onClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .clip(AppTheme.shapes.circleShape)
+            .background(AppTheme.colors.caption)
+            .clickable(onClick = onClick)
+            .padding(AppTheme.dimensions.paddingSmall)
+    ) {
+        SmallIcon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Reject",
+            tint = AppTheme.colors.deny,
+            iconSize = AppTheme.dimensions.smallButtonSize
+        )
+    }
 }
 
 @Composable
@@ -295,8 +297,11 @@ fun IconRowCard(
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
         modifier = modifier
+            .fillMaxWidth()
             .height(IntrinsicSize.Min)
+            .padding(end = AppTheme.dimensions.paddingSmall)
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -309,13 +314,7 @@ fun IconRowCard(
             mainContent()
         }
         if (sideContent != null) {
-            Row(
-                modifier = Modifier
-                    .padding(
-                        start = AppTheme.dimensions.spacingMedium,
-                        end = AppTheme.dimensions.paddingSmall
-                    )
-            ) {
+            Row(modifier = Modifier.weight(1f, false)) {
                 sideContent()
             }
         }
@@ -332,7 +331,7 @@ fun UserInfoRowCard(
     sideContent: (@Composable () -> Unit)? = {
         MoneyAmount(
             moneyAmount = userInfo.userBalance,
-            fontSize = 24.sp
+            fontSize = 24.sp,
         )
     },
     iconSize: Dp = 50.dp
@@ -388,23 +387,33 @@ fun TransactionActivityRowCard(
 
 @Composable
 fun MoneyAmount(
+    modifier: Modifier = Modifier,
     moneyAmount: Double,
     fontSize: TextUnit = 30.sp
 ) {
     Row(
         verticalAlignment = Alignment.Top,
-        modifier = Modifier
+        modifier = modifier
             .height(IntrinsicSize.Min)
     ) {
         H1Text(
-            text = moneyAmount.asMoneyAmount().substring(0, if (moneyAmount >= 0) 1 else 2),
-            fontSize = fontSize.times(0.5),
-            modifier = Modifier.padding(top = 4.dp)
-        )
-        H1Text(
-            text = moneyAmount.asMoneyAmount().substring(if (moneyAmount >= 0) 1 else 2),
-            maxLines = 1,
-            fontSize = fontSize
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(fontSize = fontSize)) {
+                    withStyle(
+                        SpanStyle(
+                            fontSize = fontSize.times(0.5f),
+                            baselineShift = BaselineShift(0.4f)
+                        )
+                    ) {
+                        append(
+                            moneyAmount
+                                .asMoneyAmount()
+                                .substring(0, if (moneyAmount >= 0) 1 else 2)
+                        )
+                    }
+                    append(moneyAmount.asMoneyAmount().substring(if (moneyAmount >= 0) 1 else 2))
+                }
+            }
         )
     }
 }

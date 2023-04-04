@@ -46,8 +46,10 @@ class APIServer private constructor(
     // GroupInvite
     suspend fun inviteUserToGroup(username: String, group: Group) =
         groupInviteController.createGroupInvite(user, username, group)
-    fun acceptInviteToGroup(groupInvite: GroupInvite) =
-        groupInviteController.acceptInviteToGroup(groupInvite, user)
+    suspend fun acceptGroupInvite(groupInvite: GroupInvite) =
+        groupInviteController.acceptGroupInvite(groupInvite, user)
+    suspend fun rejectGroupInvite(groupInvite: GroupInvite) =
+        groupInviteController.rejectGroupInvite(groupInvite)
     fun getAllGroupInvitesAsFlow() = groupInviteController.getAllGroupInvitesAsFlow()
 
     // DebtAction
@@ -58,6 +60,8 @@ class APIServer private constructor(
     ) = debtActionController.createDebtAction(transactionRecords, debtee, message)
     suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
         debtActionController.acceptDebtAction(debtAction, myTransactionRecord)
+    suspend fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
+        debtActionController.rejectDebtAction(debtAction, myTransactionRecord)
     fun getAllDebtActionsAsFlow() = debtActionController.getAllDebtActionsAsFlow()
 
     // SettleAction
@@ -67,9 +71,14 @@ class APIServer private constructor(
         settleAction: SettleAction,
         myTransactionRecord: TransactionRecord
     ) = settleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)
-    suspend fun acceptSettleActionTransaction(settleAction: SettleAction,
-                                      transactionRecord: TransactionRecord) =
-        settleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
+    suspend fun acceptSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = settleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
+    suspend fun rejectSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = settleActionController.rejectSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = settleActionController.getAllSettleActionsAsFlow()
 
     // TODO: Get rid of this lol

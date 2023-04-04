@@ -13,13 +13,11 @@ sealed class Action : BaseEntity() {
         internal set
 
     val totalAmount
-        get() = transactionRecords.sumOf { it.balanceChange!! }
+        get() = transactionRecords.filter { transactionRecord ->
+            transactionRecord.dateAccepted != TransactionRecord.REJECTED
+        }.sumOf { it.balanceChange!! }
     val acceptedAmount
-        get() = transactionRecords.sumOf { transactionRecord ->
-            if (transactionRecord.dateAccepted != TransactionRecord.PENDING) {
-                transactionRecord.balanceChange!!
-            } else {
-                0.0
-            }
-        }
+        get() = transactionRecords.filter { transactionRecord ->
+            transactionRecord.isAccepted
+        }.sumOf { it.balanceChange!! }
 }

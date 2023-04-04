@@ -41,7 +41,7 @@ class NotificationsViewModel : LoggedInViewModel() {
                 debtAction.debteeUserInfo!!.userId!! == userObject.getId()
             }.flatMap { debtAction ->
                 debtAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.dateAccepted != TransactionRecord.PENDING
+                    transactionRecord.isAccepted
                 }.map { transactionRecord ->
                     Notification.DebtorAcceptOutgoingDebtAction(debtAction, transactionRecord)
                 }
@@ -67,7 +67,7 @@ class NotificationsViewModel : LoggedInViewModel() {
             settleActions.mapNotNull { settleAction ->
                 settleAction.transactionRecords.find { transactionRecord ->
                     transactionRecord.debtorUserInfo!!.userId!! == userObject.getId()
-                            && transactionRecord.dateAccepted != TransactionRecord.PENDING
+                            && transactionRecord.isAccepted
                 }?.let { transactionRecord ->
                     Notification.DebteeAcceptSettleActionTransaction(settleAction, transactionRecord)
                 }
@@ -107,6 +107,10 @@ class NotificationsViewModel : LoggedInViewModel() {
         viewModelScope.launch {
             apiServer.acceptDebtAction(debtAction, myTransactionRecord)
         }
+    fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
+        viewModelScope.launch {
+            apiServer.rejectDebtAction(debtAction, myTransactionRecord)
+        }
 
     // SettleAction
     fun acceptSettleActionTransaction(
@@ -114,6 +118,12 @@ class NotificationsViewModel : LoggedInViewModel() {
         transactionRecord: TransactionRecord
     ) = viewModelScope.launch {
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+    }
+    fun rejectSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = viewModelScope.launch {
+        apiServer.rejectSettleActionTransaction(settleAction, transactionRecord)
     }
 
     private fun <T: Iterable<Notification>> T.afterDate(date: String) =

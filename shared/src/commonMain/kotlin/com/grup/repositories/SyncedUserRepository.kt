@@ -49,7 +49,6 @@ internal class SyncedUserRepository : KoinComponent, RealmUserRepository() {
             }
         }
         if (response.status.value in 200..299) {
-            println("NIGGA MOMENT ${response.bodyAsText()}")
             responseUser = try {
                 Json.decodeFromString(response.bodyAsText())
             } catch (e: Exception) {

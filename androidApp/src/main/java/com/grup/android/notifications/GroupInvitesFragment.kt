@@ -85,6 +85,9 @@ fun GroupInvitesLayout(
                     groupInvite = groupInvite,
                     acceptGroupInviteOnClick = {
                         groupInvitesViewModel.acceptGroupInvite(groupInvite)
+                    },
+                    rejectGroupInviteOnClick = {
+                        groupInvitesViewModel.rejectGroupInvite(groupInvite)
                     }
                 )
             }
@@ -95,7 +98,8 @@ fun GroupInvitesLayout(
 @Composable
 fun GroupInviteRowCard(
     groupInvite: GroupInvite,
-    acceptGroupInviteOnClick: () -> Unit
+    acceptGroupInviteOnClick: () -> Unit,
+    rejectGroupInviteOnClick: () -> Unit
 ) {
     val context = LocalContext.current
     val imageRequest: ImageRequest =
@@ -123,8 +127,11 @@ fun GroupInviteRowCard(
             }
         },
         sideContent = {
-            AcceptCheckButton(onClick = acceptGroupInviteOnClick)
+            AcceptRejectColumn(
+                acceptOnClick = acceptGroupInviteOnClick,
+                rejectOnClick = rejectGroupInviteOnClick
+            )
         },
-        iconSize = 50.dp
+        iconSize = 60.dp
     )
 }

@@ -37,5 +37,12 @@ internal class SettleActionController : KoinComponent {
         settleActionService.acceptTransactionRecord(settleAction, transactionRecord)
     }
 
+    suspend fun rejectSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) {
+        settleActionService.rejectTransactionRecord(settleAction, transactionRecord)
+    }
+
     fun getAllSettleActionsAsFlow() = settleActionService.getAllSettleActionsAsFlow()
 }

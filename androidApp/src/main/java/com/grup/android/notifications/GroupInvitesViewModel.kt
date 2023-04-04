@@ -1,11 +1,12 @@
 package com.grup.android.notifications
 
+import androidx.lifecycle.viewModelScope
 import com.grup.android.LoggedInViewModel
 import com.grup.models.GroupInvite
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class GroupInvitesViewModel : LoggedInViewModel() {
     companion object {
@@ -25,5 +26,10 @@ class GroupInvitesViewModel : LoggedInViewModel() {
             }
         }.asNotification(emptyList())
 
-    fun acceptGroupInvite(groupInvite: GroupInvite) = apiServer.acceptInviteToGroup(groupInvite)
+    fun acceptGroupInvite(groupInvite: GroupInvite) = viewModelScope.launch {
+        apiServer.acceptGroupInvite(groupInvite)
+    }
+    fun rejectGroupInvite(groupInvite: GroupInvite) = viewModelScope.launch {
+        apiServer.rejectGroupInvite(groupInvite)
+    }
 }

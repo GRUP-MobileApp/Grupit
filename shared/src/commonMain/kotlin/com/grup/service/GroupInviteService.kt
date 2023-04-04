@@ -25,8 +25,8 @@ internal class GroupInviteService: KoinComponent {
         ) ?: throw NotCreatedException("Error creating group invite to ${invitee.displayName!!}")
     }
 
-    fun acceptGroupInvite(groupInvite: GroupInvite) {
-        groupInviteRepository.updateGroupInviteStatus(groupInvite, getCurrentTime())
+    suspend fun deleteGroupInvite(groupInvite: GroupInvite) {
+        groupInviteRepository.deleteGroupInvite(groupInvite)
     }
 
     fun getAllGroupInvitesAsFlow() = groupInviteRepository.findAllGroupInvitesAsFlow()

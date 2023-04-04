@@ -26,12 +26,21 @@ internal class DebtActionService : KoinComponent {
                 " ${debtee.groupId}")
     }
 
-    fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
+    suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionRepository.updateDebtAction(debtAction) {
             this.transactionRecords.find { transactionRecord ->
                 transactionRecord.debtorUserInfo!!.getId() ==
                         myTransactionRecord.debtorUserInfo!!.getId()
             }?.dateAccepted = getCurrentTime()
+        }
+    }
+
+    suspend fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
+        debtActionRepository.updateDebtAction(debtAction) {
+            this.transactionRecords.find { transactionRecord ->
+                transactionRecord.debtorUserInfo!!.getId() ==
+                        myTransactionRecord.debtorUserInfo!!.getId()
+            }?.dateAccepted = TransactionRecord.REJECTED
         }
     }
 

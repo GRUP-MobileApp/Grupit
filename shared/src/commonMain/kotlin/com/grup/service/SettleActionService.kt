@@ -26,16 +26,27 @@ internal class SettleActionService : KoinComponent {
                 " ${debtee.groupId}")
     }
 
-    fun createSettleActionTransaction(settleAction: SettleAction, myTransactionRecord: TransactionRecord) {
+    fun createSettleActionTransaction(
+        settleAction: SettleAction,
+        myTransactionRecord: TransactionRecord
+    ) {
         settleActionRepository.addSettleActionTransaction(settleAction, myTransactionRecord)
     }
 
-    fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
+    suspend fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.transactionRecords.find {
                 it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
                         it.dateCreated == transactionRecord.dateCreated
             }?.dateAccepted = getCurrentTime()
+        }
+    }
+    suspend fun rejectTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
+        settleActionRepository.updateSettleAction(settleAction) {
+            this.transactionRecords.find {
+                it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
+                        it.dateCreated == transactionRecord.dateCreated
+            }?.dateAccepted = TransactionRecord.REJECTED
         }
     }
 

@@ -39,8 +39,12 @@ internal class GroupInviteController : KoinComponent {
         return groupInviteService.getAllGroupInvitesAsFlow()
     }
 
-    fun acceptInviteToGroup(groupInvite: GroupInvite, user: User) {
-        groupInviteService.acceptGroupInvite(groupInvite)
+    suspend fun acceptGroupInvite(groupInvite: GroupInvite, user: User) {
         userInfoService.createUserInfo(user, groupInvite.groupId!!)
+        groupInviteService.deleteGroupInvite(groupInvite)
+    }
+
+    suspend fun rejectGroupInvite(groupInvite: GroupInvite) {
+        groupInviteService.deleteGroupInvite(groupInvite)
     }
 }

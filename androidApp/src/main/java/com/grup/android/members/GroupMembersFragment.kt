@@ -190,9 +190,7 @@ fun UsersList(
             UserInfoRowCard(
                 userInfo = userInfo,
                 iconSize = 70.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { userInfoOnClick(userInfo) }
+                modifier = Modifier.clickable { userInfoOnClick(userInfo) }
             )
         }
     }
@@ -219,8 +217,7 @@ fun GroupMemberInfoBottomSheet(
             ) {
                 UserInfoRowCard(
                     userInfo = selectedUserInfo,
-                    iconSize = 64.dp,
-                    modifier = Modifier.fillMaxWidth()
+                    iconSize = 64.dp
                 )
                 Divider()
                 RecentActivityList(groupActivity = groupActivity)

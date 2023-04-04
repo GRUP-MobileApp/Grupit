@@ -20,11 +20,9 @@ internal abstract class RealmGroupInviteRepository : IGroupInviteRepository {
         return realm.query<GroupInvite>().asFlow().map { it.list }
     }
 
-    override fun updateGroupInviteStatus(groupInvite: GroupInvite, status: String): GroupInvite {
-        return realm.writeBlocking {
-            this.findLatest(groupInvite)!!.apply {
-                this.dateAccepted = status
-            }
+    override suspend fun deleteGroupInvite(groupInvite: GroupInvite) {
+        return realm.write {
+            delete(findLatest(groupInvite)!!)
         }
     }
 }

@@ -27,5 +27,9 @@ internal class DebtActionController : KoinComponent {
         userInfoService.applyDebtActionTransactionRecord(debtAction, myTransactionRecord)
     }
 
+    suspend fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
+        debtActionService.rejectDebtAction(debtAction, myTransactionRecord)
+    }
+
     fun getAllDebtActionsAsFlow() = debtActionService.getAllDebtActionsAsFlow()
 }
