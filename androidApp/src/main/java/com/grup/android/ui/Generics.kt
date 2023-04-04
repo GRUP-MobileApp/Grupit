@@ -182,13 +182,13 @@ fun H1ConfirmTextButton(
 }
 
 @Composable
-fun AcceptRejectColumn(
+fun AcceptRejectRow(
     acceptOnClick: () -> Unit,
     rejectOnClick: () -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.SpaceAround,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxHeight()
     ) {
         AcceptCheckButton(acceptOnClick)
@@ -305,7 +305,10 @@ fun IconRowCard(
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(end = AppTheme.dimensions.spacing)
+                .weight(1f, false)
         ) {
             ProfileIcon(
                 painter = painter,
@@ -314,9 +317,7 @@ fun IconRowCard(
             mainContent()
         }
         if (sideContent != null) {
-            Row(modifier = Modifier.weight(1f, false)) {
-                sideContent()
-            }
+            sideContent()
         }
     }
 }
@@ -344,9 +345,9 @@ fun UserInfoRowCard(
 
     val pfpPainter =
         rememberAsyncImagePainter(
-        model = imageRequest,
-        imageLoader = context.imageLoader
-    )
+            model = imageRequest,
+            imageLoader = context.imageLoader
+        )
     IconRowCard(
         painter = pfpPainter,
         mainContent = {

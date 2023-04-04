@@ -10,10 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -21,9 +18,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
-import coil.compose.rememberAsyncImagePainter
-import coil.imageLoader
-import coil.request.ImageRequest
 import com.grup.android.*
 import com.grup.android.R
 import com.grup.android.ui.*
@@ -73,7 +67,7 @@ fun NotificationsLayout(
                 when (notification) {
                     is Notification.IncomingDebtAction -> {
                         {
-                            AcceptRejectColumn(
+                            AcceptRejectRow(
                                 acceptOnClick = {
                                     notificationsViewModel.acceptDebtAction(
                                         notification.debtAction,
@@ -91,7 +85,7 @@ fun NotificationsLayout(
                     }
                     is Notification.IncomingTransactionOnSettleAction -> {
                         {
-                            AcceptRejectColumn(
+                            AcceptRejectRow(
                                 acceptOnClick = {
                                     notificationsViewModel.acceptSettleActionTransaction(
                                         notification.settleAction,

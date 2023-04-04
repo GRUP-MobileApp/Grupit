@@ -4,23 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -30,9 +23,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
-import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import com.grup.android.R
 import com.grup.android.applyCachingAndBuild
 import com.grup.android.getProfilePictureURI
@@ -127,7 +118,7 @@ fun GroupInviteRowCard(
             }
         },
         sideContent = {
-            AcceptRejectColumn(
+            AcceptRejectRow(
                 acceptOnClick = acceptGroupInviteOnClick,
                 rejectOnClick = rejectGroupInviteOnClick
             )
