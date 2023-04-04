@@ -775,7 +775,7 @@ fun DebtActionDetails(
             sideContent = {
                 Column(horizontalAlignment = Alignment.End) {
                     Caption(text = "Debt")
-                    Caption(text = isoFullDate(debtAction.date))
+                    Caption(text = isoDate(debtAction.date))
                 }
             },
             iconSize = 80.dp
@@ -925,7 +925,7 @@ fun SettleActionDetails(
                 sideContent = {
                     Column(horizontalAlignment = Alignment.End) {
                         Caption(text = "Settle")
-                        Caption(text = isoFullDate(settleAction.date))
+                        Caption(text = isoDate(settleAction.date))
                     }
                 },
                 iconSize = 80.dp
@@ -1030,7 +1030,7 @@ fun TransactionRecordRowCard(
                     .debtorUserInfo!!.nickname!!
             )
             Caption(
-                text = isoFullDate(
+                text = isoDate(
                     if (transactionRecord.isAccepted)
                         transactionRecord.dateAccepted
                     else
