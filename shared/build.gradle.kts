@@ -113,7 +113,7 @@ kotlin {
             //iosSimulatorArm64Main.dependsOn(this)
 
             dependencies {
-                implementation("io.ktor:ktor-client-ios:$ktorVersion")
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
             }
         }
         val iosX64Test by getting
@@ -124,15 +124,32 @@ kotlin {
             iosX64Test.dependsOn(this)
             iosArm64Test.dependsOn(this)
             //iosSimulatorArm64Test.dependsOn(this)
+
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            }
         }
     }
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("/Users/justinxu/Documents/keystore/signedkey")
+            storePassword = "JUTIN@ppgroup123"
+            keyAlias = "upload"
+            keyPassword = "JUTIN@ppgroup123"
+        }
+    }
     compileSdk = 33
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdk = 21
         targetSdk = 33
+    }
+    buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 }

@@ -10,6 +10,7 @@ out/
 .directory
 node_modules/
 local.properties
+gradle.properties
 android/mobile/release/*
 ios.xcworkspace/
 

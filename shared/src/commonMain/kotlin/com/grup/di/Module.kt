@@ -18,6 +18,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import org.koin.core.module.Module
 import org.koin.dsl.module
 
 internal val servicesModule = module {
@@ -29,8 +30,19 @@ internal val servicesModule = module {
     single { SettleActionService() }
 }
 
-internal val repositoriesModule = module {
+internal val releaseRepositoriesModule = module {
     single<IUserRepository> { SyncedUserRepository() }
+    single<IGroupRepository> { SyncedGroupRepository() }
+    single<IUserInfoRepository> { SyncedUserInfoRepository() }
+    single<IGroupInviteRepository> { SyncedGroupInviteRepository() }
+    single<IDebtActionRepository> { SyncedDebtActionRepository() }
+    single<ISettleActionRepository> { SyncedSettleActionRepository() }
+
+    single<IImagesRepository> { AWSImagesRepository() }
+}
+
+internal val debugRepositoriesModule = module {
+    single<IUserRepository> { DevSyncedUserRepository() }
     single<IGroupRepository> { SyncedGroupRepository() }
     single<IUserInfoRepository> { SyncedUserInfoRepository() }
     single<IGroupInviteRepository> { SyncedGroupInviteRepository() }
@@ -49,24 +61,14 @@ internal val testRepositoriesModule = module {
     single<ISettleActionRepository> { TestSettleActionRepository() }
 }
 
+internal expect fun getHttpClient(): HttpClient
+
 internal val httpClientModule = module {
-    single {
-        HttpClient(CIO) {
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        ignoreUnknownKeys = true
-                        isLenient = true
-                        prettyPrint = true
-                    },
-                    contentType = ContentType.Application.Json
-                )
-            }
-        }
-    }
+    single { getHttpClient() }
 }
 
+internal val releaseAppModules =
+    listOf(servicesModule, releaseRepositoriesModule, httpClientModule)
 
-internal val releaseAppModules = listOf(
-    servicesModule, repositoriesModule, httpClientModule
-)
+internal val debugAppModules =
+    listOf(servicesModule, debugRepositoriesModule, httpClientModule)

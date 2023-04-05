@@ -1,19 +1,22 @@
 package com.grup.di
 
-import com.grup.exceptions.login.InvalidGoogleAccountException
+import com.grup.exceptions.EntityAlreadyExistsException
+import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.models.*
 import com.grup.models.User
 import com.grup.other.RealmUser
+import com.grup.other.TEST_APP_ID
 import com.grup.other.idSerialName
 import com.grup.interfaces.DBManager
-import com.grup.other.APP_ID
 import com.grup.service.Notifications
 import io.ktor.util.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.*
-import io.realm.kotlin.mongodb.exceptions.AuthException
+import io.realm.kotlin.mongodb.exceptions.BadRequestException
+import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
+import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.mongodb.sync.asQuery
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -26,7 +29,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 
-internal class RealmManager : KoinComponent, DBManager {
+internal class DebugRealmManager : KoinComponent, DBManager {
     private val realm: Realm by inject()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -61,18 +64,27 @@ internal class RealmManager : KoinComponent, DBManager {
     }
 
     companion object {
-        private val app: App = App.create(APP_ID)
+        private val app: App = App.create(TEST_APP_ID)
         private val realmUser: RealmUser
             get() = app.currentUser ?: throw NotLoggedInException()
 
-        suspend fun loginGoogle(googleAccountToken: String): RealmManager {
+        suspend fun loginEmailPassword(email: String, password: String): RealmManager {
             try {
-                return loginRealmManager(
-                    Credentials.google(googleAccountToken, GoogleAuthType.ID_TOKEN)
-                )
-            } catch (e: AuthException) {
-                throw InvalidGoogleAccountException(e.message)
+                return loginRealmManager(Credentials.emailPassword(email, password))
+            } catch (e: InvalidCredentialsException) {
+                throw InvalidEmailPasswordException()
             }
+        }
+
+        suspend fun registerEmailPassword(email: String, password: String): RealmManager {
+            try {
+                app.emailPasswordAuth.registerUser(email, password)
+            } catch (e: UserAlreadyExistsException) {
+                throw EntityAlreadyExistsException("Email already exists")
+            } catch (e: BadRequestException) {
+                // TODO: Bad email/bad password exception
+            }
+            return loginEmailPassword(email, password)
         }
 
         private suspend fun loginRealmManager(credentials: Credentials): RealmManager {
@@ -122,7 +134,7 @@ internal class RealmManager : KoinComponent, DBManager {
                 single { realm }
             }
         )
-        unloadKoinModules(releaseAppModules)
+        unloadKoinModules(debugAppModules)
         Notifications.unsubscribeAllNotifications()
         realmUser.logOut()
     }

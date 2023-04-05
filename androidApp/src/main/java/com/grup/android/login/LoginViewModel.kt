@@ -66,7 +66,4 @@ class LoginViewModel : KoinComponent, ViewModel() {
             }
         }
     }
-
-    fun loginSavedCredentials() = viewModelScope.launch {
-    }
 }

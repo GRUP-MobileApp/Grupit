@@ -12,4 +12,8 @@ internal actual object Notifications {
     actual fun subscribePersonalNotifications(userId: String) {
         // TODO
     }
+
+    actual fun unsubscribeAllNotifications() {
+        // TODO
+    }
 }

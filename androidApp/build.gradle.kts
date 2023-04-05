@@ -7,6 +7,8 @@ val navigationVersion: String by project
 val coilComposeVersion: String by project
 val accompanistVersion: String by project
 
+val keystorePassword: String by project
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -16,6 +18,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("/Users/justinxu/Documents/keystore/signedkey")
+            storePassword = keystorePassword
+            keyAlias = "upload"
+            keyPassword = keystorePassword
+        }
+    }
     compileSdk = 33
     defaultConfig {
         applicationId = "com.grup.android"
@@ -23,6 +33,7 @@ android {
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
+        signingConfig = signingConfigs.getByName("release")
     }
 
     buildFeatures {
@@ -36,6 +47,11 @@ android {
     }
     packagingOptions {
         resources.excludes.add("META-INF/*")
+    }
+    buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
 }
 
@@ -94,6 +110,8 @@ dependencies {
     // Google Play Services
     implementation ("com.google.android.gms:play-services-auth:20.4.1")
     implementation("com.google.android.gms:play-services-base:18.2.0")
+    implementation("com.google.android.play:app-update:2.0.1")
+    implementation("com.google.android.play:app-update-ktx:2.0.1")
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:31.2.2"))

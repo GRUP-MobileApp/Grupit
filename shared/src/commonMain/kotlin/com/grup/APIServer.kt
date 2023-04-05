@@ -6,16 +6,10 @@ import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import com.grup.interfaces.DBManager
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.unloadKoinModules
 
 class APIServer private constructor(
     private val dbManager: DBManager
 ) {
-    init {
-        loadKoinModules(releaseAppModules)
-    }
-
     private val userController: UserController = UserController()
     private val groupController: GroupController = GroupController()
     private val userInfoController: UserInfoController = UserInfoController()
@@ -89,17 +83,14 @@ class APIServer private constructor(
 
     companion object Login {
         suspend fun loginEmailAndPassword(email: String, password: String): APIServer =
-            APIServer(RealmManager.loginEmailPassword(email, password))
+            APIServer(DebugRealmManager.loginEmailPassword(email, password))
 
         suspend fun registerEmailAndPassword(email: String, password: String): APIServer =
-            APIServer(RealmManager.registerEmailPassword(email, password))
+            APIServer(DebugRealmManager.registerEmailPassword(email, password))
 
         suspend fun loginGoogleAccountToken(googleAccountToken: String): APIServer =
             APIServer(RealmManager.loginGoogle(googleAccountToken))
     }
 
-    suspend fun logOut() {
-        dbManager.close()
-        unloadKoinModules(releaseAppModules)
-    }
+    suspend fun logOut() = dbManager.close()
 }
