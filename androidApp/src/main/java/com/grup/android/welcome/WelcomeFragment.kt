@@ -555,3 +555,34 @@ fun TutorialPage(
         }
     }
 }
+
+@Composable
+fun TutorialRequest(
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = AppTheme.dimensions.paddingExtraLarge,
+                bottom = 100.dp,
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        H1Text(text = "How it works")
+
+        Text(
+            text = "GRUP is an app for tracking expenses in a group! A negative balance " +
+                    "means that you owe money, while a positive balance means you are owed money." +
+                    "You can request money to record how much is owed to you. When you have a " +
+                    "positive balance, you can choose to settle debts. Anyone that has a negative " +
+                    "balance can choose to pay for settle actions."
+        )
+        H1ConfirmTextButton(
+            text = "Get Started",
+            onClick = onClick
+        )
+    }
+
+}
