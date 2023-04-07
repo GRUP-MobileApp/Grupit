@@ -135,6 +135,7 @@ fun LoginPage(
             },
             modifier = Modifier.background(AppTheme.colors.secondary),
             textStyle = TextStyle(color = AppTheme.colors.onSecondary),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             value = email,
             onValueChange = { email = it },
             singleLine = true
