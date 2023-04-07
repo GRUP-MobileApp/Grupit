@@ -36,15 +36,13 @@ import com.grup.android.MainActivity
 import com.grup.android.R
 import com.grup.android.ui.H1Text
 import com.grup.android.ui.apptheme.AppTheme
-<<<<<<< HEAD:androidApp/src/debug/java/com/grup/android/login/LoginActivity.kt
+
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-=======
-import java.lang.*
->>>>>>> 0494851 (created shared get env variable function, replaced key references with env var references):androidApp/src/main/java/com/grup/android/login/LoginActivity.kt
 
 
 class LoginActivity : AppCompatActivity(), KoinComponent {
+
     private val loginViewModel: LoginViewModel by viewModels()
     private val googleSignInClient: GoogleSignInClient by inject()
 
@@ -237,7 +235,6 @@ fun LoginPage(
                 }
             }
         }
-<<<<<<< HEAD:androidApp/src/debug/java/com/grup/android/login/LoginActivity.kt
         Button(
             onClick = {
                 if (!pendingLogin) {
@@ -267,36 +264,6 @@ fun LoginPage(
                 )
             }
         }
-        // CrashButton()
-=======
-        GoogleSignInButton(
-            onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) }
-        )
-    }
-}
-
-
-@Composable
-fun GoogleSignInButton(
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp),
-        shape = RoundedCornerShape(6.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFF4285F4),
-            contentColor = Color.White
-        )
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_logo_google),
-            contentDescription = ""
-        )
-        Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
->>>>>>> 0494851 (created shared get env variable function, replaced key references with env var references):androidApp/src/main/java/com/grup/android/login/LoginActivity.kt
     }
 }
 
