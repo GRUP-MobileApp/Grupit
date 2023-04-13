@@ -18,7 +18,7 @@ kotlin {
     android()
     iosX64()
     iosArm64()
-    //iosSimulatorArm64() sure all ios dependencies support this target
+    iosSimulatorArm64()
 
     cocoapods {
         summary = "Some description for the Shared Module"

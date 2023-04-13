@@ -11,9 +11,8 @@ import com.grup.exceptions.login.LoginException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 
-class LoginViewModel : KoinComponent, ViewModel() {
+class LoginViewModel : ViewModel() {
     sealed class LoginResult {
         object Success : LoginResult()
         object PendingLogin: LoginResult()

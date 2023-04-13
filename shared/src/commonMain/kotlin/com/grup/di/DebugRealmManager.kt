@@ -1,5 +1,6 @@
 package com.grup.di
 
+import com.grup.exceptions.APIException
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
@@ -28,6 +29,7 @@ import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
+import kotlin.coroutines.cancellation.CancellationException
 
 internal class DebugRealmManager : KoinComponent, DBManager {
     private val realm: Realm by inject()

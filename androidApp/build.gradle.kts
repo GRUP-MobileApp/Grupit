@@ -65,7 +65,7 @@ dependencies {
     implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.0")
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
@@ -80,7 +80,7 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Animation
-    implementation("androidx.compose.animation:animation:1.4.0")
+    implementation("androidx.compose.animation:animation:1.4.1")
 
     // Coil
     implementation("io.coil-kt:coil-compose:$coilComposeVersion")
@@ -108,7 +108,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
 
     // Google Play Services
-    implementation ("com.google.android.gms:play-services-auth:20.4.1")
+    implementation ("com.google.android.gms:play-services-auth:20.5.0")
     implementation("com.google.android.gms:play-services-base:18.2.0")
     implementation("com.google.android.play:app-update:2.0.1")
     implementation("com.google.android.play:app-update-ktx:2.0.1")

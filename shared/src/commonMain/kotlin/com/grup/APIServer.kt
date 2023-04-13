@@ -2,10 +2,12 @@ package com.grup
 
 import com.grup.controllers.*
 import com.grup.di.*
+import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import com.grup.interfaces.DBManager
+import kotlin.coroutines.cancellation.CancellationException
 
 class APIServer private constructor(
     private val dbManager: DBManager
@@ -82,12 +84,15 @@ class APIServer private constructor(
     }
 
     companion object Login {
+        @Throws(LoginException::class, CancellationException::class)
         suspend fun loginEmailAndPassword(email: String, password: String): APIServer =
             APIServer(DebugRealmManager.loginEmailPassword(email, password))
 
+        @Throws(LoginException::class, CancellationException::class)
         suspend fun registerEmailAndPassword(email: String, password: String): APIServer =
             APIServer(DebugRealmManager.registerEmailPassword(email, password))
 
+        @Throws(LoginException::class, CancellationException::class)
         suspend fun loginGoogleAccountToken(googleAccountToken: String): APIServer =
             APIServer(RealmManager.loginGoogle(googleAccountToken))
     }

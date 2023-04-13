@@ -12,13 +12,8 @@ import com.grup.service.*
 import com.grup.service.GroupService
 import com.grup.service.DebtActionService
 import com.grup.service.UserService
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
-import org.koin.core.module.Module
+import org.koin.core.KoinApplication
+import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
 internal val servicesModule = module {
@@ -61,14 +56,10 @@ internal val testRepositoriesModule = module {
     single<ISettleActionRepository> { TestSettleActionRepository() }
 }
 
-internal expect fun getHttpClient(): HttpClient
-
-internal val httpClientModule = module {
-    single { getHttpClient() }
-}
-
 internal val releaseAppModules =
-    listOf(servicesModule, releaseRepositoriesModule, httpClientModule)
+    listOf(servicesModule, releaseRepositoriesModule)
 
 internal val debugAppModules =
-    listOf(servicesModule, debugRepositoriesModule, httpClientModule)
+    listOf(servicesModule, debugRepositoriesModule)
+
+expect fun initKoin(appDeclaration: (KoinApplication.() -> Unit)? = null)

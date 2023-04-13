@@ -7,17 +7,17 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.grup.di.initKoin
 import com.grup.repositories.PreferencesDataStore
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.loadKoinModules
-import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
 class MainApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
-        startKoin {
+        initKoin {
             androidContext(applicationContext)
             androidLogger()
 
