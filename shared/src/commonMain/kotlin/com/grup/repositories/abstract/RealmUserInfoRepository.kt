@@ -11,6 +11,7 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
     protected abstract val realm: Realm
 
     override fun createUserInfo(userInfo: UserInfo): UserInfo? {
+        // TODO: Check that you only have <= 3 userInfos at a time
         return realm.writeBlocking {
             copyToRealm(userInfo)
         }
