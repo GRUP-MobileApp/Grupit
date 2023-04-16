@@ -36,12 +36,14 @@ import com.grup.android.MainActivity
 import com.grup.android.R
 import com.grup.android.ui.H1Text
 import com.grup.android.ui.apptheme.AppTheme
+
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 
 
 class LoginActivity : AppCompatActivity(), KoinComponent {
+
     private val loginViewModel: LoginViewModel by viewModels()
     private val googleSignInClient: GoogleSignInClient by inject()
 
