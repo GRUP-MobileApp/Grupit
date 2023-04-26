@@ -21,11 +21,12 @@ struct DebugLoginView: View {
                 loginOnClick: {}
             )
         }
+        
         func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
     }
     
     var body: some View {
-        ComposeView().ignoresSafeArea(.keyboard)
+        ComposeView()
     }
 }
 

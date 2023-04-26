@@ -1,11 +1,9 @@
 val koinVersion: String by project
-val realmVersion: String by project
 val kotlinVersion: String by project
 val composeVersion: String by project
 val lifecycleVersion: String by project
 val navigationVersion: String by project
 val coilComposeVersion: String by project
-val accompanistVersion: String by project
 
 val keystorePassword: String by project
 
@@ -60,11 +58,8 @@ dependencies {
     implementation(project(":shared"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
-    implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-ktx:1.10.0")
 
     // Lifecycle
@@ -74,9 +69,6 @@ dependencies {
 
     // KMMViewModel
     implementation("com.rickclephas.kmm:kmm-viewmodel-core:1.0.0-ALPHA-4")
-
-    // Animation
-    implementation("androidx.compose.animation:animation:1.4.2")
 
     // Coil
     implementation("io.coil-kt:coil-compose:$coilComposeVersion")
@@ -91,20 +83,11 @@ dependencies {
 
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.foundation:foundation:$composeVersion")
-    implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.activity:activity-compose:1.7.1")
     implementation("androidx.ui:ui-tooling:1.0.0-alpha07")
 
     // Koin
     implementation("io.insert-koin:koin-android:$koinVersion")
-
-    // Realm
-    implementation("io.realm.kotlin:library-base:$realmVersion")
-
-    // Accompanist
-    implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
 
     // Google Play Services
     implementation ("com.google.android.gms:play-services-auth:20.5.0")

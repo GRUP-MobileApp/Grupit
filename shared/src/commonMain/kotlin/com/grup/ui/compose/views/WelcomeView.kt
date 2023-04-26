@@ -182,7 +182,7 @@ private fun WelcomeLayout(
                             .padding(2.dp)
                             .clip(AppTheme.shapes.circleShape)
                             .background(color)
-                            .size(20.dp)
+                            .size(8.dp)
 
                     )
                 }
