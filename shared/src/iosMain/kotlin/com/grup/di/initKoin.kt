@@ -1,8 +1,7 @@
-@file:JvmName("ModuleAndroidKt")
 package com.grup.di
 
 import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
+import io.ktor.client.engine.darwin.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -17,7 +16,7 @@ actual fun initKoin(appDeclaration: (KoinApplication.() -> Unit)?) {
         modules(
             module {
                 single {
-                    HttpClient(OkHttp) {
+                    HttpClient(Darwin) {
                         install(ContentNegotiation) {
                             json(
                                 Json {
