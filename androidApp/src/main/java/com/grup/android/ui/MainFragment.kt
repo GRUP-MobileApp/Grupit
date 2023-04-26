@@ -1,4 +1,4 @@
-package com.grup.android
+package com.grup.android.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,11 +14,13 @@ import androidx.navigation.navGraphViewModels
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.grup.android.login.LoginActivity
-import com.grup.android.notifications.GroupInvitesViewModel
-import com.grup.android.notifications.NotificationsViewModel
-import com.grup.ui.compose.MainLayout
+import com.grup.android.AndroidNavigationController
+import com.grup.android.GOOGLE_WEB_CLIENT_ID
+import com.grup.android.R
+import com.grup.ui.compose.views.MainView
+import com.grup.ui.viewmodel.GroupInvitesViewModel
 import com.grup.ui.viewmodel.MainViewModel
+import com.grup.ui.viewmodel.NotificationsViewModel
 
 class MainFragment : Fragment() {
     private val mainViewModel: MainViewModel by navGraphViewModels(R.id.main_graph)
@@ -48,16 +50,16 @@ class MainFragment : Fragment() {
         )
         return ComposeView(requireContext()).apply {
             setContent {
-                MainLayout(
+                MainView(
                     mainViewModel = mainViewModel,
                     navController = AndroidNavigationController(findNavController()),
                     returnToLoginOnClick = {
+                        mainViewModel.logOut()
+                        googleSignInClient.signOut()
                         startActivity(
                             Intent(activity, LoginActivity::class.java)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         )
-                        mainViewModel.logOut()
-                        googleSignInClient.signOut()
                         requireActivity().finish()
                     }
                 )

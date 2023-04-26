@@ -1,4 +1,4 @@
-package com.grup.android.members
+package com.grup.android.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.AndroidNavigationController
 import com.grup.android.R
-import com.grup.ui.compose.GroupMembersView
+import com.grup.ui.compose.views.GroupMembersView
 import com.grup.ui.viewmodel.MainViewModel
 import com.grup.ui.viewmodel.GroupMembersViewModel
 

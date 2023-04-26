@@ -40,7 +40,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.4.6"
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -72,15 +72,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-    // Datastore
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-
-    // Koin
-    implementation("io.insert-koin:koin-core:$koinVersion")
-    implementation("io.insert-koin:koin-android:$koinVersion")
+    // KMMViewModel
+    implementation("com.rickclephas.kmm:kmm-viewmodel-core:1.0.0-ALPHA-4")
 
     // Animation
-    implementation("androidx.compose.animation:animation:1.4.1")
+    implementation("androidx.compose.animation:animation:1.4.2")
 
     // Coil
     implementation("io.coil-kt:coil-compose:$coilComposeVersion")
@@ -97,8 +93,11 @@ dependencies {
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.activity:activity-compose:1.7.0")
+    implementation("androidx.activity:activity-compose:1.7.1")
     implementation("androidx.ui:ui-tooling:1.0.0-alpha07")
+
+    // Koin
+    implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Realm
     implementation("io.realm.kotlin:library-base:$realmVersion")

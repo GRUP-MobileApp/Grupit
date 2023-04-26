@@ -1,4 +1,4 @@
-package com.grup.android.ui.apptheme
+package com.grup.ui.apptheme
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-data class AppDimensions(
+internal data class AppDimensions(
     val appPadding: Dp = 15.dp,
     val cardPadding: Dp = 20.dp,
     val rowCardPadding: PaddingValues = PaddingValues(horizontal = 10.dp, vertical = 15.dp),

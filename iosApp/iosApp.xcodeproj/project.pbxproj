@@ -12,8 +12,6 @@
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		B5E6253A29E637AE000EFB3D /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8EA04739A40CCB36AA16152 /* Pods_iosApp.framework */; };
 		B5F1AC4429E639EB00664A05 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4329E639EB00664A05 /* LoginView.swift */; };
-		B5F1AC4629E639F900664A05 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4529E639F900664A05 /* LoginViewModel.swift */; };
-		B5F1AC4829E63E5C00664A05 /* LoggedInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4729E63E5C00664A05 /* LoggedInViewModel.swift */; };
 		B5F1AC4B29E656C900664A05 /* Generics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4A29E656C900664A05 /* Generics.swift */; };
 		B5F1AC4D29E6627300664A05 /* Dimensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4C29E6627300664A05 /* Dimensions.swift */; };
 		B5F1AC4F29E667A200664A05 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4E29E667A200664A05 /* Colors.swift */; };
@@ -35,8 +33,6 @@
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A53D2BDB0F9261150EDFE7B6 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		B5F1AC4329E639EB00664A05 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		B5F1AC4529E639F900664A05 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
-		B5F1AC4729E63E5C00664A05 /* LoggedInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedInViewModel.swift; sourceTree = "<group>"; };
 		B5F1AC4A29E656C900664A05 /* Generics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generics.swift; sourceTree = "<group>"; };
 		B5F1AC4C29E6627300664A05 /* Dimensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dimensions.swift; sourceTree = "<group>"; };
 		B5F1AC4E29E667A200664A05 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
@@ -101,7 +97,6 @@
 				B5F1AC5929E7CB7E00664A05 /* GoogleService-Info.plist */,
 				2152FB032600AC8F00CF470E /* iOSApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
-				B5F1AC4729E63E5C00664A05 /* LoggedInViewModel.swift */,
 				B5F1AC5729E792EE00664A05 /* AppDelegate.swift */,
 				B5F1AC6029E7CFB200664A05 /* Keys.swift */,
 			);
@@ -120,7 +115,6 @@
 			isa = PBXGroup;
 			children = (
 				B5F1AC4329E639EB00664A05 /* LoginView.swift */,
-				B5F1AC4529E639F900664A05 /* LoginViewModel.swift */,
 			);
 			path = login;
 			sourceTree = "<group>";
@@ -158,6 +152,7 @@
 				7555FF79242A565900829871 /* Resources */,
 				FA9E23EC9745542F48E424D6 /* Frameworks */,
 				86F93DB626D02F351BAE692C /* [CP] Embed Pods Frameworks */,
+				D3B489ED7C966F92B678C121 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -262,6 +257,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		D3B489ED7C966F92B678C121 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -269,7 +281,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5F1AC4629E639F900664A05 /* LoginViewModel.swift in Sources */,
 				B5F1AC4D29E6627300664A05 /* Dimensions.swift in Sources */,
 				B5F1AC5629E670BC00664A05 /* AppTheme.swift in Sources */,
 				B5F1AC6129E7CFB200664A05 /* Keys.swift in Sources */,
@@ -278,7 +289,6 @@
 				B5F1AC4B29E656C900664A05 /* Generics.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				B5F1AC5829E792EE00664A05 /* AppDelegate.swift in Sources */,
-				B5F1AC4829E63E5C00664A05 /* LoggedInViewModel.swift in Sources */,
 				B5F1AC6329E7D6AB00664A05 /* Shapes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

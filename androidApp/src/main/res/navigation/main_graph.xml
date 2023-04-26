@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.grup.android.MainFragment"
+        android:name="com.grup.android.ui.MainFragment"
         android:label="MainFragment" >
         <action
             android:id="@+id/enterActionAmount"
@@ -27,7 +27,7 @@
 
     <fragment
         android:id="@+id/welcomeFragment"
-        android:name="com.grup.android.welcome.WelcomeFragment"
+        android:name="com.grup.android.ui.WelcomeFragment"
         android:label="WelcomeFragment" >
         <action
             android:id="@+id/startMainFragment"
@@ -36,20 +36,20 @@
 
     <fragment
         android:id="@+id/createGroupFragment"
-        android:name="com.grup.android.CreateGroupFragment"
+        android:name="com.grup.android.ui.CreateGroupFragment"
         android:label="CreateGroupFragment" />
     <fragment
         android:id="@+id/membersFragment"
-        android:name="com.grup.android.members.GroupMembersFragment"
+        android:name="com.grup.android.ui.GroupMembersFragment"
         android:label="MembersFragment" />
     <fragment
         android:id="@+id/notificationsFragment"
-        android:name="com.grup.android.notifications.NotificationsFragment"
+        android:name="com.grup.android.ui.NotificationsFragment"
         android:label="NotificationsFragment" />
 
     <fragment
         android:id="@+id/actionAmountFragment"
-        android:name="com.grup.android.transaction.ActionAmountFragment"
+        android:name="com.grup.android.ui.ActionAmountFragment"
         android:label="DebtActionFragment" >
         <action
             android:id="@+id/createDebtAction"
@@ -58,11 +58,11 @@
 
     <fragment
         android:id="@+id/debtActionFragment"
-        android:name="com.grup.android.transaction.DebtActionFragment"
+        android:name="com.grup.android.ui.DebtActionFragment"
         android:label="DebtActionFragment" >
     </fragment>
     <fragment
         android:id="@+id/groupInvitesFragment"
-        android:name="com.grup.android.notifications.GroupInvitesFragment"
+        android:name="com.grup.android.ui.GroupInvitesFragment"
         android:label="GroupInvitesFragment" />
 </navigation>

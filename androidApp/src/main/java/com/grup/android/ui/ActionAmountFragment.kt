@@ -1,4 +1,4 @@
-package com.grup.android.transaction
+package com.grup.android.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.AndroidNavigationController
 import com.grup.android.R
-import com.grup.ui.compose.ActionAmountView
+import com.grup.ui.compose.views.ActionAmountView
 import com.grup.ui.viewmodel.TransactionViewModel
 
 class ActionAmountFragment : Fragment() {

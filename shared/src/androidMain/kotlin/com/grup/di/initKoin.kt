@@ -1,4 +1,3 @@
-@file:JvmName("ModuleAndroidKt")
 package com.grup.di
 
 import io.ktor.client.*

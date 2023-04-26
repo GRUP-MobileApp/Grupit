@@ -1,12 +1,10 @@
 package com.grup.di
 
-import com.grup.exceptions.APIException
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.models.*
 import com.grup.models.User
-import com.grup.other.RealmUser
 import com.grup.other.TEST_APP_ID
 import com.grup.other.idSerialName
 import com.grup.interfaces.DBManager
@@ -29,7 +27,6 @@ import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
-import kotlin.coroutines.cancellation.CancellationException
 
 internal class DebugRealmManager : KoinComponent, DBManager {
     private val realm: Realm by inject()
@@ -67,8 +64,6 @@ internal class DebugRealmManager : KoinComponent, DBManager {
 
     companion object {
         private val app: App = App.create(TEST_APP_ID)
-        private val realmUser: RealmUser
-            get() = app.currentUser ?: throw NotLoggedInException()
 
         suspend fun loginEmailPassword(email: String, password: String): RealmManager {
             try {
@@ -90,7 +85,7 @@ internal class DebugRealmManager : KoinComponent, DBManager {
         }
 
         private suspend fun loginRealmManager(credentials: Credentials): RealmManager {
-            app.login(credentials)
+            val realmUser = app.login(credentials)
             Realm.open(
                 SyncConfiguration.Builder(
                     realmUser,
@@ -118,12 +113,12 @@ internal class DebugRealmManager : KoinComponent, DBManager {
             ).also { realm ->
                 realm.syncSession.downloadAllServerChanges()
                 loadKoinModules(
+                    releaseAppModules +
                     module {
                         single { realm }
                     }
                 )
             }
-            loadKoinModules(releaseAppModules)
             Notifications.subscribePersonalNotifications(realmUser.id)
             return RealmManager()
         }
@@ -132,12 +127,12 @@ internal class DebugRealmManager : KoinComponent, DBManager {
     override suspend fun close() {
         subscriptionsJob.cancel()
         unloadKoinModules(
+            debugAppModules +
             module {
                 single { realm }
             }
         )
-        unloadKoinModules(debugAppModules)
         Notifications.unsubscribeAllNotifications()
-        realmUser.logOut()
+        app.currentUser?.logOut()
     }
 }

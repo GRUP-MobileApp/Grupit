@@ -1,18 +1,18 @@
-package com.grup.android.ui.apptheme
+package com.grup.ui.apptheme
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 
-val dark_grey = Color(0xFF1F1F1F)
-val grey = Color(0xFF292929)
-val light_grey = Color(0xFF3D3D3D)
-val white = Color(0xFFFFFFFF)
-val off_white = Color(0xBBF5F5F4)
-val green = Color(0xFF65B540)
-val red = Color(0xFFEF1A1A)
-val red_error = Color(0xffff0033)
+internal val dark_grey = Color(0xFF1F1F1F)
+internal val grey = Color(0xFF292929)
+internal val light_grey = Color(0xFF3D3D3D)
+internal val white = Color(0xFFFFFFFF)
+internal val off_white = Color(0xBBF5F5F4)
+internal val green = Color(0xFF65B540)
+internal val red = Color(0xFFEF1A1A)
+internal val red_error = Color(0xffff0033)
 
-class AppColors(
+internal class AppColors(
     primary: Color,
     secondary: Color,
     onPrimary: Color,
@@ -70,7 +70,7 @@ class AppColors(
     }
 }
 
-fun appColors(
+internal fun appColors(
     primary: Color = dark_grey,
     secondary: Color = grey,
     onPrimary: Color = off_white,

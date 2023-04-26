@@ -3,7 +3,6 @@ package com.grup.android
 import android.content.Context
 import android.widget.Toast
 
-
 class ExceptionHandler(
     private val context: Context
 ) : Thread.UncaughtExceptionHandler {

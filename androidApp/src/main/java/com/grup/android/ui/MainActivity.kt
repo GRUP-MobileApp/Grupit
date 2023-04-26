@@ -1,10 +1,9 @@
-package com.grup.android
+package com.grup.android.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.lifecycle.ViewModelProvider
-import com.grup.android.notifications.GroupInvitesViewModel
-import com.grup.android.notifications.NotificationsViewModel
+import com.grup.android.ExceptionHandler
+import com.grup.android.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,5 +12,3 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 }
-
-

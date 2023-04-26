@@ -46,7 +46,8 @@ class APIServer private constructor(
         groupInviteController.acceptGroupInvite(groupInvite, user)
     suspend fun rejectGroupInvite(groupInvite: GroupInvite) =
         groupInviteController.rejectGroupInvite(groupInvite)
-    fun getAllGroupInvitesAsFlow() = groupInviteController.getAllGroupInvitesAsFlow()
+    fun getAllGroupInvitesAsFlow() =
+        groupInviteController.getAllGroupInvitesAsFlow()
 
     // DebtAction
     fun createDebtAction(
@@ -58,7 +59,8 @@ class APIServer private constructor(
         debtActionController.acceptDebtAction(debtAction, myTransactionRecord)
     suspend fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
         debtActionController.rejectDebtAction(debtAction, myTransactionRecord)
-    fun getAllDebtActionsAsFlow() = debtActionController.getAllDebtActionsAsFlow()
+    fun getAllDebtActionsAsFlow() =
+        debtActionController.getAllDebtActionsAsFlow()
 
     // SettleAction
     suspend fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
@@ -75,7 +77,8 @@ class APIServer private constructor(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) = settleActionController.rejectSettleActionTransaction(settleAction, transactionRecord)
-    fun getAllSettleActionsAsFlow() = settleActionController.getAllSettleActionsAsFlow()
+    fun getAllSettleActionsAsFlow() =
+        settleActionController.getAllSettleActionsAsFlow()
 
     // TODO: Get rid of this lol
     object Images {

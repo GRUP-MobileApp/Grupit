@@ -4,7 +4,6 @@ import com.grup.exceptions.login.InvalidGoogleAccountException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.models.*
 import com.grup.models.User
-import com.grup.other.RealmUser
 import com.grup.other.idSerialName
 import com.grup.interfaces.DBManager
 import com.grup.other.APP_ID
@@ -62,8 +61,6 @@ internal class RealmManager : KoinComponent, DBManager {
 
     companion object {
         private val app: App = App.create(APP_ID)
-        private val realmUser: RealmUser
-            get() = app.currentUser ?: throw NotLoggedInException()
 
         suspend fun loginGoogle(googleAccountToken: String): RealmManager {
             try {
@@ -76,7 +73,7 @@ internal class RealmManager : KoinComponent, DBManager {
         }
 
         private suspend fun loginRealmManager(credentials: Credentials): RealmManager {
-            app.login(credentials)
+            val realmUser = app.login(credentials)
             Realm.open(
                 SyncConfiguration.Builder(
                     realmUser,
@@ -104,12 +101,12 @@ internal class RealmManager : KoinComponent, DBManager {
             ).also { realm ->
                 realm.syncSession.downloadAllServerChanges()
                 loadKoinModules(
+                    releaseAppModules +
                     module {
                         single { realm }
                     }
                 )
             }
-            loadKoinModules(releaseAppModules)
             Notifications.subscribePersonalNotifications(realmUser.id)
             return RealmManager()
         }
@@ -118,12 +115,13 @@ internal class RealmManager : KoinComponent, DBManager {
     override suspend fun close() {
         subscriptionsJob.cancel()
         unloadKoinModules(
+            releaseAppModules +
             module {
                 single { realm }
             }
         )
-        unloadKoinModules(releaseAppModules)
         Notifications.unsubscribeAllNotifications()
-        realmUser.logOut()
+        // TODO: Sometimes app.currentUser is null??
+        app.currentUser?.logOut()
     }
 }

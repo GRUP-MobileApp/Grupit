@@ -1,15 +1,23 @@
-val ktorVersion: String by project
-val realmVersion: String by project
-val koinVersion: String by project
 val awsVersion: String by project
+val ktorVersion: String by project
+val koinVersion: String by project
+val realmVersion: String by project
+val composeVersion: String by project
+val lifecycleVersion: String by project
+val coilComposeVersion: String by project
+val accompanistVersion: String by project
 val napierVersion = "2.4.0"
+
+val keystorePassword: String by project
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.8.10"
+    kotlin("plugin.serialization") version "1.8.20"
     kotlin("native.cocoapods")
     id("com.android.library")
+    id("org.jetbrains.compose")
     id("io.realm.kotlin")
+    id("dev.icerock.mobile.multiplatform-resources")
 }
 
 // CocoaPods requires the podspec to have a version.
@@ -33,6 +41,7 @@ kotlin {
             // Framework name configuration. Use this property instead of deprecated 'frameworkName'
             baseName = "shared"
         }
+        extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
 
         // Maps custom Xcode configuration to NativeBuildType
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
@@ -41,6 +50,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                // Compose
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material)
+
                 // Kotlin Libraries
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
@@ -57,8 +71,14 @@ kotlin {
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
 
+                // KMMViewModel
+                implementation("com.rickclephas.kmm:kmm-viewmodel-core:1.0.0-ALPHA-4")
+
+                // MOKO Resources
+                implementation("dev.icerock.moko:resources:0.21.2")
+                implementation("dev.icerock.moko:resources-compose:0.21.2")
+
                 // Ktor
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
@@ -76,6 +96,14 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                // Coil
+                implementation("io.coil-kt:coil-compose:$coilComposeVersion")
+
+                // Lifecycle
+                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+                implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+
                 // Datastore
                 implementation("androidx.datastore:datastore-preferences:1.0.0")
 
@@ -97,20 +125,14 @@ kotlin {
 
             }
         }
-        val androidInstrumentedTest by getting {
-            dependencies {
-                implementation(kotlin("test-junit"))
-                implementation("junit:junit:4.13.2")
-            }
-        }
         val iosX64Main by getting
         val iosArm64Main by getting
-        //val iosSimulatorArm64Main by getting
+        val iosSimulatorArm64Main by getting
         val iosMain by creating {
             dependsOn(commonMain)
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
-            //iosSimulatorArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
 
             dependencies {
                 implementation("io.ktor:ktor-client-darwin:$ktorVersion")
@@ -118,12 +140,12 @@ kotlin {
         }
         val iosX64Test by getting
         val iosArm64Test by getting
-        //val iosSimulatorArm64Test by getting
+        val iosSimulatorArm64Test by getting
         val iosTest by creating {
             dependsOn(commonTest)
             iosX64Test.dependsOn(this)
             iosArm64Test.dependsOn(this)
-            //iosSimulatorArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
 
             dependencies {
                 implementation("io.ktor:ktor-client-darwin:$ktorVersion")
@@ -136,9 +158,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("/Users/justinxu/Documents/keystore/signedkey")
-            storePassword = "JUTIN@ppgroup123"
+            storePassword = keystorePassword
             keyAlias = "upload"
-            keyPassword = "JUTIN@ppgroup123"
+            keyPassword = keystorePassword
         }
     }
     compileSdk = 33
@@ -147,9 +169,21 @@ android {
         minSdk = 21
         targetSdk = 33
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
     buildTypes {
         getByName("debug") {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.6"
+    }
+}
+
+multiplatformResources {
+    multiplatformResourcesPackage = "com.grup.library"
 }

@@ -5,37 +5,12 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.grup.di.initKoin
-import com.grup.repositories.PreferencesDataStore
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.loadKoinModules
-import org.koin.dsl.module
 
 class MainApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
-        initKoin {
-            androidContext(applicationContext)
-            androidLogger()
-
-            loadKoinModules(
-                module {
-                    single { PreferencesDataStore(get()) }
-                    single {
-                        GoogleSignIn.getClient(
-                            this@MainApplication,
-                            GoogleSignInOptions
-                                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestIdToken(GOOGLE_WEB_CLIENT_ID)
-                                .build()
-                        )
-                    }
-                }
-            )
-        }
+        initKoin()
     }
 
     override fun newImageLoader(): ImageLoader {

@@ -13,7 +13,6 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.jvm.JvmField
 
 internal class AWSImagesRepository : KoinComponent, IImagesRepository {
     private val client: HttpClient by inject()

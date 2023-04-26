@@ -1,4 +1,4 @@
-package com.grup.android.login
+package com.grup.android.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +10,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.grup.android.*
-import com.grup.ui.compose.DebugLoginView
+import com.grup.ui.compose.views.DebugLoginView
 import com.grup.ui.viewmodel.LoginViewModel
 
 

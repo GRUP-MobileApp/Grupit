@@ -1,4 +1,4 @@
-package com.grup.android.notifications
+package com.grup.android.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.navGraphViewModels
 import com.grup.android.*
 import com.grup.android.R
-import com.grup.ui.compose.GroupInvitesView
+import com.grup.ui.compose.views.GroupInvitesView
 import com.grup.ui.viewmodel.GroupInvitesViewModel
 
 class GroupInvitesFragment : Fragment() {
