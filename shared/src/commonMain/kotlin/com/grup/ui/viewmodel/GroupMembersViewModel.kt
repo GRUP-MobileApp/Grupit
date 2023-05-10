@@ -1,14 +1,14 @@
 package com.grup.ui.viewmodel
 
+import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.exceptions.APIException
 import com.grup.models.UserInfo
-import com.rickclephas.kmm.viewmodel.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class GroupMembersViewModel : LoggedInViewModel() {
+internal class GroupMembersViewModel : LoggedInViewModel() {
     private val selectedGroup
         get() = MainViewModel.selectedGroup
 
@@ -44,7 +44,7 @@ class GroupMembersViewModel : LoggedInViewModel() {
 
     fun inviteUserToGroup(username: String) {
         _inviteResult.value = InviteResult.Pending
-        viewModelScope.coroutineScope.launch {
+        coroutineScope.launch {
             try {
                 apiServer.inviteUserToGroup(username, selectedGroup)
                 _inviteResult.value = InviteResult.Sent

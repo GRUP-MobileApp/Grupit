@@ -30,10 +30,9 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.models.DebtAction
 import com.grup.models.SettleAction
 import com.grup.models.UserInfo
-import com.grup.other.asMoneyAmount
-import com.grup.other.isoFullDate
-import com.grup.other.profilePicturePainter
+import com.grup.platform.signin.GoogleSignInManager
 import com.grup.ui.models.TransactionActivity
+import com.grup.ui.viewmodel.LoginViewModel
 
 private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
@@ -78,7 +77,7 @@ internal fun H1Text(
 }
 
 @Composable
-fun AutoSizingH1Text(
+internal fun AutoSizingH1Text(
     modifier: Modifier = Modifier,
     text: AnnotatedString,
     color: Color = AppTheme.colors.onSecondary,
@@ -144,6 +143,13 @@ internal fun SmallIcon(
         modifier = Modifier.size(iconSize)
     )
 }
+
+@Composable
+internal expect fun GoogleSignInButton(
+    loginResult: LoginViewModel.LoginResult,
+    googleSignInManager: GoogleSignInManager,
+    signInCallback: (String) -> Unit
+)
 
 @Composable
 internal fun H1ConfirmTextButton(
@@ -619,7 +625,6 @@ internal fun BackPressModalBottomSheetLayout(
     scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
     content: @Composable () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     ModalBottomSheetLayout(
         sheetContent = sheetContent,
         modifier = modifier,
@@ -629,7 +634,6 @@ internal fun BackPressModalBottomSheetLayout(
         sheetBackgroundColor = sheetBackgroundColor,
         sheetContentColor = sheetContentColor,
         scrimColor = scrimColor,
-    ) {
-        content()
-    }
+        content = content
+    )
 }

@@ -7,7 +7,7 @@ internal interface IUserInfoRepository : IRepository {
     fun createUserInfo(userInfo: UserInfo): UserInfo?
 
     fun findUserInfosByGroupId(groupId: String): List<UserInfo>
-    fun findMyUserInfosAsFlow(userId: String): Flow<List<UserInfo>>
+    fun findMyUserInfosAsFlow(): Flow<List<UserInfo>>
     fun findAllUserInfosAsFlow(): Flow<List<UserInfo>>
 
     suspend fun updateUserInfo(userInfo: UserInfo, block: (UserInfo) -> Unit): UserInfo?

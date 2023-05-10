@@ -1,22 +1,15 @@
 package com.grup.ui.viewmodel
 
-import com.grup.exceptions.login.UserObjectNotFoundException
-import com.rickclephas.kmm.viewmodel.coroutineScope
+import cafe.adriel.voyager.core.model.coroutineScope
+import com.grup.platform.image.cropCenterSquareImage
+import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class WelcomeViewModel : LoggedInViewModel() {
-    val hasUserObject: Boolean
-        get() = try {
-            userObject
-            true
-        } catch (e: UserObjectNotFoundException) {
-            false
-        }
-
+internal class WelcomeViewModel : LoggedInViewModel() {
     sealed class NameValidity {
         object Valid : NameValidity()
         class Invalid(val error: String) : NameValidity()
@@ -24,7 +17,7 @@ class WelcomeViewModel : LoggedInViewModel() {
         object None : NameValidity()
     }
 
-    private var currentJob: Job = viewModelScope.coroutineScope.launch { }
+    private var currentJob: Job? = null
 
     private val _usernameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
     val usernameValidity: StateFlow<NameValidity> = _usernameValidity
@@ -37,7 +30,7 @@ class WelcomeViewModel : LoggedInViewModel() {
 
     fun checkUsername(username: String) {
         _usernameValidity.value = NameValidity.Pending
-        currentJob.cancel()
+        currentJob?.cancel()
         if (username.isEmpty()) {
             _usernameValidity.value = NameValidity.None
         } else if (!username.matches(Regex("^[a-zA-Z/d_.-]*$"))) {
@@ -50,7 +43,7 @@ class WelcomeViewModel : LoggedInViewModel() {
             _usernameValidity.value =
                 NameValidity.Invalid("Username must be at least 5 characters")
         } else {
-            currentJob = viewModelScope.coroutineScope.launch {
+            currentJob = coroutineScope.launch {
                 if (!apiServer.validUsername(username)) {
                     _usernameValidity.value = NameValidity.Invalid("Username taken")
                 } else {
@@ -84,12 +77,12 @@ class WelcomeViewModel : LoggedInViewModel() {
     fun registerUserObject(
         username: String,
         displayName: String,
-        profilePicture: ByteArray
+        profilePictureBitmap: Bitmap?
     ) = runBlocking {
         apiServer.registerUser(
             username,
             displayName,
-            profilePicture
+            profilePictureBitmap?.let { cropCenterSquareImage(it.toByteArray()) }
         )
     }
 }

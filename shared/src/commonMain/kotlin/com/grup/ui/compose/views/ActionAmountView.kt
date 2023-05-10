@@ -15,11 +15,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.SettleAction
 import com.grup.models.UserInfo
-import com.grup.other.collectAsStateWithLifecycle
-import com.grup.other.getCurrencySymbol
-import com.grup.ui.*
+import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.compose.getCurrencySymbol
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.compose.Caption
@@ -29,36 +33,41 @@ import com.grup.ui.compose.TransparentTextField
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlin.math.min
 
-@Composable
-fun ActionAmountView(
-    transactionViewModel: TransactionViewModel,
-    navController: NavigationController,
-    actionType: String,
-    existingActionId: String?
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        ActionAmountLayout(
-            transactionViewModel = transactionViewModel,
-            navController = navController,
-            actionType = actionType,
-            existingActionId = existingActionId
-        )
+internal class ActionAmountScreen(
+    private val actionType: String,
+    private val existingActionId: String? = null
+) : Screen {
+    @Composable
+    override fun Content() {
+        val transactionViewModel: TransactionViewModel =
+            rememberScreenModel { TransactionViewModel() }
+        val navigator = LocalNavigator.currentOrThrow
+
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            ActionAmountLayout(
+                transactionViewModel = transactionViewModel,
+                navigator = navigator,
+                actionType = actionType,
+                existingActionId = existingActionId
+            )
+        }
     }
+
 }
 
 @Composable
 private fun ActionAmountLayout(
     transactionViewModel: TransactionViewModel,
-    navController: NavigationController,
+    navigator: Navigator,
     actionType: String,
     existingActionId: String?
 ) {
     val myUserInfo: UserInfo by transactionViewModel.myUserInfo.collectAsStateWithLifecycle()
     var actionAmount: String by remember { mutableStateOf("0") }
 
-    val onBackPress: () -> Unit = { navController.onBackPress() }
+    val onBackPress: () -> Unit = { navigator.pop() }
     fun onActionAmountChange(newActionAmount: String, maxAmount: Double = Double.MAX_VALUE)  {
         actionAmount = if (newActionAmount.toDouble() > maxAmount) {
             maxAmount.toString().trimEnd('0')
@@ -81,7 +90,12 @@ private fun ActionAmountLayout(
                         H1ConfirmTextButton(
                             text = actionType,
                             enabled = amount > 0,
-                            onClick = { navController.navigateDebtAction(amount, message) }
+                            onClick = {
+                                navigator.push(DebtActionView(
+                                    debtActionAmount = amount,
+                                    message = message
+                                ))
+                            }
                         )
                     }
                 },
@@ -141,7 +155,7 @@ private fun ActionAmountLayout(
 }
 
 @Composable
-internal fun ActionAmountScreenLayout(
+private fun ActionAmountScreenLayout(
     actionAmount: String,
     onActionAmountChange: (String) -> Unit,
     message: String? = null,

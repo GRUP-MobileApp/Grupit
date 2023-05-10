@@ -1,5 +1,5 @@
 package com.grup.exceptions
 
-class InvalidTransactionRecordException(
+internal class InvalidTransactionRecordException(
     override val message: String? = "Bad TransactionRecord"
 ) : APIException(message)

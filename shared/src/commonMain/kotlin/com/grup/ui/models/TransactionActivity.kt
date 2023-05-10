@@ -2,9 +2,9 @@ package com.grup.ui.models
 
 import com.grup.exceptions.PendingTransactionRecordException
 import com.grup.models.*
-import com.grup.other.asMoneyAmount
+import com.grup.ui.compose.asMoneyAmount
 
-sealed class TransactionActivity {
+internal sealed class TransactionActivity {
     abstract val action: Action
     abstract val userInfo: UserInfo
     abstract val date: String

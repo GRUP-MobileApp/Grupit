@@ -26,7 +26,7 @@ internal class UserInfoService : KoinComponent {
         return userInfoRepository.findUserInfosByGroupId(groupId)
     }
 
-    fun findMyUserInfosAsFlow(user: User) = userInfoRepository.findMyUserInfosAsFlow(user.getId())
+    fun findMyUserInfosAsFlow() = userInfoRepository.findMyUserInfosAsFlow()
     fun findAllUserInfosAsFlow() = userInfoRepository.findAllUserInfosAsFlow()
 
     suspend fun applyDebtActionTransactionRecord(
@@ -82,9 +82,9 @@ internal class UserInfoService : KoinComponent {
         }
     }
 
-    suspend fun updateLatestTime(user: User, group: Group) {
+    suspend fun updateLatestTime(group: Group) {
         val myUserInfo: UserInfo =
-            findMyUserInfosAsFlow(user).first().find {
+            findMyUserInfosAsFlow().first().find {
                 it.groupId == group.getId()
             }!!
 

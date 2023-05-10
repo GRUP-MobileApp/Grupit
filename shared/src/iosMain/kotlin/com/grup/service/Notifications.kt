@@ -12,5 +12,4 @@ internal actual object Notifications {
 
     actual fun unsubscribeAllNotifications() {
     }
-
 }

@@ -21,31 +21,43 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.grup.other.collectAsStateWithLifecycle
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
-import com.grup.ui.NavigationController
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.WelcomeViewModel
+import dev.icerock.moko.media.Bitmap
+import dev.icerock.moko.media.compose.BindMediaPickerEffect
+import dev.icerock.moko.media.compose.rememberMediaPickerControllerFactory
+import dev.icerock.moko.media.compose.toImageBitmap
+import dev.icerock.moko.media.picker.MediaSource
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.compose.BindEffect
+import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 
-@Composable
-fun WelcomeView(
-    welcomeViewModel: WelcomeViewModel,
-    navController: NavigationController,
-    cropImageOnClick: () -> ByteArray
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        WelcomeLayout(
-            welcomeViewModel = welcomeViewModel,
-            navController = navController,
-            cropImageOnClick = cropImageOnClick
-        )
+class WelcomeView : Screen {
+    @Composable
+    override fun Content() {
+        val welcomeViewModel: WelcomeViewModel = rememberScreenModel { WelcomeViewModel() }
+        val navigator = LocalNavigator.currentOrThrow
+
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            WelcomeLayout(
+                welcomeViewModel = welcomeViewModel,
+                navigator = navigator
+            )
+        }
     }
 }
 
@@ -53,8 +65,7 @@ fun WelcomeView(
 @Composable
 private fun WelcomeLayout(
     welcomeViewModel: WelcomeViewModel,
-    navController: NavigationController,
-    cropImageOnClick: () -> ByteArray
+    navigator: Navigator
 ) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
@@ -70,7 +81,7 @@ private fun WelcomeLayout(
     val lastNameValidity: WelcomeViewModel.NameValidity
             by welcomeViewModel.lastNameValidity.collectAsStateWithLifecycle()
 
-    var pfpByteArray: ByteArray by remember { mutableStateOf(ByteArray(0)) }
+    var pfpBitmap: Bitmap? by remember { mutableStateOf(null) }
 
     Box(
         modifier = Modifier
@@ -141,9 +152,9 @@ private fun WelcomeLayout(
                     )
                 2 ->
                     SetProfilePicture(
-                        selectedPhotoAsByteArray = pfpByteArray,
-                        promptProfilePictureOnClick = {
-                            pfpByteArray = cropImageOnClick()
+                        profilePictureBitmap = pfpBitmap,
+                        setProfilePictureBitmap = { profilePictureBitmap ->
+                            pfpBitmap = profilePictureBitmap
                         },
                         onClickBack = scrollBack,
                         onClickContinue = scrollNext
@@ -154,9 +165,9 @@ private fun WelcomeLayout(
                         welcomeViewModel.registerUserObject(
                             username,
                             "$firstName $lastName".trim(),
-                            pfpByteArray
+                            pfpBitmap
                         )
-                        navController.navigateMainView()
+                        navigator.pop()
                     }
                 )
 
@@ -271,11 +282,21 @@ private fun SetUsername(
 
 @Composable
 private fun SetProfilePicture(
-    selectedPhotoAsByteArray: ByteArray,
-    promptProfilePictureOnClick: () -> Unit,
+    profilePictureBitmap: Bitmap?,
+    setProfilePictureBitmap: (Bitmap) -> Unit,
     onClickContinue: () -> Unit,
     onClickBack: () -> Unit
 ) {
+    val permissionsFactory = rememberPermissionsControllerFactory()
+    val controller = remember(permissionsFactory) { permissionsFactory.createPermissionsController() }
+    val mediaFactory = rememberMediaPickerControllerFactory()
+    val picker = remember(mediaFactory) { mediaFactory.createMediaPickerController(permissionsController = controller) }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    BindMediaPickerEffect(picker)
+    BindEffect(controller)
+
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -297,24 +318,35 @@ private fun SetProfilePicture(
                 .border(width = 5.dp, color = AppTheme.colors.secondary)
                 .padding(AppTheme.dimensions.cardPadding)
         ) {
-            Image(
-                painter = rememberVectorPainter(image = Icons.Default.Face),
-//                if (selectedPhotoAsByteArray.isNotEmpty()) {
-//                    rememberAsyncImagePainter(model = selectedPhotoAsByteArray)
-//                } else {
-//                    rememberVectorPainter(image = Icons.Default.Face)
-//                },
-                contentDescription = "Selected picture",
-                modifier = Modifier
-                    .fillMaxHeight(0.3f)
-                    .aspectRatio(1f)
-                    .clip(AppTheme.shapes.circleShape)
-            )
+            profilePictureBitmap?.let { bitmap ->
+                Image(
+                    bitmap = bitmap.toImageBitmap(),
+                    contentDescription = "Selected picture",
+                    modifier = Modifier
+                        .fillMaxHeight(0.3f)
+                        .aspectRatio(1f)
+                        .clip(AppTheme.shapes.circleShape)
+                )
+            } ?: Image(
+                    painter = rememberVectorPainter(image = Icons.Default.Face),
+                    contentDescription = "Selected picture",
+                    modifier = Modifier
+                        .fillMaxHeight(0.3f)
+                        .aspectRatio(1f)
+                        .clip(AppTheme.shapes.circleShape)
+                )
         }
         Spacer(modifier = Modifier.weight(1f))
         H1ConfirmTextButton(
             text = "Choose Photo",
-            onClick = promptProfilePictureOnClick
+            onClick = {
+                coroutineScope.launch {
+                    controller.providePermission(Permission.GALLERY)
+                    if (controller.isPermissionGranted(Permission.GALLERY)) {
+                        setProfilePictureBitmap(picker.pickImage(MediaSource.GALLERY))
+                    }
+                }
+            }
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,

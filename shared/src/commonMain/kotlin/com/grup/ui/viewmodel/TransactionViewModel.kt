@@ -1,14 +1,14 @@
 package com.grup.ui.viewmodel
 
+import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
-import com.rickclephas.kmm.viewmodel.coroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class TransactionViewModel : LoggedInViewModel() {
+internal class TransactionViewModel : LoggedInViewModel() {
     companion object {
         const val DEBT = "Request"
         const val SETTLE = "Settle"
@@ -66,7 +66,7 @@ class TransactionViewModel : LoggedInViewModel() {
         )
 
     // SettleAction
-    fun createSettleAction(settleAmount: Double) = viewModelScope.coroutineScope.launch {
+    fun createSettleAction(settleAmount: Double) = coroutineScope.launch {
         apiServer.createSettleAction(settleAmount, myUserInfo.value)
     }
 

@@ -1,11 +1,12 @@
 val awsVersion: String by project
 val ktorVersion: String by project
 val koinVersion: String by project
+val imageLoaderVersion: String by project
 val realmVersion: String by project
 val composeVersion: String by project
+val voyagerVersion: String by project
 val lifecycleVersion: String by project
 val coilComposeVersion: String by project
-val accompanistVersion: String by project
 val napierVersion = "2.4.0"
 
 val keystorePassword: String by project
@@ -50,16 +51,32 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                // Kotlin Libraries
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+
+                // UI
+
                 // Compose
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material)
 
-                // Kotlin Libraries
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
+
+                // Voyager
+                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
+
+                // MOKO
+                implementation("dev.icerock.moko:resources:0.22.0")
+                implementation("dev.icerock.moko:resources-compose:0.22.0")
+                api("dev.icerock.moko:media:0.11.0")
+                api("dev.icerock.moko:media-compose:0.11.0")
+                api("dev.icerock.moko:permissions:0.16.0")
+                api("dev.icerock.moko:permissions-compose:0.16.0")
+
+                // Backend
 
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
@@ -70,13 +87,6 @@ kotlin {
 
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
-
-                // KMMViewModel
-                implementation("com.rickclephas.kmm:kmm-viewmodel-core:1.0.0-ALPHA-4")
-
-                // MOKO Resources
-                implementation("dev.icerock.moko:resources:0.21.2")
-                implementation("dev.icerock.moko:resources-compose:0.21.2")
 
                 // Ktor
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -96,13 +106,21 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                // UI
+
+                // Jetpack Compose
+                implementation("androidx.compose.ui:ui:$composeVersion")
+                implementation("androidx.activity:activity-compose:1.7.1")
+
+                // Lifecycle
+                implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+
+
                 // Coil
                 implementation("io.coil-kt:coil-compose:$coilComposeVersion")
 
-                // Lifecycle
-                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-                implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
-                implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+                // Backend
 
                 // Datastore
                 implementation("androidx.datastore:datastore-preferences:1.0.0")
@@ -110,11 +128,14 @@ kotlin {
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
 
+                // Google Play Services
+                implementation ("com.google.android.gms:play-services-auth:20.5.0")
+
                 // AWS
                 implementation("aws.sdk.kotlin:s3:$awsVersion")
 
                 // Import the Firebase BoM
-                implementation(platform("com.google.firebase:firebase-bom:31.2.2"))
+                implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
 
                 // Firebase Crashlytics
                 implementation("com.google.firebase:firebase-analytics-ktx")
@@ -167,11 +188,10 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     buildTypes {
         getByName("debug") {
@@ -182,6 +202,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
+    namespace = "com.grup"
 }
 
 multiplatformResources {

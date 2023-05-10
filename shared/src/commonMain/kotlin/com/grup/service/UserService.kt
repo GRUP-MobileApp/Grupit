@@ -14,11 +14,11 @@ internal class UserService : KoinComponent {
     suspend fun createMyUser(
         username: String,
         displayName: String,
-        profilePicture: ByteArray
+        profilePicture: ByteArray?
     ): User? {
         return userRepository.createMyUser(username, displayName)?.also { user ->
-            if (profilePicture.isNotEmpty()) {
-                imagesRepository.uploadProfilePicture(user, profilePicture).let { profilePictureURL ->
+            profilePicture?.let { pfpByteArray ->
+                imagesRepository.uploadProfilePicture(user, pfpByteArray).let { profilePictureURL ->
                     if (profilePictureURL.isNotEmpty()) {
                         userRepository.updateUser(user) {
                             this.profilePictureURL = profilePictureURL

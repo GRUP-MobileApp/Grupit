@@ -10,19 +10,14 @@
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
+		B56303342A02314A00D55F5A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56303332A02314A00D55F5A /* ContentView.swift */; };
 		B5E6253A29E637AE000EFB3D /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8EA04739A40CCB36AA16152 /* Pods_iosApp.framework */; };
-		B5F1AC4429E639EB00664A05 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4329E639EB00664A05 /* LoginView.swift */; };
-		B5F1AC4B29E656C900664A05 /* Generics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4A29E656C900664A05 /* Generics.swift */; };
-		B5F1AC4D29E6627300664A05 /* Dimensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4C29E6627300664A05 /* Dimensions.swift */; };
-		B5F1AC4F29E667A200664A05 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC4E29E667A200664A05 /* Colors.swift */; };
 		B5F1AC5329E66CF600664A05 /* proxima_nova.otf in Resources */ = {isa = PBXBuildFile; fileRef = B5F1AC5229E66CF600664A05 /* proxima_nova.otf */; };
-		B5F1AC5629E670BC00664A05 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC5529E670BC00664A05 /* AppTheme.swift */; };
 		B5F1AC5829E792EE00664A05 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC5729E792EE00664A05 /* AppDelegate.swift */; };
 		B5F1AC5A29E7CB7E00664A05 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B5F1AC5929E7CB7E00664A05 /* GoogleService-Info.plist */; };
 		B5F1AC5D29E7CC5000664A05 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = B5F1AC5C29E7CC5000664A05 /* FirebaseCrashlytics */; };
 		B5F1AC5F29E7CC5000664A05 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = B5F1AC5E29E7CC5000664A05 /* FirebaseMessaging */; };
 		B5F1AC6129E7CFB200664A05 /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC6029E7CFB200664A05 /* Keys.swift */; };
-		B5F1AC6329E7D6AB00664A05 /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC6229E7D6AB00664A05 /* Shapes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,16 +27,11 @@
 		7555FF7B242A565900829871 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A53D2BDB0F9261150EDFE7B6 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
-		B5F1AC4329E639EB00664A05 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		B5F1AC4A29E656C900664A05 /* Generics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generics.swift; sourceTree = "<group>"; };
-		B5F1AC4C29E6627300664A05 /* Dimensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dimensions.swift; sourceTree = "<group>"; };
-		B5F1AC4E29E667A200664A05 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		B56303332A02314A00D55F5A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B5F1AC5229E66CF600664A05 /* proxima_nova.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = proxima_nova.otf; sourceTree = "<group>"; };
-		B5F1AC5529E670BC00664A05 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		B5F1AC5729E792EE00664A05 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5F1AC5929E7CB7E00664A05 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B5F1AC6029E7CFB200664A05 /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
-		B5F1AC6229E7D6AB00664A05 /* Shapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shapes.swift; sourceTree = "<group>"; };
 		E60E23A54EF560FEF305B4B8 /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.release.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
 		E8EA04739A40CCB36AA16152 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -90,8 +80,6 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
-				B5F1AC4929E656B900664A05 /* ui */,
-				B5F1AC4229E639D600664A05 /* login */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				B5F1AC5929E7CB7E00664A05 /* GoogleService-Info.plist */,
@@ -99,6 +87,7 @@
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				B5F1AC5729E792EE00664A05 /* AppDelegate.swift */,
 				B5F1AC6029E7CFB200664A05 /* Keys.swift */,
+				B56303332A02314A00D55F5A /* ContentView.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -109,26 +98,6 @@
 				E8EA04739A40CCB36AA16152 /* Pods_iosApp.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		B5F1AC4229E639D600664A05 /* login */ = {
-			isa = PBXGroup;
-			children = (
-				B5F1AC4329E639EB00664A05 /* LoginView.swift */,
-			);
-			path = login;
-			sourceTree = "<group>";
-		};
-		B5F1AC4929E656B900664A05 /* ui */ = {
-			isa = PBXGroup;
-			children = (
-				B5F1AC4A29E656C900664A05 /* Generics.swift */,
-				B5F1AC4C29E6627300664A05 /* Dimensions.swift */,
-				B5F1AC4E29E667A200664A05 /* Colors.swift */,
-				B5F1AC5529E670BC00664A05 /* AppTheme.swift */,
-				B5F1AC6229E7D6AB00664A05 /* Shapes.swift */,
-			);
-			path = ui;
 			sourceTree = "<group>";
 		};
 		ECD99DFE43D1058620F9A1B4 /* Pods */ = {
@@ -281,15 +250,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5F1AC4D29E6627300664A05 /* Dimensions.swift in Sources */,
-				B5F1AC5629E670BC00664A05 /* AppTheme.swift in Sources */,
+				B56303342A02314A00D55F5A /* ContentView.swift in Sources */,
 				B5F1AC6129E7CFB200664A05 /* Keys.swift in Sources */,
-				B5F1AC4429E639EB00664A05 /* LoginView.swift in Sources */,
-				B5F1AC4F29E667A200664A05 /* Colors.swift in Sources */,
-				B5F1AC4B29E656C900664A05 /* Generics.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				B5F1AC5829E792EE00664A05 /* AppDelegate.swift in Sources */,
-				B5F1AC6329E7D6AB00664A05 /* Shapes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

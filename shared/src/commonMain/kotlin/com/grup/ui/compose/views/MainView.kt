@@ -17,11 +17,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.*
-import com.grup.other.asMoneyAmount
-import com.grup.other.collectAsStateWithLifecycle
-import com.grup.other.isoDate
-import com.grup.other.profilePicturePainter
+import com.grup.ui.compose.asMoneyAmount
+import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.compose.isoDate
+import com.grup.ui.compose.profilePicturePainter
 import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
@@ -43,20 +48,37 @@ import com.grup.ui.viewmodel.NotificationsViewModel
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
 
-@Composable
-fun MainView(
-    mainViewModel: MainViewModel,
-    navController: NavigationController,
-    returnToLoginOnClick: () -> Unit
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        MainLayout(
-            mainViewModel = mainViewModel,
-            navController = navController,
-            returnToLoginOnClick = returnToLoginOnClick
-        )
+internal class MainView(
+    private val logOutAuthProviderOnClick: () -> Unit
+) : Screen {
+    @Composable
+    override fun Content() {
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            val navigator = LocalNavigator.currentOrThrow
+            val mainViewModel: MainViewModel = rememberScreenModel { MainViewModel() }
+
+            if (!mainViewModel.hasUserObject) {
+                navigator.push(WelcomeView())
+            }
+            val notificationsViewModel: NotificationsViewModel =
+                rememberScreenModel { NotificationsViewModel() }
+            val groupInvitesViewModel: GroupInvitesViewModel =
+                rememberScreenModel { GroupInvitesViewModel() }
+
+            MainLayout(
+                mainViewModel = mainViewModel,
+                notificationsViewModel = notificationsViewModel,
+                groupInvitesViewModel = groupInvitesViewModel,
+                navigator = navigator,
+                logOutAuthProviderOnClick = {
+                    mainViewModel.logOut()
+                    logOutAuthProviderOnClick()
+                    navigator.popUntilRoot()
+                }
+            )
+        }
     }
 }
 
@@ -64,8 +86,10 @@ fun MainView(
 @Composable
 private fun MainLayout(
     mainViewModel: MainViewModel,
-    navController: NavigationController,
-    returnToLoginOnClick: () -> Unit
+    notificationsViewModel: NotificationsViewModel,
+    groupInvitesViewModel: GroupInvitesViewModel,
+    navigator: Navigator,
+    logOutAuthProviderOnClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -84,9 +108,9 @@ private fun MainLayout(
         mainViewModel.activeSettleActions.collectAsStateWithLifecycle()
 
     val groupInvitesAmount: Int by
-        GroupInvitesViewModel.groupInvitesAmount.collectAsStateWithLifecycle()
+        groupInvitesViewModel.groupInvitesCount.collectAsStateWithLifecycle()
     val notificationsAmount: Map<String, Int> by
-        NotificationsViewModel.notificationsAmount.collectAsStateWithLifecycle()
+        notificationsViewModel.notificationsCount.collectAsStateWithLifecycle()
 
     // Not getting updated
     var selectedAction: Action? by remember { mutableStateOf(null) }
@@ -140,9 +164,13 @@ private fun MainLayout(
                                     myUserInfo = userInfo,
                                     navigateSettleActionTransactionOnClick = {
                                         if (userInfo.userBalance < 0) {
-                                            navController.navigateActionAmount(
-                                                TransactionViewModel.SETTLE_TRANSACTION,
-                                                selectedAction.getId()
+                                            navigator.push(
+                                                ActionAmountScreen(
+                                                    actionType =
+                                                        TransactionViewModel.SETTLE_TRANSACTION,
+                                                    existingActionId =
+                                                        selectedAction.getId()
+                                                )
                                             )
                                         }
                                     },
@@ -214,12 +242,12 @@ private fun MainLayout(
                                     groupNotificationsAmount =
                                     notificationsAmount[group.getId()] ?: 0,
                                     navigateGroupNotificationsOnClick = {
-                                        navController.navigateGroupNotifications()
+                                        navigator.push(GroupNotificationsView())
                                     }
                                 )
                                 MembersButton(
                                     navigateGroupMembersOnClick = {
-                                        navController.navigateGroupMembers()
+                                        navigator.push(GroupMembersView())
                                     }
                                 )
                             }
@@ -241,13 +269,23 @@ private fun MainLayout(
                     notificationsAmount = notificationsAmount,
                     isSelectedGroup = { it.getId() == selectedGroup?.getId() },
                     navigateGroupInvitesOnClick = {
-                        navController.navigateGroupInvites()
+                        navigator.push(GroupInvitesView())
                     },
                     navigateCreateGroupOnClick = {
                         closeDrawer()
-                        navController.navigateCreateGroup()
+                        navigator.push(
+                            CreateGroupView(
+                                createGroupOnClick = { groupName ->
+                                    mainViewModel.onSelectedGroupChange(
+                                        mainViewModel.createGroup(groupName)
+                                    )
+                                }
+                            )
+                        )
                     },
-                    logOutOnClick = returnToLoginOnClick
+                    logOutOnClick = {
+                        logOutAuthProviderOnClick()
+                    }
                 )
             },
             backgroundColor = AppTheme.colors.primary,
@@ -269,12 +307,16 @@ private fun MainLayout(
                                     .fillMaxWidth(),
                                 myUserInfo = myUserInfo,
                                 navigateDebtActionAmountOnClick = {
-                                    navController.navigateActionAmount(TransactionViewModel.DEBT)
+                                    navigator.push(
+                                        ActionAmountScreen(actionType = TransactionViewModel.DEBT)
+                                    )
                                 },
                                 navigateSettleActionAmountOnClick = {
                                     if (myUserInfo.userBalance > 0) {
-                                        navController.navigateActionAmount(
-                                            TransactionViewModel.SETTLE
+                                        navigator.push(
+                                            ActionAmountScreen(
+                                                actionType = TransactionViewModel.SETTLE
+                                            )
                                         )
                                     }
                                 }

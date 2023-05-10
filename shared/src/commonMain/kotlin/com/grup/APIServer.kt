@@ -7,6 +7,8 @@ import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import com.grup.interfaces.DBManager
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.cancellation.CancellationException
 
 class APIServer private constructor(
@@ -26,7 +28,7 @@ class APIServer private constructor(
     suspend fun registerUser(
         username: String,
         displayName: String,
-        profilePicture: ByteArray
+        profilePicture: ByteArray?
     ) = userController.createUser(username, displayName, profilePicture)
     suspend fun validUsername(username: String) = !userController.usernameExists(username)
 
@@ -35,9 +37,9 @@ class APIServer private constructor(
     fun getAllGroupsAsFlow() = groupController.getAllGroupsAsFlow()
 
     // UserInfo
-    fun getMyUserInfosAsFlow() = userInfoController.getMyUserInfosAsFlow(user)
+    fun getMyUserInfosAsFlow() = userInfoController.getMyUserInfosAsFlow()
     fun getAllUserInfosAsFlow() = userInfoController.getAllUserInfosAsFlow()
-    suspend fun updateLatestTime(group: Group) = userInfoController.updateLatestTime(user, group)
+    suspend fun updateLatestTime(group: Group) = userInfoController.updateLatestTime(group)
 
     // GroupInvite
     suspend fun inviteUserToGroup(username: String, group: Group) =
@@ -79,12 +81,6 @@ class APIServer private constructor(
     ) = settleActionController.rejectSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() =
         settleActionController.getAllSettleActionsAsFlow()
-
-    // TODO: Get rid of this lol
-    object Images {
-        fun getProfilePictureURI(userId: String) =
-            "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
-    }
 
     companion object Login {
         @Throws(LoginException::class, CancellationException::class)

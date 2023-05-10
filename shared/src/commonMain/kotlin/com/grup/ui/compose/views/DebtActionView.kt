@@ -17,9 +17,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
-import com.grup.other.asMoneyAmount
-import com.grup.other.collectAsStateWithLifecycle
+import com.grup.ui.compose.asMoneyAmount
+import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
@@ -34,32 +39,36 @@ import com.grup.ui.compose.UsernameSearchBar
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
 
-@Composable
-fun DebtActionView(
-    debtActionAmount: Double,
-    message: String,
-    transactionViewModel: TransactionViewModel,
-    navController: NavigationController
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        DebtActionLayout(
-            debtActionAmount = debtActionAmount,
-            message = message,
-            transactionViewModel = transactionViewModel,
-            navController = navController
-        )
+internal class DebtActionView(
+    private val debtActionAmount: Double,
+    private val message: String
+) : Screen {
+    @Composable
+    override fun Content() {
+        val transactionViewModel: TransactionViewModel =
+            rememberScreenModel { TransactionViewModel() }
+        val navigator = LocalNavigator.currentOrThrow
+
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            DebtActionLayout(
+                transactionViewModel = transactionViewModel,
+                navigator = navigator,
+                debtActionAmount = debtActionAmount,
+                message = message
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DebtActionLayout(
-    debtActionAmount: Double,
-    message: String,
     transactionViewModel: TransactionViewModel,
-    navController: NavigationController
+    navigator: Navigator,
+    debtActionAmount: Double,
+    message: String
 ) {
     val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
@@ -82,7 +91,7 @@ private fun DebtActionLayout(
         Scaffold(
             topBar = {
                 DebtActionTopBar(
-                    onBackPress = { navController.onBackPress() }
+                    onBackPress = { navigator.pop() }
                 )
             }
         ) { padding ->
@@ -132,8 +141,8 @@ private fun DebtActionLayout(
                             enabled = debtAmounts.sum() == debtActionAmount,
                             onClick = {
                                 transactionViewModel.createDebtAction(debtors, debtAmounts, message)
-                                navController.onBackPress()
-                                navController.onBackPress()
+                                navigator.pop()
+                                navigator.pop()
                             }
                         )
                     }
@@ -231,7 +240,7 @@ private fun SelectedDebtorsList(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AddDebtorBottomSheet(
+private fun AddDebtorBottomSheet(
     userInfos: List<UserInfo>,
     addDebtorsOnClick: (List<UserInfo>) -> Unit,
     state: ModalBottomSheetState,

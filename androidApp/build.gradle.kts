@@ -2,7 +2,6 @@ val koinVersion: String by project
 val kotlinVersion: String by project
 val composeVersion: String by project
 val lifecycleVersion: String by project
-val navigationVersion: String by project
 val coilComposeVersion: String by project
 
 val keystorePassword: String by project
@@ -40,17 +39,20 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
+
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
-    packagingOptions {
-        resources.excludes.add("META-INF/*")
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     buildTypes {
         getByName("debug") {
             signingConfig = signingConfigs.getByName("release")
         }
     }
+    namespace = "com.grup.android"
 }
 
 dependencies {
@@ -61,25 +63,6 @@ dependencies {
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.core:core-ktx:1.10.0")
-
-    // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-
-    // KMMViewModel
-    implementation("com.rickclephas.kmm:kmm-viewmodel-core:1.0.0-ALPHA-4")
-
-    // Coil
-    implementation("io.coil-kt:coil-compose:$coilComposeVersion")
-
-    // Image Cropper
-    implementation("com.vanniktech:android-image-cropper:4.5.0")
-    implementation("io.github.mr0xf00:easycrop:0.1.1")
-
-    // Navigation
-    implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
-    implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
 
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:$composeVersion")
@@ -96,11 +79,7 @@ dependencies {
     implementation("com.google.android.play:app-update-ktx:2.0.1")
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:31.2.2"))
-
-    //Firebase Crashlytics
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
 
     // Firebase Cloud Messaging
     implementation("com.google.firebase:firebase-messaging-ktx")

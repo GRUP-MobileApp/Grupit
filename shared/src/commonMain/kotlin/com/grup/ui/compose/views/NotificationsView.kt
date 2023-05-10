@@ -8,10 +8,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.Group
-import com.grup.other.collectAsStateWithLifecycle
-import com.grup.other.isoDate
-import com.grup.ui.*
+import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.compose.isoDate
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.compose.AcceptRejectRow
@@ -22,25 +26,30 @@ import com.grup.ui.models.Notification
 import com.grup.ui.viewmodel.MainViewModel
 import com.grup.ui.viewmodel.NotificationsViewModel
 
-@Composable
-fun NotificationsView(
-    notificationsViewModel: NotificationsViewModel,
-    navController: NavigationController
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        NotificationsLayout(
-            notificationsViewModel = notificationsViewModel,
-            navController = navController
-        )
+internal class GroupNotificationsView : Screen {
+    @Composable
+    override fun Content() {
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            val notificationsViewModel: NotificationsViewModel =
+                rememberScreenModel { NotificationsViewModel() }
+            val navigator = LocalNavigator.currentOrThrow
+
+            notificationsViewModel.logGroupNotificationsDate()
+            GroupNotificationsLayout(
+                notificationsViewModel = notificationsViewModel,
+                navigator = navigator
+            )
+        }
     }
+
 }
 
 @Composable
-internal fun NotificationsLayout(
+private fun GroupNotificationsLayout(
     notificationsViewModel: NotificationsViewModel,
-    navController: NavigationController
+    navigator: Navigator
 ) {
     val selectedGroup: Group = MainViewModel.selectedGroup
     val notifications: Map<String, List<Notification>> by
@@ -48,7 +57,7 @@ internal fun NotificationsLayout(
 
     SimpleLazyListPage(
         pageName = "Notifications",
-        onBackPress = { navController.onBackPress() }
+        onBackPress = { navigator.pop() }
     ) {
         items(notifications[selectedGroup.getId()] ?: emptyList()) { notification ->
             val sideContent: (@Composable () -> Unit)? =
@@ -100,7 +109,7 @@ internal fun NotificationsLayout(
 }
 
 @Composable
-internal fun NotificationRowCard(
+private fun NotificationRowCard(
     notification: Notification,
     mainContent: @Composable ColumnScope.() -> Unit = {
         Caption(

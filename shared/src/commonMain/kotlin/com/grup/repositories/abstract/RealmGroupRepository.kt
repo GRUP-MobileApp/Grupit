@@ -8,9 +8,7 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
 internal abstract class RealmGroupRepository : IGroupRepository {

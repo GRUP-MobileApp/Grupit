@@ -38,7 +38,7 @@ internal fun AppTheme(
         LocalColors provides rememberedColors,
         LocalDimensions provides dimensions,
         LocalTypography provides typography,
-        LocalShapes provides shapes
+        LocalShapes provides shapes,
     ) {
         content()
     }

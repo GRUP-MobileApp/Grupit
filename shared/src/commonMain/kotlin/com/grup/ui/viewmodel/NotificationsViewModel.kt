@@ -1,17 +1,12 @@
 package com.grup.ui.viewmodel
 
+import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.models.*
 import com.grup.ui.models.Notification
-import com.rickclephas.kmm.viewmodel.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class NotificationsViewModel : LoggedInViewModel() {
-    companion object {
-        var notificationsAmount: MutableStateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
-    }
-    // TODO: Remove notifications after joinDate
-
+internal class NotificationsViewModel : LoggedInViewModel() {
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
     private val latestDatesFlow: Flow<Map<String, String>> =
         _myUserInfosFlow.map { myUserInfos ->
@@ -85,7 +80,7 @@ class NotificationsViewModel : LoggedInViewModel() {
                 notification.groupId
             }
         }.combine(latestDatesFlow) { notifications, lastViewDates ->
-            notificationsAmount.value = notifications.map { groupEntry ->
+            notificationsCount.value = notifications.map { groupEntry ->
                 groupEntry.key to groupEntry.value.count { notification ->
                     !notification.dismissible ||
                     lastViewDates[groupEntry.key]?.let { lastViewDate ->
@@ -96,17 +91,19 @@ class NotificationsViewModel : LoggedInViewModel() {
             notifications
         }.asNotification(emptyMap())
 
-    fun logGroupNotificationsDate() = viewModelScope.coroutineScope.launch {
+    var notificationsCount: MutableStateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
+
+    fun logGroupNotificationsDate() = coroutineScope.launch {
         apiServer.updateLatestTime(MainViewModel.selectedGroup)
     }
 
     // DebtAction
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        viewModelScope.coroutineScope.launch {
+        coroutineScope.launch {
             apiServer.acceptDebtAction(debtAction, myTransactionRecord)
         }
     fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        viewModelScope.coroutineScope.launch {
+        coroutineScope.launch {
             apiServer.rejectDebtAction(debtAction, myTransactionRecord)
         }
 
@@ -114,13 +111,13 @@ class NotificationsViewModel : LoggedInViewModel() {
     fun acceptSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = viewModelScope.coroutineScope.launch {
+    ) = coroutineScope.launch {
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
     }
     fun rejectSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = viewModelScope.coroutineScope.launch {
+    ) = coroutineScope.launch {
         apiServer.rejectSettleActionTransaction(settleAction, transactionRecord)
     }
 

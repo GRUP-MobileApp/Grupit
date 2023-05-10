@@ -15,33 +15,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
-import com.grup.other.collectAsStateWithLifecycle
+import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.UserInfoRowCard
 import com.grup.ui.compose.UsernameSearchBar
-import com.grup.ui.models.TransactionActivity
-import com.grup.ui.viewmodel.MainViewModel
 import com.grup.ui.viewmodel.GroupMembersViewModel
 import kotlinx.coroutines.launch
 
-@Composable
-fun GroupMembersView(
-    groupMembersViewModel: GroupMembersViewModel,
-    mainViewModel: MainViewModel,
-    navController: NavigationController
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        GroupMembersLayout(
-            groupMembersViewModel = groupMembersViewModel,
-            mainViewModel = mainViewModel,
-            navController = navController
-        )
+internal class GroupMembersView : Screen {
+    @Composable
+    override fun Content() {
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            val groupMembersViewModel: GroupMembersViewModel =
+                rememberScreenModel { GroupMembersViewModel() }
+            val navigator = LocalNavigator.currentOrThrow
+            GroupMembersLayout(
+                groupMembersViewModel = groupMembersViewModel,
+                navigator = navigator
+            )
+        }
     }
 }
 
@@ -49,16 +52,13 @@ fun GroupMembersView(
 @Composable
 private fun GroupMembersLayout(
     groupMembersViewModel: GroupMembersViewModel,
-    mainViewModel: MainViewModel,
-    navController: NavigationController
+    navigator: Navigator
 ) {
     val userInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
     val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
-    val groupActivity: List<TransactionActivity>
-        by mainViewModel.groupActivity.collectAsStateWithLifecycle()
     val inviteResult: GroupMembersViewModel.InviteResult by
         groupMembersViewModel.inviteResult.collectAsStateWithLifecycle()
 
@@ -89,9 +89,6 @@ private fun GroupMembersLayout(
             selectedUserInfo?.let { selectedUserInfo ->
                 GroupMemberInfoBottomSheet(
                     selectedUserInfo = selectedUserInfo,
-                    groupActivity = groupActivity.filter { transactionActivity ->
-                        transactionActivity.userInfo.userId!! == selectedUserInfo.userId
-                    },
                     state = userInfoBottomSheetState
                 ) {
                     content()
@@ -114,7 +111,7 @@ private fun GroupMembersLayout(
                     backgroundColor = AppTheme.colors.primary,
                     navigationIcon = {
                         IconButton(
-                            onClick = { navController.onBackPress() }
+                            onClick = { navigator.pop() }
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
@@ -188,9 +185,8 @@ private fun UsersList(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun GroupMemberInfoBottomSheet(
+private fun GroupMemberInfoBottomSheet(
     selectedUserInfo: UserInfo,
-    groupActivity: List<TransactionActivity>,
     state: ModalBottomSheetState,
     content: @Composable () -> Unit
 ) {
@@ -210,7 +206,6 @@ fun GroupMemberInfoBottomSheet(
                     iconSize = 64.dp
                 )
                 Divider()
-                RecentActivityList(groupActivity = groupActivity)
             }
         },
         content = content

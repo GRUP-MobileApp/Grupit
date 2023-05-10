@@ -10,12 +10,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.GroupInvite
-import com.grup.other.collectAsStateWithLifecycle
-import com.grup.other.getProfilePictureURI
-import com.grup.other.isoDate
-import com.grup.other.profilePicturePainter
-import com.grup.ui.*
+import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.compose.getProfilePictureURI
+import com.grup.ui.compose.isoDate
+import com.grup.ui.compose.profilePicturePainter
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.compose.Caption
@@ -24,32 +28,35 @@ import com.grup.ui.compose.IconRowCard
 import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.viewmodel.GroupInvitesViewModel
 
-@Composable
-fun GroupInvitesView(
-    groupInvitesViewModel: GroupInvitesViewModel,
-    navController: NavigationController
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        GroupInvitesLayout(
-            groupInvitesViewModel = groupInvitesViewModel,
-            navController = navController
-        )
+class GroupInvitesView() : Screen {
+    @Composable
+    override fun Content() {
+        val groupInvitesViewModel: GroupInvitesViewModel =
+            rememberScreenModel { GroupInvitesViewModel() }
+        val navigator = LocalNavigator.currentOrThrow
+
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            GroupInvitesLayout(
+                groupInvitesViewModel = groupInvitesViewModel,
+                navigator = navigator
+            )
+        }
     }
 }
 
 @Composable
 private fun GroupInvitesLayout(
     groupInvitesViewModel: GroupInvitesViewModel,
-    navController: NavigationController
+    navigator: Navigator
 ) {
     val groupInvites: List<GroupInvite> by
     groupInvitesViewModel.groupInvites.collectAsStateWithLifecycle()
 
     SimpleLazyListPage(
         pageName = "Group Invites",
-        onBackPress = { navController.onBackPress() }
+        onBackPress = { navigator.pop() }
     ) {
         items(groupInvites) { groupInvite ->
             Row(

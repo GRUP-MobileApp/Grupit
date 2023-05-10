@@ -1,17 +1,13 @@
 package com.grup.ui.viewmodel
 
+import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.models.GroupInvite
-import com.rickclephas.kmm.viewmodel.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class GroupInvitesViewModel : LoggedInViewModel() {
-    companion object {
-        var groupInvitesAmount: MutableStateFlow<Int> = MutableStateFlow(0)
-    }
-
+internal class GroupInvitesViewModel : LoggedInViewModel() {
     private val _groupInvitesFlow = apiServer.getAllGroupInvitesAsFlow()
     val groupInvites: StateFlow<List<GroupInvite>> =
         _groupInvitesFlow.map { groupInvites ->
@@ -21,14 +17,17 @@ class GroupInvitesViewModel : LoggedInViewModel() {
             }.sortedByDescending { groupInvite ->
                 groupInvite.date
             }.also { sortedGroupInvites ->
-                groupInvitesAmount.value = sortedGroupInvites.size
+                groupInvitesCount.value = sortedGroupInvites.size
             }
         }.asNotification(emptyList())
 
-    fun acceptGroupInvite(groupInvite: GroupInvite) = viewModelScope.coroutineScope.launch {
+
+    val groupInvitesCount: MutableStateFlow<Int> = MutableStateFlow(0)
+
+    fun acceptGroupInvite(groupInvite: GroupInvite) = coroutineScope.launch {
         apiServer.acceptGroupInvite(groupInvite)
     }
-    fun rejectGroupInvite(groupInvite: GroupInvite) = viewModelScope.coroutineScope.launch {
+    fun rejectGroupInvite(groupInvite: GroupInvite) = coroutineScope.launch {
         apiServer.rejectGroupInvite(groupInvite)
     }
 }

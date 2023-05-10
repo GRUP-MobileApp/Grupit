@@ -4,6 +4,8 @@ import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.UserInfo
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.mongodb.subscriptions
+import io.realm.kotlin.mongodb.sync.asQuery
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -21,8 +23,9 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
         return realm.query<UserInfo>("groupId == $0", groupId).find()
     }
 
-    override fun findMyUserInfosAsFlow(userId: String): Flow<List<UserInfo>> {
-        return realm.query<UserInfo>("userId == $0", userId).find().asFlow().map { it.list }
+    override fun findMyUserInfosAsFlow(): Flow<List<UserInfo>> {
+        return realm.subscriptions.findByName("UserInfos")!!
+            .asQuery<UserInfo>().asFlow().map { it.list }
     }
 
     override fun findAllUserInfosAsFlow(): Flow<List<UserInfo>> {

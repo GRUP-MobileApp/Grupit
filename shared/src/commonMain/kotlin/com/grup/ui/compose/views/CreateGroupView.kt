@@ -16,39 +16,44 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.grup.ui.NavigationController
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.viewmodel.MainViewModel
 
-@Composable
-fun CreateGroupView(
-    mainViewModel: MainViewModel,
-    navController: NavigationController
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides AppTheme.colors.onSecondary
-    ) {
-        CreateGroupLayout(
-            mainViewModel = mainViewModel,
-            navController = navController
-        )
+internal class CreateGroupView(
+    private val createGroupOnClick: (groupName: String) -> Unit
+) : Screen {
+    @Composable
+    override fun Content() {
+        CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colors.onSecondary
+        ) {
+            val navigator = LocalNavigator.currentOrThrow
+
+            CreateGroupLayout(
+                createGroupOnClick = createGroupOnClick,
+                navigator = navigator
+            )
+        }
     }
 }
 
 @Composable
 private fun CreateGroupLayout(
-    mainViewModel: MainViewModel,
-    navController: NavigationController
+    createGroupOnClick: (groupName: String) -> Unit,
+    navigator: Navigator
 ) {
     var groupName: String by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             CreateGroupTopBar(
-                onBackPress = { navController.onBackPress() },
+                onBackPress = { navigator.pop() },
                 createGroupOnClick = {
-                    mainViewModel.onSelectedGroupChange(mainViewModel.createGroup(groupName))
-                    navController.onBackPress()
+                    createGroupOnClick(groupName)
+                    navigator.pop()
                 }
             )
         },

@@ -9,9 +9,9 @@ import org.koin.core.component.inject
 internal class UserInfoController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
 
-    fun getMyUserInfosAsFlow(user: User) = userInfoService.findMyUserInfosAsFlow(user)
+    fun getMyUserInfosAsFlow() = userInfoService.findMyUserInfosAsFlow()
     fun getAllUserInfosAsFlow() = userInfoService.findAllUserInfosAsFlow()
 
-    suspend fun updateLatestTime(user: User, group: Group) =
-        userInfoService.updateLatestTime(user, group)
+    suspend fun updateLatestTime(group: Group) =
+        userInfoService.updateLatestTime(group)
 }

@@ -1,21 +1,27 @@
 package com.grup.ui.viewmodel
 
-import com.grup.models.Group
-import com.grup.models.SettleAction
-import com.grup.models.TransactionRecord
-import com.grup.models.UserInfo
+import cafe.adriel.voyager.core.model.coroutineScope
+import com.grup.exceptions.login.UserObjectNotFoundException
+import com.grup.models.*
 import com.grup.ui.models.TransactionActivity
-import com.rickclephas.kmm.viewmodel.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class MainViewModel : LoggedInViewModel() {
+internal class MainViewModel : LoggedInViewModel() {
     companion object {
         private val selectedGroupMutable:
                 MutableStateFlow<Group?> = MutableStateFlow(null)
         val selectedGroup: Group
             get() = selectedGroupMutable.value!!
     }
+
+    val hasUserObject: Boolean
+        get() = try {
+            userObject
+            true
+        } catch (e: UserObjectNotFoundException) {
+            false
+        }
 
     // Selected group in the UI. Other UI flows use this to filter data based on the selected group.
     val selectedGroup: StateFlow<Group?> = selectedGroupMutable
@@ -122,7 +128,6 @@ class MainViewModel : LoggedInViewModel() {
             }
         }.asInitialEmptyState()
 
-
     // Group
     fun createGroup(groupName: String) = apiServer.createGroup(groupName)
 
@@ -130,11 +135,11 @@ class MainViewModel : LoggedInViewModel() {
     fun acceptSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = viewModelScope.coroutineScope.launch {
+    ) = coroutineScope.launch {
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
     }
 
-    fun logOut() = viewModelScope.coroutineScope.launch {
+    fun logOut() = coroutineScope.launch {
         selectedGroupMutable.value = null
         closeApiServer()
     }

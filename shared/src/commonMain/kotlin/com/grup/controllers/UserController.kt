@@ -11,7 +11,7 @@ internal class UserController : KoinComponent {
     suspend fun createUser(
         username: String,
         displayName: String,
-        profilePicture: ByteArray
+        profilePicture: ByteArray?
     ): User? {
         return userService.createMyUser(username, displayName, profilePicture)
     }

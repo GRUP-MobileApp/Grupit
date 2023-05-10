@@ -22,7 +22,6 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onMessageReceived(message: RemoteMessage) {
-        // TODO
         super.onMessageReceived(message)
         sendNotification(message.notification!!, message.data)
     }

@@ -1,5 +1,5 @@
 package com.grup.exceptions
 
-class NotCreatedException(
+internal class NotCreatedException(
     override val message: String? = "Error creating model"
 ) : APIException(message)
