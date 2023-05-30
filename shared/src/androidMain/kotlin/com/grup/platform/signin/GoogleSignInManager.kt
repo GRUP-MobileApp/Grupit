@@ -20,16 +20,8 @@ actual class GoogleSignInManager(
         googleSignInClient.signOut()
     }
 
-    override fun doSilentSignIn(callback: (String) -> Unit) {
-        googleSignInClient.silentSignIn().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val account: GoogleSignInAccount? =
-                    task.getResult(ApiException::class.java)
-                val token: String = account?.idToken!!
-
-                callback(token)
-            }
-        }
+    override fun disconnect() {
+        googleSignInClient.revokeAccess()
     }
 
     fun setGoogleLauncher(

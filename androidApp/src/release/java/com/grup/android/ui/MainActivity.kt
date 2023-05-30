@@ -11,8 +11,9 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.grup.android.ExceptionHandler
 import com.grup.android.GOOGLE_WEB_CLIENT_ID
+import com.grup.platform.signin.AuthManager
 import com.grup.platform.signin.GoogleSignInManager
-import com.grup.ui.compose.ReleaseApplication
+import com.grup.ui.compose.Application
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +47,12 @@ class MainActivity : AppCompatActivity() {
             )
 
         setContent {
-            ReleaseApplication(
-                googleSignInManager = GoogleSignInManager(googleSignInClient = googleSignInClient)
+            Application(
+                authManager = AuthManager(
+                    googleSignInManager = GoogleSignInManager(
+                        googleSignInClient = googleSignInClient
+                    )
+                )
             )
         }
     }

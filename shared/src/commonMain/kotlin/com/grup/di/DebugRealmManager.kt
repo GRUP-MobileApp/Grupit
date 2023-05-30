@@ -3,69 +3,32 @@ package com.grup.di
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.exceptions.login.NotLoggedInException
-import com.grup.models.*
-import com.grup.models.User
 import com.grup.other.TEST_APP_ID
-import com.grup.other.idSerialName
 import com.grup.interfaces.DBManager
+import com.grup.platform.signin.AuthManager
 import com.grup.service.Notifications
-import io.ktor.util.*
-import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
-import io.realm.kotlin.mongodb.sync.SyncConfiguration
-import io.realm.kotlin.mongodb.sync.asQuery
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 
-internal class DebugRealmManager : KoinComponent, DBManager {
-    private val realm: Realm by inject()
-
-    @OptIn(DelicateCoroutinesApi::class)
-    private val subscriptionsJob: Job = GlobalScope.launch {
-        var prevSubscribedGroupIds: Set<String> = emptySet()
-        realm.subscriptions.findByName("UserInfos")?.asQuery<UserInfo>()!!.asFlow()
-            .collect { resultsChange ->
-                val newGroupIds: Set<String> = resultsChange.list.map { it.groupId!! }.toSet()
-
-                realm.subscriptions.update {
-                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
-                        add(realm.query<Group>("$idSerialName == $0", groupId),
-                            "${groupId}_Group")
-                        add(realm.query<UserInfo>("groupId == $0", groupId),
-                            "${groupId}_UserInfo")
-                        add(realm.query<DebtAction>("groupId == $0", groupId),
-                            "${groupId}_DebtAction")
-                        add(realm.query<SettleAction>("groupId == $0", groupId),
-                            "${groupId}_SettleAction")
-                        Notifications.subscribeGroupNotifications(groupId)
-                    }
-                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
-                        remove("${groupId}_Group")
-                        remove("${groupId}_UserInfo")
-                        remove("${groupId}_DebtAction")
-                        remove("${groupId}_SettleAction")
-                        Notifications.unsubscribeGroupNotifications(groupId)
-                    }
-                }
-                prevSubscribedGroupIds = newGroupIds
-            }
-    }
-
+internal class DebugRealmManager private constructor(): RealmManager() {
+    override val authProvider: AuthManager.AuthProvider
+        get() = getAuthProvider(app)
     companion object {
         private val app: App = App.create(TEST_APP_ID)
 
-        suspend fun loginEmailPassword(email: String, password: String): RealmManager {
+        suspend fun silentSignIn(): DBManager? {
+            return app.currentUser?.let { realmUser ->
+                openRealm(realmUser)
+                DebugRealmManager()
+            }
+        }
+
+        suspend fun loginEmailPassword(email: String, password: String): DBManager {
             try {
                 return loginRealmManager(Credentials.emailPassword(email, password))
             } catch (e: InvalidCredentialsException) {
@@ -73,7 +36,7 @@ internal class DebugRealmManager : KoinComponent, DBManager {
             }
         }
 
-        suspend fun registerEmailPassword(email: String, password: String): RealmManager {
+        suspend fun registerEmailPassword(email: String, password: String): DBManager {
             try {
                 app.emailPasswordAuth.registerUser(email, password)
             } catch (e: UserAlreadyExistsException) {
@@ -84,55 +47,22 @@ internal class DebugRealmManager : KoinComponent, DBManager {
             return loginEmailPassword(email, password)
         }
 
-        private suspend fun loginRealmManager(credentials: Credentials): RealmManager {
-            val realmUser = app.login(credentials)
-            Realm.open(
-                SyncConfiguration.Builder(
-                    realmUser,
-                    setOf(
-                        User::class, Group::class, UserInfo::class, GroupInvite::class,
-                        DebtAction::class, SettleAction::class, TransactionRecord::class
-                    )
-                )
-                    .initialSubscriptions(rerunOnOpen = true) { realm ->
-                        removeAll()
-                        add(realm.query<User>("$idSerialName == $0", realmUser.id), "User")
-                        add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
-                        add(
-                            realm.query<GroupInvite>("inviter == $0", realmUser.id),
-                            "OutgoingGroupInvites"
-                        )
-                        add(
-                            realm.query<GroupInvite>("invitee == $0", realmUser.id),
-                            "IncomingGroupInvites"
-                        )
-                    }
-                    .waitForInitialRemoteData()
-                    .name("syncedRealm")
-                    .build()
-            ).also { realm ->
-                realm.syncSession.downloadAllServerChanges()
-                loadKoinModules(
-                    releaseAppModules +
-                    module {
-                        single { realm }
-                    }
-                )
+        private suspend fun loginRealmManager(credentials: Credentials): DBManager {
+            app.login(credentials).let {  realmUser ->
+                openRealm(realmUser)
+                Notifications.subscribePersonalNotifications(realmUser.id)
             }
-            Notifications.subscribePersonalNotifications(realmUser.id)
-            return RealmManager()
+            return DebugRealmManager()
+        }
+
+        private suspend fun openRealm(realmUser: User) {
+            RealmManager.openRealm(realmUser)
+            loadKoinModules(debugAppModules)
         }
     }
 
     override suspend fun close() {
-        subscriptionsJob.cancel()
-        unloadKoinModules(
-            debugAppModules +
-            module {
-                single { realm }
-            }
-        )
-        Notifications.unsubscribeAllNotifications()
+        unloadKoinModules(debugAppModules)
         app.currentUser?.logOut()
     }
 }

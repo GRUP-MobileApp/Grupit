@@ -2,14 +2,12 @@ package com.grup.ui.compose.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -22,16 +20,16 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.platform.signin.AuthManager
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.LoadingSpinner
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.LoginViewModel
-import com.grup.platform.signin.GoogleSignInManager
 import com.grup.ui.compose.GoogleSignInButton
 
 internal class DebugLoginView(
-    private val googleSignInManager: GoogleSignInManager? = null
+    private val authManager: AuthManager
 ) : Screen {
     @Composable
     override fun Content() {
@@ -44,7 +42,7 @@ internal class DebugLoginView(
             DebugLoginLayout(
                 loginViewModel = loginViewModel,
                 navigator = navigator,
-                googleSignInManager = googleSignInManager
+                authManager = authManager
             )
         }
     }
@@ -54,7 +52,7 @@ internal class DebugLoginView(
 private fun DebugLoginLayout(
     loginViewModel: LoginViewModel,
     navigator: Navigator,
-    googleSignInManager: GoogleSignInManager?
+    authManager: AuthManager
 ) {
     var email: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
@@ -62,25 +60,16 @@ private fun DebugLoginLayout(
     val loginResult:
             LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
 
-    val pendingLogin: Boolean =
-        loginResult is LoginViewModel.LoginResult.PendingEmailPasswordLogin ||
-        loginResult is LoginViewModel.LoginResult.PendingEmailPasswordRegister ||
-        loginResult is LoginViewModel.LoginResult.PendingGoogleLogin
+    val pendingLogin: Boolean = loginResult is LoginViewModel.LoginResult.PendingLogin
 
     when(loginResult) {
-        is LoginViewModel.LoginResult.SuccessGoogleLogin -> {
+        is LoginViewModel.LoginResult.SuccessLogin -> {
             navigator.push(
-                MainView(logOutAuthProviderOnClick = { googleSignInManager!!.signOut() })
-            )
-        }
-        is LoginViewModel.LoginResult.SuccessEmailPasswordLogin -> {
-            navigator.push(
-                MainView(logOutAuthProviderOnClick = { })
-            )
-        }
-        is LoginViewModel.LoginResult.SuccessEmailPasswordRegister -> {
-            navigator.push(
-                MainView(logOutAuthProviderOnClick = { })
+                MainView(
+                    signInManager = authManager.getSignInManagerFromProvider(
+                        (loginResult as LoginViewModel.LoginResult.SuccessLogin).authProvider
+                    )
+                )
             )
         }
         else -> {}
@@ -191,20 +180,18 @@ private fun DebugLoginLayout(
                         .width(130.dp)
                         .height(50.dp)
                 ) {
-                    when(loginResult) {
-                        is LoginViewModel.LoginResult.SuccessEmailPasswordRegister -> {
-                            LoadingSpinner()
-                        }
-                        is LoginViewModel.LoginResult.PendingEmailPasswordRegister -> {
-                            LoadingSpinner()
-                        }
-                        else -> {
-                            H1Text(
-                                text = "Sign Up",
-                                color = AppTheme.colors.onSecondary,
-                                fontSize = 18.sp
-                            )
-                        }
+                    if (
+                        loginResult.isSuccessOrPendingLoginAuthProvider(
+                            AuthManager.AuthProvider.EmailPasswordRegister
+                        )
+                    ) {
+                        LoadingSpinner()
+                    } else {
+                        H1Text(
+                            text = "Sign Up",
+                            color = AppTheme.colors.onSecondary,
+                            fontSize = 18.sp
+                        )
                     }
                 }
 
@@ -224,26 +211,24 @@ private fun DebugLoginLayout(
                         .width(130.dp)
                         .height(50.dp)
                 ) {
-                    when(loginResult) {
-                        is LoginViewModel.LoginResult.SuccessEmailPasswordLogin -> {
-                            LoadingSpinner()
-                        }
-                        is LoginViewModel.LoginResult.PendingEmailPasswordLogin -> {
-                            LoadingSpinner()
-                        }
-                        else -> {
-                            H1Text(
-                                text = "Login",
-                                color = AppTheme.colors.onSecondary,
-                                fontSize = 18.sp
-                            )
-                        }
+                    if (
+                        loginResult.isSuccessOrPendingLoginAuthProvider(
+                            AuthManager.AuthProvider.EmailPassword
+                        )
+                    ) {
+                        LoadingSpinner()
+                    } else {
+                        H1Text(
+                            text = "Login",
+                            color = AppTheme.colors.onSecondary,
+                            fontSize = 18.sp
+                        )
                     }
                 }
             }
         }
 
-        googleSignInManager?.let { googleSignInManager ->
+        authManager.googleSignInManager?.let { googleSignInManager ->
             GoogleSignInButton(
                 loginResult = loginResult,
                 googleSignInManager = googleSignInManager,
@@ -252,26 +237,5 @@ private fun DebugLoginLayout(
                 }
             )
         }
-        // CrashButton()
-    }
-}
-
-// test crash reports
-@Composable
-private fun CrashButton() {
-    Button(
-        onClick = {
-            throw RuntimeException("Test Crash")
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp),
-        shape = RoundedCornerShape(6.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Black,
-            contentColor = Color.White
-        )
-    ) {
-        Text(text = "TEST CRASH", modifier = Modifier.padding(6.dp))
     }
 }

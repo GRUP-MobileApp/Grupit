@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 internal class WelcomeViewModel : LoggedInViewModel() {
     sealed class NameValidity {
         object Valid : NameValidity()
-        class Invalid(val error: String) : NameValidity()
+        data class Invalid(val error: String) : NameValidity()
         object Pending : NameValidity()
         object None : NameValidity()
     }
@@ -82,7 +82,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         apiServer.registerUser(
             username,
             displayName,
-            profilePictureBitmap?.let { cropCenterSquareImage(it.toByteArray()) }
+            profilePictureBitmap?.let { cropCenterSquareImage(it) }
         )
     }
 }

@@ -18,6 +18,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.grup.library.MR
+import com.grup.platform.signin.AuthManager
 import com.grup.platform.signin.GoogleSignInManager
 import com.grup.ui.viewmodel.LoginViewModel
 import dev.icerock.moko.resources.compose.painterResource
@@ -43,14 +44,10 @@ internal actual fun GoogleSignInButton(
         }
 
     LaunchedEffect(key1 = googleSignInManager) {
-        googleSignInManager.silentSignIn(signInCallback)
         googleSignInManager.setGoogleLauncher(googleSignInLauncher)
     }
 
-    val pendingLogin: Boolean =
-        loginResult is LoginViewModel.LoginResult.PendingEmailPasswordLogin ||
-                loginResult is LoginViewModel.LoginResult.PendingEmailPasswordRegister ||
-                loginResult is LoginViewModel.LoginResult.PendingGoogleLogin
+    val pendingLogin: Boolean = loginResult is LoginViewModel.LoginResult.PendingLogin
 
     Button(
         onClick = {
@@ -67,24 +64,18 @@ internal actual fun GoogleSignInButton(
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp),
     ) {
-        when(loginResult) {
-            is LoginViewModel.LoginResult.SuccessGoogleLogin -> {
-                LoadingSpinner()
-            }
-            is LoginViewModel.LoginResult.PendingGoogleLogin -> {
-                LoadingSpinner()
-            }
-            else -> {
-                Image(
-                    painter = painterResource(MR.images.ic_logo_google),
-                    contentDescription = "Google Icon"
-                )
-                H1Text(
-                    text = "Sign in with Google",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(6.dp)
-                )
-            }
+        if (loginResult.isSuccessOrPendingLoginAuthProvider(AuthManager.AuthProvider.Google)) {
+            LoadingSpinner()
+        } else {
+            Image(
+                painter = painterResource(MR.images.ic_logo_google),
+                contentDescription = "Google Icon"
+            )
+            H1Text(
+                text = "Sign in with Google",
+                fontSize = 20.sp,
+                modifier = Modifier.padding(6.dp)
+            )
         }
     }
 }

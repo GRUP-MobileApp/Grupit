@@ -1,6 +1,6 @@
 package com.grup.platform.signin
 
-actual class GoogleSignInManager : SignInManager() {
+actual class AppleSignInManager : SignInManager() {
     override fun signIn() {
         TODO("Not yet implemented")
     }

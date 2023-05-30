@@ -14,15 +14,15 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.platform.signin.AuthManager
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.H1Text
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.LoginViewModel
-import com.grup.platform.signin.GoogleSignInManager
 import com.grup.ui.compose.GoogleSignInButton
 
 internal class ReleaseLoginView(
-    private val googleSignInManager: GoogleSignInManager? = null
+    private val authManager: AuthManager
 ) : Screen {
     @Composable
     override fun Content() {
@@ -35,7 +35,7 @@ internal class ReleaseLoginView(
             ReleaseLoginLayout(
                 loginViewModel = loginViewModel,
                 navigator = navigator,
-                googleSignInManager = googleSignInManager
+                authManager = authManager
             )
         }
     }
@@ -45,15 +45,19 @@ internal class ReleaseLoginView(
 private fun ReleaseLoginLayout(
     loginViewModel: LoginViewModel,
     navigator: Navigator,
-    googleSignInManager: GoogleSignInManager?
+    authManager: AuthManager
 ) {
     val loginResult:
             LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
 
     when (loginResult) {
-        is LoginViewModel.LoginResult.SuccessGoogleLogin -> {
+        is LoginViewModel.LoginResult.SuccessLogin -> {
             navigator.push(
-                MainView(logOutAuthProviderOnClick = { googleSignInManager!!.signOut() })
+                MainView(
+                    signInManager = authManager.getSignInManagerFromProvider(
+                        (loginResult as LoginViewModel.LoginResult.SuccessLogin).authProvider
+                    )
+                )
             )
         }
         else -> {}
@@ -78,7 +82,7 @@ private fun ReleaseLoginLayout(
 
             Spacer(modifier = Modifier.height(50.dp))
 
-            googleSignInManager?.let { googleSignInManager ->
+            authManager.googleSignInManager?.let { googleSignInManager ->
                 GoogleSignInButton(
                     loginResult = loginResult,
                     googleSignInManager = googleSignInManager,

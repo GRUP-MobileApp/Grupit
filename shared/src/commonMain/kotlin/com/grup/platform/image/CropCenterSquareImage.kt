@@ -1,3 +1,5 @@
 package com.grup.platform.image
 
-internal expect fun cropCenterSquareImage(byteArray: ByteArray): ByteArray
+import dev.icerock.moko.media.Bitmap
+
+internal expect fun cropCenterSquareImage(bitmap: Bitmap): ByteArray

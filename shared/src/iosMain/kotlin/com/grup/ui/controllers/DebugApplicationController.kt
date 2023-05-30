@@ -1,11 +1,11 @@
 package com.grup.ui.controllers
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.grup.platform.signin.GoogleSignInManager
-import com.grup.ui.compose.DebugApplication
+import com.grup.platform.signin.AuthManager
+import com.grup.ui.compose.Application
 
 fun DebugApplicationController(
-    googleSignInManager: GoogleSignInManager?
+    authManager: AuthManager
 ) = ComposeUIViewController {
-    DebugApplication(googleSignInManager = googleSignInManager)
+    Application(authManager = authManager, isDebug = true)
 }

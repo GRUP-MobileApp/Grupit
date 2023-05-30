@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,10 +37,9 @@ import dev.icerock.moko.media.Bitmap
 import dev.icerock.moko.media.compose.BindMediaPickerEffect
 import dev.icerock.moko.media.compose.rememberMediaPickerControllerFactory
 import dev.icerock.moko.media.compose.toImageBitmap
+import dev.icerock.moko.media.picker.CanceledException
 import dev.icerock.moko.media.picker.MediaSource
-import dev.icerock.moko.permissions.Permission
-import dev.icerock.moko.permissions.compose.BindEffect
-import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
+import dev.icerock.moko.permissions.DeniedException
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
@@ -67,6 +67,10 @@ private fun WelcomeLayout(
     welcomeViewModel: WelcomeViewModel,
     navigator: Navigator
 ) {
+    val mediaFactory = rememberMediaPickerControllerFactory()
+    val picker = remember(mediaFactory) { mediaFactory.createMediaPickerController() }
+    BindMediaPickerEffect(picker)
+
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
     val pageCount = 4
@@ -153,8 +157,16 @@ private fun WelcomeLayout(
                 2 ->
                     SetProfilePicture(
                         profilePictureBitmap = pfpBitmap,
-                        setProfilePictureBitmap = { profilePictureBitmap ->
-                            pfpBitmap = profilePictureBitmap
+                        choosePhotoOnClick = {
+                            scope.launch {
+                                try {
+                                    pfpBitmap = picker.pickImage(MediaSource.GALLERY)
+                                } catch (exc: DeniedException) {
+                                    println("denied - $exc")
+                                } catch (exc: CanceledException) {
+                                    println("cancelled - $exc")
+                                }
+                            }
                         },
                         onClickBack = scrollBack,
                         onClickContinue = scrollNext
@@ -283,20 +295,10 @@ private fun SetUsername(
 @Composable
 private fun SetProfilePicture(
     profilePictureBitmap: Bitmap?,
-    setProfilePictureBitmap: (Bitmap) -> Unit,
+    choosePhotoOnClick: () -> Unit,
     onClickContinue: () -> Unit,
     onClickBack: () -> Unit
 ) {
-    val permissionsFactory = rememberPermissionsControllerFactory()
-    val controller = remember(permissionsFactory) { permissionsFactory.createPermissionsController() }
-    val mediaFactory = rememberMediaPickerControllerFactory()
-    val picker = remember(mediaFactory) { mediaFactory.createMediaPickerController(permissionsController = controller) }
-
-    val coroutineScope = rememberCoroutineScope()
-
-    BindMediaPickerEffect(picker)
-    BindEffect(controller)
-
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -322,6 +324,7 @@ private fun SetProfilePicture(
                 Image(
                     bitmap = bitmap.toImageBitmap(),
                     contentDescription = "Selected picture",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxHeight(0.3f)
                         .aspectRatio(1f)
@@ -337,17 +340,7 @@ private fun SetProfilePicture(
                 )
         }
         Spacer(modifier = Modifier.weight(1f))
-        H1ConfirmTextButton(
-            text = "Choose Photo",
-            onClick = {
-                coroutineScope.launch {
-                    controller.providePermission(Permission.GALLERY)
-                    if (controller.isPermissionGranted(Permission.GALLERY)) {
-                        setProfilePictureBitmap(picker.pickImage(MediaSource.GALLERY))
-                    }
-                }
-            }
-        )
+        H1ConfirmTextButton(text = "Choose Photo", onClick = choosePhotoOnClick)
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,

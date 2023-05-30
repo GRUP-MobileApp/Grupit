@@ -8,6 +8,9 @@ import com.grup.other.AWS_IMAGES_API_URL
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*

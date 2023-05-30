@@ -23,6 +23,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.*
+import com.grup.platform.signin.SignInManager
 import com.grup.ui.compose.asMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoDate
@@ -49,24 +50,24 @@ import com.grup.ui.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
 
 internal class MainView(
-    private val logOutAuthProviderOnClick: () -> Unit
+    private val signInManager: SignInManager? = null
 ) : Screen {
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val mainViewModel: MainViewModel = rememberScreenModel { MainViewModel() }
+
+        if (!mainViewModel.hasUserObject) {
+            navigator.push(WelcomeView())
+        }
+        val notificationsViewModel: NotificationsViewModel =
+            rememberScreenModel { NotificationsViewModel() }
+        val groupInvitesViewModel: GroupInvitesViewModel =
+            rememberScreenModel { GroupInvitesViewModel() }
+
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            val navigator = LocalNavigator.currentOrThrow
-            val mainViewModel: MainViewModel = rememberScreenModel { MainViewModel() }
-
-            if (!mainViewModel.hasUserObject) {
-                navigator.push(WelcomeView())
-            }
-            val notificationsViewModel: NotificationsViewModel =
-                rememberScreenModel { NotificationsViewModel() }
-            val groupInvitesViewModel: GroupInvitesViewModel =
-                rememberScreenModel { GroupInvitesViewModel() }
-
             MainLayout(
                 mainViewModel = mainViewModel,
                 notificationsViewModel = notificationsViewModel,
@@ -74,7 +75,7 @@ internal class MainView(
                 navigator = navigator,
                 logOutAuthProviderOnClick = {
                     mainViewModel.logOut()
-                    logOutAuthProviderOnClick()
+                    signInManager?.signOut()
                     navigator.popUntilRoot()
                 }
             )

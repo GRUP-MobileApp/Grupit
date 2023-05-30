@@ -1,17 +1,14 @@
 package com.grup.platform.image
 
+import dev.icerock.moko.media.Bitmap
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.CoreGraphics.*
-import platform.Foundation.*
 import platform.UIKit.*
 import platform.posix.memcpy
 
-internal actual fun cropCenterSquareImage(byteArray: ByteArray): ByteArray {
-    val nsData = UIImage(
-        data = NSString.create(string = byteArray.decodeToString())
-            .dataUsingEncoding(NSUTF8StringEncoding)!!
-    ).CGImage.let { cgImage ->
+internal actual fun cropCenterSquareImage(bitmap: Bitmap): ByteArray {
+    val croppedUIImage = bitmap.image.CGImage?.let { cgImage ->
         val width = CGImageGetWidth(cgImage).toDouble()
         val height = CGImageGetHeight(cgImage).toDouble()
 
@@ -21,12 +18,11 @@ internal actual fun cropCenterSquareImage(byteArray: ByteArray): ByteArray {
 
         val rect = CGRectMake(x, y, squareSize, squareSize)
 
-        UIImageJPEGRepresentation(
-            image = UIImage
-                .imageWithCGImage(CGImageCreateWithImageInRect(image = cgImage, rect = rect)),
-            compressionQuality = 1.0
-        )!!
-    }
+        UIImage(CGImageCreateWithImageInRect(image = cgImage, rect = rect))
+    } ?: throw NullPointerException("Null CGImage")
+
+    val nsData = UIImagePNGRepresentation(croppedUIImage)
+        ?: throw CharacterCodingException("Can't represent UIImage as PNG")
 
     return ByteArray(nsData.length.toInt()).apply {
         usePinned {

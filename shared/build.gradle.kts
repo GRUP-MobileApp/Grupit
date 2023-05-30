@@ -71,10 +71,9 @@ kotlin {
                 // MOKO
                 implementation("dev.icerock.moko:resources:0.22.0")
                 implementation("dev.icerock.moko:resources-compose:0.22.0")
-                api("dev.icerock.moko:media:0.11.0")
-                api("dev.icerock.moko:media-compose:0.11.0")
-                api("dev.icerock.moko:permissions:0.16.0")
-                api("dev.icerock.moko:permissions-compose:0.16.0")
+                implementation("dev.icerock.moko:media:0.11.0")
+                implementation("dev.icerock.moko:media-compose:0.11.0")
+                implementation("dev.icerock.moko:permissions-compose:0.16.0")
 
                 // Backend
 

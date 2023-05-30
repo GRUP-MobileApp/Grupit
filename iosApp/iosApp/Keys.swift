@@ -8,5 +8,5 @@
 
 import Foundation
 
-let GOOGLE_WEB_CLIENT_ID = "151153956529-cunlgj2ifgr3d5kdfdpac8nraqqmocb0.apps.googleusercontent.com"
+let GOOGLE_WEB_CLIENT_ID = "296324231687-e1ecrjgjqfdqmd73dt9d02g8o64a77ph.apps.googleusercontent.com"
 let GOOGLE_CLIENT_ID = "296324231687-uir2ckc3ggot0p7ck7jkvr0iernieku1.apps.googleusercontent.com"

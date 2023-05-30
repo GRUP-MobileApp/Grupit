@@ -5,10 +5,8 @@ import com.grup.di.*
 import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
-import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import com.grup.interfaces.DBManager
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
+import com.grup.platform.signin.AuthManager
 import kotlin.coroutines.cancellation.CancellationException
 
 class APIServer private constructor(
@@ -25,6 +23,8 @@ class APIServer private constructor(
     val user: User
         get() = userController.getMyUser()
             ?: throw UserObjectNotFoundException()
+    val authProvider: AuthManager.AuthProvider
+        get() = dbManager.authProvider
     suspend fun registerUser(
         username: String,
         displayName: String,
@@ -84,6 +84,12 @@ class APIServer private constructor(
 
     companion object Login {
         @Throws(LoginException::class, CancellationException::class)
+        suspend fun debugSilentSignIn(): APIServer? =
+            DebugRealmManager.silentSignIn()?.let { realmManager ->
+                APIServer(realmManager)
+            }
+
+        @Throws(LoginException::class, CancellationException::class)
         suspend fun loginEmailAndPassword(email: String, password: String): APIServer =
             APIServer(DebugRealmManager.loginEmailPassword(email, password))
 
@@ -92,8 +98,14 @@ class APIServer private constructor(
             APIServer(DebugRealmManager.registerEmailPassword(email, password))
 
         @Throws(LoginException::class, CancellationException::class)
+        suspend fun releaseSilentSignIn(): APIServer? =
+            ReleaseRealmManager.silentSignIn()?.let { realmManager ->
+                APIServer(realmManager)
+            }
+
+        @Throws(LoginException::class, CancellationException::class)
         suspend fun loginGoogleAccountToken(googleAccountToken: String): APIServer =
-            APIServer(RealmManager.loginGoogle(googleAccountToken))
+            APIServer(ReleaseRealmManager.loginGoogle(googleAccountToken))
     }
 
     suspend fun logOut() = dbManager.close()

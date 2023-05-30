@@ -1,20 +1,25 @@
 package com.grup.di
 
-import com.grup.exceptions.login.InvalidGoogleAccountException
 import com.grup.exceptions.login.NotLoggedInException
-import com.grup.models.*
-import com.grup.models.User
-import com.grup.other.idSerialName
 import com.grup.interfaces.DBManager
-import com.grup.other.APP_ID
+import com.grup.models.DebtAction
+import com.grup.models.Group
+import com.grup.models.GroupInvite
+import com.grup.models.SettleAction
+import com.grup.models.TransactionRecord
+import com.grup.models.User
+import com.grup.models.UserInfo
+import com.grup.other.idSerialName
+import com.grup.platform.signin.AuthManager
 import com.grup.service.Notifications
-import io.ktor.util.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.mongodb.*
-import io.realm.kotlin.mongodb.exceptions.AuthException
+import io.realm.kotlin.mongodb.App
+import io.realm.kotlin.mongodb.AuthenticationProvider
+import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.mongodb.sync.asQuery
+import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -24,12 +29,13 @@ import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
+import kotlin.jvm.JvmStatic
 
-internal class RealmManager : KoinComponent, DBManager {
-    private val realm: Realm by inject()
+abstract class RealmManager : DBManager, KoinComponent {
+    protected val realm: Realm by inject()
 
     @OptIn(DelicateCoroutinesApi::class)
-    private val subscriptionsJob: Job = GlobalScope.launch {
+    protected val subscriptionsJob: Job = GlobalScope.launch {
         var prevSubscribedGroupIds: Set<String> = emptySet()
         realm.subscriptions.findByName("UserInfos")?.asQuery<UserInfo>()!!.asFlow()
             .collect { resultsChange ->
@@ -60,20 +66,8 @@ internal class RealmManager : KoinComponent, DBManager {
     }
 
     companion object {
-        private val app: App = App.create(APP_ID)
-
-        suspend fun loginGoogle(googleAccountToken: String): RealmManager {
-            try {
-                return loginRealmManager(
-                    Credentials.google(googleAccountToken, GoogleAuthType.ID_TOKEN)
-                )
-            } catch (e: AuthException) {
-                throw InvalidGoogleAccountException(e.message)
-            }
-        }
-
-        private suspend fun loginRealmManager(credentials: Credentials): RealmManager {
-            val realmUser = app.login(credentials)
+        @JvmStatic
+        protected suspend fun openRealm(realmUser: io.realm.kotlin.mongodb.User) {
             Realm.open(
                 SyncConfiguration.Builder(
                     realmUser,
@@ -101,14 +95,11 @@ internal class RealmManager : KoinComponent, DBManager {
             ).also { realm ->
                 realm.syncSession.downloadAllServerChanges()
                 loadKoinModules(
-                    releaseAppModules +
                     module {
                         single { realm }
                     }
                 )
             }
-            Notifications.subscribePersonalNotifications(realmUser.id)
-            return RealmManager()
         }
     }
 
@@ -116,12 +107,19 @@ internal class RealmManager : KoinComponent, DBManager {
         subscriptionsJob.cancel()
         unloadKoinModules(
             releaseAppModules +
-            module {
-                single { realm }
-            }
+                    module {
+                        single { realm }
+                    }
         )
         Notifications.unsubscribeAllNotifications()
-        // TODO: Sometimes app.currentUser is null??
-        app.currentUser?.logOut()
     }
+
+    protected fun getAuthProvider(app: App): AuthManager.AuthProvider =
+        app.currentUser?.let { user ->
+            when (user.provider) {
+                AuthenticationProvider.GOOGLE -> AuthManager.AuthProvider.Google
+                AuthenticationProvider.APPLE -> AuthManager.AuthProvider.Apple
+                else -> AuthManager.AuthProvider.None
+            }
+        } ?: throw NotLoggedInException("Not logged into Realm")
 }
