@@ -1,15 +1,18 @@
 package com.grup.platform.signin
 
-actual class GoogleSignInManager : SignInManager() {
-    override fun signIn() {
-        TODO("Not yet implemented")
-    }
+actual class GoogleSignInManager(
+    private val signInClosure: ((String) -> Unit) -> Unit,
+    private val signOutClosure: () -> Unit,
+    private val disconnectClosure: () -> Unit
+) : SignInManager() {
+    private lateinit var signInCallback: (String) -> Unit
+    override fun signIn() = signInClosure(signInCallback)
 
-    override fun signOut() {
-        TODO("Not yet implemented")
-    }
+    override fun signOut() = signOutClosure()
 
-    override fun disconnect() {
-        TODO("Not yet implemented")
+    override fun disconnect() = disconnectClosure()
+
+    fun setSignInCallback(signInCallback: (String) -> Unit) {
+        this.signInCallback = signInCallback
     }
 }

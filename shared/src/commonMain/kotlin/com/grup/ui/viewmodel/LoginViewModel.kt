@@ -4,6 +4,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.APIServer
 import com.grup.exceptions.login.LoginException
+import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.platform.signin.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,14 +15,17 @@ import org.koin.dsl.module
 internal class LoginViewModel : ScreenModel {
     sealed class LoginResult {
         data class SuccessLogin(val authProvider: AuthManager.AuthProvider) : LoginResult()
+        data class SuccessLoginWelcomeSlideshow(
+            val authProvider: AuthManager.AuthProvider
+        ) : LoginResult()
         data class PendingLogin(val authProvider: AuthManager.AuthProvider) : LoginResult()
         data class Error(val exception: Exception) : LoginResult()
         object None : LoginResult()
 
-        fun isSuccessLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
+        private fun isSuccessLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
             (this is SuccessLogin) && (this.authProvider == authProvider)
 
-        fun isPendingLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
+        private fun isPendingLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
             (this is PendingLogin) && (this.authProvider == authProvider)
 
         fun isSuccessOrPendingLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
@@ -34,8 +38,19 @@ internal class LoginViewModel : ScreenModel {
     fun loginEmailPassword(email: String, password: String) = coroutineScope.launch {
         _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.EmailPassword)
         try {
-            injectApiServer(APIServer.loginEmailAndPassword(email, password))
-            _loginResult.value = LoginResult.SuccessLogin(AuthManager.AuthProvider.EmailPassword)
+            APIServer.loginEmailAndPassword(email, password).let { apiServer ->
+                injectApiServer(apiServer)
+                try {
+                    apiServer.user
+                    _loginResult.value = LoginResult.SuccessLogin(
+                        AuthManager.AuthProvider.EmailPassword
+                    )
+                } catch (e: UserObjectNotFoundException) {
+                    _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
+                        AuthManager.AuthProvider.EmailPassword
+                    )
+                }
+            }
         } catch (e: LoginException) {
             _loginResult.value = LoginResult.Error(e)
         }
@@ -47,10 +62,19 @@ internal class LoginViewModel : ScreenModel {
                 AuthManager.AuthProvider.EmailPasswordRegister
             )
             try {
-                injectApiServer(APIServer.registerEmailAndPassword(email, password))
-                _loginResult.value = LoginResult.SuccessLogin(
-                    AuthManager.AuthProvider.EmailPasswordRegister
-                )
+                APIServer.registerEmailAndPassword(email, password).let { apiServer ->
+                    injectApiServer(apiServer)
+                    try {
+                        apiServer.user
+                        _loginResult.value = LoginResult.SuccessLogin(
+                            AuthManager.AuthProvider.EmailPasswordRegister
+                        )
+                    } catch (e: UserObjectNotFoundException) {
+                        _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
+                            AuthManager.AuthProvider.EmailPasswordRegister
+                        )
+                    }
+                }
             } catch (e: LoginException) {
                 _loginResult.value = LoginResult.Error(e)
             }
@@ -59,11 +83,24 @@ internal class LoginViewModel : ScreenModel {
     fun loginGoogleAccount(googleAccountToken: String) = coroutineScope.launch {
         _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Google)
         try {
-            injectApiServer(APIServer.loginGoogleAccountToken(googleAccountToken))
-            _loginResult.value = LoginResult.SuccessLogin(AuthManager.AuthProvider.Google)
+            APIServer.loginGoogleAccountToken(googleAccountToken).let { apiServer ->
+                injectApiServer(apiServer)
+                try {
+                    apiServer.user
+                    _loginResult.value = LoginResult.SuccessLogin(AuthManager.AuthProvider.Google)
+                } catch (e: UserObjectNotFoundException) {
+                    _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
+                        AuthManager.AuthProvider.Google
+                    )
+                }
+            }
         } catch (e: LoginException) {
             _loginResult.value = LoginResult.Error(e)
         }
+    }
+
+    fun consumeLoginResult() {
+        _loginResult.value = LoginResult.None
     }
 
     private fun injectApiServer(apiServer: APIServer) {

@@ -56,10 +56,6 @@ internal class MainView(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val mainViewModel: MainViewModel = rememberScreenModel { MainViewModel() }
-
-        if (!mainViewModel.hasUserObject) {
-            navigator.push(WelcomeView())
-        }
         val notificationsViewModel: NotificationsViewModel =
             rememberScreenModel { NotificationsViewModel() }
         val groupInvitesViewModel: GroupInvitesViewModel =

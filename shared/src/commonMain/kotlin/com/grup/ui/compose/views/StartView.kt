@@ -30,8 +30,8 @@ class StartView(
 ) : Screen {
     @Composable
     override fun Content() {
-        val startViewModel: StartViewModel = rememberScreenModel { StartViewModel() }
         val navigator = LocalNavigator.currentOrThrow
+        val startViewModel: StartViewModel = rememberScreenModel { StartViewModel() }
 
         LaunchedEffect(true) {
             startViewModel.silentSignIn(isDebug = isDebug)
@@ -69,6 +69,7 @@ private fun StartLayout(
                     ReleaseLoginView(authManager = authManager)
                 }
             )
+            startViewModel.consumeSignInResult()
         }
         is StartViewModel.SilentSignInResult.SignedIn -> {
             navigator.push(
@@ -80,6 +81,7 @@ private fun StartLayout(
                         )
                 )
             )
+            startViewModel.consumeSignInResult()
         }
         is StartViewModel.SilentSignInResult.SignedInWelcomeSlideshow -> {
             navigator.push(
@@ -94,6 +96,18 @@ private fun StartLayout(
                     WelcomeView()
                 )
             )
+            startViewModel.consumeSignInResult()
+        }
+        is StartViewModel.SilentSignInResult.Error -> {
+            // TODO: Handle error
+            navigator.push(
+                if (isDebug) {
+                    DebugLoginView(authManager = authManager)
+                } else {
+                    ReleaseLoginView(authManager = authManager)
+                }
+            )
+            startViewModel.consumeSignInResult()
         }
         is StartViewModel.SilentSignInResult.None -> { }
     }

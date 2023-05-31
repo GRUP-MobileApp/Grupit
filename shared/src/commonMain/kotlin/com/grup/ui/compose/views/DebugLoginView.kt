@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -26,14 +27,13 @@ import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.LoadingSpinner
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.LoginViewModel
-import com.grup.ui.compose.GoogleSignInButton
 
 internal class DebugLoginView(
     private val authManager: AuthManager
 ) : Screen {
     @Composable
     override fun Content() {
-        val loginViewModel = LoginViewModel()
+        val loginViewModel: LoginViewModel = rememberScreenModel { LoginViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -71,6 +71,7 @@ private fun DebugLoginLayout(
                     )
                 )
             )
+            loginViewModel.consumeLoginResult()
         }
         else -> {}
     }
@@ -228,14 +229,14 @@ private fun DebugLoginLayout(
             }
         }
 
-        authManager.googleSignInManager?.let { googleSignInManager ->
-            GoogleSignInButton(
-                loginResult = loginResult,
-                googleSignInManager = googleSignInManager,
-                signInCallback = { token ->
-                    loginViewModel.loginGoogleAccount(token)
-                }
-            )
-        }
+//        authManager.googleSignInManager?.let { googleSignInManager ->
+//            GoogleSignInButton(
+//                loginResult = loginResult,
+//                googleSignInManager = googleSignInManager,
+//                signInCallback = { token ->
+//                    loginViewModel.loginGoogleAccount(token)
+//                }
+//            )
+//        }
     }
 }

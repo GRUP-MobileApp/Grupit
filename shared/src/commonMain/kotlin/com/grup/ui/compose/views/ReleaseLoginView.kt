@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -26,7 +27,7 @@ internal class ReleaseLoginView(
 ) : Screen {
     @Composable
     override fun Content() {
-        val loginViewModel = LoginViewModel()
+        val loginViewModel: LoginViewModel = rememberScreenModel { LoginViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -59,6 +60,21 @@ private fun ReleaseLoginLayout(
                     )
                 )
             )
+            loginViewModel.consumeLoginResult()
+        }
+        is LoginViewModel.LoginResult.SuccessLoginWelcomeSlideshow -> {
+            navigator.push(
+                listOf(
+                    MainView(
+                        signInManager = authManager.getSignInManagerFromProvider(
+                            (loginResult as LoginViewModel.LoginResult.SuccessLoginWelcomeSlideshow)
+                                .authProvider
+                        )
+                    ),
+                    WelcomeView()
+                )
+            )
+            loginViewModel.consumeLoginResult()
         }
         else -> {}
     }
