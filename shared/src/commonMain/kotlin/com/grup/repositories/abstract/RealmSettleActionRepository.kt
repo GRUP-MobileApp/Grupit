@@ -1,6 +1,6 @@
 package com.grup.repositories.abstract
 
-import com.grup.di.getLatestFields
+import com.grup.other.getLatestFields
 import com.grup.interfaces.ISettleActionRepository
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord

@@ -1,6 +1,6 @@
 package com.grup.repositories.abstract
 
-import com.grup.di.getLatestFields
+import com.grup.other.getLatestFields
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.models.DebtAction
 import io.realm.kotlin.ext.query

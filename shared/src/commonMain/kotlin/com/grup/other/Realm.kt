@@ -1,4 +1,4 @@
-package com.grup.di
+package com.grup.other
 
 import com.grup.models.*
 import io.realm.kotlin.MutableRealm

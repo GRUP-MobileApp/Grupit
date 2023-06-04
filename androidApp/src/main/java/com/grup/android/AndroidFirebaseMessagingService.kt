@@ -55,11 +55,11 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "GRUP",
-                "GRUP",
+                "Grupit",
+                "Grupit",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            channel.description = "GRUP Notifications"
+            channel.description = "Grupit Notifications"
             channel.setShowBadge(true)
             channel.canShowBadge()
             channel.enableLights(true)

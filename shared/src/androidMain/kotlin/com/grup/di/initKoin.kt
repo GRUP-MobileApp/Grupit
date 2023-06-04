@@ -10,9 +10,8 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
-actual fun initKoin(appDeclaration: (KoinApplication.() -> Unit)?) {
+actual fun initKoin() {
     startKoin {
-        appDeclaration?.let { it() }
         modules(
             module {
                 single {

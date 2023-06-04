@@ -6,6 +6,7 @@ import com.grup.interfaces.IGroupRepository
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.interfaces.IUserRepository
+import com.grup.platform.signin.AuthManager
 import com.grup.repositories.*
 import com.grup.repositories.SyncedUserRepository
 import com.grup.service.*
@@ -13,6 +14,7 @@ import com.grup.service.GroupService
 import com.grup.service.DebtActionService
 import com.grup.service.UserService
 import org.koin.core.KoinApplication
+import org.koin.core.context.loadKoinModules
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
@@ -56,10 +58,22 @@ internal val testRepositoriesModule = module {
     single<ISettleActionRepository> { TestSettleActionRepository() }
 }
 
+internal val defaultAuthManager = module {
+    single { AuthManager() }
+}
+
 internal val releaseAppModules =
-    listOf(servicesModule, releaseRepositoriesModule)
+    listOf(servicesModule, releaseRepositoriesModule, defaultAuthManager)
 
 internal val debugAppModules =
-    listOf(servicesModule, debugRepositoriesModule)
+    listOf(servicesModule, debugRepositoriesModule, defaultAuthManager)
 
-expect fun initKoin(appDeclaration: (KoinApplication.() -> Unit)? = null)
+expect fun initKoin()
+
+fun initAuthManager(authManager: AuthManager) {
+    loadKoinModules(
+        module {
+            single { authManager }
+        }
+    )
+}

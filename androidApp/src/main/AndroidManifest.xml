@@ -14,7 +14,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="GRUP"
+        android:label="Grupit"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".MainApplication"

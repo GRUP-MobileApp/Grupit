@@ -11,6 +11,7 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.grup.android.ExceptionHandler
 import com.grup.android.GOOGLE_WEB_CLIENT_ID
+import com.grup.di.initAuthManager
 import com.grup.platform.signin.AuthManager
 import com.grup.platform.signin.GoogleSignInManager
 import com.grup.ui.compose.Application
@@ -37,23 +38,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val googleSignInClient: GoogleSignInClient =
-            GoogleSignIn.getClient(
-                this,
-                GoogleSignInOptions
-                    .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(GOOGLE_WEB_CLIENT_ID)
-                    .build()
-            )
-
-        setContent {
-            Application(
-                authManager = AuthManager(
-                    googleSignInManager = GoogleSignInManager(
-                        googleSignInClient = googleSignInClient
+        initAuthManager(
+            AuthManager(
+                googleSignInManager = GoogleSignInManager(
+                    googleSignInClient = GoogleSignIn.getClient(
+                        this,
+                        GoogleSignInOptions
+                            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(GOOGLE_WEB_CLIENT_ID)
+                            .build()
                     )
                 )
             )
+        )
+
+        setContent {
+            Application()
         }
     }
 }

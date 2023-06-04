@@ -25,7 +25,6 @@ import com.grup.ui.compose.collectAsStateWithLifecycle
 import dev.icerock.moko.resources.compose.painterResource
 
 class StartView(
-    private val authManager: AuthManager,
     private val isDebug: Boolean
 ) : Screen {
     @Composable
@@ -42,7 +41,7 @@ class StartView(
         ) {
             StartLayout(
                 startViewModel = startViewModel,
-                authManager = authManager,
+                authManager = startViewModel.authManager,
                 navigator = navigator,
                 isDebug = isDebug
             )
@@ -64,9 +63,9 @@ private fun StartLayout(
         is StartViewModel.SilentSignInResult.NotSignedIn -> {
             navigator.push(
                 if (isDebug) {
-                    DebugLoginView(authManager = authManager)
+                    DebugLoginView()
                 } else {
-                    ReleaseLoginView(authManager = authManager)
+                    ReleaseLoginView()
                 }
             )
             startViewModel.consumeSignInResult()
@@ -102,9 +101,9 @@ private fun StartLayout(
             // TODO: Handle error
             navigator.push(
                 if (isDebug) {
-                    DebugLoginView(authManager = authManager)
+                    DebugLoginView()
                 } else {
-                    ReleaseLoginView(authManager = authManager)
+                    ReleaseLoginView()
                 }
             )
             startViewModel.consumeSignInResult()

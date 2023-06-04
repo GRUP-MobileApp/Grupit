@@ -28,9 +28,7 @@ import com.grup.ui.compose.LoadingSpinner
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.LoginViewModel
 
-internal class DebugLoginView(
-    private val authManager: AuthManager
-) : Screen {
+internal class DebugLoginView : Screen {
     @Composable
     override fun Content() {
         val loginViewModel: LoginViewModel = rememberScreenModel { LoginViewModel() }
@@ -42,7 +40,7 @@ internal class DebugLoginView(
             DebugLoginLayout(
                 loginViewModel = loginViewModel,
                 navigator = navigator,
-                authManager = authManager
+                authManager = loginViewModel.authManager
             )
         }
     }
@@ -102,7 +100,7 @@ private fun DebugLoginLayout(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         H1Text(
-            text = "GRUP",
+            text = "Grupit",
             fontSize = 40.sp,
             color = AppTheme.colors.onSecondary
         )

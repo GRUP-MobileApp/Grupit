@@ -8,10 +8,14 @@ import com.grup.platform.signin.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
-class StartViewModel : ScreenModel {
+class StartViewModel : ScreenModel, KoinComponent {
+    val authManager: AuthManager by inject()
+
     sealed class SilentSignInResult {
         data class SignedIn(val authProvider: AuthManager.AuthProvider) : SilentSignInResult()
         data class SignedInWelcomeSlideshow(

@@ -22,9 +22,7 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.LoginViewModel
 import com.grup.ui.compose.GoogleSignInButton
 
-internal class ReleaseLoginView(
-    private val authManager: AuthManager
-) : Screen {
+internal class ReleaseLoginView : Screen {
     @Composable
     override fun Content() {
         val loginViewModel: LoginViewModel = rememberScreenModel { LoginViewModel() }
@@ -36,7 +34,7 @@ internal class ReleaseLoginView(
             ReleaseLoginLayout(
                 loginViewModel = loginViewModel,
                 navigator = navigator,
-                authManager = authManager
+                authManager = loginViewModel.authManager
             )
         }
     }
@@ -91,7 +89,7 @@ private fun ReleaseLoginLayout(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             H1Text(
-                text = "GRUP",
+                text = "Grupit",
                 fontSize = 70.sp,
                 color = AppTheme.colors.onSecondary
             )
