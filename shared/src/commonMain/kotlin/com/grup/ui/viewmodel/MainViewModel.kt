@@ -3,25 +3,21 @@ package com.grup.ui.viewmodel
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
+import com.grup.platform.signin.AuthManager
 import com.grup.ui.models.TransactionActivity
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-internal class MainViewModel : LoggedInViewModel() {
+internal class MainViewModel : LoggedInViewModel(), KoinComponent {
+    private val authManager: AuthManager by inject()
     companion object {
         private val selectedGroupMutable:
                 MutableStateFlow<Group?> = MutableStateFlow(null)
         val selectedGroup: Group
             get() = selectedGroupMutable.value!!
     }
-
-    val hasUserObject: Boolean
-        get() = try {
-            userObject
-            true
-        } catch (e: UserObjectNotFoundException) {
-            false
-        }
 
     // Selected group in the UI. Other UI flows use this to filter data based on the selected group.
     val selectedGroup: StateFlow<Group?> = selectedGroupMutable
@@ -141,6 +137,7 @@ internal class MainViewModel : LoggedInViewModel() {
 
     fun logOut() = coroutineScope.launch {
         selectedGroupMutable.value = null
+        authManager.getSignInManagerFromProvider(apiServer.authProvider)?.signOut()
         closeApiServer()
     }
 }

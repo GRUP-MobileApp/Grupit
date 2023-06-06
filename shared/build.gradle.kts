@@ -109,7 +109,7 @@ kotlin {
 
                 // Jetpack Compose
                 implementation("androidx.compose.ui:ui:$composeVersion")
-                implementation("androidx.activity:activity-compose:1.7.1")
+                implementation("androidx.activity:activity-compose:1.7.2")
 
                 // Lifecycle
                 implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
@@ -135,6 +135,9 @@ kotlin {
 
                 // Import the Firebase BoM
                 implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
+
+                // Firebase Auth
+                implementation("com.google.firebase:firebase-auth-ktx")
 
                 // Firebase Crashlytics
                 implementation("com.google.firebase:firebase-analytics-ktx")

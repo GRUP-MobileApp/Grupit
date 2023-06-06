@@ -28,6 +28,7 @@ actual fun initKoin() {
                         }
                     }
                 }
+                single { defaultAuthManager }
             }
         )
     }

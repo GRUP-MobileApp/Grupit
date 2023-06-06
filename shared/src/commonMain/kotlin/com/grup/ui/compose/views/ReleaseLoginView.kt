@@ -15,7 +15,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.platform.signin.AuthManager
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.H1Text
 import com.grup.ui.apptheme.AppTheme
@@ -33,8 +32,7 @@ internal class ReleaseLoginView : Screen {
         ) {
             ReleaseLoginLayout(
                 loginViewModel = loginViewModel,
-                navigator = navigator,
-                authManager = loginViewModel.authManager
+                navigator = navigator
             )
         }
     }
@@ -43,35 +41,18 @@ internal class ReleaseLoginView : Screen {
 @Composable
 private fun ReleaseLoginLayout(
     loginViewModel: LoginViewModel,
-    navigator: Navigator,
-    authManager: AuthManager
+    navigator: Navigator
 ) {
     val loginResult:
             LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
 
     when (loginResult) {
         is LoginViewModel.LoginResult.SuccessLogin -> {
-            navigator.push(
-                MainView(
-                    signInManager = authManager.getSignInManagerFromProvider(
-                        (loginResult as LoginViewModel.LoginResult.SuccessLogin).authProvider
-                    )
-                )
-            )
+            navigator.push(MainView())
             loginViewModel.consumeLoginResult()
         }
         is LoginViewModel.LoginResult.SuccessLoginWelcomeSlideshow -> {
-            navigator.push(
-                listOf(
-                    MainView(
-                        signInManager = authManager.getSignInManagerFromProvider(
-                            (loginResult as LoginViewModel.LoginResult.SuccessLoginWelcomeSlideshow)
-                                .authProvider
-                        )
-                    ),
-                    WelcomeView()
-                )
-            )
+            navigator.push(listOf(MainView(), WelcomeView()))
             loginViewModel.consumeLoginResult()
         }
         else -> {}
@@ -96,7 +77,7 @@ private fun ReleaseLoginLayout(
 
             Spacer(modifier = Modifier.height(50.dp))
 
-            authManager.googleSignInManager?.let { googleSignInManager ->
+            loginViewModel.authManager.googleSignInManager?.let { googleSignInManager ->
                 GoogleSignInButton(
                     loginResult = loginResult,
                     googleSignInManager = googleSignInManager,

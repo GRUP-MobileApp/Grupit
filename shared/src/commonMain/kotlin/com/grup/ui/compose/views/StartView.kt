@@ -41,7 +41,6 @@ class StartView(
         ) {
             StartLayout(
                 startViewModel = startViewModel,
-                authManager = startViewModel.authManager,
                 navigator = navigator,
                 isDebug = isDebug
             )
@@ -52,7 +51,6 @@ class StartView(
 @Composable
 private fun StartLayout(
     startViewModel: StartViewModel,
-    authManager: AuthManager,
     navigator: Navigator,
     isDebug: Boolean
 ) {
@@ -71,30 +69,11 @@ private fun StartLayout(
             startViewModel.consumeSignInResult()
         }
         is StartViewModel.SilentSignInResult.SignedIn -> {
-            navigator.push(
-                MainView(
-                    signInManager = authManager
-                        .getSignInManagerFromProvider(
-                            (silentSignInResult as StartViewModel.SilentSignInResult.SignedIn)
-                                .authProvider
-                        )
-                )
-            )
+            navigator.push(MainView())
             startViewModel.consumeSignInResult()
         }
         is StartViewModel.SilentSignInResult.SignedInWelcomeSlideshow -> {
-            navigator.push(
-                listOf(
-                    MainView(signInManager = authManager
-                        .getSignInManagerFromProvider(
-                            (silentSignInResult as
-                                    StartViewModel.SilentSignInResult.SignedInWelcomeSlideshow)
-                                .authProvider
-                        )
-                    ),
-                    WelcomeView()
-                )
-            )
+            navigator.push(listOf(MainView(), WelcomeView()))
             startViewModel.consumeSignInResult()
         }
         is StartViewModel.SilentSignInResult.Error -> {

@@ -2,6 +2,7 @@ package com.grup.repositories
 
 import com.grup.models.User
 import com.grup.other.MONGODB_API_ENDPOINT
+import com.grup.other.TEST_MONGODB_API_ENDPOINT
 import com.grup.repositories.abstract.RealmUserRepository
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -14,7 +15,9 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class SyncedUserRepository : KoinComponent, RealmUserRepository() {
+internal class SyncedUserRepository(
+    private val isDebug: Boolean = false
+) : KoinComponent, RealmUserRepository() {
     override val realm: Realm by inject()
     private val client: HttpClient by inject()
 
@@ -41,7 +44,9 @@ internal class SyncedUserRepository : KoinComponent, RealmUserRepository() {
     override suspend fun findUserByUsername(username: String): User? {
         var responseUser: User? = null
         val response: HttpResponse = client.get(
-            "$MONGODB_API_ENDPOINT/user/findUserByUsername"
+            if (isDebug)
+                "$MONGODB_API_ENDPOINT/user/findUserByUsername"
+            else "$TEST_MONGODB_API_ENDPOINT/user/findUserByUsername"
         ) {
             contentType(ContentType.Application.Json)
             url {

@@ -9,7 +9,6 @@ import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.AuthException
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
-import org.koin.dsl.module
 
 internal class ReleaseRealmManager private constructor() : RealmManager() {
     override val authProvider: AuthManager.AuthProvider

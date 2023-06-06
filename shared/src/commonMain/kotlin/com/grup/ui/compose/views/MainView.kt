@@ -49,9 +49,7 @@ import com.grup.ui.viewmodel.NotificationsViewModel
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
 
-internal class MainView(
-    private val signInManager: SignInManager? = null
-) : Screen {
+internal class MainView : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -71,8 +69,9 @@ internal class MainView(
                 navigator = navigator,
                 logOutAuthProviderOnClick = {
                     mainViewModel.logOut()
-                    signInManager?.signOut()
-                    navigator.popUntilRoot()
+                    navigator.popUntil { screen ->
+                        screen is ReleaseLoginView || screen is DebugLoginView
+                    }
                 }
             )
         }

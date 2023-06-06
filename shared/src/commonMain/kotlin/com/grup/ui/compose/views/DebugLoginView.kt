@@ -39,8 +39,7 @@ internal class DebugLoginView : Screen {
         ) {
             DebugLoginLayout(
                 loginViewModel = loginViewModel,
-                navigator = navigator,
-                authManager = loginViewModel.authManager
+                navigator = navigator
             )
         }
     }
@@ -49,8 +48,7 @@ internal class DebugLoginView : Screen {
 @Composable
 private fun DebugLoginLayout(
     loginViewModel: LoginViewModel,
-    navigator: Navigator,
-    authManager: AuthManager
+    navigator: Navigator
 ) {
     var email: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
@@ -62,13 +60,7 @@ private fun DebugLoginLayout(
 
     when(loginResult) {
         is LoginViewModel.LoginResult.SuccessLogin -> {
-            navigator.push(
-                MainView(
-                    signInManager = authManager.getSignInManagerFromProvider(
-                        (loginResult as LoginViewModel.LoginResult.SuccessLogin).authProvider
-                    )
-                )
-            )
+            navigator.push(MainView())
             loginViewModel.consumeLoginResult()
         }
         else -> {}

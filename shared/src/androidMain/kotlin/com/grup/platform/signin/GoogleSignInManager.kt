@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResult
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
 
 actual class GoogleSignInManager(
     private val googleSignInClient: GoogleSignInClient
@@ -17,7 +18,11 @@ actual class GoogleSignInManager(
     }
 
     override fun signOut() {
-        googleSignInClient.signOut()
+        googleSignInClient.signOut().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                FirebaseAuth.getInstance().signOut()
+            }
+        }
     }
 
     override fun disconnect() {

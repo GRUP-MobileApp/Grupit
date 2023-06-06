@@ -62,11 +62,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.core:core-ktx:1.10.0")
+    implementation("androidx.core:core-ktx:1.10.1")
 
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:1.4.3")
-    implementation("androidx.activity:activity-compose:1.7.1")
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.ui:ui-tooling:1.4.3")
 
     // Koin
@@ -75,8 +75,8 @@ dependencies {
     // Google Play Services
     implementation ("com.google.android.gms:play-services-auth:20.5.0")
     implementation("com.google.android.gms:play-services-base:18.2.0")
-    implementation("com.google.android.play:app-update:2.0.1")
-    implementation("com.google.android.play:app-update-ktx:2.0.1")
+    implementation("com.google.android.play:app-update:2.1.0")
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:32.0.0"))

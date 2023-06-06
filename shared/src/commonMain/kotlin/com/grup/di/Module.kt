@@ -39,7 +39,7 @@ internal val releaseRepositoriesModule = module {
 }
 
 internal val debugRepositoriesModule = module {
-    single<IUserRepository> { DevSyncedUserRepository() }
+    single<IUserRepository> { SyncedUserRepository(isDebug = true) }
     single<IGroupRepository> { SyncedGroupRepository() }
     single<IUserInfoRepository> { SyncedUserInfoRepository() }
     single<IGroupInviteRepository> { SyncedGroupInviteRepository() }
@@ -63,10 +63,10 @@ internal val defaultAuthManager = module {
 }
 
 internal val releaseAppModules =
-    listOf(servicesModule, releaseRepositoriesModule, defaultAuthManager)
+    listOf(servicesModule, releaseRepositoriesModule)
 
 internal val debugAppModules =
-    listOf(servicesModule, debugRepositoriesModule, defaultAuthManager)
+    listOf(servicesModule, debugRepositoriesModule)
 
 expect fun initKoin()
 
