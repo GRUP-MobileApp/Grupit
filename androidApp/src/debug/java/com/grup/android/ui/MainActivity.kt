@@ -7,6 +7,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.grup.android.*
+import com.grup.di.initKoin
 import com.grup.ui.compose.Application
 
 

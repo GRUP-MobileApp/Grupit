@@ -48,6 +48,7 @@ internal class ReleaseRealmManager private constructor() : RealmManager() {
     }
 
     override suspend fun close() {
+        super.close()
         unloadKoinModules(releaseAppModules)
         app.currentUser?.logOut()
     }

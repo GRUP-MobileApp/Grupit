@@ -5,14 +5,24 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.painter.Painter
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.datetime.LocalDateTime
 
 // Money
 internal expect fun getCurrencySymbol(): String
 
 internal expect fun Double.asMoneyAmount(): String
 
-fun isoDate(date: String) = date.substring(5, 10)
-fun isoFullDate(date: String) = date.substring(0, 10)
+fun isoDate(date: String) = LocalDateTime.parse(date).date.let {  localDate ->
+    "${localDate.monthNumber}-${localDate.dayOfMonth}"
+}
+fun isoFullDate(date: String) = "${isoDate(date)}-${LocalDateTime.parse(date).year}"
+
+fun isoTime(date: String) = LocalDateTime.parse(date).time.let { localTime ->
+    localTime.hour.let {  hour ->
+        "${hour % 12}:${localTime.minute} " +
+                if (hour / 12 > 0) "AM" else "PM"
+    }
+}
 
 // Image
 fun getProfilePictureURI(userId: String) =

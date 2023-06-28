@@ -5,16 +5,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -74,16 +79,24 @@ private fun DebtActionLayout(
     val scope = rememberCoroutineScope()
 
     val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
-    var debtors: List<UserInfo> by remember { mutableStateOf(emptyList()) }
-    var splitStrategy: TransactionViewModel.SplitStrategy
-            by remember { mutableStateOf(TransactionViewModel.SplitStrategy.EvenSplit) }
-    var debtAmounts: List<Double> by remember { mutableStateOf(emptyList()) }
+    var splitStrategy: TransactionViewModel.SplitStrategy by remember {
+        mutableStateOf(TransactionViewModel.SplitStrategy.EvenSplit)
+    }
+
+    val rawSplitStrategyDebtAmounts:
+            SnapshotStateMap<UserInfo, Double?> = remember { mutableStateMapOf() }
+    val splitStrategyDebtAmounts: Map<UserInfo, Double> =
+        splitStrategy.generateSplit(debtActionAmount, rawSplitStrategyDebtAmounts)
 
     AddDebtorBottomSheet(
         userInfos = userInfos,
         addDebtorsOnClick = { selectedUsers ->
-            debtors = selectedUsers
-            debtAmounts = splitStrategy.generateSplit(debtActionAmount, debtors.size)
+            rawSplitStrategyDebtAmounts.keys.minus(selectedUsers).forEach { userInfo ->
+                rawSplitStrategyDebtAmounts.remove(userInfo)
+            }
+            selectedUsers.minus(rawSplitStrategyDebtAmounts.keys).forEach { userInfo ->
+                rawSplitStrategyDebtAmounts[userInfo] = null
+            }
             scope.launch { addDebtorBottomSheetState.hide() }
         },
         state = addDebtorBottomSheetState
@@ -126,21 +139,43 @@ private fun DebtActionLayout(
                     ) {
                         DebtActionSettings(
                             splitStrategy = splitStrategy,
-                            onSplitStrategyChange = { splitStrategy = it },
+                            onSplitStrategyChange = { newSplitStrategy ->
+                                if (splitStrategy::class != newSplitStrategy::class) {
+                                    splitStrategy = newSplitStrategy
+                                    rawSplitStrategyDebtAmounts
+                                        .mapValuesTo(rawSplitStrategyDebtAmounts) { null }
+                                }
+                            },
                             addDebtorsOnClick = {
                                 scope.launch { addDebtorBottomSheetState.show() }
                             }
                         )
                         SelectedDebtorsList(
-                            debtors = debtors,
-                            debtAmounts = debtAmounts,
+                            splitStrategyDebtAmounts = splitStrategyDebtAmounts,
+                            userHasSetDebtAmount = { userInfo ->
+                                rawSplitStrategyDebtAmounts[userInfo] != null
+                            },
+                            setUserDebtAmount = if (splitStrategy.editable) {
+                                { userInfo, amount ->
+                                    rawSplitStrategyDebtAmounts[userInfo] = amount
+                                }
+                            } else null,
                             modifier = Modifier.weight(1f)
                         )
                         H1ConfirmTextButton(
                             text = "Create",
-                            enabled = debtAmounts.sum() == debtActionAmount,
+                            enabled = splitStrategy.isValid(
+                                debtActionAmount,
+                                splitStrategyDebtAmounts
+                            ),
                             onClick = {
-                                transactionViewModel.createDebtAction(debtors, debtAmounts, message)
+                                transactionViewModel.createDebtAction(
+                                    splitStrategy.splitToMoneyAmounts(
+                                        debtActionAmount,
+                                        splitStrategyDebtAmounts
+                                    ),
+                                    message
+                                )
                                 navigator.pop()
                                 navigator.pop()
                             }
@@ -191,7 +226,9 @@ private fun DebtActionSettings(
                     .padding(vertical = AppTheme.dimensions.spacing)
                     .clip(AppTheme.shapes.medium)
                     .background(AppTheme.colors.primary)
-                    .clickable {  }
+                    .clickable {
+                        onSplitStrategyChange(TransactionViewModel.SplitStrategy.UnevenSplit)
+                    }
             ) {
                 H1Text(
                     text = splitStrategy.name,
@@ -207,10 +244,14 @@ private fun DebtActionSettings(
 
 @Composable
 private fun SelectedDebtorsList(
-    debtors: List<UserInfo>,
-    debtAmounts: List<Double>,
+    splitStrategyDebtAmounts: Map<UserInfo, Double>,
+    userHasSetDebtAmount: (UserInfo) -> Boolean,
+    setUserDebtAmount: ((UserInfo, Double) -> Unit)?,
     modifier: Modifier = Modifier
 ) {
+    // Keeps track of any values user is currently typing
+    val proxyDebtAmounts: SnapshotStateMap<UserInfo, Double> = remember { mutableStateMapOf() }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -223,13 +264,60 @@ private fun SelectedDebtorsList(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            itemsIndexed(debtors) { index, userInfo ->
+            items(splitStrategyDebtAmounts.keys.toTypedArray()) { userInfo ->
                 UserInfoRowCard(
                     userInfo = userInfo,
                     sideContent = {
-                        Text(
-                            text = "pays ${debtAmounts[index].asMoneyAmount()}",
-                            color = AppTheme.colors.onSecondary
+                        val hasEditedAmount =
+                            setUserDebtAmount != null && userHasSetDebtAmount(userInfo)
+                        var isFocused: Boolean by remember { mutableStateOf(false) }
+                        setUserDebtAmount?.let { setUserDebtAmount ->
+                            TextField(
+                                value =
+                                if (isFocused && proxyDebtAmounts[userInfo] == null) {
+                                    ""
+                                } else {
+                                    (proxyDebtAmounts[userInfo]
+                                        ?: splitStrategyDebtAmounts[userInfo]!!)
+                                        .asMoneyAmount()
+                                },
+                                onValueChange = { text ->
+                                    proxyDebtAmounts[userInfo] = text.replaceFirst(
+                                        Regex("^\\p{Alpha}+"), ""
+                                    ).toDouble()
+                                },
+                                textStyle = TextStyle(
+                                    color =
+                                    if (hasEditedAmount || proxyDebtAmounts.containsKey(userInfo))
+                                        AppTheme.colors.onSecondary
+                                    else
+                                        AppTheme.colors.caption
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Decimal
+                                ),
+                                modifier = Modifier.onFocusChanged { focusState ->
+                                    isFocused = focusState.isFocused
+                                    if (!focusState.isFocused) {
+                                        proxyDebtAmounts.forEach { entry ->
+                                            setUserDebtAmount(entry.key, entry.value)
+                                        }
+                                        proxyDebtAmounts.clear()
+                                    }
+                                }
+                            )
+                        } ?: Text(
+                            text = "pays ${splitStrategyDebtAmounts[userInfo]!!.asMoneyAmount()}",
+                            color =
+                            if (hasEditedAmount)
+                                AppTheme.colors.onSecondary
+                            else
+                                AppTheme.colors.caption,
+                            modifier = Modifier.apply {
+                                onFocusChanged {
+                                    // TODO: Update rawSplitStrategyDebtAmounts
+                                }
+                            }
                         )
                     }
                 )
@@ -242,12 +330,12 @@ private fun SelectedDebtorsList(
 @Composable
 private fun AddDebtorBottomSheet(
     userInfos: List<UserInfo>,
-    addDebtorsOnClick: (List<UserInfo>) -> Unit,
+    addDebtorsOnClick: (Set<UserInfo>) -> Unit,
     state: ModalBottomSheetState,
     textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
-    var selectedUsers: List<UserInfo> by remember { mutableStateOf(emptyList()) }
+    var selectedUsers: Set<UserInfo> by remember { mutableStateOf(emptySet()) }
     var usernameSearchQuery: String by remember { mutableStateOf("") }
 
     BackPressModalBottomSheetLayout(
@@ -311,7 +399,7 @@ private fun AddDebtorBottomSheet(
 private fun SelectDebtorsChecklist(
     usernameSearchQuery: String,
     userInfos: List<UserInfo>,
-    selectedUsers: List<UserInfo>,
+    selectedUsers: Set<UserInfo>,
     onCheckedChange: (UserInfo, Boolean) -> Unit
 ) {
     LazyColumn(

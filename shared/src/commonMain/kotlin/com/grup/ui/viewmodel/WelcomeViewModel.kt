@@ -39,6 +39,11 @@ internal class WelcomeViewModel : LoggedInViewModel() {
                     "Only alphanumeric characters, \".\", \"-\", and \"_\" are " +
                             "allowed"
                 )
+        } else if (username.length > 12) {
+            _usernameValidity.value =
+                NameValidity.Invalid(
+                    "Max 12 characters"
+                )
         } else if (username.length < 5) {
             _usernameValidity.value =
                 NameValidity.Invalid("Username must be at least 5 characters")
@@ -57,6 +62,11 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         _firstNameValidity.value = NameValidity.Pending
         if (firstName.isEmpty()) {
             _firstNameValidity.value = NameValidity.None
+        } else if (firstName.length > 12) {
+            _usernameValidity.value =
+                NameValidity.Invalid(
+                    "Max 12 characters"
+                )
         } else if (!firstName.matches(Regex("^[a-zA-Z]*$"))) {
             _firstNameValidity.value = NameValidity.Invalid("Alphabetic characters only")
         } else {

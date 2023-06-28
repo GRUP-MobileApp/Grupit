@@ -14,8 +14,6 @@ import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
 class StartViewModel : ScreenModel, KoinComponent {
-    val authManager: AuthManager by inject()
-
     sealed class SilentSignInResult {
         data class SignedIn(val authProvider: AuthManager.AuthProvider) : SilentSignInResult()
         data class SignedInWelcomeSlideshow(

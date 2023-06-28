@@ -6,7 +6,6 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -28,8 +27,8 @@ actual fun initKoin() {
                         }
                     }
                 }
-                single { defaultAuthManager }
-            }
+            },
+            defaultAuthManager
         )
     }
 }

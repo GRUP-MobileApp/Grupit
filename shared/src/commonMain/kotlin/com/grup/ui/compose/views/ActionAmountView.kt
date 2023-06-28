@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -89,12 +91,14 @@ private fun ActionAmountLayout(
                     actionAmount.toDouble().let { amount ->
                         H1ConfirmTextButton(
                             text = actionType,
-                            enabled = amount > 0,
+                            enabled = amount > 0 && message.isNotBlank(),
                             onClick = {
-                                navigator.push(DebtActionView(
-                                    debtActionAmount = amount,
-                                    message = message
-                                ))
+                                navigator.push(
+                                    DebtActionView(
+                                        debtActionAmount = amount,
+                                        message = message
+                                    )
+                                )
                             }
                         )
                     }
@@ -157,6 +161,7 @@ private fun ActionAmountLayout(
 @Composable
 private fun ActionAmountScreenLayout(
     actionAmount: String,
+    actionAmountFontSize: TextUnit = 98.sp,
     onActionAmountChange: (String) -> Unit,
     message: String? = null,
     onMessageChange: ((String) -> Unit)? = null,
@@ -178,27 +183,42 @@ private fun ActionAmountScreenLayout(
                 verticalArrangement = Arrangement.SpaceAround,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
+                    .fillMaxSize()
                     .weight(1f)
             ) {
                 AutoSizingH1Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = AppTheme.colors.onSecondary)) {
-                            append(getCurrencySymbol())
-                            append(actionAmount)
-                        }
-                        actionAmount.indexOf('.').let { index ->
-                            if (index != -1) {
-                                withStyle(SpanStyle(color = AppTheme.colors.caption)) {
-                                    repeat(2 - (actionAmount.length - (index + 1))) {
-                                        append('0')
+                    textContent = { fontSize ->
+                        buildAnnotatedString {
+                            withStyle(SpanStyle(color = AppTheme.colors.onSecondary)) {
+                                withStyle(
+                                    SpanStyle(
+                                        fontSize = fontSize.times(0.5f),
+                                        baselineShift = BaselineShift(0.4f)
+                                    )
+                                ) {
+                                    append(getCurrencySymbol())
+                                }
+                                withStyle(SpanStyle(fontSize = fontSize)) {
+                                    append(actionAmount)
+                                }
+                            }
+                            actionAmount.indexOf('.').let { index ->
+                                if (index != -1) {
+                                    withStyle(
+                                        SpanStyle(
+                                            color = AppTheme.colors.caption,
+                                            fontSize = fontSize
+                                        )
+                                    ) {
+                                        repeat(2 - (actionAmount.length - (index + 1))) {
+                                            append('0')
+                                        }
                                     }
                                 }
                             }
                         }
                     },
-                    fontSize = 98.sp
+                    fontSize = actionAmountFontSize,
                 )
                 Box(
                     contentAlignment = Alignment.Center,
@@ -208,11 +228,13 @@ private fun ActionAmountScreenLayout(
                 ) {
                     message?.let { message ->
                         if (message.isEmpty()) {
-                            Caption(text = "Message", fontSize = 24.sp)
+                            Caption(text = "What is this for?", fontSize = 24.sp)
                         }
                         TransparentTextField(
                             value = message,
-                            onValueChange = onMessageChange!!,
+                            onValueChange = {
+                                onMessageChange!!(it.take(50))
+                            },
                             fontSize = 24.sp
                         )
                     }
@@ -333,7 +355,7 @@ private fun Key(
         H1Text(
             text = key.toString(),
             fontSize = 28.sp,
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.Black,
             color = AppTheme.colors.onSecondary
         )
     }

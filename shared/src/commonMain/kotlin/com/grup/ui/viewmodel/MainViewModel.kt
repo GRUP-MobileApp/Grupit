@@ -12,6 +12,7 @@ import org.koin.core.component.inject
 
 internal class MainViewModel : LoggedInViewModel(), KoinComponent {
     private val authManager: AuthManager by inject()
+
     companion object {
         private val selectedGroupMutable:
                 MutableStateFlow<Group?> = MutableStateFlow(null)
@@ -61,15 +62,8 @@ internal class MainViewModel : LoggedInViewModel(), KoinComponent {
         _debtActionsFlow.map { debtActions ->
             debtActions.filter { debtAction ->
                 debtAction.totalAmount > 0
-            }.flatMap { debtAction ->
-                listOf(
-                    TransactionActivity.CreateDebtAction(debtAction),
-                    *debtAction.transactionRecords.filter { transactionRecord ->
-                        transactionRecord.isAccepted
-                    }.map { transactionRecord ->
-                        TransactionActivity.AcceptDebtAction(debtAction, transactionRecord)
-                    }.toTypedArray()
-                )
+            }.map { debtAction ->
+                TransactionActivity.CreateDebtAction(debtAction)
             }
         }
 

@@ -106,10 +106,9 @@ abstract class RealmManager : DBManager, KoinComponent {
     override suspend fun close() {
         subscriptionsJob.cancel()
         unloadKoinModules(
-            releaseAppModules +
-                    module {
-                        single { realm }
-                    }
+            module {
+                single { realm }
+            }
         )
         Notifications.unsubscribeAllNotifications()
     }

@@ -7,6 +7,7 @@ import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 internal class TransactionViewModel : LoggedInViewModel() {
     companion object {
@@ -38,32 +39,110 @@ internal class TransactionViewModel : LoggedInViewModel() {
         }!!
     }.asState()
 
+
     sealed class SplitStrategy {
+        companion object {
+            val strategies = listOf(EvenSplit, UnevenSplit, PercentageSplit)
+        }
         abstract val name: String
-        abstract fun generateSplit(transactionAmount: Double, numPeople: Int): List<Double>
+        open val editable: Boolean = true
+        open val showMoneyAmount: Boolean = false
+
+        abstract fun generateSplit(
+            totalMoneyAmount: Double,
+            rawSplitStrategyAmounts: Map<UserInfo, Double?>
+        ): Map<UserInfo, Double>
+
+        abstract fun splitToMoneyAmounts(
+            totalMoneyAmount: Double,
+            splitStrategyAmounts: Map<UserInfo, Double>
+        ): Map<UserInfo, Double>
+
+        open fun isValid(
+            totalMoneyAmount: Double,
+            rawSplitStrategyAmounts: Map<UserInfo, Double>
+        ): Boolean =
+            rawSplitStrategyAmounts.values.sum() == totalMoneyAmount
 
         object EvenSplit : SplitStrategy() {
             override val name: String = "Even Split"
+            override val editable: Boolean = false
+            override fun generateSplit(
+                totalMoneyAmount: Double,
+                rawSplitStrategyAmounts: Map<UserInfo, Double?>
+            ): Map<UserInfo, Double> = rawSplitStrategyAmounts.keys.associateWith {
+                totalMoneyAmount / rawSplitStrategyAmounts.size
+            }
 
-            override fun generateSplit(transactionAmount: Double, numPeople: Int): List<Double> =
-                List(numPeople) { transactionAmount / numPeople }
+            override fun splitToMoneyAmounts(
+                totalMoneyAmount: Double,
+                splitStrategyAmounts: Map<UserInfo, Double>
+            ): Map<UserInfo, Double> = splitStrategyAmounts
+
+            override fun isValid(
+                totalMoneyAmount: Double,
+                rawSplitStrategyAmounts: Map<UserInfo, Double>
+            ): Boolean = true
+        }
+
+        object UnevenSplit : SplitStrategy() {
+            override val name: String = "Uneven Split"
+
+            override fun generateSplit(
+                totalMoneyAmount: Double,
+                rawSplitStrategyAmounts: Map<UserInfo, Double?>
+            ): Map<UserInfo, Double> = rawSplitStrategyAmounts.mapValues { entry ->
+                entry.value ?: rawSplitStrategyAmounts.values.let { values ->
+                    (totalMoneyAmount - values.filterNotNull().sum()) / values.count { it == null }
+                }
+            }
+
+            override fun splitToMoneyAmounts(
+                totalMoneyAmount: Double,
+                splitStrategyAmounts: Map<UserInfo, Double>
+            ): Map<UserInfo, Double> = splitStrategyAmounts
+        }
+
+        object PercentageSplit : SplitStrategy() {
+            override val name: String = "Percentage Split"
+            override val showMoneyAmount: Boolean = true
+
+            override fun generateSplit(
+                totalMoneyAmount: Double,
+                rawSplitStrategyAmounts: Map<UserInfo, Double?>
+            ): Map<UserInfo, Double> = rawSplitStrategyAmounts.mapValues { entry ->
+                entry.value ?: rawSplitStrategyAmounts.values.let { values ->
+                    (100 - values.filterNotNull().sum()) / values.count { it == null }
+                }
+            }
+
+            override fun splitToMoneyAmounts(
+                totalMoneyAmount: Double,
+                splitStrategyAmounts: Map<UserInfo, Double>
+            ): Map<UserInfo, Double> = splitStrategyAmounts
+
+            override fun isValid(
+                totalMoneyAmount: Double,
+                rawSplitStrategyAmounts: Map<UserInfo, Double>
+            ): Boolean =
+                rawSplitStrategyAmounts.values.sum() == 100.0
         }
     }
 
     // DebtAction
-    fun createDebtAction(userInfos: List<UserInfo>,
-                         debtAmounts: List<Double>,
-                         message: String) =
-        apiServer.createDebtAction(
-            userInfos.zip(debtAmounts).map { (userInfo, balanceChange) ->
-                TransactionRecord().apply {
-                    this.debtorUserInfo = userInfo
-                    this.balanceChange = balanceChange
-                }
-            },
-            myUserInfo.value,
-            message
-        )
+    fun createDebtAction(
+        debtAmounts: Map<UserInfo, Double>,
+        message: String
+    ) = apiServer.createDebtAction(
+        debtAmounts.map { (userInfo, balanceChange) ->
+            TransactionRecord().apply {
+                this.debtorUserInfo = userInfo
+                this.balanceChange = balanceChange
+            }
+        },
+        myUserInfo.value,
+        message
+    )
 
     // SettleAction
     fun createSettleAction(settleAmount: Double) = coroutineScope.launch {
@@ -75,12 +154,12 @@ internal class TransactionViewModel : LoggedInViewModel() {
         amount: Double,
         myUserInfo: UserInfo
     ) = apiServer.createSettleActionTransaction(
-            settleAction,
-            TransactionRecord().apply {
-                this.balanceChange = amount
-                this.debtorUserInfo = myUserInfo
-            }
-        )
+        settleAction,
+        TransactionRecord().apply {
+            this.balanceChange = amount
+            this.debtorUserInfo = myUserInfo
+        }
+    )
 
     fun getSettleAction(settleActionId: String) =
         apiServer.getAllSettleActionsAsFlow().map { settleActions ->

@@ -3,7 +3,10 @@ package com.grup.ui.compose.views
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -15,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -23,7 +27,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.*
-import com.grup.platform.signin.SignInManager
 import com.grup.ui.compose.asMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoDate
@@ -234,7 +237,7 @@ private fun MainLayout(
                                 horizontalArrangement = Arrangement
                                     .spacedBy(AppTheme.dimensions.spacingSmall)
                             ) {
-                                GroupNotificationsPopup(
+                                GroupNotificationsButton(
                                     groupNotificationsAmount =
                                     notificationsAmount[group.getId()] ?: 0,
                                     navigateGroupNotificationsOnClick = {
@@ -322,14 +325,13 @@ private fun MainLayout(
                         if (activeSettleActions.isNotEmpty()) {
                             item {
                                 ActiveSettleActions(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    mySettleActions = activeSettleActions.filter { settleAction ->
-                                        settleAction.debteeUserInfo!!.userId == myUserInfo.userId!!
+                                    activeSettleActions = activeSettleActions,
+                                    isMySettleAction = { settleAction ->
+                                        settleAction.debteeUserInfo!!.userId!! ==
+                                                myUserInfo.userId!!
                                     },
-                                    activeSettleActions = activeSettleActions.filter { settleAction ->
-                                        settleAction.debteeUserInfo!!.userId != myUserInfo.userId!!
-                                    },
-                                    settleActionCardOnClick = selectAction
+                                    settleActionCardOnClick = selectAction,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                                 Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingLarge))
                             }
@@ -511,7 +513,7 @@ private fun GroupNavigationRow(
 }
 
 @Composable
-private fun GroupNotificationsPopup(
+private fun GroupNotificationsButton(
     groupNotificationsAmount: Int,
     navigateGroupNotificationsOnClick: () -> Unit
 ) {
@@ -601,76 +603,40 @@ private fun GroupBalanceCard(
 
 @Composable
 private fun ActiveSettleActions(
-    modifier: Modifier = Modifier,
-    mySettleActions: List<SettleAction>,
     activeSettleActions: List<SettleAction>,
-    settleActionCardOnClick: (SettleAction) -> Unit
+    isMySettleAction: (SettleAction) -> Boolean,
+    settleActionCardOnClick: (SettleAction) -> Unit,
+    cardSize: Dp = 140.dp,
+    modifier: Modifier = Modifier
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier
     ) {
-        H1Text(
-            text = "Active Settle",
-            fontWeight = FontWeight.Medium
-        )
-        LazyRow(
+        H1Text(text = "Active Settle", fontWeight = FontWeight.Medium)
+        LazyHorizontalGrid(
+            rows = GridCells.Fixed(count = 2),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
-            verticalAlignment = Alignment.Bottom
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
+            modifier = Modifier.height(cardSize.times(2) + AppTheme.dimensions.appPadding)
         ) {
-            if (mySettleActions.isNotEmpty()) {
-                itemsIndexed(mySettleActions) { index, settleAction ->
-                    when(index) {
-                        0 -> {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                Caption(text = "My Settle")
-                                SettleActionCard(
-                                    settleAction = settleAction,
-                                    settleActionCardOnClick = {
-                                        settleActionCardOnClick(settleAction)
-                                    },
-                                    showPendingNotification = true
-                                )
-                            }
-                        }
-                        else -> SettleActionCard(
-                            settleAction = settleAction,
-                            settleActionCardOnClick = {
-                                settleActionCardOnClick(settleAction)
-                            },
-                            showPendingNotification = true
-                        )
+            items(
+                activeSettleActions.sortedWith(
+                    compareBy<SettleAction> { settleAction ->
+                        isMySettleAction(settleAction)
+                    }.thenBy { settleAction ->
+                        settleAction.date
                     }
-                }
-            }
-            if (activeSettleActions.isNotEmpty()) {
-                itemsIndexed(activeSettleActions) { index, settleAction ->
-                    when(index) {
-                        0 -> Column(
-                            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Caption(text = "Other Settle")
-                            SettleActionCard(
-                                settleAction = settleAction,
-                                settleActionCardOnClick = {
-                                    settleActionCardOnClick(settleAction)
-                                },
-                                showPendingNotification = false
-                            )
-                        }
-                        else -> SettleActionCard(
-                            settleAction = settleAction,
-                            settleActionCardOnClick = {
-                                settleActionCardOnClick(settleAction)
-                            },
-                            showPendingNotification = false
-                        )
-                    }
-                }
+                )
+            ) {settleAction ->
+                SettleActionCard(
+                    settleAction = settleAction,
+                    settleActionCardOnClick = {
+                        settleActionCardOnClick(settleAction)
+                    },
+                    isMySettleAction = isMySettleAction(settleAction),
+                    cardSize = cardSize
+                )
             }
         }
     }
@@ -680,7 +646,8 @@ private fun ActiveSettleActions(
 private fun SettleActionCard(
     settleAction: SettleAction,
     settleActionCardOnClick: () -> Unit,
-    showPendingNotification: Boolean = false
+    isMySettleAction: Boolean = false,
+    cardSize: Dp = 140.dp
 ) {
     val pfpPainter = profilePicturePainter(settleAction.debteeUserInfo!!.profilePictureURL)
 
@@ -689,7 +656,7 @@ private fun SettleActionCard(
             settleAction.transactionRecords.count { transactionRecord ->
                 transactionRecord.dateAccepted == TransactionRecord.PENDING
             }.let { notificationCount ->
-                if (showPendingNotification && notificationCount > 0) {
+                if (isMySettleAction && notificationCount > 0) {
                     Badge(
                         backgroundColor = AppTheme.colors.error,
                         modifier = Modifier
@@ -709,9 +676,12 @@ private fun SettleActionCard(
         Box(
             modifier = Modifier
                 .clip(AppTheme.shapes.large)
-                .width(140.dp)
-                .height(140.dp)
-                .background(AppTheme.colors.secondary)
+                .width(cardSize)
+                .height(cardSize)
+                .background(
+                    if (isMySettleAction) AppTheme.colors.secondary
+                    else AppTheme.colors.confirm
+                )
                 .clickable(onClick = settleActionCardOnClick)
         ) {
             Column(
@@ -721,14 +691,8 @@ private fun SettleActionCard(
                     .fillMaxWidth()
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
-                ProfileIcon(
-                    painter = pfpPainter,
-                    iconSize = 50.dp
-                )
-                MoneyAmount(
-                    moneyAmount = settleAction.remainingAmount,
-                    fontSize = 24.sp
-                )
+                ProfileIcon(painter = pfpPainter, iconSize = 50.dp)
+                MoneyAmount(moneyAmount = settleAction.remainingAmount, fontSize = 24.sp)
             }
         }
     }
@@ -739,16 +703,6 @@ private fun DebtActionDetails(
     modifier: Modifier = Modifier,
     debtAction: DebtAction,
 ) {
-    val tabTitles: List<String> = mutableListOf<String>().apply {
-        if (debtAction.transactionRecords.any { it.isAccepted }) {
-            this.add("Accepted")
-        }
-        if (debtAction.transactionRecords.any { it.dateAccepted == TransactionRecord.PENDING }) {
-            this.add("Pending")
-        }
-    }
-    var selectedTabIndex: Int by remember { mutableStateOf(0) }
-
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -757,48 +711,33 @@ private fun DebtActionDetails(
         UserInfoRowCard(
             userInfo = debtAction.debteeUserInfo!!,
             mainContent = {
-                Caption(text = debtAction.debteeUserInfo!!.nickname!!)
-                MoneyAmount(
-                    moneyAmount = debtAction.totalAmount,
-                    fontSize = 60.sp
-                )
-            },
-            sideContent = {
-                Column(horizontalAlignment = Alignment.End) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Caption(text = "Debt")
-                    Caption(text = isoDate(debtAction.date))
+                    Caption(text = "${isoDate(debtAction.date)} at ${isoTime(debtAction.date)}")
                 }
+                H1Text(text = debtAction.debteeUserInfo!!.nickname!!, fontSize = 28.sp)
             },
+            sideContent = null,
             iconSize = 80.dp
         )
-
-        if (debtAction.message.isNotBlank()) {
-            H1Text(
-                text = "\"" + debtAction.message + "\"",
-                modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingMedium)
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
+        MoneyAmount(moneyAmount = debtAction.totalAmount, fontSize = 60.sp)
+        H1Text(
+            text = "\"" + debtAction.message + "\"",
+            modifier = Modifier.padding(top = AppTheme.dimensions.spacingMedium)
+        )
+        Box(
+            contentAlignment = Alignment.BottomStart,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = AppTheme.dimensions.paddingMedium)
         ) {
-            tabTitles.forEachIndexed { index, tabTitle ->
-                if (tabTitle == tabTitles[selectedTabIndex]) {
-                    H1Text(
-                        text = tabTitle,
-                        modifier = Modifier.clickable { selectedTabIndex = index }
-                    )
-                } else {
-                    Caption(
-                        text = tabTitle,
-                        modifier = Modifier.clickable { selectedTabIndex = index }
-                    )
-                }
-            }
+            H1Text(
+                text = "Transactions",
+                modifier = Modifier.padding(top = AppTheme.dimensions.paddingMedium)
+            )
         }
 
         Box(
@@ -808,29 +747,12 @@ private fun DebtActionDetails(
                 .clip(AppTheme.shapes.extraLarge)
                 .background(AppTheme.colors.secondary)
         ) {
-            Column(
+            LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
             ) {
-                when (tabTitles[selectedTabIndex]) {
-                    "Accepted" -> {
-                        debtAction.transactionRecords.filter { transactionRecord ->
-                            transactionRecord.isAccepted
-                        }.let { acceptedTransactions ->
-                            acceptedTransactions.forEach { acceptedTransaction ->
-                                TransactionRecordRowCard(transactionRecord = acceptedTransaction)
-                            }
-                        }
-                    }
-                    "Pending" -> {
-                        debtAction.transactionRecords.filter { transactionRecord ->
-                            transactionRecord.dateAccepted == TransactionRecord.PENDING
-                        }.let { pendingTransactions ->
-                            pendingTransactions.forEach { pendingTransaction ->
-                                TransactionRecordRowCard(transactionRecord = pendingTransaction)
-                            }
-                        }
-                    }
+                items(debtAction.transactionRecords) { transactionRecord ->
+                    TransactionRecordRowCard(transactionRecord = transactionRecord)
                 }
             }
         }
@@ -1021,12 +943,11 @@ private fun TransactionRecordRowCard(
                     .debtorUserInfo!!.nickname!!
             )
             Caption(
-                text = isoDate(
+                text =
                     if (transactionRecord.isAccepted)
-                        transactionRecord.dateAccepted
+                        "Accepted on ${isoDate(transactionRecord.dateAccepted)}"
                     else
-                        transactionRecord.dateCreated
-                )
+                        "Pending"
             )
         },
         sideContent = {

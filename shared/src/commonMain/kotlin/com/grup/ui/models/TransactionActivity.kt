@@ -8,6 +8,8 @@ internal sealed class TransactionActivity {
     abstract val action: Action
     abstract val userInfo: UserInfo
     abstract val date: String
+    abstract val amount: Double
+    abstract val activityName: String
     abstract fun displayText(): String
 
     data class CreateDebtAction(
@@ -19,35 +21,12 @@ internal sealed class TransactionActivity {
             get() = debtAction.debteeUserInfo!!
         override val date: String
             get() = debtAction.date
+        override val amount: Double
+            get() = debtAction.totalAmount
+        override val activityName: String
+            get() = "Debt Request"
 
-        override fun displayText() =
-                    "${userInfo.nickname!!} created a transaction with " +
-                            "${debtAction.transactionRecords.size} people"
-    }
-
-    data class AcceptDebtAction(
-        val debtAction: DebtAction,
-        val transactionRecord: TransactionRecord
-    ): TransactionActivity() {
-        override val action: Action
-            get() = debtAction
-        override val userInfo: UserInfo
-            get() = transactionRecord.debtorUserInfo!!
-        override val date: String
-            get() = transactionRecord.let { transactionRecord ->
-                if (!transactionRecord.isAccepted) {
-                    throw PendingTransactionRecordException(
-                        "TransactionRecord still pending for Debt Action " +
-                                "with id ${debtAction.getId()}"
-                    )
-                }
-                transactionRecord.dateAccepted
-            }
-
-        override fun displayText() =
-                    "${userInfo.nickname!!} accepted a debt of " +
-                            "${transactionRecord.balanceChange!!.asMoneyAmount()} from " +
-                            debtAction.debteeUserInfo!!.nickname!!
+        override fun displayText() = "\"${debtAction.message}\""
     }
 
     data class CreateSettleAction(
@@ -59,10 +38,12 @@ internal sealed class TransactionActivity {
             get() = settleAction.debteeUserInfo!!
         override val date: String
             get() = settleAction.date
+        override val amount: Double
+            get() = settleAction.totalAmount
+        override val activityName: String
+            get() = "New Settle"
 
-        override fun displayText() =
-            "${userInfo.nickname!!} requested ${settleAction.settleAmount!!.asMoneyAmount()} " +
-                    "to the group"
+        override fun displayText() = "created a new settlement"
     }
 
     data class SettlePartialSettleAction(
@@ -83,8 +64,12 @@ internal sealed class TransactionActivity {
                 }
                 transactionRecord.dateAccepted
             }
+        override val amount: Double
+            get() = transactionRecord.balanceChange!!
+        override val activityName: String
+            get() = "Settle Request"
+
         override fun displayText(): String =
-            "${userInfo.nickname!!} paid ${transactionRecord.balanceChange!!.asMoneyAmount()} to " +
-                    settleAction.debteeUserInfo!!.nickname!!
+            "paid ${settleAction.debteeUserInfo!!.nickname!!}"
     }
 }

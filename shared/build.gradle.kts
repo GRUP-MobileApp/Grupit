@@ -1,7 +1,6 @@
 val awsVersion: String by project
 val ktorVersion: String by project
 val koinVersion: String by project
-val imageLoaderVersion: String by project
 val realmVersion: String by project
 val composeVersion: String by project
 val voyagerVersion: String by project
@@ -60,6 +59,9 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material)
+                implementation(compose.material3)
+                implementation(compose.ui)
+
 
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")

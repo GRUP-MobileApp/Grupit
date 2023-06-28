@@ -60,7 +60,7 @@ private fun GroupNotificationsLayout(
         onBackPress = { navigator.pop() }
     ) {
         items(notifications[selectedGroup.getId()] ?: emptyList()) { notification ->
-            val sideContent: (@Composable () -> Unit)? =
+            val sideContent: (@Composable ColumnScope.() -> Unit)? =
                 when (notification) {
                     is Notification.IncomingDebtAction -> {
                         {
@@ -121,7 +121,7 @@ private fun NotificationRowCard(
             fontSize = 16.sp
         )
     },
-    sideContent: (@Composable () -> Unit)?,
+    sideContent: (@Composable ColumnScope.() -> Unit)?,
 ) {
     UserInfoRowCard(
         userInfo = notification.userInfo,

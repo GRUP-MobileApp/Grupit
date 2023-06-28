@@ -1,5 +1,7 @@
 import SwiftUI
 import GoogleSignIn
+import FirebaseCore
+import FirebaseAuth
 import shared
 
 @main
@@ -27,13 +29,33 @@ struct iOSApp: App {
                     GIDSignIn.sharedInstance.signIn(
                         withPresenting: rootViewController
                     ) { signInResult, error in
-                        if let googleToken = signInResult?.user.idToken?.tokenString {
-                            signInCallback(googleToken)
+                        guard error == nil else {
+                            // Handle error
+                        }
+                        guard let user = signInResult?.user,
+                            let idToken = user.idToken?.tokenString
+                        else {
+                            // Handle null user
+                        }
+                        let credential = GoogleAuthProvider.credential(
+                            withIDToken: idToken,
+                            accessToken: user.accessToken.tokenString
+                        )
+                        Auth.auth().signIn(with: credential) { result, error in
+                            signInCallback(user.accessToken.tokenString)
                         }
                     }
                 }
             },
-            signOutClosure: { GIDSignIn.sharedInstance.signOut() },
+            signOutClosure: {
+                GIDSignIn.sharedInstance.signOut()
+                do {
+                    try Auth.auth().signOut()
+                } catch let signOutError as NSError {
+                    print("Error signing out: %@", signOutError)
+                }
+                
+            },
             disconnectClosure: { GIDSignIn.sharedInstance.disconnect() }
         )
         

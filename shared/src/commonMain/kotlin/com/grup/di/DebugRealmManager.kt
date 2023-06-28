@@ -62,6 +62,7 @@ internal class DebugRealmManager private constructor(): RealmManager() {
     }
 
     override suspend fun close() {
+        super.close()
         unloadKoinModules(debugAppModules)
         app.currentUser?.logOut()
     }

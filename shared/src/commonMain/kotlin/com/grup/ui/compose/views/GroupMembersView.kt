@@ -102,12 +102,7 @@ private fun GroupMembersLayout(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = {
-                        H1Text(
-                            text = "Members",
-                            color = AppTheme.colors.onSecondary
-                        )
-                    },
+                    title = { },
                     backgroundColor = AppTheme.colors.primary,
                     navigationIcon = {
                         IconButton(
@@ -127,37 +122,39 @@ private fun GroupMembersLayout(
                     }
                 )
             },
-            backgroundColor = AppTheme.colors.primary
+            backgroundColor = AppTheme.colors.primary,
         ) { padding ->
-            Box(
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(AppTheme.shapes.large)
                     .padding(padding)
+                    .padding(AppTheme.dimensions.appPadding)
+                    .clip(AppTheme.shapes.large)
                     .background(AppTheme.colors.secondary)
+                    .padding(AppTheme.dimensions.cardPadding)
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(AppTheme.dimensions.paddingMedium)
-                ) {
-                    UsernameSearchBar(
-                        usernameSearchQuery = usernameSearchQuery,
-                        onQueryChange = { username ->
-                            usernameSearchQuery = username
-                            groupMembersViewModel.resetInviteResult()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .padding(top = AppTheme.dimensions.paddingMedium)
-                    )
-                    UsersList(
-                        userInfos = userInfos.filter { userInfo ->
-                            userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
-                        },
-                        userInfoOnClick = { userInfoOnClick(it) }
-                    )
-                }
+                H1Text(
+                    text = "Members",
+                    color = AppTheme.colors.onSecondary,
+                    modifier = Modifier.fillMaxWidth(0.95f)
+                )
+                UsernameSearchBar(
+                    usernameSearchQuery = usernameSearchQuery,
+                    onQueryChange = { username ->
+                        usernameSearchQuery = username
+                        groupMembersViewModel.resetInviteResult()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                )
+                UsersList(
+                    userInfos = userInfos.filter { userInfo ->
+                        userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
+                    },
+                    userInfoOnClick = { userInfoOnClick(it) }
+                )
             }
         }
     }
@@ -169,14 +166,13 @@ private fun UsersList(
     userInfoOnClick: (UserInfo) -> Unit
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
         itemsIndexed(userInfos) { _, userInfo ->
             UserInfoRowCard(
                 userInfo = userInfo,
-                iconSize = 70.dp,
                 modifier = Modifier.clickable { userInfoOnClick(userInfo) }
             )
         }

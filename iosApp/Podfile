@@ -6,6 +6,7 @@ target 'iosApp' do
   # Google sign in
   pod 'GoogleSignIn'
   pod 'GoogleSignInSwiftSupport'
+  pod 'FirebaseAuth'
 end
 
 post_install do |installer|

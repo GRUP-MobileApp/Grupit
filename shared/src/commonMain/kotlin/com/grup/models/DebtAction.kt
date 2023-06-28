@@ -20,6 +20,6 @@ class DebtAction internal constructor(): Action(), RealmObject {
             ?: throw MissingFieldException("DebtAction with id $_id missing debteeUserInfo")
     override var transactionRecords: RealmList<TransactionRecord> = realmListOf()
 
-    var message: String = ""
+    var message: String? = null
         internal set
 }

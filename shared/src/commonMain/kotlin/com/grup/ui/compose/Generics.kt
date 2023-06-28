@@ -27,8 +27,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.*
 import com.grup.ui.apptheme.AppTheme
-import com.grup.models.DebtAction
-import com.grup.models.SettleAction
 import com.grup.models.UserInfo
 import com.grup.platform.signin.GoogleSignInManager
 import com.grup.ui.models.TransactionActivity
@@ -79,13 +77,14 @@ internal fun H1Text(
 @Composable
 internal fun AutoSizingH1Text(
     modifier: Modifier = Modifier,
-    text: AnnotatedString,
+    textContent: @Composable (TextUnit) -> AnnotatedString,
     color: Color = AppTheme.colors.onSecondary,
-    fontSize: TextUnit = TextUnit.Unspecified,
+    fontSize: TextUnit,
     fontWeight: FontWeight? = null,
     maxLines: Int = 1
 ) {
     var textSize: TextUnit by remember { mutableStateOf(fontSize) }
+    val text: AnnotatedString = textContent(textSize)
     var textLength: Int by remember { mutableStateOf(text.length) }
 
     Text(
@@ -118,7 +117,7 @@ internal fun Caption(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onPrimary,
-    fontSize: TextUnit = TextUnit.Unspecified
+    fontSize: TextUnit = 14.sp
 ) {
     Text(
         text = text,
@@ -262,7 +261,7 @@ internal fun SimpleLazyListPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { H1Text(text = pageName, color = AppTheme.colors.onSecondary) },
+                title = { },
                 backgroundColor = AppTheme.colors.primary,
                 navigationIcon = {
                     IconButton(onClick = onBackPress) {
@@ -283,9 +282,17 @@ internal fun SimpleLazyListPage(
             contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            content = content
-        )
+                .padding(padding)
+        ) {
+            item {
+                H1Text(
+                    text = pageName,
+                    color = AppTheme.colors.onSecondary,
+                    modifier = Modifier.fillMaxWidth(0.95f)
+                )
+            }
+            content()
+        }
     }
 }
 
@@ -303,14 +310,11 @@ internal fun IconRowCard(
         modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .padding(end = AppTheme.dimensions.paddingSmall)
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.rowCardPadding),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(end = AppTheme.dimensions.spacing)
-                .weight(1f, false)
+            modifier = Modifier.weight(1f, false)
         ) {
             ProfileIcon(
                 painter = painter,
@@ -329,9 +333,9 @@ internal fun UserInfoRowCard(
     modifier: Modifier = Modifier,
     userInfo: UserInfo,
     mainContent: @Composable ColumnScope.() -> Unit = {
-        H1Text(text = userInfo.nickname!!)
+        H1Text(text = userInfo.nickname!!, fontSize = 24.sp)
     },
-    sideContent: (@Composable () -> Unit)? = {
+    sideContent: (@Composable ColumnScope.() -> Unit)? = {
         MoneyAmount(
             moneyAmount = userInfo.userBalance,
             fontSize = 24.sp,
@@ -344,14 +348,23 @@ internal fun UserInfoRowCard(
         painter = pfpPainter,
         mainContent = {
             Column(
-                verticalArrangement = Arrangement.Top,
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier.fillMaxHeight()
             ) {
                 mainContent()
             }
         },
-        sideContent = sideContent,
+        sideContent = sideContent?.let { content ->
+            {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    content()
+                }
+            }
+        },
         iconSize = iconSize,
         modifier = modifier
     )
@@ -366,14 +379,23 @@ internal fun TransactionActivityRowCard(
         userInfo = transactionActivity.userInfo,
         mainContent = {
             Caption(
-                text = when(transactionActivity.action) {
-                    is DebtAction -> "Request"
-                    is SettleAction -> "Settle"
-                }
+                text =
+                "${transactionActivity.activityName} at ${isoTime(transactionActivity.date)}"
             )
-            H1Text(text = transactionActivity.displayText(), fontSize = 18.sp)
+            H1Text(text = transactionActivity.userInfo.nickname!!, fontSize = 18.sp)
+            H1Text(
+                text = transactionActivity.displayText(),
+                fontSize = 16.sp,
+            )
         },
-        sideContent = { },
+        sideContent = {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                MoneyAmount(moneyAmount = transactionActivity.amount, fontSize = 20.sp)
+            }
+        },
         modifier = modifier.height(70.dp)
     )
 }
@@ -389,24 +411,32 @@ internal fun MoneyAmount(
         modifier = modifier
             .height(IntrinsicSize.Min)
     ) {
-        H1Text(
-            text = buildAnnotatedString {
-                withStyle(SpanStyle(fontSize = fontSize)) {
-                    withStyle(
-                        SpanStyle(
-                            fontSize = fontSize.times(0.5f),
-                            baselineShift = BaselineShift(0.4f)
-                        )
-                    ) {
-                        append(
-                            moneyAmount
-                                .asMoneyAmount()
-                                .substring(0, if (moneyAmount >= 0) 1 else 2)
-                        )
+        AutoSizingH1Text(
+            textContent = { fontSize ->
+                buildAnnotatedString {
+                    withStyle(SpanStyle(fontSize = fontSize)) {
+                        withStyle(
+                            SpanStyle(
+                                fontSize = fontSize.times(0.5f),
+                                baselineShift = BaselineShift(0.4f)
+                            )
+                        ) {
+                            append(
+                                moneyAmount
+                                    .asMoneyAmount()
+                                    .substring(0, if (moneyAmount >= 0) 1 else 2)
+                            )
+                        }
+                        withStyle(SpanStyle(fontSize = fontSize)) {
+                            append(
+                                moneyAmount.asMoneyAmount()
+                                    .substring(if (moneyAmount >= 0) 1 else 2)
+                            )
+                        }
                     }
-                    append(moneyAmount.asMoneyAmount().substring(if (moneyAmount >= 0) 1 else 2))
                 }
-            }
+            },
+            fontSize = fontSize
         )
     }
 }
