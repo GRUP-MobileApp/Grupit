@@ -749,7 +749,9 @@ private fun DebtActionDetails(
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
+                modifier = Modifier
+                    .padding(vertical = AppTheme.dimensions.cardPadding)
+                    .padding(horizontal = AppTheme.dimensions.rowCardPadding)
             ) {
                 items(debtAction.transactionRecords) { transactionRecord ->
                     TransactionRecordRowCard(transactionRecord = transactionRecord)
@@ -875,7 +877,9 @@ private fun SettleActionDetails(
             ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                    modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
+                    modifier = Modifier
+                        .padding(vertical = AppTheme.dimensions.cardPadding)
+                        .padding(horizontal = AppTheme.dimensions.rowCardPadding)
                 ) {
                     when (tabTitles[selectedTabIndex]) {
                         "Accepted" -> {
@@ -920,10 +924,7 @@ private fun SettleActionDetails(
                 enabled = !isMyAction &&
                         myUserInfo.userBalance < 0 &&
                         settleAction.remainingAmount > 0,
-                modifier = Modifier.padding(
-                    top = AppTheme.dimensions.cardPadding,
-                    bottom = AppTheme.dimensions.cardPadding
-                )
+                modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
             )
         }
     }

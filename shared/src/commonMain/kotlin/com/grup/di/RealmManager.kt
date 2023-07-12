@@ -30,6 +30,8 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import kotlin.jvm.JvmStatic
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 abstract class RealmManager : DBManager, KoinComponent {
     protected val realm: Realm by inject()
@@ -66,6 +68,7 @@ abstract class RealmManager : DBManager, KoinComponent {
     }
 
     companion object {
+        @ExperimentalTime
         @JvmStatic
         protected suspend fun openRealm(realmUser: io.realm.kotlin.mongodb.User) {
             Realm.open(
@@ -89,11 +92,10 @@ abstract class RealmManager : DBManager, KoinComponent {
                             "IncomingGroupInvites"
                         )
                     }
-                    .waitForInitialRemoteData()
                     .name("syncedRealm")
                     .build()
             ).also { realm ->
-                realm.syncSession.downloadAllServerChanges()
+                realm.syncSession.downloadAllServerChanges(5.seconds)
                 loadKoinModules(
                     module {
                         single { realm }

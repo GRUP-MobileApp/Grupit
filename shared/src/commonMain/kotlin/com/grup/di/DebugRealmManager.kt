@@ -2,7 +2,6 @@ package com.grup.di
 
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
-import com.grup.exceptions.login.NotLoggedInException
 import com.grup.other.TEST_APP_ID
 import com.grup.interfaces.DBManager
 import com.grup.platform.signin.AuthManager
@@ -13,7 +12,6 @@ import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
-import org.koin.dsl.module
 
 internal class DebugRealmManager private constructor(): RealmManager() {
     override val authProvider: AuthManager.AuthProvider
@@ -48,7 +46,7 @@ internal class DebugRealmManager private constructor(): RealmManager() {
         }
 
         private suspend fun loginRealmManager(credentials: Credentials): DBManager {
-            app.login(credentials).let {  realmUser ->
+            app.login(credentials).let { realmUser ->
                 openRealm(realmUser)
                 Notifications.subscribePersonalNotifications(realmUser.id)
             }

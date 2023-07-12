@@ -94,7 +94,6 @@ private fun GroupMembersLayout(
                     content()
                 }
             } ?: content()
-
         }
     }
 
@@ -194,8 +193,7 @@ private fun GroupMemberInfoBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.5f)
-                    .padding(top = AppTheme.dimensions.appPadding)
-                    .padding(horizontal = AppTheme.dimensions.appPadding)
+                    .padding(AppTheme.dimensions.appPadding)
             ) {
                 UserInfoRowCard(
                     userInfo = selectedUserInfo,

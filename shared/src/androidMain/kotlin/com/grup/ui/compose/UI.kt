@@ -44,3 +44,6 @@ internal actual fun profilePicturePainter(uri: String): Painter {
 @Composable
 internal actual fun <T> StateFlow<T>.collectAsStateWithLifecycle(): State<T> =
     this.collectAsStateWithLifecycle()
+
+internal actual fun String.parseMoneyAmount(): Double? =
+    NumberFormat.getInstance().parse(this)?.toDouble()

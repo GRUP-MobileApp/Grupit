@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -15,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
@@ -88,7 +92,6 @@ internal fun AutoSizingH1Text(
     var textLength: Int by remember { mutableStateOf(text.length) }
 
     Text(
-        modifier = modifier,
         text = text,
         color = color,
         style = AppTheme.typography.h1,
@@ -108,7 +111,8 @@ internal fun AutoSizingH1Text(
                 }
             }
             textLength = text.length
-        }
+        },
+        modifier = modifier
     )
 }
 
@@ -124,7 +128,8 @@ internal fun Caption(
         modifier = modifier,
         color = color,
         style = AppTheme.typography.smallFont,
-        fontSize = fontSize
+        fontSize = fontSize,
+        maxLines = 1
     )
 }
 
@@ -404,7 +409,8 @@ internal fun TransactionActivityRowCard(
 internal fun MoneyAmount(
     modifier: Modifier = Modifier,
     moneyAmount: Double,
-    fontSize: TextUnit = 30.sp
+    fontSize: TextUnit = 30.sp,
+    moneyAmountTextColor: Color = Color.Unspecified
 ) {
     Row(
         verticalAlignment = Alignment.Top,
@@ -414,30 +420,226 @@ internal fun MoneyAmount(
         AutoSizingH1Text(
             textContent = { fontSize ->
                 buildAnnotatedString {
-                    withStyle(SpanStyle(fontSize = fontSize)) {
+                    moneyAmount.asCurrencySymbolAndMoneyAmount().let { (symbol, moneyAmount) ->
                         withStyle(
                             SpanStyle(
                                 fontSize = fontSize.times(0.5f),
                                 baselineShift = BaselineShift(0.4f)
                             )
                         ) {
-                            append(
-                                moneyAmount
-                                    .asMoneyAmount()
-                                    .substring(0, if (moneyAmount >= 0) 1 else 2)
-                            )
+                            append(symbol)
                         }
-                        withStyle(SpanStyle(fontSize = fontSize)) {
-                            append(
-                                moneyAmount.asMoneyAmount()
-                                    .substring(if (moneyAmount >= 0) 1 else 2)
+                        withStyle(
+                            SpanStyle(
+                                fontSize = fontSize,
+                                color = moneyAmountTextColor
                             )
+                        ) {
+                            append(moneyAmount)
                         }
                     }
                 }
             },
             fontSize = fontSize
         )
+    }
+}
+
+@Composable
+internal fun KeyPadScreenLayout(
+    moneyAmount: String,
+    moneyAmountFontSize: TextUnit = 98.sp,
+    onMoneyAmountChange: (String) -> Unit,
+    message: String? = null,
+    onMessageChange: ((String) -> Unit)? = null,
+    confirmButton: @Composable () -> Unit,
+    onBackPress: () -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                backgroundColor = AppTheme.colors.primary,
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackPress
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = AppTheme.colors.onSecondary
+                        )
+                    }
+                }
+            )
+        },
+        backgroundColor = AppTheme.colors.primary
+    ) { padding ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(AppTheme.dimensions.appPadding)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.SpaceAround,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                KeyPadMoneyAmount(moneyAmount = moneyAmount, fontSize = moneyAmountFontSize)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(65.dp)
+                        .padding(horizontal = AppTheme.dimensions.paddingSmall)
+                ) {
+                    message?.let { message ->
+                        TransparentTextField(
+                            value = message,
+                            placeholder = "What is this for?",
+                            onValueChange = {
+                                onMessageChange!!(it.take(50))
+                            },
+                            fontSize = 24.sp
+                        )
+                    }
+                }
+            }
+            KeyPad(
+                modifier = Modifier.padding(top = AppTheme.dimensions.spacing),
+                moneyAmount = moneyAmount,
+                onMoneyAmountChange = onMoneyAmountChange
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, bottom = AppTheme.dimensions.cardPadding)
+            ) {
+                confirmButton()
+            }
+        }
+    }
+}
+
+@Composable
+internal fun KeyPadMoneyAmount(
+    moneyAmount: String,
+    fontSize: TextUnit
+) {
+    AutoSizingH1Text(
+        textContent = { moneyAmountFontSize ->
+            buildAnnotatedString {
+                withStyle(SpanStyle(color = AppTheme.colors.onSecondary)) {
+                    withStyle(
+                        SpanStyle(
+                            fontSize = moneyAmountFontSize.times(0.5f),
+                            baselineShift = BaselineShift(0.4f)
+                        )
+                    ) {
+                        append(getCurrencySymbol())
+                    }
+                    withStyle(SpanStyle(fontSize = moneyAmountFontSize)) {
+                        append(moneyAmount)
+                    }
+                }
+                moneyAmount.indexOf('.').let { index ->
+                    if (index != -1) {
+                        withStyle(
+                            SpanStyle(
+                                color = AppTheme.colors.caption,
+                                fontSize = moneyAmountFontSize
+                            )
+                        ) {
+                            repeat(2 - (moneyAmount.length - (index + 1))) {
+                                append('0')
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        fontSize = fontSize,
+    )
+}
+
+@Composable
+internal fun KeyPad(
+    modifier: Modifier = Modifier,
+    moneyAmount: String,
+    onMoneyAmountChange: (String) -> Unit
+) {
+    val keys: List<List<Char>> = listOf(
+        listOf('1', '2', '3'),
+        listOf('4', '5', '6'),
+        listOf('7', '8', '9'),
+        listOf('.', '0', '<')
+    )
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .fillMaxHeight(0.4f)
+            .fillMaxWidth()
+    ) {
+        keys.forEach { row ->
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                row.forEach { key ->
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(50.dp)
+                            .background(AppTheme.colors.primary)
+                            .clickable {
+                                when(key) {
+                                    '.' -> {
+                                        if (!moneyAmount.contains('.')) {
+                                            onMoneyAmountChange(moneyAmount + key)
+                                        }
+                                    }
+                                    '<' -> {
+                                        onMoneyAmountChange(
+                                            if (moneyAmount.length > 1) {
+                                                moneyAmount.substring(0, moneyAmount.length - 1)
+                                            } else {
+                                                "0"
+                                            }
+                                        )
+                                    }
+                                    else -> {
+                                        if (key.isDigit() &&
+                                            (moneyAmount.length < 3 ||
+                                                    moneyAmount[moneyAmount.length - 3] != '.')) {
+                                            onMoneyAmountChange(
+                                                if (moneyAmount == "0") {
+                                                    key.toString()
+                                                } else {
+                                                    moneyAmount + key
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                    ) {
+                        H1Text(
+                            text = key.toString(),
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Black,
+                            color = AppTheme.colors.onSecondary
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -619,34 +821,54 @@ internal fun UsernameSearchBar(
 internal fun TransparentTextField(
     modifier: Modifier = Modifier,
     value: String,
+    placeholder: String = "",
+    onValueChange: (String) -> Unit,
     fontSize: TextUnit = TextUnit.Unspecified,
     textColor: Color = AppTheme.colors.onSecondary,
-    onValueChange: (String) -> Unit
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        textStyle = TextStyle(color = textColor, fontSize = fontSize),
-        singleLine = true,
-        decorationBox = { innerTextField ->
-            TextFieldDefaults.TextFieldDecorationBox(
-                value = value,
-                innerTextField = innerTextField,
-                enabled = true,
-                singleLine = true,
-                visualTransformation = VisualTransformation.None,
-                interactionSource  = remember { MutableInteractionSource() }
+    var isFocused: Boolean by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        if(value.isBlank() && placeholder.isNotBlank() && !isFocused) {
+            Caption(
+                text = placeholder,
+                fontSize = fontSize,
+                modifier = Modifier.clickable { focusRequester.requestFocus() }
             )
-        },
-        modifier = modifier.width(IntrinsicSize.Min)
-    )
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = TextStyle(color = textColor, fontSize = fontSize),
+            singleLine = true,
+            decorationBox = { innerTextField ->
+                TextFieldDefaults.TextFieldDecorationBox(
+                    value = value,
+                    innerTextField = innerTextField,
+                    enabled = true,
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource  = remember { MutableInteractionSource() }
+                )
+            },
+            keyboardOptions = keyboardOptions,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .focusRequester(focusRequester)
+                .onFocusChanged { isFocused = it.isFocused }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun BackPressModalBottomSheetLayout(
     sheetContent: @Composable ColumnScope.() -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxSize(),
     sheetState: ModalBottomSheetState,
     sheetShape: Shape = MaterialTheme.shapes.large,
     sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,

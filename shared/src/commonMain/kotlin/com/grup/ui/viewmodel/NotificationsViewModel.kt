@@ -80,10 +80,10 @@ internal class NotificationsViewModel : LoggedInViewModel() {
                 notification.groupId
             }
         }.combine(latestDatesFlow) { notifications, lastViewDates ->
-            notificationsCount.value = notifications.map { groupEntry ->
-                groupEntry.key to groupEntry.value.count { notification ->
+            notificationsCount.value = notifications.map { (groupId, groupNotifications) ->
+                groupId to groupNotifications.count { notification ->
                     !notification.dismissible ||
-                    lastViewDates[groupEntry.key]?.let { lastViewDate ->
+                    lastViewDates[groupId]?.let { lastViewDate ->
                         notification.date > lastViewDate
                     } ?: true
                 }

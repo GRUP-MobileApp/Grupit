@@ -12,13 +12,28 @@ internal expect fun getCurrencySymbol(): String
 
 internal expect fun Double.asMoneyAmount(): String
 
+internal fun Double.asCurrencySymbolAndMoneyAmount(): Pair<String, String> =
+    (if (this >= 0) 1 else 2).let { moneyAmountIndex ->
+        Pair(
+            this.asMoneyAmount().substring(0, moneyAmountIndex),
+            this.asMoneyAmount().substring(moneyAmountIndex)
+        )
+    }
+
+internal fun Double.asPureMoneyAmount(): String =
+    this.asCurrencySymbolAndMoneyAmount().second
+
+internal expect fun String.parseMoneyAmount(): Double?
+
+// Date
+
 fun isoDate(date: String) = LocalDateTime.parse(date).date.let {  localDate ->
     "${localDate.monthNumber}-${localDate.dayOfMonth}"
 }
 fun isoFullDate(date: String) = "${isoDate(date)}-${LocalDateTime.parse(date).year}"
 
 fun isoTime(date: String) = LocalDateTime.parse(date).time.let { localTime ->
-    localTime.hour.let {  hour ->
+    localTime.hour.let { hour ->
         "${hour % 12}:${localTime.minute} " +
                 if (hour / 12 > 0) "AM" else "PM"
     }
