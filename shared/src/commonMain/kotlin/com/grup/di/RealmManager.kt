@@ -68,7 +68,6 @@ abstract class RealmManager : DBManager, KoinComponent {
     }
 
     companion object {
-        @ExperimentalTime
         @JvmStatic
         protected suspend fun openRealm(realmUser: io.realm.kotlin.mongodb.User) {
             Realm.open(

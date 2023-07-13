@@ -2,7 +2,6 @@ package com.grup.ui.models
 
 import com.grup.exceptions.PendingTransactionRecordException
 import com.grup.models.*
-import com.grup.ui.compose.asMoneyAmount
 
 internal sealed class TransactionActivity {
     abstract val action: Action
@@ -41,7 +40,7 @@ internal sealed class TransactionActivity {
         override val amount: Double
             get() = settleAction.totalAmount
         override val activityName: String
-            get() = "New Settle"
+            get() = "Completed Settle"
 
         override fun displayText() = "created a new settlement"
     }
