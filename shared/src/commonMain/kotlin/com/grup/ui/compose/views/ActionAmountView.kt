@@ -37,7 +37,6 @@ internal class ActionAmountScreen(
             )
         }
     }
-
 }
 
 @Composable

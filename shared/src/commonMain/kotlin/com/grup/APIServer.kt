@@ -19,6 +19,8 @@ class APIServer private constructor(
     private val debtActionController: DebtActionController = DebtActionController()
     private val settleActionController: SettleActionController = SettleActionController()
 
+    private val accountSettingsController: AccountSettingsController = AccountSettingsController()
+
     // User
     val user: User
         get() = userController.getMyUser()
@@ -81,6 +83,14 @@ class APIServer private constructor(
     ) = settleActionController.rejectSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() =
         settleActionController.getAllSettleActionsAsFlow()
+
+    // Account Settings
+    fun getGroupNotificationNewSettleRequests() =
+        accountSettingsController.getGroupNotificationNewSettleRequests()
+
+    fun toggleGroupNotificationNewSettleRequests() =
+        accountSettingsController.toggleGroupNotificationNewSettleRequests()
+
 
     companion object Login {
         @Throws(LoginException::class, CancellationException::class)

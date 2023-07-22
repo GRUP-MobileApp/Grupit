@@ -4,12 +4,11 @@ import com.grup.exceptions.login.InvalidGoogleAccountException
 import com.grup.interfaces.DBManager
 import com.grup.other.APP_ID
 import com.grup.platform.signin.AuthManager
-import com.grup.service.Notifications
+import com.grup.service.NotificationsService
 import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.AuthException
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
-import kotlin.time.ExperimentalTime
 
 internal class ReleaseRealmManager private constructor() : RealmManager() {
     override val authProvider: AuthManager.AuthProvider
@@ -37,7 +36,7 @@ internal class ReleaseRealmManager private constructor() : RealmManager() {
         private suspend fun loginRealmManager(credentials: Credentials): DBManager {
             app.login(credentials).let { realmUser ->
                 openRealm(realmUser)
-                Notifications.subscribePersonalNotifications(realmUser.id)
+                NotificationsService.subscribePersonalNotifications(realmUser.id)
             }
             return ReleaseRealmManager()
         }

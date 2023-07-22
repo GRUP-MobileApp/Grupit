@@ -174,7 +174,11 @@ private fun DebtActionLayout(
                         SelectedDebtorsList(
                             splitStrategyDebtAmounts = splitStrategyDebtAmounts,
                             userHasSetDebtAmount = { userInfo ->
-                                rawSplitStrategyDebtAmounts[userInfo] != null
+                                if (!splitStrategy.editable) {
+                                    true
+                                } else {
+                                    rawSplitStrategyDebtAmounts[userInfo] != null
+                                }
                             },
                             debtAmountOnClick = { userInfo, debtAmount ->
                                 if (splitStrategy.editable) {
@@ -249,7 +253,18 @@ private fun DebtActionSettings(
                     .clip(AppTheme.shapes.medium)
                     .background(AppTheme.colors.primary)
                     .clickable {
-                        onSplitStrategyChange(TransactionViewModel.SplitStrategy.UnevenSplit)
+                        // TODO: Make actual split strategy selection screen
+                        when(splitStrategy) {
+                            is TransactionViewModel.SplitStrategy.EvenSplit -> {
+                                onSplitStrategyChange(
+                                    TransactionViewModel.SplitStrategy.UnevenSplit
+                                )
+                            }
+                            is TransactionViewModel.SplitStrategy.UnevenSplit -> {
+                                onSplitStrategyChange(TransactionViewModel.SplitStrategy.EvenSplit)
+                            }
+                            else -> {}
+                        }
                     }
                     .padding(AppTheme.dimensions.spacingSmall)
             ) {

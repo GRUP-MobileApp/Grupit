@@ -1,6 +1,6 @@
 package com.grup.service
 
-internal actual object Notifications {
+internal actual object NotificationsService {
     actual fun subscribeGroupNotifications(groupId: String) {
     }
 

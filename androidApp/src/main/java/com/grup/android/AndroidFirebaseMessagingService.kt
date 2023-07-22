@@ -12,7 +12,9 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.grup.android.ui.MainActivity
-
+import com.grup.other.AccountSettings
+import com.grup.other.NotificationPermissions
+import com.grup.service.ViewableAccountSettingsService
 
 class AndroidFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
@@ -23,7 +25,16 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        sendNotification(message.notification!!, message.data)
+        val notificationType = message.data["type"]!!
+        if (
+            AccountSettings.Notifications.values().find {
+                it.type == notificationType
+            }?.let { notification ->
+                NotificationPermissions.isNotificationTypeToggled(notification)
+            } != false
+        ) {
+            sendNotification(message.notification!!, message.data)
+        }
     }
 
     private fun sendNotification(

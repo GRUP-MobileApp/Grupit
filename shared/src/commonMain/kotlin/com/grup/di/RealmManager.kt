@@ -11,7 +11,7 @@ import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.other.idSerialName
 import com.grup.platform.signin.AuthManager
-import com.grup.service.Notifications
+import com.grup.service.NotificationsService
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
@@ -31,7 +31,6 @@ import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import kotlin.jvm.JvmStatic
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 abstract class RealmManager : DBManager, KoinComponent {
     protected val realm: Realm by inject()
@@ -39,6 +38,7 @@ abstract class RealmManager : DBManager, KoinComponent {
     @OptIn(DelicateCoroutinesApi::class)
     protected val subscriptionsJob: Job = GlobalScope.launch {
         var prevSubscribedGroupIds: Set<String> = emptySet()
+        var prevSubscribedUserIds: Set<String> = emptySet()
         realm.subscriptions.findByName("UserInfos")?.asQuery<UserInfo>()!!.asFlow()
             .collect { resultsChange ->
                 val newGroupIds: Set<String> = resultsChange.list.map { it.groupId!! }.toSet()
@@ -53,17 +53,31 @@ abstract class RealmManager : DBManager, KoinComponent {
                             "${groupId}_DebtAction")
                         add(realm.query<SettleAction>("groupId == $0", groupId),
                             "${groupId}_SettleAction")
-                        Notifications.subscribeGroupNotifications(groupId)
+                        NotificationsService.subscribeGroupNotifications(groupId)
                     }
                     prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
                         remove("${groupId}_Group")
                         remove("${groupId}_UserInfo")
                         remove("${groupId}_DebtAction")
                         remove("${groupId}_SettleAction")
-                        Notifications.unsubscribeGroupNotifications(groupId)
+                        NotificationsService.unsubscribeGroupNotifications(groupId)
                     }
                 }
                 prevSubscribedGroupIds = newGroupIds
+
+//                TODO: Add User objects to UserInfo
+//                val newUserIds: Set<String> = resultsChange.list.map { it.userId!! }.toSet()
+//                realm.subscriptions.update {
+//                    newUserIds.minus(prevSubscribedUserIds).forEach { userId ->
+//                        add(realm.query<User>("$idSerialName == $0", userId),
+//                            "${userId}_User")
+//                    }
+//                    prevSubscribedGroupIds.minus(newGroupIds).forEach { userId ->
+//                        remove("${userId}_User")
+//                        NotificationsService.unsubscribeGroupNotifications(userId)
+//                    }
+//                }
+//                prevSubscribedUserIds = newUserIds
             }
     }
 
@@ -80,7 +94,7 @@ abstract class RealmManager : DBManager, KoinComponent {
                 )
                     .initialSubscriptions(rerunOnOpen = true) { realm ->
                         removeAll()
-                        add(realm.query<User>("$idSerialName == $0", realmUser.id), "User")
+                        add(realm.query<User>("$idSerialName == $0", realmUser.id), "MyUser")
                         add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
                         add(
                             realm.query<GroupInvite>("inviter == $0", realmUser.id),
@@ -111,7 +125,7 @@ abstract class RealmManager : DBManager, KoinComponent {
                 single { realm }
             }
         )
-        Notifications.unsubscribeAllNotifications()
+        NotificationsService.unsubscribeAllNotifications()
     }
 
     protected fun getAuthProvider(app: App): AuthManager.AuthProvider =

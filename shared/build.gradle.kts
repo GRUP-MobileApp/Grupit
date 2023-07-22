@@ -93,6 +93,10 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+
+                // Multiplatform Settings
+                implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
+                implementation("com.russhwolf:multiplatform-settings-coroutines:1.0.0")
             }
         }
         val commonTest by getting {
@@ -123,14 +127,11 @@ kotlin {
 
                 // Backend
 
-                // Datastore
-                implementation("androidx.datastore:datastore-preferences:1.0.0")
-
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
 
                 // Google Play Services
-                implementation ("com.google.android.gms:play-services-auth:20.5.0")
+                implementation ("com.google.android.gms:play-services-auth:20.6.0")
 
                 // AWS
                 implementation("aws.sdk.kotlin:s3:$awsVersion")

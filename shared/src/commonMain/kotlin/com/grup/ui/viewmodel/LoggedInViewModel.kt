@@ -21,7 +21,7 @@ internal abstract class LoggedInViewModel : KoinComponent, ScreenModel {
 
     protected val apiServer: APIServer by inject()
 
-    protected val userObject: User
+    protected open val userObject: User
         get() = apiServer.user
 
     protected suspend fun closeApiServer() {

@@ -2,6 +2,8 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.platform.image.cropCenterSquareImage
+import com.grup.ui.compose.validateName
+import com.grup.ui.compose.validateUsername
 import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,57 +33,46 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     fun checkUsername(username: String) {
         _usernameValidity.value = NameValidity.Pending
         currentJob?.cancel()
-        if (username.isEmpty()) {
-            _usernameValidity.value = NameValidity.None
-        } else if (!username.matches(Regex("^[a-zA-Z/d_.-]*$"))) {
-            _usernameValidity.value =
-                NameValidity.Invalid(
-                    "Only alphanumeric characters, \".\", \"-\", and \"_\" are " +
-                            "allowed"
-                )
-        } else if (username.length > 12) {
-            _usernameValidity.value =
-                NameValidity.Invalid(
-                    "Max 12 characters"
-                )
-        } else if (username.length < 5) {
-            _usernameValidity.value =
-                NameValidity.Invalid("Username must be at least 5 characters")
-        } else {
-            currentJob = coroutineScope.launch {
-                if (!apiServer.validUsername(username)) {
-                    _usernameValidity.value = NameValidity.Invalid("Username taken")
-                } else {
-                    _usernameValidity.value = NameValidity.Valid
+        validateUsername(
+            username = username,
+            onValid = {
+                currentJob = coroutineScope.launch {
+                    if (!apiServer.validUsername(username)) {
+                        _usernameValidity.value = NameValidity.Invalid("Username taken")
+                    } else {
+                        _usernameValidity.value = NameValidity.Valid
+                    }
                 }
+            },
+            onError = { error ->
+                _usernameValidity.value = NameValidity.Invalid(error)
             }
-        }
+        )
     }
 
     fun checkFirstNameValidity(firstName: String) {
         _firstNameValidity.value = NameValidity.Pending
-        if (firstName.isEmpty()) {
-            _firstNameValidity.value = NameValidity.None
-        } else if (firstName.length > 12) {
-            _usernameValidity.value =
-                NameValidity.Invalid(
-                    "Max 12 characters"
-                )
-        } else if (!firstName.matches(Regex("^[a-zA-Z]*$"))) {
-            _firstNameValidity.value = NameValidity.Invalid("Alphabetic characters only")
-        } else {
-            _firstNameValidity.value = NameValidity.Valid
-        }
+        validateName(
+            name = firstName,
+            onValid = {
+                _firstNameValidity.value = NameValidity.Valid
+            },
+            onError = { error ->
+                _firstNameValidity.value = NameValidity.Invalid(error)
+            }
+        )
     }
     fun checkLastNameValidity(lastName: String) {
         _lastNameValidity.value = NameValidity.Pending
-        if (lastName.isEmpty()) {
-            _lastNameValidity.value = NameValidity.None
-        } else if (!lastName.matches(Regex("^[a-zA-Z]*$"))) {
-            _lastNameValidity.value = NameValidity.Invalid("Alphabetic characters only")
-        } else {
-            _lastNameValidity.value = NameValidity.Valid
-        }
+        validateName(
+            name = lastName,
+            onValid = {
+                _lastNameValidity.value = NameValidity.Valid
+            },
+            onError = { error ->
+                _lastNameValidity.value = NameValidity.Invalid(error)
+            }
+        )
     }
 
     fun registerUserObject(

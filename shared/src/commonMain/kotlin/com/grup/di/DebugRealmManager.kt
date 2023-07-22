@@ -5,7 +5,7 @@ import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.other.TEST_APP_ID
 import com.grup.interfaces.DBManager
 import com.grup.platform.signin.AuthManager
-import com.grup.service.Notifications
+import com.grup.service.NotificationsService
 import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
@@ -48,7 +48,7 @@ internal class DebugRealmManager private constructor(): RealmManager() {
         private suspend fun loginRealmManager(credentials: Credentials): DBManager {
             app.login(credentials).let { realmUser ->
                 openRealm(realmUser)
-                Notifications.subscribePersonalNotifications(realmUser.id)
+                NotificationsService.subscribePersonalNotifications(realmUser.id)
             }
             return DebugRealmManager()
         }

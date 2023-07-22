@@ -17,7 +17,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.platform.signin.AuthManager
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.StartViewModel
 import com.grup.library.MR

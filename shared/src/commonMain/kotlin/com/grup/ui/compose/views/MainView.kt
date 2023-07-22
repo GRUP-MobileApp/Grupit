@@ -282,6 +282,9 @@ private fun MainLayout(
                             )
                         )
                     },
+                    navigateAccountSettingsOnClick = {
+                        navigator.push(AccountSettingsView())
+                    },
                     logOutOnClick = {
                         logOutAuthProviderOnClick()
                     }
@@ -365,6 +368,7 @@ private fun GroupNavigationMenu(
     notificationsAmount: Map<String, Int>,
     navigateGroupInvitesOnClick: () -> Unit,
     navigateCreateGroupOnClick: () -> Unit,
+    navigateAccountSettingsOnClick: () -> Unit,
     logOutOnClick: () -> Unit,
     background: Color = AppTheme.colors.primary
 ) {
@@ -431,11 +435,11 @@ private fun GroupNavigationMenu(
                         onClick = { navigateCreateGroupOnClick() }
                     ),
                     MenuItem(
-                        id = "settings",
-                        title = "Settings",
-                        contentDescription = "Open settings screen",
-                        icon = Icons.Default.Settings,
-                        onClick = { }
+                        id = "account",
+                        title = "Account",
+                        contentDescription = "Open account screen",
+                        icon = Icons.Default.AccountCircle,
+                        onClick = { navigateAccountSettingsOnClick() }
                     ),
                     MenuItem(
                         id = "logout",

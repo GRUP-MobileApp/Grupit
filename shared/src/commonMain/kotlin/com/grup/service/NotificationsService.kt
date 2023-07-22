@@ -1,6 +1,6 @@
 package com.grup.service
 
-internal expect object Notifications {
+internal expect object NotificationsService {
     fun subscribeGroupNotifications(groupId: String)
     fun unsubscribeGroupNotifications(groupId: String)
 

@@ -3,7 +3,8 @@ package com.grup.repositories.abstract
 import com.grup.interfaces.IUserRepository
 import com.grup.models.User
 import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
+import io.realm.kotlin.mongodb.subscriptions
+import io.realm.kotlin.mongodb.sync.asQuery
 
 internal abstract class RealmUserRepository : IUserRepository {
     protected abstract val realm: Realm
@@ -23,7 +24,7 @@ internal abstract class RealmUserRepository : IUserRepository {
     }
 
     override fun findMyUser(): User? {
-        return realm.query<User>().first().find()
+        return realm.subscriptions.findByName("MyUser")!!.asQuery<User>().first().find()
     }
 
     override suspend fun updateUser(user: User, block: User.() -> Unit) {

@@ -25,6 +25,9 @@ internal val servicesModule = module {
     single { GroupInviteService() }
     single { DebtActionService() }
     single { SettleActionService() }
+
+    single { AccountSettingsService(get()) }
+    single { ValidationService() }
 }
 
 internal val releaseRepositoriesModule = module {
@@ -36,6 +39,7 @@ internal val releaseRepositoriesModule = module {
     single<ISettleActionRepository> { SyncedSettleActionRepository() }
 
     single<IImagesRepository> { AWSImagesRepository() }
+    single<ISettingsDataStore> { SettingsDataStore() }
 }
 
 internal val debugRepositoriesModule = module {
@@ -47,6 +51,7 @@ internal val debugRepositoriesModule = module {
     single<ISettleActionRepository> { SyncedSettleActionRepository() }
 
     single<IImagesRepository> { AWSImagesRepository() }
+    single<ISettingsDataStore> { SettingsDataStore() }
 }
 
 internal val testRepositoriesModule = module {
@@ -56,17 +61,22 @@ internal val testRepositoriesModule = module {
     single<IGroupInviteRepository> { TestGroupInviteRepository() }
     single<IDebtActionRepository> { TestDebtActionRepository() }
     single<ISettleActionRepository> { TestSettleActionRepository() }
+
+    single<IImagesRepository> { AWSImagesRepository() }
+    single<ISettingsDataStore> { SettingsDataStore() }
 }
 
 internal val defaultAuthManager = module {
     single { AuthManager() }
 }
 
-internal val releaseAppModules =
-    listOf(servicesModule, releaseRepositoriesModule)
+internal val releaseAppModules = module {
+    includes(servicesModule, releaseRepositoriesModule)
+}
 
-internal val debugAppModules =
-    listOf(servicesModule, debugRepositoriesModule)
+internal val debugAppModules = module {
+    includes(servicesModule, debugRepositoriesModule)
+}
 
 expect fun initKoin()
 
