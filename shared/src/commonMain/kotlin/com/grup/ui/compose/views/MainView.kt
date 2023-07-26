@@ -275,8 +275,12 @@ private fun MainLayout(
                         navigator.push(
                             CreateGroupView(
                                 createGroupOnClick = { groupName ->
-                                    mainViewModel.onSelectedGroupChange(
-                                        mainViewModel.createGroup(groupName)
+                                    mainViewModel.createGroup(
+                                        groupName = groupName,
+                                        onSuccess = { group ->
+                                            mainViewModel.onSelectedGroupChange(group)
+                                        },
+                                        onFailure = { }
                                     )
                                 }
                             )
@@ -626,7 +630,7 @@ private fun ActiveSettleActions(
         ) {
             items(
                 activeSettleActions.sortedWith(
-                    compareBy<SettleAction> { settleAction ->
+                    compareByDescending<SettleAction> { settleAction ->
                         isMySettleAction(settleAction)
                     }.thenBy { settleAction ->
                         settleAction.date
@@ -683,8 +687,8 @@ private fun SettleActionCard(
                 .width(cardSize)
                 .height(cardSize)
                 .background(
-                    if (isMySettleAction) AppTheme.colors.secondary
-                    else AppTheme.colors.confirm
+                    if (isMySettleAction) AppTheme.colors.confirm
+                    else AppTheme.colors.secondary
                 )
                 .clickable(onClick = settleActionCardOnClick)
         ) {

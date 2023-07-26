@@ -73,7 +73,10 @@ private fun DebtActionLayout(
     message: String
 ) {
     val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val debtAmountBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val debtAmountBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
     val scope = rememberCoroutineScope()
 
     val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
@@ -407,7 +410,7 @@ private fun KeyPadBottomSheet(
         moneyAmount = if (initialMoneyAmount % 1 == 0.0)
             initialMoneyAmount.roundToInt().toString()
         else
-            ((initialMoneyAmount * 100).roundToInt() / 100.0).toString()
+            initialMoneyAmount.asPureMoneyAmount()
     }
 
     BackPressModalBottomSheetLayout(

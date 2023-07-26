@@ -96,8 +96,11 @@ private fun ActionAmountLayout(
                             text = actionType,
                             enabled = amount > 0,
                             onClick = {
-                                transactionViewModel.createSettleAction(amount)
-                                onBackPress()
+                                transactionViewModel.createSettleAction(
+                                    settleAmount = amount,
+                                    onSuccess = { onBackPress() },
+                                    onFailure = { }
+                                )
                             }
                         )
                     }

@@ -13,17 +13,19 @@ import org.koin.core.component.inject
 internal class SettleActionService : KoinComponent {
     private val settleActionRepository: ISettleActionRepository by inject()
 
-    fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
+    suspend fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
         if (debtee.userBalance < settleAmount) {
             throw NegativeBalanceException("SettleAction for $settleAmount results in negative " +
                     "balance")
         }
-        return settleActionRepository.createSettleAction(SettleAction().apply {
-            this.groupId = debtee.groupId
-            this.debteeUserInfo = debtee
-            this.settleAmount = settleAmount
-        }) ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
-                " ${debtee.groupId}")
+        return settleActionRepository.createSettleAction(
+            SettleAction().apply {
+                this.groupId = debtee.groupId
+                this.debteeUserInfo = debtee
+                this.settleAmount = settleAmount
+            }
+        ) ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
+                    " ${debtee.groupId}")
     }
 
     fun createSettleActionTransaction(

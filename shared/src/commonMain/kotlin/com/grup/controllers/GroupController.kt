@@ -11,7 +11,7 @@ internal class GroupController : KoinComponent {
     private val groupService: GroupService by inject()
     private val userInfoService: UserInfoService by inject()
 
-    fun createGroup(creator: User, groupName: String): Group {
+    suspend fun createGroup(creator: User, groupName: String): Group {
         val group = Group().apply {
             this.groupName = groupName
         }

@@ -1,6 +1,7 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.coroutineScope
+import com.grup.exceptions.APIException
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
@@ -145,8 +146,15 @@ internal class TransactionViewModel : LoggedInViewModel() {
     )
 
     // SettleAction
-    fun createSettleAction(settleAmount: Double) = coroutineScope.launch {
-        apiServer.createSettleAction(settleAmount, myUserInfo.value)
+    fun createSettleAction(
+        settleAmount: Double, onSuccess: (SettleAction) -> Unit, onFailure: (String?) -> Unit
+    ) = coroutineScope.launch {
+        try {
+            apiServer.createSettleAction(settleAmount, myUserInfo.value).let(onSuccess)
+        } catch (e: APIException) {
+            onFailure(e.message)
+        }
+
     }
 
     fun createSettleActionTransaction(

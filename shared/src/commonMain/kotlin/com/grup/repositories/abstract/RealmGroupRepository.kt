@@ -5,20 +5,16 @@ import com.grup.interfaces.IGroupRepository
 import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 internal abstract class RealmGroupRepository : IGroupRepository {
     protected abstract val realm: Realm
 
-    override fun createGroup(group: Group): Group? {
-        runBlocking {
-            realm.syncSession.downloadAllServerChanges()
-        }
-        return realm.writeBlocking {
+    override suspend fun createGroup(group: Group): Group? {
+        realm.syncSession.downloadAllServerChanges()
+        return realm.write {
             copyToRealm(group)
         }
     }
@@ -31,8 +27,8 @@ internal abstract class RealmGroupRepository : IGroupRepository {
         return realm.query<Group>().find().asFlow().map { it.list }
     }
 
-    override fun updateGroup(group: Group, block: Group.() -> Unit): Group? {
-        return realm.writeBlocking {
+    override suspend fun updateGroup(group: Group, block: Group.() -> Unit): Group? {
+        return realm.write {
             findLatest(group)!!.apply(block)
         }
     }

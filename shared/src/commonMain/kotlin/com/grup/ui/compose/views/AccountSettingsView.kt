@@ -4,18 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,10 +34,8 @@ import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.ProfileIcon
 import com.grup.ui.compose.SimpleLazyListPage
-import com.grup.ui.compose.UserInfoRowCard
 import com.grup.ui.compose.profilePicturePainter
 import com.grup.ui.viewmodel.AccountSettingsViewModel
-import org.koin.core.component.get
 
 class AccountSettingsView : Screen {
     @Composable
@@ -60,6 +59,17 @@ private fun AccountSettingsLayout(
     accountSettingsViewModel: AccountSettingsViewModel,
     navigator: Navigator
 ) {
+    val groupNotificationEntries: SnapshotStateMap<String, Boolean> = remember {
+        mutableStateMapOf<String, Boolean>().apply {
+            putAll(
+                AccountSettingsViewModel.groupNotificationEntries
+                    .mapValues { (_, notificationTypes) ->
+                        accountSettingsViewModel.getGroupNotificationType(*notificationTypes)
+                    }
+            )
+        }
+    }
+
     SimpleLazyListPage(
         pageName = "Account Settings",
         onBackPress = { navigator.pop() }
@@ -69,7 +79,14 @@ private fun AccountSettingsLayout(
         }
         item {
             SettingHeader(text = "Group Notifications")
-            NotificationSettings(accountSettingsViewModel = accountSettingsViewModel)
+            NotificationSettings(
+                groupNotificationEntries = groupNotificationEntries,
+                toggleGroupNotification = { notificationName ->
+                    accountSettingsViewModel.toggleGroupNotificationType(
+                        *AccountSettingsViewModel.groupNotificationEntries[notificationName]!!
+                    )
+                }
+            )
         }
     }
 }
@@ -117,12 +134,9 @@ private fun ProfileSettings(
 
 @Composable
 private fun NotificationSettings(
-    accountSettingsViewModel: AccountSettingsViewModel
+    groupNotificationEntries: Map<String, Boolean>,
+    toggleGroupNotification: (String) -> Unit
 ) {
-    var groupNotificationNewSettleRequests: Boolean by remember {
-        mutableStateOf(accountSettingsViewModel.getGroupNotificationNewSettleRequests())
-    }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -130,17 +144,20 @@ private fun NotificationSettings(
             .background(AppTheme.colors.secondary)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            modifier = Modifier.fillMaxWidth().padding(AppTheme.dimensions.cardPadding)
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppTheme.dimensions.cardPadding)
         ) {
-            SettingSlider(
-                text = "New group settle requests",
-                toggled = groupNotificationNewSettleRequests,
-                onToggle = {
-                    groupNotificationNewSettleRequests =
-                        accountSettingsViewModel.toggleGroupNotificationNewSettleRequests()
-                }
-            )
+            groupNotificationEntries.forEach { (notificationName, toggled) ->
+                SettingSlider(
+                    text = notificationName,
+                    toggled = toggled,
+                    onToggle = {
+                        toggleGroupNotification(notificationName)
+                    }
+                )
+            }
         }
     }
 }
@@ -149,7 +166,7 @@ private fun NotificationSettings(
 private fun SettingHeader(
     text: String,
     textSize: TextUnit = TextUnit.Unspecified,
-    modifier: Modifier = Modifier.padding(bottom = AppTheme.dimensions.paddingSmall)
+    modifier: Modifier = Modifier.padding(bottom = AppTheme.dimensions.paddingMedium)
 ) {
     Caption(text = text, fontSize = textSize, modifier = modifier.fillMaxWidth(0.95f))
 }
@@ -157,7 +174,7 @@ private fun SettingHeader(
 @Composable
 private fun SettingSlider(
     text: String,
-    textSize: TextUnit = 16.sp,
+    textSize: TextUnit = 18.sp,
     toggled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {

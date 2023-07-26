@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.map
 internal abstract class RealmSettleActionRepository : ISettleActionRepository {
     protected abstract val realm: Realm
 
-    override fun createSettleAction(settleAction: SettleAction): SettleAction? {
-        return realm.writeBlocking {
+    override suspend fun createSettleAction(settleAction: SettleAction): SettleAction? {
+        return realm.write {
             copyToRealm(getLatestFields(settleAction))
         }
     }

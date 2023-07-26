@@ -9,7 +9,7 @@ import org.koin.core.component.inject
 internal class GroupService : KoinComponent {
     private val groupRepository: IGroupRepository by inject()
 
-    fun createGroup(group: Group): Group {
+    suspend fun createGroup(group: Group): Group {
         return groupRepository.createGroup(group)
             ?: throw NotCreatedException("Error creating group ${group.groupName}")
     }

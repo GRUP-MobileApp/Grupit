@@ -175,11 +175,12 @@ private fun WelcomeLayout(
                     onClickBack = scrollBack,
                     registerOnClick = {
                         welcomeViewModel.registerUserObject(
-                            username,
-                            "$firstName $lastName".trim(),
-                            pfpBitmap
+                            username = username,
+                            displayName = "$firstName $lastName".trim(),
+                            profilePictureBitmap = pfpBitmap,
+                            onSuccess = { navigator.pop() },
+                            onFailure = { }
                         )
-                        navigator.pop()
                     }
                 )
 

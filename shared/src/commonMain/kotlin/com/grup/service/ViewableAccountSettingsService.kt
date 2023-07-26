@@ -2,14 +2,14 @@ package com.grup.service
 
 import com.grup.interfaces.ISettingsDataStore
 import com.grup.other.AccountSettings
-import com.grup.repositories.SettingsDataStore
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-open class ViewableAccountSettingsService internal constructor(
-    private val settingsDataStore: ISettingsDataStore = SettingsDataStore()
-) {
-    fun isNotificationTypeToggled(notification: AccountSettings.Notifications): Boolean {
+open class ViewableAccountSettingsService : KoinComponent {
+    private val settingsDataStore: ISettingsDataStore by inject()
+    fun isNotificationTypeToggled(notification: AccountSettings.GroupNotificationType): Boolean {
         return settingsDataStore.getBoolean(
             notification.type
-        ) ?: notification.defaultValue
+        ) ?: true
     }
 }

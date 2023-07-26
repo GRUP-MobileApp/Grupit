@@ -1,6 +1,8 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.coroutineScope
+import com.grup.exceptions.APIException
+import com.grup.models.User
 import com.grup.platform.image.cropCenterSquareImage
 import com.grup.ui.compose.validateName
 import com.grup.ui.compose.validateUsername
@@ -78,12 +80,18 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     fun registerUserObject(
         username: String,
         displayName: String,
-        profilePictureBitmap: Bitmap?
-    ) = runBlocking {
-        apiServer.registerUser(
-            username,
-            displayName,
-            profilePictureBitmap?.let { cropCenterSquareImage(it) }
-        )
+        profilePictureBitmap: Bitmap?,
+        onSuccess: (User) -> Unit,
+        onFailure: (String?) -> Unit
+    ) = coroutineScope.launch {
+        try {
+            apiServer.registerUser(
+                username,
+                displayName,
+                profilePictureBitmap?.let { cropCenterSquareImage(it) }
+            ).let(onSuccess)
+        } catch (e: APIException) {
+            onFailure(e.message)
+        }
     }
 }

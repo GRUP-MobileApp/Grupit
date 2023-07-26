@@ -1,6 +1,7 @@
 package com.grup.service
 
 import com.grup.exceptions.EmptyArgumentException
+import com.grup.exceptions.NotCreatedException
 import com.grup.interfaces.IImagesRepository
 import com.grup.models.User
 import com.grup.interfaces.IUserRepository
@@ -15,7 +16,7 @@ internal class UserService : KoinComponent {
         username: String,
         displayName: String,
         profilePicture: ByteArray?
-    ): User? {
+    ): User {
         return userRepository.createMyUser(username, displayName)?.also { user ->
             profilePicture?.let { pfpByteArray ->
                 imagesRepository.uploadProfilePicture(user, pfpByteArray).let { profilePictureURL ->
@@ -26,7 +27,7 @@ internal class UserService : KoinComponent {
                     }
                 }
             }
-        }
+        } ?: throw NotCreatedException("Error creating user object")
     }
 
     fun getMyUser(): User? {

@@ -38,7 +38,6 @@ abstract class RealmManager : DBManager, KoinComponent {
     @OptIn(DelicateCoroutinesApi::class)
     protected val subscriptionsJob: Job = GlobalScope.launch {
         var prevSubscribedGroupIds: Set<String> = emptySet()
-        var prevSubscribedUserIds: Set<String> = emptySet()
         realm.subscriptions.findByName("UserInfos")?.asQuery<UserInfo>()!!.asFlow()
             .collect { resultsChange ->
                 val newGroupIds: Set<String> = resultsChange.list.map { it.groupId!! }.toSet()
@@ -107,11 +106,12 @@ abstract class RealmManager : DBManager, KoinComponent {
                     }
                     .name("syncedRealm")
                     .build()
-            ).also { realm ->
-                realm.syncSession.downloadAllServerChanges(5.seconds)
+            ).apply {
+                syncSession.downloadAllServerChanges(5.seconds)
+                subscriptions.waitForSynchronization(5.seconds)
                 loadKoinModules(
                     module {
-                        single { realm }
+                        single { this@apply }
                     }
                 )
             }

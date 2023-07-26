@@ -23,8 +23,6 @@ internal fun Double.asCurrencySymbolAndMoneyAmount(): Pair<String, String> =
 internal fun Double.asPureMoneyAmount(): String =
     this.asCurrencySymbolAndMoneyAmount().second
 
-internal expect fun String.parseMoneyAmount(): Double?
-
 // Date
 
 fun isoDate(date: String) = LocalDateTime.parse(date).date.let {  localDate ->
@@ -34,8 +32,10 @@ fun isoFullDate(date: String) = "${isoDate(date)}-${LocalDateTime.parse(date).ye
 
 fun isoTime(date: String) = LocalDateTime.parse(date).time.let { localTime ->
     localTime.hour.let { hour ->
-        "${hour % 12}:${localTime.minute} " +
-                if (hour / 12 > 0) "AM" else "PM"
+        localTime.minute.let { minute ->
+            "${hour % 12}:${if (minute < 10) 0 else ""}${minute} " +
+                    if (hour / 12 > 0) "AM" else "PM"
+        }
     }
 }
 

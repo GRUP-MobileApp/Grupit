@@ -14,7 +14,6 @@ import com.google.firebase.messaging.RemoteMessage
 import com.grup.android.ui.MainActivity
 import com.grup.other.AccountSettings
 import com.grup.other.NotificationPermissions
-import com.grup.service.ViewableAccountSettingsService
 
 class AndroidFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
@@ -24,21 +23,23 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onMessageReceived(message: RemoteMessage) {
-        super.onMessageReceived(message)
         val notificationType = message.data["type"]!!
+
+        println("MESSAGE RECEIVED: $notificationType")
+
         if (
-            AccountSettings.Notifications.values().find {
+            AccountSettings.GroupNotificationType.values().find {
                 it.type == notificationType
             }?.let { notification ->
                 NotificationPermissions.isNotificationTypeToggled(notification)
-            } != false
+            } == true
         ) {
-            sendNotification(message.notification!!, message.data)
+            println("MESSAGE FINNA GET NOTI GANG")
+            sendNotification(message.data)
         }
     }
 
     private fun sendNotification(
-        notification: RemoteMessage.Notification,
         data: Map<String, String>
     ) {
         val pendingIntent =
@@ -53,13 +54,14 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
                 }
             )
 
-        val notificationBuilder = NotificationCompat.Builder(this, "GRUP")
-            .setContentTitle(notification.title)
-            .setContentText(notification.body)
+        val notificationBuilder = NotificationCompat.Builder(this, "Grupit")
+            .setContentTitle(data["title"])
+            .setContentText(data["body"])
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.grup_logo)
             .setContentIntent(pendingIntent)
             .setDefaults(Notification.DEFAULT_VIBRATE)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -79,6 +81,7 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        println("SENDING NOTIFICATION...")
         notificationManager.notify(0, notificationBuilder.build())
     }
 }

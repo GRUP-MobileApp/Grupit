@@ -6,6 +6,7 @@ import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import com.grup.interfaces.DBManager
+import com.grup.other.AccountSettings
 import com.grup.platform.signin.AuthManager
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -35,7 +36,7 @@ class APIServer private constructor(
     suspend fun validUsername(username: String) = !userController.usernameExists(username)
 
     // Group
-    fun createGroup(groupName: String) = groupController.createGroup(user, groupName)
+    suspend fun createGroup(groupName: String) = groupController.createGroup(user, groupName)
     fun getAllGroupsAsFlow() = groupController.getAllGroupsAsFlow()
 
     // UserInfo
@@ -85,11 +86,11 @@ class APIServer private constructor(
         settleActionController.getAllSettleActionsAsFlow()
 
     // Account Settings
-    fun getGroupNotificationNewSettleRequests() =
-        accountSettingsController.getGroupNotificationNewSettleRequests()
+    fun getGroupNotificationType(notificationType: AccountSettings.GroupNotificationType) =
+        accountSettingsController.getGroupNotificationType(notificationType)
 
-    fun toggleGroupNotificationNewSettleRequests() =
-        accountSettingsController.toggleGroupNotificationNewSettleRequests()
+    fun toggleGroupNotificationType(notificationType: AccountSettings.GroupNotificationType) =
+        accountSettingsController.toggleGroupNotificationType(notificationType)
 
 
     companion object Login {

@@ -13,9 +13,7 @@ import com.grup.service.*
 import com.grup.service.GroupService
 import com.grup.service.DebtActionService
 import com.grup.service.UserService
-import org.koin.core.KoinApplication
 import org.koin.core.context.loadKoinModules
-import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
 internal val servicesModule = module {
@@ -26,7 +24,7 @@ internal val servicesModule = module {
     single { DebtActionService() }
     single { SettleActionService() }
 
-    single { AccountSettingsService(get()) }
+    single { AccountSettingsService() }
     single { ValidationService() }
 }
 

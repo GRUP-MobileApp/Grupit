@@ -8,13 +8,11 @@ import org.koin.core.component.inject
 internal class AccountSettingsController : KoinComponent {
     private val accountSettingsService: AccountSettingsService by inject()
 
-    fun getGroupNotificationNewSettleRequests(): Boolean =
-        accountSettingsService.isNotificationTypeToggled(
-            AccountSettings.Notifications.NEW_SETTLE_REQUEST
-        )
+    fun getGroupNotificationType(
+        notificationType: AccountSettings.GroupNotificationType
+    ): Boolean = accountSettingsService.isNotificationTypeToggled(notificationType)
 
-    fun toggleGroupNotificationNewSettleRequests(): Boolean =
-        accountSettingsService.toggleNotificationType(
-            AccountSettings.Notifications.NEW_SETTLE_REQUEST
-        )
+    fun toggleGroupNotificationType(
+        notificationType: AccountSettings.GroupNotificationType
+    ): Boolean = accountSettingsService.toggleNotificationType(notificationType)
 }

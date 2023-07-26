@@ -1,6 +1,7 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.coroutineScope
+import com.grup.exceptions.APIException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import com.grup.platform.signin.AuthManager
@@ -119,7 +120,17 @@ internal class MainViewModel : LoggedInViewModel(), KoinComponent {
         }.asInitialEmptyState()
 
     // Group
-    fun createGroup(groupName: String) = apiServer.createGroup(groupName)
+    fun createGroup(
+        groupName: String,
+        onSuccess: (Group) -> Unit,
+        onFailure: (String?) -> Unit
+    ) = coroutineScope.launch {
+        try {
+            apiServer.createGroup(groupName).let(onSuccess)
+        } catch (e: APIException) {
+            onFailure(e.message)
+        }
+    }
 
     // SettleAction
     fun acceptSettleActionTransaction(
