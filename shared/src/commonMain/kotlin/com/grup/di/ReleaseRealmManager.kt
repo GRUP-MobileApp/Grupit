@@ -2,24 +2,15 @@ package com.grup.di
 
 import com.grup.exceptions.login.InvalidGoogleAccountException
 import com.grup.interfaces.DBManager
-import com.grup.other.APP_ID
-import com.grup.platform.signin.AuthManager
 import com.grup.service.NotificationsService
 import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.AuthException
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.unloadKoinModules
 
 internal class ReleaseRealmManager private constructor() : RealmManager() {
-    override val authProvider: AuthManager.AuthProvider
-        get() = getAuthProvider(app)
     companion object {
-        private val app: App = App.create(APP_ID)
-
         suspend fun silentSignIn(): DBManager? {
-            return app.currentUser?.let { realmUser ->
-                openRealm(realmUser)
-                ReleaseRealmManager()
+            return releaseApp.currentUser?.let {
+                ReleaseRealmManager().apply { open() }
             }
         }
 
@@ -34,22 +25,10 @@ internal class ReleaseRealmManager private constructor() : RealmManager() {
         }
 
         private suspend fun loginRealmManager(credentials: Credentials): DBManager {
-            app.login(credentials).let { realmUser ->
-                openRealm(realmUser)
+            releaseApp.login(credentials).let { realmUser ->
                 NotificationsService.subscribePersonalNotifications(realmUser.id)
             }
             return ReleaseRealmManager()
         }
-
-        private suspend fun openRealm(realmUser: User) {
-            RealmManager.openRealm(realmUser)
-            loadKoinModules(releaseAppModules)
-        }
-    }
-
-    override suspend fun close() {
-        super.close()
-        unloadKoinModules(releaseAppModules)
-        app.currentUser?.logOut()
     }
 }

@@ -3,6 +3,7 @@ val kotlinVersion: String by project
 val composeVersion: String by project
 val lifecycleVersion: String by project
 val coilComposeVersion: String by project
+val kotlinExtensionVersion: String by project
 
 val keystorePassword: String by project
 
@@ -37,7 +38,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.6"
+        kotlinCompilerExtensionVersion = kotlinExtensionVersion
     }
 
     kotlinOptions {
@@ -65,9 +66,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
 
     // Jetpack Compose
-    implementation("androidx.compose.ui:ui:1.4.3")
+    implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.activity:activity-compose:1.7.2")
-    implementation("androidx.compose.ui:ui-tooling:1.4.3")
+    implementation("androidx.compose.ui:ui-tooling:$composeVersion")
 
     // Koin
     implementation("io.insert-koin:koin-android:$koinVersion")

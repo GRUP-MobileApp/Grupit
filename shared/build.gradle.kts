@@ -6,13 +6,14 @@ val composeVersion: String by project
 val voyagerVersion: String by project
 val lifecycleVersion: String by project
 val coilComposeVersion: String by project
+val kotlinExtensionVersion: String by project
 val napierVersion = "2.4.0"
 
 val keystorePassword: String by project
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.8.20"
+    kotlin("plugin.serialization") version "1.8.22"
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
@@ -53,6 +54,9 @@ kotlin {
                 // Kotlin Libraries
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
+                // Logger
+                implementation("io.github.aakira:napier:$napierVersion")
+
                 // UI
 
                 // Compose
@@ -61,10 +65,6 @@ kotlin {
                 implementation(compose.material)
                 implementation(compose.material3)
                 implementation(compose.ui)
-
-
-                // Logger
-                implementation("io.github.aakira:napier:$napierVersion")
 
                 // Voyager
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
@@ -76,6 +76,9 @@ kotlin {
                 implementation("dev.icerock.moko:media:0.11.0")
                 implementation("dev.icerock.moko:media-compose:0.11.0")
                 implementation("dev.icerock.moko:permissions-compose:0.16.0")
+
+                // Kamel
+                implementation("media.kamel:kamel-image:0.7.1")
 
                 // Backend
 
@@ -205,7 +208,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.6"
+        kotlinCompilerExtensionVersion = kotlinExtensionVersion
     }
     namespace = "com.grup"
 }

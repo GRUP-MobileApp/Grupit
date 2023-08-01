@@ -474,6 +474,7 @@ private fun GroupNavigationRow(
 
     ) {
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = AppTheme.dimensions.paddingSmall)
@@ -496,14 +497,9 @@ private fun GroupNavigationRow(
                         }
                     }
                 },
-                modifier =
-                if (isSelected)
-                    Modifier.border(
-                        width = 1.dp,
-                        color = Color.White
-                    )
-                else
-                    Modifier
+                modifier = Modifier.apply {
+                    if (isSelected) border(width = 1.dp, color = Color.White)
+                }
             ) {
                 SmallIcon(
                     imageVector = Icons.Default.Home,

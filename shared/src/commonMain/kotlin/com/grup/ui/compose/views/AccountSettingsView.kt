@@ -4,11 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
@@ -28,6 +26,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.models.User
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
@@ -37,10 +36,11 @@ import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.compose.profilePicturePainter
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 
-class AccountSettingsView : Screen {
+internal class AccountSettingsView : Screen {
     @Composable
     override fun Content() {
-        val accountSettingsViewModel: AccountSettingsViewModel = rememberScreenModel { AccountSettingsViewModel() }
+        val accountSettingsViewModel: AccountSettingsViewModel =
+            rememberScreenModel { AccountSettingsViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -75,7 +75,7 @@ private fun AccountSettingsLayout(
         onBackPress = { navigator.pop() }
     ) {
         item {
-            ProfileSettings(accountSettingsViewModel = accountSettingsViewModel)
+            ProfileSettings(user = accountSettingsViewModel.userObject)
         }
         item {
             SettingHeader(text = "Group Notifications")
@@ -92,10 +92,8 @@ private fun AccountSettingsLayout(
 }
 
 @Composable
-private fun ProfileSettings(
-    accountSettingsViewModel: AccountSettingsViewModel
-) {
-    val pfpPainter = profilePicturePainter(accountSettingsViewModel.userObject.profilePictureURL)
+private fun ProfileSettings(user: User) {
+    val pfpPainter = profilePicturePainter(user.profilePictureURL)
 
     Box(
         modifier = Modifier
@@ -115,10 +113,8 @@ private fun ProfileSettings(
             Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
             ) {
-                accountSettingsViewModel.userObject.let {  user ->
-                    H1Text(text = user.displayName!!)
-                    Caption(text = "@${user.username!!}")
-                }
+                H1Text(text = user.displayName!!)
+                Caption(text = "@${user.username!!}")
             }
             Spacer(modifier = Modifier.weight(1f))
             H1ConfirmTextButton(

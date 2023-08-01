@@ -9,19 +9,7 @@ struct iOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     init() {
-        InitKoinKt.doInitKoin()
-        
-        let signIn: (@escaping (String) -> Void) -> Void = { signInCallback in
-            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                GIDSignIn.sharedInstance.signIn(
-                    withPresenting: rootViewController
-                ) { signInResult, error in
-                    if let googleToken = signInResult?.user.accessToken.tokenString {
-                        signInCallback(googleToken)
-                    }
-                }
-            }
-        }
+        ModuleKt.doInitKoin()
         
         let googleSignInManager = GoogleSignInManager(
             signInClosure: { signInCallback in
@@ -31,18 +19,20 @@ struct iOSApp: App {
                     ) { signInResult, error in
                         guard error == nil else {
                             // Handle error
+                            return
                         }
                         guard let user = signInResult?.user,
                             let idToken = user.idToken?.tokenString
                         else {
                             // Handle null user
+                            return
                         }
                         let credential = GoogleAuthProvider.credential(
                             withIDToken: idToken,
                             accessToken: user.accessToken.tokenString
                         )
                         Auth.auth().signIn(with: credential) { result, error in
-                            signInCallback(user.accessToken.tokenString)
+                            _ = signInCallback(user.accessToken.tokenString)
                         }
                     }
                 }
@@ -59,7 +49,7 @@ struct iOSApp: App {
             disconnectClosure: { GIDSignIn.sharedInstance.disconnect() }
         )
         
-        InitAuthManagerKt.doInitAuthManager(
+        ModuleKt.doInitAuthManager(
             authManager: AuthManager(
                 googleSignInManager: googleSignInManager,
                 appleSignInManager: nil

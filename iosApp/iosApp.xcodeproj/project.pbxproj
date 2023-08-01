@@ -11,6 +11,7 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		B56303342A02314A00D55F5A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56303332A02314A00D55F5A /* ContentView.swift */; };
+		B57A9DA62A789C0E006ADA11 /* NotificationCenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */; };
 		B5E6253A29E637AE000EFB3D /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8EA04739A40CCB36AA16152 /* Pods_iosApp.framework */; };
 		B5F1AC5329E66CF600664A05 /* proxima_nova.otf in Resources */ = {isa = PBXBuildFile; fileRef = B5F1AC5229E66CF600664A05 /* proxima_nova.otf */; };
 		B5F1AC5829E792EE00664A05 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC5729E792EE00664A05 /* AppDelegate.swift */; };
@@ -28,6 +29,7 @@
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A53D2BDB0F9261150EDFE7B6 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		B56303332A02314A00D55F5A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterDelegate.swift; sourceTree = "<group>"; };
 		B5F1AC5229E66CF600664A05 /* proxima_nova.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = proxima_nova.otf; sourceTree = "<group>"; };
 		B5F1AC5729E792EE00664A05 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5F1AC5929E7CB7E00664A05 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 				B5F1AC5729E792EE00664A05 /* AppDelegate.swift */,
 				B5F1AC6029E7CFB200664A05 /* Keys.swift */,
 				B56303332A02314A00D55F5A /* ContentView.swift */,
+				B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -252,6 +255,7 @@
 			files = (
 				B56303342A02314A00D55F5A /* ContentView.swift in Sources */,
 				B5F1AC6129E7CFB200664A05 /* Keys.swift in Sources */,
+				B57A9DA62A789C0E006ADA11 /* NotificationCenterDelegate.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				B5F1AC5829E792EE00664A05 /* AppDelegate.swift in Sources */,
 			);

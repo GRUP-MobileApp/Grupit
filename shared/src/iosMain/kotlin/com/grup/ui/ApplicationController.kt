@@ -1,7 +1,7 @@
-package com.grup.ui.controllers
+package com.grup.ui
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.grup.platform.signin.AuthManager
 import com.grup.ui.compose.Application
 
 fun DebugApplicationController() = ComposeUIViewController { Application(isDebug = true) }
+fun ReleaseApplicationController() = ComposeUIViewController { Application() }
