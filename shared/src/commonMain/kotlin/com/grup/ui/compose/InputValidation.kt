@@ -1,10 +1,10 @@
 package com.grup.ui.compose
 
 internal val usernameRegex: Regex =
-    Regex("^(?=[a-zA-Z0-9._]{8,20}\$)(?!.*[_.]{2})[^_.].*[^_.]\$")
+    Regex("^[a-zA-Z0-9._-]+$")
 
 internal val nameRegex: Regex =
-    Regex("^[a-z ,.'-]+$")
+    Regex("^[a-zA-Z ,.'-]+$")
 
 fun validateUsername(username: String, onValid: () -> Unit, onError: (String) -> Unit) {
     if (username.isEmpty()) {

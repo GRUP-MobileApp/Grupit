@@ -8,9 +8,6 @@ import com.grup.other.AWS_IMAGES_API_URL
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import io.ktor.client.*
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.FormDataContent
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -23,7 +20,7 @@ internal class AWSImagesRepository : KoinComponent, IImagesRepository {
     override suspend fun uploadProfilePicture(user: User, pfp: ByteArray): String {
         if (pfp.isNotEmpty()) {
             val response: HttpResponse = client.put(
-                "$AWS_IMAGES_API_URL/pfp_${user.getId()}.png"
+                "$AWS_IMAGES_API_URL/pfp_${user.id}.png"
             ) {
                 contentType(ContentType.Image.PNG)
                 header("X-Api-Key", AWS_IMAGES_API_KEY)
@@ -37,7 +34,7 @@ internal class AWSImagesRepository : KoinComponent, IImagesRepository {
             if (response.status.value !in 200..299) {
                 throw ImageUploadException(response.bodyAsText())
             }
-            return "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_${user.getId()}.png"
+            return "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_${user.id}.png"
         }
         return ""
     }

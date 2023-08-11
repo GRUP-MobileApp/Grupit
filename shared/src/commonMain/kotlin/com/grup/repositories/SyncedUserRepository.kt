@@ -1,8 +1,9 @@
 package com.grup.repositories
 
-import com.grup.models.User
+import com.grup.models.realm.RealmUser
 import com.grup.other.MONGODB_API_ENDPOINT
 import com.grup.other.TEST_MONGODB_API_ENDPOINT
+import com.grup.other.copyNestedObjectToRealm
 import com.grup.repositories.abstract.RealmUserRepository
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -10,7 +11,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.syncSession
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -27,12 +27,12 @@ internal class SyncedUserRepository(
     override suspend fun createMyUser(
         username: String,
         displayName: String
-    ): User {
+    ): RealmUser {
         return realm.write {
-            copyToRealm(
-                User(myUserId).apply {
-                    this.username = username
-                    this.displayName = displayName
+            copyNestedObjectToRealm(
+                RealmUser(myUserId).apply {
+                    this._username = username
+                    this._displayName = displayName
                 }
             )
         }.also {
@@ -41,12 +41,12 @@ internal class SyncedUserRepository(
         }
     }
 
-    override suspend fun findUserByUsername(username: String): User? {
-        var responseUser: User? = null
+    override suspend fun findUserByUsername(username: String): RealmUser? {
+        var responseUser: RealmUser? = null
         val response: HttpResponse = client.get(
-            if (isDebug)
-                "$MONGODB_API_ENDPOINT/user/findUserByUsername"
-            else "$TEST_MONGODB_API_ENDPOINT/user/findUserByUsername"
+            (if (isDebug) TEST_MONGODB_API_ENDPOINT else MONGODB_API_ENDPOINT) +
+                    "/user/findUserByUsername"
+
         ) {
             contentType(ContentType.Application.Json)
             url {
@@ -57,6 +57,7 @@ internal class SyncedUserRepository(
             responseUser = try {
                 Json.decodeFromString(response.bodyAsText())
             } catch (e: Exception) {
+                println("RealmUser decode error: ${e.message}")
                 null
             }
         }

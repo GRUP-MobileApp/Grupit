@@ -1,32 +1,50 @@
 package com.grup.repositories.abstract
 
-import com.grup.other.getLatestFields
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.models.DebtAction
+import com.grup.models.TransactionRecord
+import com.grup.models.UserInfo
+import com.grup.models.realm.RealmDebtAction
+import com.grup.models.realm.RealmUserInfo
+import com.grup.models.realm.toRealmTransactionRecord
+import com.grup.other.copyNestedObjectToRealm
+import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.Realm
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 internal abstract class RealmDebtActionRepository : IDebtActionRepository {
     protected abstract val realm: Realm
 
-    override fun createDebtAction(debtAction: DebtAction): DebtAction? {
+    override fun createDebtAction(
+        debtee: UserInfo,
+        transactionRecords: List<TransactionRecord>,
+        message: String
+    ): RealmDebtAction? {
         return realm.writeBlocking {
-            copyToRealm(getLatestFields(debtAction))
+            copyNestedObjectToRealm(
+                RealmDebtAction().apply {
+                    _debteeUserInfo = debtee as RealmUserInfo
+                    _groupId = debtee.groupId
+                    _transactionRecords.addAll(
+                        transactionRecords.map { it.toRealmTransactionRecord() }
+                    )
+                    _message = message
+                }
+            )
         }
     }
 
     override suspend fun updateDebtAction(
         debtAction: DebtAction,
         block: DebtAction.() -> Unit
-    ): DebtAction? {
+    ): RealmDebtAction? {
         return realm.write {
-            findLatest(debtAction)!!.apply(block)
+            findLatest(debtAction as RealmDebtAction)!!.apply(block)
         }
     }
 
-    override fun findAllDebtActionsAsFlow(): Flow<List<DebtAction>> {
-        return realm.query<DebtAction>().find().asFlow().map { it.list }
+    override fun findAllDebtActionsAsFlow(): Flow<List<RealmDebtAction>> {
+        return realm.query<RealmDebtAction>().toResolvedListFlow()
     }
 }

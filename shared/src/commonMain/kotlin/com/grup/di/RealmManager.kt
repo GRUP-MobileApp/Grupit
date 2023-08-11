@@ -1,14 +1,15 @@
 package com.grup.di
 
+import com.grup.exceptions.MissingFieldException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.interfaces.DBManager
-import com.grup.models.DebtAction
-import com.grup.models.Group
-import com.grup.models.GroupInvite
-import com.grup.models.SettleAction
-import com.grup.models.TransactionRecord
-import com.grup.models.User
-import com.grup.models.UserInfo
+import com.grup.models.realm.RealmDebtAction
+import com.grup.models.realm.RealmGroup
+import com.grup.models.realm.RealmGroupInvite
+import com.grup.models.realm.RealmSettleAction
+import com.grup.models.realm.RealmTransactionRecord
+import com.grup.models.realm.RealmUser
+import com.grup.models.realm.RealmUserInfo
 import com.grup.other.APP_ID
 import com.grup.other.TEST_APP_ID
 import com.grup.other.idSerialName
@@ -27,11 +28,13 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import kotlin.jvm.JvmStatic
+import kotlin.reflect.KProperty
 import kotlin.time.Duration.Companion.seconds
 
 abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
@@ -53,20 +56,23 @@ abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
             SyncConfiguration.Builder(
                 realmUser,
                 setOf(
-                    User::class, Group::class, UserInfo::class, GroupInvite::class,
-                    DebtAction::class, SettleAction::class, TransactionRecord::class
+                    RealmUser::class, RealmGroup::class, RealmUserInfo::class,
+                    RealmGroupInvite::class, RealmDebtAction::class, RealmSettleAction::class,
+                    RealmTransactionRecord::class
                 )
             )
                 .initialSubscriptions(rerunOnOpen = true) { realm ->
                     removeAll()
-                    add(realm.query<User>("$idSerialName == $0", realmUser.id), "MyUser")
-                    add(realm.query<UserInfo>("userId == $0", realmUser.id), "UserInfos")
+                    add(realm.query<RealmUser>("$idSerialName == $0", realmUser.id), "MyUser")
                     add(
-                        realm.query<GroupInvite>("inviter == $0", realmUser.id),
+                        realm.query<RealmUserInfo>("userId == $0", realmUser.id),
+                        "UserInfos")
+                    add(
+                        realm.query<RealmGroupInvite>("inviterId == $0", realmUser.id),
                         "OutgoingGroupInvites"
                     )
                     add(
-                        realm.query<GroupInvite>("invitee == $0", realmUser.id),
+                        realm.query<RealmGroupInvite>("inviteeId == $0", realmUser.id),
                         "IncomingGroupInvites"
                     )
                 }
@@ -82,42 +88,139 @@ abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
     } ?: throw NotLoggedInException()
 
     @OptIn(DelicateCoroutinesApi::class)
-    private val subscriptionsJob: Job = GlobalScope.launch(
+    private val userSubscriptionsJob: Job = GlobalScope.launch(
         Dispatchers.Main,
         CoroutineStart.LAZY
     ) {
-        var prevSubscribedGroupIds: Set<String> = emptySet()
-        realm.subscriptions.findByName("UserInfos")?.asQuery<UserInfo>()!!.asFlow()
-            .collect { resultsChange ->
-                val newGroupIds: Set<String> = resultsChange.list.map { it.groupId!! }.toSet()
+        val userInfosFlow: Flow<List<RealmUserInfo>> =
+            realm.query<RealmUserInfo>().asFlow().map { it.list }
+        val groupInvitesFlow: Flow<List<RealmGroupInvite>> =
+            realm.subscriptions.findByName("IncomingGroupInvites")!!
+                .asQuery<RealmGroupInvite>().asFlow().map { it.list }
 
-                realm.subscriptions.update {
-                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
-                        add(realm.query<Group>("$idSerialName == $0", groupId),
-                            "${groupId}_Group")
-                        add(realm.query<UserInfo>("groupId == $0", groupId),
-                            "${groupId}_UserInfo")
-                        add(realm.query<DebtAction>("groupId == $0", groupId),
-                            "${groupId}_DebtAction")
-                        add(realm.query<SettleAction>("groupId == $0", groupId),
-                            "${groupId}_SettleAction")
-                        NotificationsService.subscribeGroupNotifications(groupId)
-                    }
-                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
-                        remove("${groupId}_Group")
-                        remove("${groupId}_UserInfo")
-                        remove("${groupId}_DebtAction")
-                        remove("${groupId}_SettleAction")
-                        NotificationsService.unsubscribeGroupNotifications(groupId)
-                    }
-                }
-                prevSubscribedGroupIds = newGroupIds
+        val userIdsFromUserInfos: Flow<List<String>> = userInfosFlow.map { userInfos ->
+            userInfos.map { it._userId ?: throw MissingFieldException() }
+        }
+        val userIdsFromGroupInvitesInviters: Flow<List<String>> =
+            groupInvitesFlow.map { groupInvites ->
+                groupInvites.map { it._inviterId ?: throw MissingFieldException() }
             }
+
+        var prevSubscribedUserIds: Set<String> = emptySet()
+        combine(
+            userIdsFromUserInfos,
+            userIdsFromGroupInvitesInviters
+        ) { allUserIds: Array<List<String>> ->
+            allUserIds.flatMap { it }.toSet()
+        }.collect { newUserIds: Set<String> ->
+            realm.subscriptions.update {
+                newUserIds.minus(prevSubscribedUserIds).forEach { userId ->
+                    add(realm.query<RealmUser>("$idSerialName == $0", userId),
+                        "${userId}_User")
+                }
+                prevSubscribedUserIds.minus(newUserIds).forEach { userId ->
+                    remove("${userId}_User")
+                }
+            }
+            prevSubscribedUserIds = newUserIds
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private val groupSubscriptionsJob: Job = GlobalScope.launch(
+        Dispatchers.Main,
+        CoroutineStart.LAZY
+    ) {
+        val userInfosFlow: Flow<List<RealmUserInfo>> =
+            realm.subscriptions.findByName("UserInfos")!!
+                .asQuery<RealmUserInfo>().asFlow().map { it.list }
+
+        // GroupIds
+        val groupIdsFromUserInfos: Flow<List<String>> = userInfosFlow.map { userInfos ->
+            userInfos.map { it._groupId ?: throw MissingFieldException() }
+        }
+
+        var prevSubscribedGroupIds: Set<String> = emptySet()
+        combine(
+            groupIdsFromUserInfos
+        ) { allGroupInfos: Array<List<String>> ->
+            allGroupInfos.flatMap { it }.toSet()
+        }.collect { newGroupIds: Set<String> ->
+            realm.subscriptions.update {
+                newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
+                    add(
+                        realm.query<RealmGroup>("$idSerialName == $0", groupId),
+                        "${groupId}_Group"
+                    )
+                    add(
+                        realm.query<RealmUserInfo>("_groupId == $0", groupId),
+                        "${groupId}_UserInfo"
+                    )
+                    add(
+                        realm.query<RealmDebtAction>("_groupId == $0", groupId),
+                        "${groupId}_DebtAction"
+                    )
+                    add(
+                        realm.query<RealmSettleAction>("_groupId == $0", groupId),
+                        "${groupId}_SettleAction"
+                    )
+                    NotificationsService.subscribeGroupNotifications(groupId)
+                }
+                prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
+                    remove("${groupId}_Group")
+                    remove("${groupId}_UserInfo")
+                    remove("${groupId}_DebtAction")
+                    remove("${groupId}_SettleAction")
+                    NotificationsService.unsubscribeGroupNotifications(groupId)
+                }
+            }
+            prevSubscribedGroupIds = newGroupIds
+        }
+
+
+//        realm.subscriptions.findByName("UserInfos")?.asQuery<RealmUserInfo>()!!.asFlow()
+//            .collect { resultsChange ->
+//                val newGroupIds: Set<String> = resultsChange.list.map { it.groupId }.toSet()
+//                val newUserIds: Set<String> = resultsChange.list.map { it.user.id }.toSet()
+//
+//                realm.subscriptions.update {
+//                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
+//                        add(realm.query<RealmGroup>("$idSerialName == $0", groupId),
+//                            "${groupId}_Group")
+//                        add(realm.query<RealmUserInfo>("_groupId == $0", groupId),
+//                            "${groupId}_UserInfo")
+//                        add(realm.query<RealmDebtAction>("_groupId == $0", groupId),
+//                            "${groupId}_DebtAction")
+//                        add(realm.query<RealmSettleAction>("_groupId == $0", groupId),
+//                            "${groupId}_SettleAction")
+//                        NotificationsService.subscribeGroupNotifications(groupId)
+//                    }
+//                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
+//                        remove("${groupId}_Group")
+//                        remove("${groupId}_UserInfo")
+//                        remove("${groupId}_DebtAction")
+//                        remove("${groupId}_SettleAction")
+//                        NotificationsService.unsubscribeGroupNotifications(groupId)
+//                    }
+//
+//                    newUserIds.minus(prevSubscribedUserIds).forEach { userId ->
+//                        add(realm.query<RealmUser>("$idSerialName == $0", userId),
+//                            "${userId}_User")
+//                    }
+//                    prevSubscribedUserIds.minus(newUserIds).forEach { userId ->
+//                        remove("${userId}_User")
+//                    }
+//                }
+//                prevSubscribedGroupIds = newGroupIds
+//                prevSubscribedUserIds = newUserIds
+//            }
     }
 
     suspend fun open() {
+        realm.subscriptions.waitForSynchronization(5.seconds)
         realm.syncSession.downloadAllServerChanges(5.seconds)
-        subscriptionsJob.start()
+        userSubscriptionsJob.start()
+        groupSubscriptionsJob.start()
         loadKoinModules(if (isDebug) debugAppModules else releaseAppModules)
     }
 
@@ -130,7 +233,9 @@ abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
 
     override suspend fun close() {
         app.currentUser?.apply { logOut() } ?: throw NotLoggedInException()
-        subscriptionsJob.cancel()
+        realm.close()
+        userSubscriptionsJob.cancel()
+        groupSubscriptionsJob.cancel()
         NotificationsService.unsubscribeAllNotifications()
         unloadKoinModules(
             listOf(

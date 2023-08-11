@@ -13,33 +13,27 @@ internal class DebtActionService : KoinComponent {
     private val debtActionRepository: IDebtActionRepository by inject()
 
     fun createDebtAction(
-        transactionRecords: List<TransactionRecord>,
         debtee: UserInfo,
+        transactionRecords: List<TransactionRecord>,
         message: String
     ): DebtAction {
-        return debtActionRepository.createDebtAction(DebtAction().apply {
-            this.debteeUserInfo = debtee
-            this.groupId = debtee.groupId
-            this.transactionRecords.addAll(transactionRecords)
-            this.message = message
-        }) ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
+        return debtActionRepository.createDebtAction(debtee, transactionRecords, message)
+            ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
                 " ${debtee.groupId}")
     }
 
     suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionRepository.updateDebtAction(debtAction) {
-            this.transactionRecords.find { transactionRecord ->
-                transactionRecord.debtorUserInfo!!.getId() ==
-                        myTransactionRecord.debtorUserInfo!!.getId()
+            transactionRecords.find { transactionRecord ->
+                transactionRecord.debtorUserInfo.id == myTransactionRecord.debtorUserInfo.id
             }?.dateAccepted = getCurrentTime()
         }
     }
 
     suspend fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionRepository.updateDebtAction(debtAction) {
-            this.transactionRecords.find { transactionRecord ->
-                transactionRecord.debtorUserInfo!!.getId() ==
-                        myTransactionRecord.debtorUserInfo!!.getId()
+            transactionRecords.find { transactionRecord ->
+                transactionRecord.debtorUserInfo.id == myTransactionRecord.debtorUserInfo.id
             }?.dateAccepted = TransactionRecord.REJECTED
         }
     }

@@ -23,18 +23,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.*
+import com.grup.models.User
 import com.grup.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
 import com.grup.platform.signin.GoogleSignInManager
 import com.grup.ui.models.TransactionActivity
 import com.grup.ui.viewmodel.LoginViewModel
+import io.kamel.core.Resource
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 
 private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
@@ -243,13 +249,17 @@ internal fun RejectButton(onClick: () -> Unit) {
 @Composable
 internal fun ProfileIcon(
     modifier: Modifier = Modifier,
-    painter: Painter,
-    contentDescription: String = "Profile Picture",
+    user: User,
     iconSize: Dp = 70.dp
 ) {
-    Image(
-        painter = painter,
-        contentDescription = contentDescription,
+    val painterResource: Resource<Painter> =
+        asyncPainterResource(user.profilePictureURL) {
+            // CoroutineContext to be used while loading the image.
+            coroutineContext = Job() + Dispatchers.IO
+        }
+    KamelImage(
+        resource = painterResource,
+        contentDescription = "Profile Picture",
         contentScale = ContentScale.Crop,
         modifier = modifier
             .clip(AppTheme.shapes.circleShape)
@@ -304,10 +314,9 @@ internal fun SimpleLazyListPage(
 @Composable
 internal fun IconRowCard(
     modifier: Modifier = Modifier,
-    painter: Painter = rememberVectorPainter(image = Icons.Default.Face),
-    iconSize: Dp = 70.dp,
     mainContent: @Composable () -> Unit,
-    sideContent: (@Composable () -> Unit)? = {}
+    sideContent: (@Composable () -> Unit)? = {},
+    iconContent: @Composable () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -321,10 +330,7 @@ internal fun IconRowCard(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f, false)
         ) {
-            ProfileIcon(
-                painter = painter,
-                iconSize = iconSize
-            )
+            iconContent()
             mainContent()
         }
         if (sideContent != null) {
@@ -338,7 +344,7 @@ internal fun UserInfoRowCard(
     modifier: Modifier = Modifier,
     userInfo: UserInfo,
     mainContent: @Composable ColumnScope.() -> Unit = {
-        H1Text(text = userInfo.nickname!!, fontSize = 24.sp)
+        H1Text(text = userInfo.user.displayName, fontSize = 24.sp)
     },
     sideContent: (@Composable ColumnScope.() -> Unit)? = {
         MoneyAmount(
@@ -346,11 +352,15 @@ internal fun UserInfoRowCard(
             fontSize = 24.sp,
         )
     },
-    iconSize: Dp = 50.dp
+    iconSize: Dp = 50.dp,
+    iconContent: @Composable () -> Unit = {
+        ProfileIcon(
+            user = userInfo.user,
+            iconSize = iconSize
+        )
+    }
 ) {
-    val pfpPainter = profilePicturePainter(userInfo.profilePictureURL)
     IconRowCard(
-        painter = pfpPainter,
         mainContent = {
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -370,7 +380,7 @@ internal fun UserInfoRowCard(
                 }
             }
         },
-        iconSize = iconSize,
+        iconContent = iconContent,
         modifier = modifier
     )
 }
@@ -387,7 +397,7 @@ internal fun TransactionActivityRowCard(
                 text =
                 "${transactionActivity.activityName} at ${isoTime(transactionActivity.date)}"
             )
-            H1Text(text = transactionActivity.userInfo.nickname!!, fontSize = 18.sp)
+            H1Text(text = transactionActivity.userInfo.user.displayName, fontSize = 18.sp)
             H1Text(
                 text = transactionActivity.displayText(),
                 fontSize = 16.sp,

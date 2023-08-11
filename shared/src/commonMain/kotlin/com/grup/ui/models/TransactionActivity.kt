@@ -17,7 +17,7 @@ internal sealed class TransactionActivity {
         override val action: Action
             get() = debtAction
         override val userInfo: UserInfo
-            get() = debtAction.debteeUserInfo!!
+            get() = debtAction.debteeUserInfo
         override val date: String
             get() = debtAction.date
         override val amount: Double
@@ -34,7 +34,7 @@ internal sealed class TransactionActivity {
         override val action: Action
             get() = settleAction
         override val userInfo: UserInfo
-            get() = settleAction.debteeUserInfo!!
+            get() = settleAction.debteeUserInfo
         override val date: String
             get() = settleAction.date
         override val amount: Double
@@ -52,23 +52,23 @@ internal sealed class TransactionActivity {
         override val action: Action
             get() = settleAction
         override val userInfo: UserInfo
-            get() = transactionRecord.debtorUserInfo!!
+            get() = transactionRecord.debtorUserInfo
         override val date: String
             get() = transactionRecord.let { transactionRecord ->
                 if (!transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
                         "TransactionRecord still pending for Settle Action " +
-                                "with id ${settleAction.getId()}"
+                                "with id ${settleAction.id}"
                     )
                 }
                 transactionRecord.dateAccepted
             }
         override val amount: Double
-            get() = transactionRecord.balanceChange!!
+            get() = transactionRecord.balanceChange
         override val activityName: String
             get() = "Settle Request"
 
         override fun displayText(): String =
-            "paid ${settleAction.debteeUserInfo!!.nickname!!}"
+            "paid ${settleAction.debteeUserInfo.user.displayName}"
     }
 }

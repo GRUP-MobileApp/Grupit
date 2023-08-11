@@ -18,14 +18,14 @@ internal sealed class Notification {
         override val date: String
             get() = debtAction.date
         override val groupId: String
-            get() = debtAction.groupId!!
+            get() = debtAction.groupId
         override val userInfo: UserInfo
-            get() = debtAction.debteeUserInfo!!
+            get() = debtAction.debteeUserInfo
         override val dismissible: Boolean = false
 
         override fun displayText(): String =
-            "${debtAction.debteeUserInfo!!.nickname} is requesting " +
-                    "${transactionRecord.balanceChange!!.asMoneyAmount()} from you"
+            "${debtAction.debteeUserInfo.user.displayName} is requesting " +
+                    "${transactionRecord.balanceChange.asMoneyAmount()} from you"
     }
 
     data class DebtorAcceptOutgoingDebtAction(
@@ -37,19 +37,19 @@ internal sealed class Notification {
                 if (!transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
                         "TransactionRecord still pending for Debt Action " +
-                                "with id ${debtAction.getId()}"
+                                "with id ${debtAction.id}"
                     )
                 }
                 transactionRecord.dateAccepted
             }
         override val groupId: String
-            get() = debtAction.groupId!!
+            get() = debtAction.groupId
         override val userInfo: UserInfo
-            get() = transactionRecord.debtorUserInfo!!
+            get() = transactionRecord.debtorUserInfo
 
         override fun displayText(): String =
-            "${transactionRecord.debtorUserInfo!!.nickname!!} has accepted a debt of " +
-                    "${transactionRecord.balanceChange!!.asMoneyAmount()} from you"
+            "${transactionRecord.debtorUserInfo.user.displayName} has accepted a debt of " +
+                    "${transactionRecord.balanceChange.asMoneyAmount()} from you"
     }
 
     data class IncomingTransactionOnSettleAction(
@@ -59,14 +59,14 @@ internal sealed class Notification {
         override val date: String
             get() = transactionRecord.dateCreated
         override val groupId: String
-            get() = settleAction.groupId!!
+            get() = settleAction.groupId
         override val userInfo: UserInfo
-            get() = transactionRecord.debtorUserInfo!!
+            get() = transactionRecord.debtorUserInfo
         override val dismissible: Boolean = false
 
         override fun displayText(): String =
-            "${transactionRecord.debtorUserInfo!!.nickname!!} is settling " +
-                    "${transactionRecord.balanceChange!!.asMoneyAmount()} out of your " +
+            "${transactionRecord.debtorUserInfo.user.displayName} is settling " +
+                    "${transactionRecord.balanceChange.asMoneyAmount()} out of your " +
                     "${settleAction.remainingAmount.asMoneyAmount()} request"
     }
 
@@ -79,18 +79,18 @@ internal sealed class Notification {
                 if (!transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
                         "TransactionRecord still pending for Settle Action " +
-                                "with id ${settleAction.getId()}"
+                                "with id ${settleAction.id}"
                     )
                 }
                 transactionRecord.dateAccepted
             }
         override val groupId: String
-            get() = settleAction.groupId!!
+            get() = settleAction.groupId
         override val userInfo: UserInfo
-            get() = settleAction.debteeUserInfo!!
+            get() = settleAction.debteeUserInfo
 
         override fun displayText(): String =
-            "${settleAction.debteeUserInfo!!.nickname} accepted your settlement for " +
-                    transactionRecord.balanceChange!!.asMoneyAmount()
+            "${settleAction.debteeUserInfo.user.displayName} accepted your settlement for " +
+                    transactionRecord.balanceChange.asMoneyAmount()
     }
 }

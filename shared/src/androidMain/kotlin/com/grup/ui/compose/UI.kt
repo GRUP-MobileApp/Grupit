@@ -23,24 +23,5 @@ internal actual fun Double.asMoneyAmount(): String =
         .format(this)
 
 @Composable
-internal actual fun profilePicturePainter(uri: String): Painter {
-    val context = LocalContext.current
-    val imageRequest: ImageRequest =
-        ImageRequest.Builder(context)
-            .data(uri)
-            .memoryCachePolicy(CachePolicy.ENABLED)
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .allowHardware(true)
-            .diskCacheKey(uri)
-            .memoryCacheKey(uri)
-            .transformations(CircleCropTransformation())
-            .build()
-    return rememberAsyncImagePainter(
-        model = imageRequest,
-        imageLoader = context.imageLoader
-    )
-}
-
-@Composable
 internal actual fun <T> StateFlow<T>.collectAsStateWithLifecycle(): State<T> =
     this.collectAsStateWithLifecycle()

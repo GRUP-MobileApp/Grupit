@@ -12,7 +12,7 @@ internal class GroupInvitesViewModel : LoggedInViewModel() {
     val groupInvites: StateFlow<List<GroupInvite>> =
         _groupInvitesFlow.map { groupInvites ->
             groupInvites.filter { groupInvite ->
-                groupInvite.invitee!! == apiServer.user.getId() &&
+                groupInvite.inviteeId == apiServer.user.id &&
                         groupInvite.dateAccepted == GroupInvite.PENDING
             }.sortedByDescending { groupInvite ->
                 groupInvite.date

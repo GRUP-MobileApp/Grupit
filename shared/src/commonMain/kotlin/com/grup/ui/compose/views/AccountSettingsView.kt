@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
@@ -33,7 +34,6 @@ import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.ProfileIcon
 import com.grup.ui.compose.SimpleLazyListPage
-import com.grup.ui.compose.profilePicturePainter
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 
 internal class AccountSettingsView : Screen {
@@ -93,8 +93,6 @@ private fun AccountSettingsLayout(
 
 @Composable
 private fun ProfileSettings(user: User) {
-    val pfpPainter = profilePicturePainter(user.profilePictureURL)
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -107,14 +105,14 @@ private fun ProfileSettings(user: User) {
             modifier = Modifier.fillMaxWidth().padding(AppTheme.dimensions.cardPadding)
         ) {
             ProfileIcon(
-                painter = pfpPainter,
+                user = user,
                 iconSize = 50.dp
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
             ) {
-                H1Text(text = user.displayName!!)
-                Caption(text = "@${user.username!!}")
+                H1Text(text = user.displayName)
+                Caption(text = "@${user.username}")
             }
             Spacer(modifier = Modifier.weight(1f))
             H1ConfirmTextButton(
@@ -182,7 +180,8 @@ private fun SettingSlider(
         H1Text(text = text, fontSize = textSize)
         Switch(
             checked = toggled,
-            onCheckedChange = onToggle
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(checkedThumbColor = AppTheme.colors.confirm)
         )
     }
 }

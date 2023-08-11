@@ -21,10 +21,5 @@ internal actual fun Double.asMoneyAmount(): String =
     }
 
 @Composable
-internal actual fun profilePicturePainter(uri: String): Painter {
-    return rememberVectorPainter(image = Icons.Default.Face)
-}
-
-@Composable
 internal actual fun <T> StateFlow<T>.collectAsStateWithLifecycle(): State<T> =
     this.collectAsState()

@@ -31,7 +31,7 @@ class APIServer private constructor(
     suspend fun registerUser(
         username: String,
         displayName: String,
-        profilePicture: ByteArray?
+        profilePicture: ByteArray
     ) = userController.createUser(username, displayName, profilePicture)
     suspend fun validUsername(username: String) = !userController.usernameExists(username)
 
@@ -70,7 +70,7 @@ class APIServer private constructor(
     // SettleAction
     suspend fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
         settleActionController.createSettleAction(settleAmount, debtee)
-    fun createSettleActionTransaction(
+    suspend fun createSettleActionTransaction(
         settleAction: SettleAction,
         myTransactionRecord: TransactionRecord
     ) = settleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)

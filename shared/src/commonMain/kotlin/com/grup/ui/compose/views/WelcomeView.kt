@@ -179,8 +179,11 @@ private fun WelcomeLayout(
                             displayName = "$firstName $lastName".trim(),
                             profilePictureBitmap = pfpBitmap,
                             onSuccess = { navigator.pop() },
-                            onFailure = { }
+                            onFailure = {
+                                println("Failed to register, error: $it")
+                            }
                         )
+
                     }
                 )
 

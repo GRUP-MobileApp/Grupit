@@ -2,10 +2,12 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.exceptions.APIException
-import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.models.*
 import com.grup.platform.signin.AuthManager
 import com.grup.ui.models.TransactionActivity
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -32,7 +34,7 @@ internal class MainViewModel : LoggedInViewModel(), KoinComponent {
     val groups: StateFlow<List<Group>> = _groupsFlow.onEach { newGroups ->
         selectedGroup.value?.let { nonNullGroup ->
             selectedGroupMutable.value = newGroups.find { group ->
-                group.getId() == nonNullGroup.getId()
+                group.id == nonNullGroup.id
             }
         } ?: run {
             selectedGroupMutable.value = newGroups.getOrNull(0)
@@ -45,7 +47,7 @@ internal class MainViewModel : LoggedInViewModel(), KoinComponent {
         _myUserInfosFlow.combine(selectedGroup) { userInfos, selectedGroup ->
             selectedGroup?.let { nonNullGroup ->
                 userInfos.find { userInfo ->
-                    userInfo.groupId == nonNullGroup.getId()
+                    userInfo.groupId == nonNullGroup.id
                 }
             }
         }.asState()
@@ -55,7 +57,7 @@ internal class MainViewModel : LoggedInViewModel(), KoinComponent {
         .combine(selectedGroup) { debtActions, selectedGroup ->
             selectedGroup?.let { group ->
                 debtActions.filter { debtAction ->
-                    debtAction.groupId == group.getId()
+                    debtAction.groupId == group.id
                 }
             } ?: emptyList()
         }
@@ -73,7 +75,7 @@ internal class MainViewModel : LoggedInViewModel(), KoinComponent {
         .combine(selectedGroup) { settleActions, selectedGroup ->
             selectedGroup?.let { group ->
                 settleActions.filter { settleAction ->
-                    settleAction.groupId == group.getId()
+                    settleAction.groupId == group.id
                 }
             } ?: emptyList()
         }
@@ -140,9 +142,12 @@ internal class MainViewModel : LoggedInViewModel(), KoinComponent {
         apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
     }
 
-    fun logOut() = coroutineScope.launch {
+    @OptIn(DelicateCoroutinesApi::class)
+    fun logOut(onSuccess: () -> Unit) = GlobalScope.launch {
         selectedGroupMutable.value = null
         authManager.getSignInManagerFromProvider(apiServer.authProvider)?.signOut()
         closeApiServer()
+        coroutineScope.cancel()
+        onSuccess()
     }
 }

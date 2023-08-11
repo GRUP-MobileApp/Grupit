@@ -1,39 +1,14 @@
 package com.grup.models
 
-import com.grup.exceptions.MissingFieldException
-import com.grup.other.createId
-import com.grup.other.getCurrentTime
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
-
-class GroupInvite internal constructor() : BaseEntity(), RealmObject {
+abstract class GroupInvite internal constructor() : BaseEntity() {
     companion object {
         const val PENDING = "PENDING"
     }
-    @PrimaryKey override var _id: String = createId()
 
-    var inviter: String? = null
-        get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing inviter")
-        internal set
-    var inviterUsername: String? = null
-        get() = field
-            ?: throw MissingFieldException("GroupInvite with id $_id missing inviterUsername")
-        internal set
-    var invitee: String? = null
-        get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing invitee")
-        internal set
-    var inviteeUsername: String? = null
-        get() = field
-            ?: throw MissingFieldException("GroupInvite with id $_id missing inviteeUsername")
-        internal set
-    var groupId: String? = null
-        get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing groupId")
-        internal set
-    var groupName: String? = null
-        get() = field ?: throw MissingFieldException("GroupInvite with id $_id missing groupName")
-        internal set
-    var date: String = getCurrentTime()
-        internal set
-    var dateAccepted: String = PENDING
-        internal set
+    abstract val inviter: User
+    abstract val inviteeId: String
+    abstract val groupId: String
+    abstract val groupName: String
+    abstract val date: String
+    abstract val dateAccepted: String
 }

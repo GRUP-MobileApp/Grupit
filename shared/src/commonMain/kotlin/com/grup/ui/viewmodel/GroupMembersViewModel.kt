@@ -18,13 +18,9 @@ internal class GroupMembersViewModel : LoggedInViewModel() {
     val userInfos: StateFlow<List<UserInfo>> =
         _userInfosFlow.map { userInfos ->
             userInfos.filter { userInfo ->
-                userInfo.groupId == selectedGroup.getId()
+                userInfo.groupId == selectedGroup.id
             }.sortedBy { userInfo ->
-                if (userInfo.userId == userObject.getId()) {
-                    ""
-                } else {
-                    userInfo.nickname!!
-                }
+                if (userInfo.user.id == userObject.id) "" else userInfo.user.displayName
             }
         }.asState()
 

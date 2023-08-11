@@ -8,6 +8,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -17,9 +20,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.GroupInvite
 import com.grup.ui.compose.collectAsStateWithLifecycle
-import com.grup.ui.compose.getProfilePictureURI
 import com.grup.ui.compose.isoDate
-import com.grup.ui.compose.profilePicturePainter
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.compose.Caption
@@ -27,8 +28,14 @@ import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.IconRowCard
 import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.viewmodel.GroupInvitesViewModel
+import io.kamel.core.Resource
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 
-class GroupInvitesView() : Screen {
+class GroupInvitesView : Screen {
     @Composable
     override fun Content() {
         val groupInvitesViewModel: GroupInvitesViewModel =
@@ -83,10 +90,7 @@ private fun GroupInviteRowCard(
     acceptGroupInviteOnClick: () -> Unit,
     rejectGroupInviteOnClick: () -> Unit
 ) {
-    val pfpPainter = profilePicturePainter(getProfilePictureURI(groupInvite.invitee!!))
-
     IconRowCard(
-        painter = pfpPainter,
         mainContent = {
             Column(
                 verticalArrangement = Arrangement.Top,
@@ -95,8 +99,8 @@ private fun GroupInviteRowCard(
             ) {
                 Caption(text = isoDate(groupInvite.date))
                 H1Text(
-                    text = "${groupInvite.inviterUsername!!} is inviting you to " +
-                            "${groupInvite.groupName}",
+                    text = "${groupInvite.inviter.username} is inviting you to " +
+                            groupInvite.groupName,
                     fontSize = 16.sp
                 )
             }
@@ -107,6 +111,8 @@ private fun GroupInviteRowCard(
                 rejectOnClick = rejectGroupInviteOnClick
             )
         },
-        iconSize = 60.dp
+        iconContent = {
+            ProfileIcon(user = groupInvite.inviter, iconSize = 60.dp)
+        }
     )
 }

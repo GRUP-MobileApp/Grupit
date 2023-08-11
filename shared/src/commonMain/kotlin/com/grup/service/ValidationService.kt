@@ -19,13 +19,13 @@ internal class ValidationService {
 
     fun validateNickname(fullName: String) {
         if (fullName.count { it == ' '} != 1) {
-            throw ValidationException("Illegal word count")
+            throw ValidationException("Illegal word count in display name")
         } else if (fullName.isBlank()) {
             throw ValidationException("Empty first/last name")
         } else if (fullName.length > 21) {
             throw ValidationException("Max 20 characters for first and last name")
-        } else if (fullName.matches(nameRegex)) {
-            throw ValidationException("Invalid characters")
+        } else if (!fullName.matches(nameRegex)) {
+            throw ValidationException("Invalid characters in display name")
         }
     }
 }

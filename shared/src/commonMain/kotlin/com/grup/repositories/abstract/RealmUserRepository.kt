@@ -2,6 +2,8 @@ package com.grup.repositories.abstract
 
 import com.grup.interfaces.IUserRepository
 import com.grup.models.User
+import com.grup.models.realm.RealmUser
+import com.grup.other.copyNestedObjectToRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.sync.asQuery
@@ -12,24 +14,24 @@ internal abstract class RealmUserRepository : IUserRepository {
     override suspend fun createMyUser(
         username: String,
         displayName: String
-    ): User? {
+    ): RealmUser? {
         return realm.write {
-            copyToRealm(
-                User().apply {
-                    this.username = username
-                    this.displayName = displayName
+            copyNestedObjectToRealm(
+                RealmUser().apply {
+                    this._username = username
+                    this._displayName = displayName
                 }
             )
         }
     }
 
-    override fun findMyUser(): User? {
-        return realm.subscriptions.findByName("MyUser")!!.asQuery<User>().first().find()
+    override fun findMyUser(): RealmUser? {
+        return realm.subscriptions.findByName("MyUser")!!.asQuery<RealmUser>().first().find()
     }
 
-    override suspend fun updateUser(user: User, block: User.() -> Unit) {
-        realm.write {
-            findLatest(user)!!.apply(block)
+    override suspend fun updateUser(user: User, block: User.() -> Unit): RealmUser {
+        return realm.write {
+            findLatest(user as RealmUser)!!.apply(block)
         }
     }
 }

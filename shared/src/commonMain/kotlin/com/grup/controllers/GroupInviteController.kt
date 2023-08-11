@@ -25,11 +25,11 @@ internal class GroupInviteController : KoinComponent {
     ): GroupInvite {
         val foundInvitee: User = userService.getUserByUsername(inviteeUsername)
             ?: throw NotFoundException("User with username $inviteeUsername not found")
-        val groupUserInfos: List<UserInfo> = userInfoService.findUserInfosByGroupId(group.getId())
+        val groupUserInfos: List<UserInfo> = userInfoService.findUserInfosByGroupId(group.id)
 
-        if (groupUserInfos.any { it.userId == foundInvitee.getId() }) {
+        if (groupUserInfos.any { it.user.id == foundInvitee.id }) {
             throw EntityAlreadyExistsException("$inviteeUsername is already in Group " +
-                    group.groupName!!
+                    group.groupName
             )
         }
         return groupInviteService.createGroupInvite(inviter, foundInvitee, group)
@@ -40,7 +40,7 @@ internal class GroupInviteController : KoinComponent {
     }
 
     suspend fun acceptGroupInvite(groupInvite: GroupInvite, user: User) {
-        userInfoService.createUserInfo(user, groupInvite.groupId!!)
+        userInfoService.createUserInfo(user, groupInvite.groupId)
         groupInviteService.deleteGroupInvite(groupInvite)
     }
 

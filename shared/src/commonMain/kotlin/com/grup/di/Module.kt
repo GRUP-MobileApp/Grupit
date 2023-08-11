@@ -76,10 +76,12 @@ internal val debugAppModules = module {
 
 fun initKoin() {
     startKoin {
-        module {
-            single { httpClient }
-            single { AuthManager() }
-        }
+        modules(
+            module {
+                single { httpClient }
+                single { AuthManager() }
+            }
+        )
     }
 }
 

@@ -4,11 +4,11 @@ import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.exceptions.APIException
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
+import com.grup.models.TransactionRecord.Companion.DataTransactionRecord
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 internal class TransactionViewModel : LoggedInViewModel() {
     companion object {
@@ -25,18 +25,18 @@ internal class TransactionViewModel : LoggedInViewModel() {
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
         .map { userInfos ->
             userInfos.filter { userInfo ->
-                userInfo.groupId == selectedGroup.getId()
+                userInfo.groupId == selectedGroup.id
             }
         }
     val userInfos: StateFlow<List<UserInfo>> = _userInfosFlow.map { userInfos ->
         userInfos.filter { userInfo ->
-            userInfo.userId != userObject.getId()
+            userInfo.user.id != userObject.id
         }
     }.asState()
 
     val myUserInfo: StateFlow<UserInfo> = _userInfosFlow.map { userInfos ->
         userInfos.find { userInfo ->
-            userInfo.userId == userObject.getId()
+            userInfo.user.id == userObject.id
         }!!
     }.asState()
 
@@ -136,10 +136,7 @@ internal class TransactionViewModel : LoggedInViewModel() {
         message: String
     ) = apiServer.createDebtAction(
         debtAmounts.map { (userInfo, balanceChange) ->
-            TransactionRecord().apply {
-                this.debtorUserInfo = userInfo
-                this.balanceChange = balanceChange
-            }
+            DataTransactionRecord(userInfo, balanceChange)
         },
         myUserInfo.value,
         message
@@ -161,16 +158,15 @@ internal class TransactionViewModel : LoggedInViewModel() {
         settleAction: SettleAction,
         amount: Double,
         myUserInfo: UserInfo
-    ) = apiServer.createSettleActionTransaction(
-        settleAction,
-        TransactionRecord().apply {
-            this.balanceChange = amount
-            this.debtorUserInfo = myUserInfo
-        }
-    )
+    ) = coroutineScope.launch {
+        apiServer.createSettleActionTransaction(
+            settleAction,
+            DataTransactionRecord(myUserInfo, amount)
+        )
+    }
 
     fun getSettleAction(settleActionId: String) =
         apiServer.getAllSettleActionsAsFlow().map { settleActions ->
-            settleActions.find { settleActionId == it.getId() }!!
+            settleActions.find { settleActionId == it.id }!!
         }.asState()
 }

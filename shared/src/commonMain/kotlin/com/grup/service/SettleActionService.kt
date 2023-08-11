@@ -1,5 +1,6 @@
 package com.grup.service
 
+import com.grup.exceptions.InvalidTransactionRecordException
 import com.grup.exceptions.NegativeBalanceException
 import com.grup.exceptions.NotCreatedException
 import com.grup.interfaces.ISettleActionRepository
@@ -18,27 +19,27 @@ internal class SettleActionService : KoinComponent {
             throw NegativeBalanceException("SettleAction for $settleAmount results in negative " +
                     "balance")
         }
-        return settleActionRepository.createSettleAction(
-            SettleAction().apply {
-                this.groupId = debtee.groupId
-                this.debteeUserInfo = debtee
-                this.settleAmount = settleAmount
-            }
-        ) ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
+        return settleActionRepository.createSettleAction(settleAmount, debtee)
+            ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
                     " ${debtee.groupId}")
     }
 
-    fun createSettleActionTransaction(
+    suspend fun createSettleActionTransaction(
         settleAction: SettleAction,
         myTransactionRecord: TransactionRecord
     ) {
-        settleActionRepository.addSettleActionTransaction(settleAction, myTransactionRecord)
+        if (settleAction.remainingAmount < myTransactionRecord.balanceChange) {
+            throw InvalidTransactionRecordException("Can't settle for more than remaining amount")
+        }
+        settleActionRepository.updateSettleAction(settleAction) {
+            transactionRecords.add(myTransactionRecord)
+        }
     }
 
     suspend fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.transactionRecords.find {
-                it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
+                it.debtorUserInfo.id == transactionRecord.debtorUserInfo.id &&
                         it.dateCreated == transactionRecord.dateCreated
             }?.dateAccepted = getCurrentTime()
         }
@@ -46,7 +47,7 @@ internal class SettleActionService : KoinComponent {
     suspend fun rejectTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.transactionRecords.find {
-                it.debtorUserInfo!!.getId() == transactionRecord.debtorUserInfo!!.getId() &&
+                it.debtorUserInfo.id == transactionRecord.debtorUserInfo.id &&
                         it.dateCreated == transactionRecord.dateCreated
             }?.dateAccepted = TransactionRecord.REJECTED
         }

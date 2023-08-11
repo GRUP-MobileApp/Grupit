@@ -3,21 +3,14 @@ package com.grup.controllers
 import com.grup.models.Group
 import com.grup.models.User
 import com.grup.service.GroupService
-import com.grup.service.UserInfoService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal class GroupController : KoinComponent {
     private val groupService: GroupService by inject()
-    private val userInfoService: UserInfoService by inject()
 
     suspend fun createGroup(creator: User, groupName: String): Group {
-        val group = Group().apply {
-            this.groupName = groupName
-        }
-
-        userInfoService.createUserInfo(creator, group.getId())
-        return groupService.createGroup(group)
+        return groupService.createGroup(creator, groupName)
     }
 
     fun getAllGroupsAsFlow() = groupService.getAllGroupsAsFlow()

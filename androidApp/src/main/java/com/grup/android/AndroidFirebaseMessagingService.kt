@@ -25,8 +25,6 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         val notificationType = message.data["type"]!!
 
-        println("MESSAGE RECEIVED: $notificationType")
-
         if (
             AccountSettings.GroupNotificationType.values().find {
                 it.type == notificationType
@@ -34,7 +32,6 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
                 NotificationPermissions.isNotificationTypeToggled(notification)
             } == true
         ) {
-            println("MESSAGE FINNA GET NOTI GANG")
             sendNotification(message.data)
         }
     }
@@ -81,7 +78,6 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        println("SENDING NOTIFICATION...")
         notificationManager.notify(0, notificationBuilder.build())
     }
 }

@@ -84,7 +84,7 @@ kotlin {
 
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
                 // Realm Sync
                 implementation("io.realm.kotlin:library-sync:$realmVersion")
@@ -198,8 +198,13 @@ android {
         minSdk = 21
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
     }
     buildTypes {
         getByName("debug") {

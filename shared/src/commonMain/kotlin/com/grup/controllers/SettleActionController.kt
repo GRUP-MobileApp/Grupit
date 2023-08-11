@@ -19,7 +19,7 @@ internal class SettleActionController : KoinComponent {
         }
     }
 
-    fun createSettleActionTransaction(
+    suspend fun createSettleActionTransaction(
         settleAction: SettleAction,
         myTransactionRecord: TransactionRecord
     ) {
@@ -30,7 +30,7 @@ internal class SettleActionController : KoinComponent {
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) {
-        if (transactionRecord.balanceChange!! > settleAction.remainingAmount) {
+        if (transactionRecord.balanceChange > settleAction.remainingAmount) {
             throw InvalidTransactionRecordException("Transaction exceeds Settle amount")
         }
         userInfoService.applyPartialSettleActionTransactionRecord(settleAction, transactionRecord)

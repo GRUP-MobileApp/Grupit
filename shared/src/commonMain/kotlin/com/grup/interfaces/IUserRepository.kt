@@ -11,5 +11,5 @@ internal interface IUserRepository : IRepository {
     fun findMyUser(): User?
     suspend fun findUserByUsername(username: String): User?
 
-    suspend fun updateUser(user: User, block: User.() -> Unit)
+    suspend fun updateUser(user: User, block: User.() -> Unit): User
 }

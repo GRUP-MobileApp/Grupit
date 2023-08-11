@@ -150,7 +150,7 @@ private fun GroupMembersLayout(
                 )
                 UsersList(
                     userInfos = userInfos.filter { userInfo ->
-                        userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
+                        userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
                     },
                     userInfoOnClick = { userInfoOnClick(it) }
                 )

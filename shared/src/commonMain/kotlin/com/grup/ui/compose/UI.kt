@@ -2,7 +2,6 @@ package com.grup.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.graphics.painter.Painter
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDateTime
@@ -43,8 +42,6 @@ fun isoTime(date: String) = LocalDateTime.parse(date).time.let { localTime ->
 fun getProfilePictureURI(userId: String) =
     "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
 
-@Composable
-internal expect fun profilePicturePainter(uri: String): Painter
 
 @Composable
 internal expect fun <T> StateFlow<T>.collectAsStateWithLifecycle(): State<T>

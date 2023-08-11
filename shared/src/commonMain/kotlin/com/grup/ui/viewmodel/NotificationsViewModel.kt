@@ -11,7 +11,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val latestDatesFlow: Flow<Map<String, String>> =
         _myUserInfosFlow.map { myUserInfos ->
             myUserInfos.associate { userInfo ->
-                userInfo.groupId!! to userInfo.latestViewDate
+                userInfo.groupId to userInfo.latestViewDate
             }
         }
 
@@ -21,7 +21,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
         _debtActionsFlow.map { debtActions ->
             debtActions.mapNotNull { debtAction ->
                 debtAction.transactionRecords.find { transactionRecord ->
-                    transactionRecord.debtorUserInfo!!.userId!! == userObject.getId() &&
+                    transactionRecord.debtorUserInfo.user.id == userObject.id &&
                             transactionRecord.dateAccepted == TransactionRecord.PENDING
                 }?.let { transactionRecord ->
                     Notification.IncomingDebtAction(debtAction, transactionRecord)
@@ -31,7 +31,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val outgoingDebtActionsAsNotification: Flow<List<Notification>> =
         _debtActionsFlow.map { debtActions ->
             debtActions.filter { debtAction ->
-                debtAction.debteeUserInfo!!.userId!! == userObject.getId()
+                debtAction.debteeUserInfo.user.id == userObject.id
             }.flatMap { debtAction ->
                 debtAction.transactionRecords.filter { transactionRecord ->
                     transactionRecord.isAccepted
@@ -46,7 +46,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val incomingTransactionsOnSettleActionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                settleAction.debteeUserInfo!!.userId!! == userObject.getId()
+                settleAction.debteeUserInfo.user.id == userObject.id
             }.flatMap { debtAction ->
                 debtAction.transactionRecords.filter { transactionRecord ->
                     transactionRecord.dateAccepted == TransactionRecord.PENDING
@@ -59,7 +59,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
         _settleActionsFlow.map { settleActions ->
             settleActions.mapNotNull { settleAction ->
                 settleAction.transactionRecords.find { transactionRecord ->
-                    transactionRecord.debtorUserInfo!!.userId!! == userObject.getId()
+                    transactionRecord.debtorUserInfo.user.id == userObject.id
                             && transactionRecord.isAccepted
                 }?.let { transactionRecord ->
                     Notification.DebteeAcceptSettleActionTransaction(settleAction, transactionRecord)

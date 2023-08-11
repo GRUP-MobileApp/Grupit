@@ -451,7 +451,7 @@ private fun SelectDebtorsChecklist(
     ) {
         items(
             userInfos.filter { userInfo ->
-                userInfo.nickname!!.contains(usernameSearchQuery, ignoreCase = true)
+                userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
             }
         ) { userInfo ->
             Row(
@@ -461,7 +461,7 @@ private fun SelectDebtorsChecklist(
                 UserInfoRowCard(
                     userInfo = userInfo,
                     mainContent = {
-                        H1Text(text = userInfo.nickname!!)
+                        H1Text(text = userInfo.user.displayName)
                         Caption(text = "Balance: ${userInfo.userBalance.asMoneyAmount()}")
                     },
                     sideContent = {

@@ -13,13 +13,15 @@ internal class DebtActionController : KoinComponent {
     private val userInfoService: UserInfoService by inject()
     private val debtActionService: DebtActionService by inject()
 
-    fun createDebtAction(transactionRecords: List<TransactionRecord>,
-                         debtee: UserInfo,
-                         message: String): DebtAction {
+    fun createDebtAction(
+        transactionRecords: List<TransactionRecord>,
+        debtee: UserInfo,
+        message: String
+    ): DebtAction {
         if (transactionRecords.isEmpty()) {
             throw InvalidTransactionRecordException("Empty transaction records")
         }
-        return debtActionService.createDebtAction(transactionRecords, debtee, message)
+        return debtActionService.createDebtAction(debtee, transactionRecords, message)
     }
 
     suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {

@@ -11,7 +11,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 internal class WelcomeViewModel : LoggedInViewModel() {
     sealed class NameValidity {
@@ -33,6 +32,10 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     val lastNameValidity: StateFlow<NameValidity> = _lastNameValidity
 
     fun checkUsername(username: String) {
+        if (username.isEmpty()) {
+            _usernameValidity.value = NameValidity.None
+            return
+        }
         _usernameValidity.value = NameValidity.Pending
         currentJob?.cancel()
         validateUsername(
@@ -53,6 +56,10 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     }
 
     fun checkFirstNameValidity(firstName: String) {
+        if (firstName.isEmpty()) {
+            _usernameValidity.value = NameValidity.None
+            return
+        }
         _firstNameValidity.value = NameValidity.Pending
         validateName(
             name = firstName,
@@ -65,6 +72,10 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         )
     }
     fun checkLastNameValidity(lastName: String) {
+        if (lastName.isEmpty()) {
+            _usernameValidity.value = NameValidity.None
+            return
+        }
         _lastNameValidity.value = NameValidity.Pending
         validateName(
             name = lastName,
@@ -88,7 +99,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
             apiServer.registerUser(
                 username,
                 displayName,
-                profilePictureBitmap?.let { cropCenterSquareImage(it) }
+                profilePictureBitmap?.let { cropCenterSquareImage(it) } ?: byteArrayOf()
             ).let(onSuccess)
         } catch (e: APIException) {
             onFailure(e.message)

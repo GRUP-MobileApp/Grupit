@@ -11,15 +11,8 @@ import org.koin.core.component.inject
 internal class UserInfoService : KoinComponent {
     private val userInfoRepository: IUserInfoRepository by inject()
 
-    fun createUserInfo(user: User, groupId: String): UserInfo? {
-        return userInfoRepository.createUserInfo(
-            UserInfo().apply {
-                this.userId = user.getId()
-                this.groupId = groupId
-                this.nickname = user.displayName
-                this.profilePictureURL = user.profilePictureURL
-            }
-        )
+    suspend fun createUserInfo(user: User, groupId: String): UserInfo? {
+        return userInfoRepository.createUserInfo(user, groupId)
     }
 
     fun findUserInfosByGroupId(groupId: String): List<UserInfo> {
@@ -34,33 +27,34 @@ internal class UserInfoService : KoinComponent {
         transactionRecord: TransactionRecord,
         allowNegative: Boolean = true
     ) {
-        val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo!!
-        val debteeUserInfo: UserInfo = debtAction.debteeUserInfo!!
+        val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo
+        val debteeUserInfo: UserInfo = debtAction.debteeUserInfo
 
-        if (!allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange!! < 0) {
+        if (!allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange < 0) {
             throw NegativeBalanceException("TransactionRecord between debtor with id " +
-                    "${debtorUserInfo.userId} and debtee with id ${debteeUserInfo.userId} " +
-                    "in DebtAction with id ${debtAction.getId()} results in negative balance")
+                    "${debtorUserInfo.user.id} and debtee with id " +
+                    "${debteeUserInfo.user.id} in DebtAction with id " +
+                    "${debtAction.id} results in negative balance")
         }
 
         userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->
-            userInfo.userBalance -= transactionRecord.balanceChange!!
+            userInfo.userBalance -= transactionRecord.balanceChange
         }
         userInfoRepository.updateUserInfo(debteeUserInfo) { userInfo ->
-            userInfo.userBalance += transactionRecord.balanceChange!!
+            userInfo.userBalance += transactionRecord.balanceChange
         }
     }
 
     suspend fun applySettleAction(settleAction: SettleAction) {
-        val debteeUserInfo: UserInfo = settleAction.debteeUserInfo!!
+        val debteeUserInfo: UserInfo = settleAction.debteeUserInfo
 
-        if (debteeUserInfo.userBalance < settleAction.settleAmount!!) {
-            throw NegativeBalanceException("SettleAction with id ${settleAction.getId()}" +
+        if (debteeUserInfo.userBalance < settleAction.settleAmount) {
+            throw NegativeBalanceException("SettleAction with id ${settleAction.id}" +
                     "results in negative balance")
         }
 
         userInfoRepository.updateUserInfo(debteeUserInfo) { userInfo ->
-            userInfo.userBalance -= settleAction.settleAmount!!
+            userInfo.userBalance -= settleAction.settleAmount
         }
     }
 
@@ -68,24 +62,24 @@ internal class UserInfoService : KoinComponent {
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) {
-        val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo!!
+        val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo
 
-        if (transactionRecord.balanceChange!! > settleAction.remainingAmount) {
+        if (transactionRecord.balanceChange > settleAction.remainingAmount) {
             throw NegativeBalanceException("TransactionRecord between debtor with id " +
-                    "${debtorUserInfo.userId} and debtee with id " +
-                    "${settleAction.debteeUserInfo!!} in SettleAction with id " +
-                    "${settleAction.getId()} results in negative remaining amount")
+                    "${debtorUserInfo.user.id} and debtee with id " +
+                    "${settleAction.debteeUserInfo} in SettleAction with id " +
+                    "${settleAction.id} results in negative remaining amount")
         }
 
         userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->
-            userInfo.userBalance += transactionRecord.balanceChange!!
+            userInfo.userBalance += transactionRecord.balanceChange
         }
     }
 
     suspend fun updateLatestTime(group: Group) {
         val myUserInfo: UserInfo =
             findMyUserInfosAsFlow().first().find {
-                it.groupId == group.getId()
+                it.groupId == group.id
             }!!
 
         userInfoRepository.updateUserInfo(myUserInfo) { userInfo ->

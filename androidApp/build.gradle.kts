@@ -42,11 +42,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "11"
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        jvmTarget = "1.8"
     }
     buildTypes {
         getByName("debug") {

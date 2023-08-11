@@ -30,7 +30,6 @@ import com.grup.models.*
 import com.grup.ui.compose.asMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoDate
-import com.grup.ui.compose.profilePicturePainter
 import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
@@ -71,9 +70,10 @@ internal class MainView : Screen {
                 groupInvitesViewModel = groupInvitesViewModel,
                 navigator = navigator,
                 logOutAuthProviderOnClick = {
-                    mainViewModel.logOut()
-                    navigator.popUntil { screen ->
-                        screen is ReleaseLoginView || screen is DebugLoginView
+                    mainViewModel.logOut {
+                        navigator.popUntil { screen ->
+                            screen is ReleaseLoginView || screen is DebugLoginView
+                        }
                     }
                 }
             )
@@ -167,8 +167,7 @@ private fun MainLayout(
                                                 ActionAmountScreen(
                                                     actionType =
                                                         TransactionViewModel.SETTLE_TRANSACTION,
-                                                    existingActionId =
-                                                        selectedAction.getId()
+                                                    existingActionId = selectedAction.id
                                                 )
                                             )
                                         }
@@ -198,16 +197,12 @@ private fun MainLayout(
             scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar(
-                    title = { selectedGroup?.let {
-                        H1Text(
-                            text = it.groupName!!
-                        )
-                    } },
+                    title = { selectedGroup?.let { H1Text(text = it.groupName) } },
                     backgroundColor = AppTheme.colors.primary,
                     navigationIcon = {
                         BadgedBox(
                             badge = {
-                                (notificationsAmount[selectedGroup?.getId()]?: 0)
+                                (notificationsAmount[selectedGroup?.id]?: 0)
                                     .let { selectedGroupNotificationsAmount ->
                                         if (
                                             notificationsAmount.values.sum() -
@@ -239,7 +234,7 @@ private fun MainLayout(
                             ) {
                                 GroupNotificationsButton(
                                     groupNotificationsAmount =
-                                    notificationsAmount[group.getId()] ?: 0,
+                                    notificationsAmount[group.id] ?: 0,
                                     navigateGroupNotificationsOnClick = {
                                         navigator.push(GroupNotificationsView())
                                     }
@@ -266,7 +261,7 @@ private fun MainLayout(
                     },
                     groupInvitesAmount = groupInvitesAmount,
                     notificationsAmount = notificationsAmount,
-                    isSelectedGroup = { it.getId() == selectedGroup?.getId() },
+                    isSelectedGroup = { it.id == selectedGroup?.id },
                     navigateGroupInvitesOnClick = {
                         navigator.push(GroupInvitesView())
                     },
@@ -290,6 +285,7 @@ private fun MainLayout(
                         navigator.push(AccountSettingsView())
                     },
                     logOutOnClick = {
+                        selectedAction = null
                         logOutAuthProviderOnClick()
                     }
                 )
@@ -334,8 +330,7 @@ private fun MainLayout(
                                 ActiveSettleActions(
                                     activeSettleActions = activeSettleActions,
                                     isMySettleAction = { settleAction ->
-                                        settleAction.debteeUserInfo!!.userId!! ==
-                                                myUserInfo.userId!!
+                                        settleAction.debteeUserInfo.user.id == myUserInfo.user.id
                                     },
                                     settleActionCardOnClick = selectAction,
                                     modifier = Modifier.fillMaxWidth()
@@ -419,7 +414,7 @@ private fun GroupNavigationMenu(
                 GroupNavigationRow(
                     group = group,
                     onGroupClick = { onGroupClick(index) },
-                    groupNotificationsAmount = notificationsAmount[group.getId()] ?: 0,
+                    groupNotificationsAmount = notificationsAmount[group.id] ?: 0,
                     isSelected = isSelectedGroup(group)
                 )
             }
@@ -501,14 +496,11 @@ private fun GroupNavigationRow(
                     if (isSelected) border(width = 1.dp, color = Color.White)
                 }
             ) {
-                SmallIcon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = group.groupName!!
-                )
+                SmallIcon(imageVector = Icons.Default.Home, contentDescription = group.groupName)
             }
             Spacer(modifier = Modifier.width(20.dp))
             H1Text(
-                text = group.groupName!!,
+                text = group.groupName,
                 color = AppTheme.colors.onSecondary,
                 modifier = Modifier.weight(1f)
             )
@@ -653,8 +645,6 @@ private fun SettleActionCard(
     isMySettleAction: Boolean = false,
     cardSize: Dp = 140.dp
 ) {
-    val pfpPainter = profilePicturePainter(settleAction.debteeUserInfo!!.profilePictureURL)
-
     BadgedBox(
         badge = {
             settleAction.transactionRecords.count { transactionRecord ->
@@ -695,7 +685,7 @@ private fun SettleActionCard(
                     .fillMaxWidth()
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
-                ProfileIcon(painter = pfpPainter, iconSize = 50.dp)
+                ProfileIcon(user = settleAction.debteeUserInfo.user, iconSize = 50.dp)
                 MoneyAmount(moneyAmount = settleAction.remainingAmount, fontSize = 24.sp)
             }
         }
@@ -713,7 +703,7 @@ private fun DebtActionDetails(
         modifier = modifier.fillMaxSize()
     ) {
         UserInfoRowCard(
-            userInfo = debtAction.debteeUserInfo!!,
+            userInfo = debtAction.debteeUserInfo,
             mainContent = {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -722,7 +712,7 @@ private fun DebtActionDetails(
                     Caption(text = "Debt")
                     Caption(text = "${isoDate(debtAction.date)} at ${isoTime(debtAction.date)}")
                 }
-                H1Text(text = debtAction.debteeUserInfo!!.nickname!!, fontSize = 28.sp)
+                H1Text(text = debtAction.debteeUserInfo.user.displayName, fontSize = 28.sp)
             },
             sideContent = null,
             iconSize = 80.dp
@@ -782,7 +772,8 @@ private fun SettleActionDetails(
     var selectedTabIndex: Int by remember { mutableStateOf(0) }
     var selectedTransaction: TransactionRecord? by remember { mutableStateOf(null) }
 
-    val isMyAction: Boolean = (myUserInfo.userId!! == settleAction.debteeUserInfo!!.userId!!)
+    val isMyAction: Boolean =
+        (myUserInfo.user!!.id == settleAction.debteeUserInfo.user.id)
     if (
         isMyAction &&
         settleAction.remainingAmount > 0 &&
@@ -806,8 +797,9 @@ private fun SettleActionDetails(
                         modifier = modifier.fillMaxWidth()
                     ) {
                         H1Text(
-                            text = "${selectedTransaction.debtorUserInfo!!.nickname!!} is " +
-                                    "paying ${selectedTransaction.balanceChange!!.asMoneyAmount()}"
+                            text = "${selectedTransaction.debtorUserInfo.user.displayName} " +
+                                    "is paying " +
+                                    selectedTransaction.balanceChange.asMoneyAmount()
                         )
                         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                             H1ConfirmTextButton(
@@ -833,9 +825,9 @@ private fun SettleActionDetails(
             modifier = modifier.fillMaxSize()
         ) {
             UserInfoRowCard(
-                userInfo = settleAction.debteeUserInfo!!,
+                userInfo = settleAction.debteeUserInfo,
                 mainContent = {
-                    Caption(text = settleAction.debteeUserInfo!!.nickname!!)
+                    Caption(text = settleAction.debteeUserInfo.user.displayName)
                     MoneyAmount(
                         moneyAmount = settleAction.remainingAmount,
                         fontSize = 60.sp
@@ -940,13 +932,10 @@ private fun TransactionRecordRowCard(
     transactionRecord: TransactionRecord
 ) {
     UserInfoRowCard(
-        userInfo = transactionRecord.debtorUserInfo!!,
+        userInfo = transactionRecord.debtorUserInfo,
         iconSize = 50.dp,
         mainContent = {
-            H1Text(
-                text = transactionRecord
-                    .debtorUserInfo!!.nickname!!
-            )
+            H1Text(text = transactionRecord.debtorUserInfo.user.displayName)
             Caption(
                 text =
                     if (transactionRecord.isAccepted)
@@ -956,11 +945,7 @@ private fun TransactionRecordRowCard(
             )
         },
         sideContent = {
-            MoneyAmount(
-                moneyAmount = transactionRecord
-                    .balanceChange!!,
-                fontSize = 24.sp
-            )
+            MoneyAmount(moneyAmount = transactionRecord.balanceChange, fontSize = 24.sp)
         },
         modifier = modifier
     )
