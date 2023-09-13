@@ -13,4 +13,12 @@ object AccountSettings {
     }
 }
 
-object NotificationPermissions : ViewableAccountSettingsService()
+object NotificationPermissions : ViewableAccountSettingsService() {
+    fun isNotificationTypeToggled(notificationName: String): Boolean {
+        return AccountSettings.GroupNotificationType.values().find {
+            it.type == notificationName
+        }?.let { notification ->
+            NotificationPermissions.isNotificationTypeToggled(notification)
+        } == true
+    }
+}

@@ -31,11 +31,3 @@ internal class RealmTransactionRecord : TransactionRecord(), EmbeddedRealmObject
     @PersistedName("dateAccepted")
     var _dateAccepted: String = PENDING
 }
-
-internal fun TransactionRecord.toRealmTransactionRecord(): RealmTransactionRecord =
-    RealmTransactionRecord().apply {
-        _debtorUserInfo = this@toRealmTransactionRecord.debtorUserInfo as RealmUserInfo
-        _balanceChange = this@toRealmTransactionRecord.balanceChange
-        _dateCreated = this@toRealmTransactionRecord.dateCreated
-        _dateAccepted = this@toRealmTransactionRecord.dateAccepted
-    }

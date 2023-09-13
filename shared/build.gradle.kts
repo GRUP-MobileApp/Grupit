@@ -5,7 +5,8 @@ val realmVersion: String by project
 val composeVersion: String by project
 val voyagerVersion: String by project
 val lifecycleVersion: String by project
-val coilComposeVersion: String by project
+val firebaseBOMVersion: String by project
+val mokoResourcesVersion: String by project
 val kotlinExtensionVersion: String by project
 val napierVersion = "2.4.0"
 
@@ -13,7 +14,7 @@ val keystorePassword: String by project
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.8.22"
+    kotlin("plugin.serialization") version "1.9.0"
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
@@ -24,7 +25,7 @@ plugins {
 // CocoaPods requires the podspec to have a version.
 version = "1.0"
 kotlin {
-    android()
+    androidTarget()
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -43,6 +44,8 @@ kotlin {
             baseName = "shared"
         }
         extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
+
+        pod("FirebaseMessaging")
 
         // Maps custom Xcode configuration to NativeBuildType
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
@@ -71,8 +74,8 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
 
                 // MOKO
-                implementation("dev.icerock.moko:resources:0.22.0")
-                implementation("dev.icerock.moko:resources-compose:0.22.0")
+                implementation("dev.icerock.moko:resources:$mokoResourcesVersion")
+                implementation("dev.icerock.moko:resources-compose:$mokoResourcesVersion")
                 implementation("dev.icerock.moko:media:0.11.0")
                 implementation("dev.icerock.moko:media-compose:0.11.0")
                 implementation("dev.icerock.moko:permissions-compose:0.16.0")
@@ -113,10 +116,12 @@ kotlin {
             }
         }
         val androidMain by getting {
+            dependsOn(commonMain)
             dependencies {
                 // UI
 
                 // Jetpack Compose
+                //noinspection GradleDependency
                 implementation("androidx.compose.ui:ui:$composeVersion")
                 implementation("androidx.activity:activity-compose:1.7.2")
 
@@ -125,22 +130,19 @@ kotlin {
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
 
-                // Coil
-                implementation("io.coil-kt:coil-compose:$coilComposeVersion")
-
                 // Backend
 
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
 
                 // Google Play Services
-                implementation ("com.google.android.gms:play-services-auth:20.6.0")
+                implementation ("com.google.android.gms:play-services-auth:20.7.0")
 
                 // AWS
                 implementation("aws.sdk.kotlin:s3:$awsVersion")
 
                 // Import the Firebase BoM
-                implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
+                implementation(platform("com.google.firebase:firebase-bom:$firebaseBOMVersion"))
 
                 // Firebase Auth
                 implementation("com.google.firebase:firebase-auth-ktx")

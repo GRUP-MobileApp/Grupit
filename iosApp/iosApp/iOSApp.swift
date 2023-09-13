@@ -1,12 +1,11 @@
 import SwiftUI
 import GoogleSignIn
-import FirebaseCore
 import FirebaseAuth
 import shared
 
 @main
 struct iOSApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     init() {
         ModuleKt.doInitKoin()

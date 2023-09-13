@@ -30,14 +30,15 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import kotlin.jvm.JvmStatic
-import kotlin.reflect.KProperty
 import kotlin.time.Duration.Companion.seconds
 
-abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
+internal open class RealmManager(private val isDebug: Boolean = false) : DBManager, KoinComponent {
     private val app: App
         get() = (if (isDebug) debugApp else releaseApp)
 
@@ -49,6 +50,10 @@ abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
                 else -> AuthManager.AuthProvider.None
             }
         } ?: throw NotLoggedInException("Not logged into Realm")
+
+    override suspend fun startDBTransaction(transaction: () -> Unit) = realm.write {
+        transaction()
+    }
 
 
     private val realm: Realm = app.currentUser?.let { realmUser ->
@@ -217,11 +222,14 @@ abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
     }
 
     suspend fun open() {
+        app.currentUser?.let { realmUser ->
+            NotificationsService.subscribePersonalNotifications(realmUser.id)
+        } ?: throw NotLoggedInException()
         realm.subscriptions.waitForSynchronization(5.seconds)
         realm.syncSession.downloadAllServerChanges(5.seconds)
         userSubscriptionsJob.start()
         groupSubscriptionsJob.start()
-        loadKoinModules(if (isDebug) debugAppModules else releaseAppModules)
+        loadKoinModules(if (isDebug) debugAppModule else releaseAppModule)
     }
 
     companion object {
@@ -242,7 +250,7 @@ abstract class RealmManager(private val isDebug: Boolean = false) : DBManager {
                 module {
                     single { realm }
                 },
-                if (isDebug) debugAppModules else releaseAppModules
+                if (isDebug) debugAppModule else releaseAppModule
             )
         )
     }

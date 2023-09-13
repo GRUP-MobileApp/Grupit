@@ -2,7 +2,6 @@ package com.grup.di
 
 import com.grup.exceptions.login.InvalidGoogleAccountException
 import com.grup.interfaces.DBManager
-import com.grup.service.NotificationsService
 import io.realm.kotlin.mongodb.*
 import io.realm.kotlin.mongodb.exceptions.AuthException
 
@@ -25,10 +24,8 @@ internal class ReleaseRealmManager private constructor() : RealmManager() {
         }
 
         private suspend fun loginRealmManager(credentials: Credentials): DBManager {
-            releaseApp.login(credentials).let { realmUser ->
-                NotificationsService.subscribePersonalNotifications(realmUser.id)
-            }
-            return ReleaseRealmManager()
+            releaseApp.login(credentials)
+            return ReleaseRealmManager().apply { open() }
         }
     }
 }

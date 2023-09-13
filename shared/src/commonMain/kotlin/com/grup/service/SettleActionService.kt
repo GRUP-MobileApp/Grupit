@@ -31,9 +31,7 @@ internal class SettleActionService : KoinComponent {
         if (settleAction.remainingAmount < myTransactionRecord.balanceChange) {
             throw InvalidTransactionRecordException("Can't settle for more than remaining amount")
         }
-        settleActionRepository.updateSettleAction(settleAction) {
-            transactionRecords.add(myTransactionRecord)
-        }
+        settleActionRepository.addTransactionRecord(settleAction, myTransactionRecord)
     }
 
     suspend fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {

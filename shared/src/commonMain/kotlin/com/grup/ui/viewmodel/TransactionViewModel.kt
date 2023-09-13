@@ -3,7 +3,6 @@ package com.grup.ui.viewmodel
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.exceptions.APIException
 import com.grup.models.SettleAction
-import com.grup.models.TransactionRecord
 import com.grup.models.TransactionRecord.Companion.DataTransactionRecord
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow

@@ -25,7 +25,6 @@ internal val servicesModule = module {
     single { GroupInviteService() }
     single { DebtActionService() }
     single { SettleActionService() }
-
     single { AccountSettingsService() }
     single { ValidationService() }
 }
@@ -66,11 +65,11 @@ internal val testRepositoriesModule = module {
     single<ISettingsDataStore> { SettingsDataStore() }
 }
 
-internal val releaseAppModules = module {
+internal val releaseAppModule = module {
     includes(servicesModule, releaseRepositoriesModule)
 }
 
-internal val debugAppModules = module {
+internal val debugAppModule = module {
     includes(servicesModule, debugRepositoriesModule)
 }
 

@@ -6,7 +6,6 @@ import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
 import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmUserInfo
-import com.grup.models.realm.toRealmTransactionRecord
 import com.grup.other.copyNestedObjectToRealm
 import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.ext.query

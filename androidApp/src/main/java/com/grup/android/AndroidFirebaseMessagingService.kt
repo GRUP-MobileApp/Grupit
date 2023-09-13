@@ -12,7 +12,6 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.grup.android.ui.MainActivity
-import com.grup.other.AccountSettings
 import com.grup.other.NotificationPermissions
 
 class AndroidFirebaseMessagingService : FirebaseMessagingService() {
@@ -25,13 +24,7 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         val notificationType = message.data["type"]!!
 
-        if (
-            AccountSettings.GroupNotificationType.values().find {
-                it.type == notificationType
-            }?.let { notification ->
-                NotificationPermissions.isNotificationTypeToggled(notification)
-            } == true
-        ) {
+        if (NotificationPermissions.isNotificationTypeToggled(notificationType)) {
             sendNotification(message.data)
         }
     }

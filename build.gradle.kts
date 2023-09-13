@@ -2,6 +2,7 @@ buildscript {
     val kotlinVersion: String by project
     val composeVersion: String by project
     val realmVersion: String by project
+    val mokoResourcesVersion: String by project
 
     repositories {
         google()
@@ -13,10 +14,10 @@ buildscript {
         classpath("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
         classpath("com.android.tools.build:gradle:8.1.0")
         classpath("io.realm.kotlin:gradle-plugin:$realmVersion")
-        classpath("dev.icerock.moko:resources-generator:0.21.2")
+        classpath("dev.icerock.moko:resources-generator:$mokoResourcesVersion")
 
         classpath("com.google.gms:google-services:4.3.15")
-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.5")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.8")
     }
 }
 

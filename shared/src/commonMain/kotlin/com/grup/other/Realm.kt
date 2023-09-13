@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.map
 internal fun <T : RealmObject> MutableRealm.copyNestedObjectToRealm(instance: T): T =
     copyToRealm(getLatestFields(instance), UpdatePolicy.ERROR)
 
-private fun <T: BaseRealmObject> MutableRealm.getLatestFields(obj: T): T {
+internal fun <T: BaseRealmObject> MutableRealm.getLatestFields(obj: T): T {
     return try {
         findLatest(obj) ?: throw NotFoundException("Object not found in realm")
     } catch (e: IllegalArgumentException) {

@@ -286,6 +286,7 @@ private fun MainLayout(
                     },
                     logOutOnClick = {
                         selectedAction = null
+                        closeDrawer()
                         logOutAuthProviderOnClick()
                     }
                 )
@@ -493,7 +494,7 @@ private fun GroupNavigationRow(
                     }
                 },
                 modifier = Modifier.apply {
-                    if (isSelected) border(width = 1.dp, color = Color.White)
+                    if (isSelected) border(width = 2.dp, color = Color.White)
                 }
             ) {
                 SmallIcon(imageVector = Icons.Default.Home, contentDescription = group.groupName)
@@ -773,7 +774,7 @@ private fun SettleActionDetails(
     var selectedTransaction: TransactionRecord? by remember { mutableStateOf(null) }
 
     val isMyAction: Boolean =
-        (myUserInfo.user!!.id == settleAction.debteeUserInfo.user.id)
+        (myUserInfo.user.id == settleAction.debteeUserInfo.user.id)
     if (
         isMyAction &&
         settleAction.remainingAmount > 0 &&

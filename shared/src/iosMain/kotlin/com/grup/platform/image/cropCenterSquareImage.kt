@@ -1,12 +1,14 @@
 package com.grup.platform.image
 
 import dev.icerock.moko.media.Bitmap
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.CoreGraphics.*
 import platform.UIKit.*
 import platform.posix.memcpy
 
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun cropCenterSquareImage(bitmap: Bitmap): ByteArray {
     val croppedUIImage = bitmap.image.CGImage?.let { cgImage ->
         val width = CGImageGetWidth(cgImage).toDouble()

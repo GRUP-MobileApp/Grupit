@@ -1,5 +1,7 @@
 package com.grup.models
 
+import com.grup.models.realm.RealmTransactionRecord
+import com.grup.models.realm.RealmUserInfo
 import com.grup.other.getCurrentTime
 
 abstract class TransactionRecord {
@@ -23,4 +25,12 @@ abstract class TransactionRecord {
 
     val isAccepted: Boolean
         get() = !(dateAccepted == PENDING || dateAccepted == REJECTED)
+
+    internal fun toRealmTransactionRecord(): RealmTransactionRecord =
+        RealmTransactionRecord().apply {
+            _debtorUserInfo = this@TransactionRecord.debtorUserInfo as RealmUserInfo
+            _balanceChange = this@TransactionRecord.balanceChange
+            _dateCreated = this@TransactionRecord.dateCreated
+            _dateAccepted = this@TransactionRecord.dateAccepted
+        }
 }
