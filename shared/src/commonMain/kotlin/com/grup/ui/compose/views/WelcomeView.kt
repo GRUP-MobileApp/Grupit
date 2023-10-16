@@ -72,8 +72,8 @@ private fun WelcomeLayout(
     BindMediaPickerEffect(picker)
 
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState()
     val pageCount = 4
+    val pagerState = rememberPagerState(pageCount = { pageCount })
 
     var username: String by remember { mutableStateOf("") }
     val usernameValidity: WelcomeViewModel.NameValidity
@@ -94,7 +94,6 @@ private fun WelcomeLayout(
             .padding(horizontal = AppTheme.dimensions.appPadding)
     ) {
         HorizontalPager(
-            pageCount = pageCount,
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth(),

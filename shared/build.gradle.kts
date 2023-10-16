@@ -121,8 +121,8 @@ kotlin {
                 // UI
 
                 // Jetpack Compose
-                //noinspection GradleDependency
                 implementation("androidx.compose.ui:ui:$composeVersion")
+                //noinspection GradleDependency
                 implementation("androidx.activity:activity-compose:1.7.2")
 
                 // Lifecycle
@@ -194,7 +194,7 @@ android {
             keyPassword = keystorePassword
         }
     }
-    compileSdk = 33
+    compileSdk = 34
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdk = 21

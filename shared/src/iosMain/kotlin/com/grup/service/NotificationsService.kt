@@ -2,10 +2,8 @@ package com.grup.service
 
 import cocoapods.FirebaseMessaging.FIRMessaging
 
+
 internal actual object NotificationsService {
-    init {
-        println("initiating notifications service")
-    }
     actual fun subscribeGroupNotifications(groupId: String) {
         FIRMessaging.messaging().subscribeToTopic("group_$groupId")
     }

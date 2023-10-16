@@ -30,17 +30,22 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import kotlin.jvm.JvmStatic
 import kotlin.time.Duration.Companion.seconds
 
-internal open class RealmManager(private val isDebug: Boolean = false) : DBManager, KoinComponent {
+internal open class RealmManager(private val isDebug: Boolean = false) : DBManager {
+    protected companion object {
+        @JvmStatic
+        protected val releaseApp: App = App.create(APP_ID)
+        @JvmStatic
+        protected val debugApp: App = App.create(TEST_APP_ID)
+    }
+
     private val app: App
-        get() = (if (isDebug) debugApp else releaseApp)
+        get() = if (isDebug) debugApp else releaseApp
 
     override val authProvider: AuthManager.AuthProvider
         get() = app.currentUser?.let { user ->
@@ -181,44 +186,6 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
             }
             prevSubscribedGroupIds = newGroupIds
         }
-
-
-//        realm.subscriptions.findByName("UserInfos")?.asQuery<RealmUserInfo>()!!.asFlow()
-//            .collect { resultsChange ->
-//                val newGroupIds: Set<String> = resultsChange.list.map { it.groupId }.toSet()
-//                val newUserIds: Set<String> = resultsChange.list.map { it.user.id }.toSet()
-//
-//                realm.subscriptions.update {
-//                    newGroupIds.minus(prevSubscribedGroupIds).forEach { groupId ->
-//                        add(realm.query<RealmGroup>("$idSerialName == $0", groupId),
-//                            "${groupId}_Group")
-//                        add(realm.query<RealmUserInfo>("_groupId == $0", groupId),
-//                            "${groupId}_UserInfo")
-//                        add(realm.query<RealmDebtAction>("_groupId == $0", groupId),
-//                            "${groupId}_DebtAction")
-//                        add(realm.query<RealmSettleAction>("_groupId == $0", groupId),
-//                            "${groupId}_SettleAction")
-//                        NotificationsService.subscribeGroupNotifications(groupId)
-//                    }
-//                    prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
-//                        remove("${groupId}_Group")
-//                        remove("${groupId}_UserInfo")
-//                        remove("${groupId}_DebtAction")
-//                        remove("${groupId}_SettleAction")
-//                        NotificationsService.unsubscribeGroupNotifications(groupId)
-//                    }
-//
-//                    newUserIds.minus(prevSubscribedUserIds).forEach { userId ->
-//                        add(realm.query<RealmUser>("$idSerialName == $0", userId),
-//                            "${userId}_User")
-//                    }
-//                    prevSubscribedUserIds.minus(newUserIds).forEach { userId ->
-//                        remove("${userId}_User")
-//                    }
-//                }
-//                prevSubscribedGroupIds = newGroupIds
-//                prevSubscribedUserIds = newUserIds
-//            }
     }
 
     suspend fun open() {
@@ -230,13 +197,6 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
         userSubscriptionsJob.start()
         groupSubscriptionsJob.start()
         loadKoinModules(if (isDebug) debugAppModule else releaseAppModule)
-    }
-
-    companion object {
-        @JvmStatic
-        protected val releaseApp: App = App.create(APP_ID)
-        @JvmStatic
-        protected val debugApp: App = App.create(TEST_APP_ID)
     }
 
     override suspend fun close() {

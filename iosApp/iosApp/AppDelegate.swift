@@ -85,4 +85,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
         return UIBackgroundFetchResult.newData
     }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
 }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -126,7 +126,6 @@
 		20081D3CBEE5677763AAF43A8680BF6B /* FIRSendVerificationCodeRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 681F6A31EA56F924E744358AF4CA3B2B /* FIRSendVerificationCodeRequest.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		20126504B21BF96F7634D526C7950036 /* GIDSignInResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F434407F342A020675323CA8BC53803 /* GIDSignInResult.m */; };
 		20C6FD8A23A259D3ABBBA68A5ED6F795 /* dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D7AF75AD081C8D6B844DA507A036B55 /* dummy.m */; };
-		20EBAA857C9A4544AAAAD4D46E5D9240 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CEB1A6B3C282F29DF5DDB484BAC2C82 /* Foundation.framework */; };
 		210F8127ACA1094C33C524AF7762D678 /* FBLPromise+Timeout.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD88FC3428550E4ACD4674DBDEA8B0F /* FBLPromise+Timeout.m */; };
 		2156F1E12D1F62F8322CFE5C29277E6E /* OIDResponseTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 606F6FBBB974735DA92E6E65D97BBB32 /* OIDResponseTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		217A472B8A51E2074AF991A482F2B9D3 /* FIRAuthGlobalWorkQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 94F18EAE6DD7448B56D361B7FDCE43FB /* FIRAuthGlobalWorkQueue.h */; settings = {ATTRIBUTES = (Project, ); }; };
@@ -225,8 +224,8 @@
 		3E19512CAA59984C13E1C22800C0CF87 /* FIRAuthAppCredential.h in Headers */ = {isa = PBXBuildFile; fileRef = DBB60735CE13758DE2144F073B23CE3F /* FIRAuthAppCredential.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		3E2FA264318E6350AA0C9C59FEB37E1E /* FIRComponentContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3A9B3EBC032F9439027185A3E4DB0C26 /* FIRComponentContainer.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		3E6A2F325990D74D584DFB427B5D31CA /* FBLPromise+Recover.m in Sources */ = {isa = PBXBuildFile; fileRef = 442BEFF3EE8E6E59BEBDEAB4F05EAB03 /* FBLPromise+Recover.m */; };
-		3E9F0A0CDBBD8A679A281E65232D8E0D /* Pods-iosApp-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 015E0D7EA7331961AB63E5AFECA86BB5 /* Pods-iosApp-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3EEB073873D8B56104AF1C74DF63EC1D /* FIRInstallationsHTTPError.m in Sources */ = {isa = PBXBuildFile; fileRef = AE3FB4420B8666FC5E25564F10ED3D32 /* FIRInstallationsHTTPError.m */; };
+		3FE477BBC03A58D1A44CFC11282076F9 /* Pods-Grupit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = F6C51D00A4C8416FDE0E7A8D9E7DB894 /* Pods-Grupit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3FF245B492F029804F79113978BEE3FF /* FIRAnalyticsConfiguration.h in Headers */ = {isa = PBXBuildFile; fileRef = 67F03F9DEC233342991815F1FE6B45A7 /* FIRAnalyticsConfiguration.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		40811940FB5675B52E76F480E9AE88D2 /* FirebaseMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = AFBF2E5AD31D422ED485F3945C163C70 /* FirebaseMessaging.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		40873A5FF398CEF066397732E3FF4C39 /* _ObjC_HeartbeatController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3057DD58A88ED26E9F0A6B9B7561F10 /* _ObjC_HeartbeatController.swift */; };
@@ -401,6 +400,7 @@
 		6D767DF3F5995F0F407675E627FF8691 /* FIRMessagingCheckinStore.m in Sources */ = {isa = PBXBuildFile; fileRef = EED5A88E9EC5FEB89ED7DAAEE0588B54 /* FIRMessagingCheckinStore.m */; };
 		6E19EF6334D4D7E3DBCFC7C0FBCA2E48 /* placeholder.m in Sources */ = {isa = PBXBuildFile; fileRef = 193F49E6A5F6B5C603AAED284A51528C /* placeholder.m */; };
 		6EB1983A2D3549D862B39D648DE6F6D2 /* FIREmailLinkSignInRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 73E60944A29466CE91AC337D144B40F3 /* FIREmailLinkSignInRequest.m */; };
+		6EB2E9AFD07BB2DF8C27E2F3EB7C5AAD /* Pods-Grupit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 88B7CF349C4ABF9C87AD58BCB681BECF /* Pods-Grupit-dummy.m */; };
 		6ECA7A2734AE58ABDA4E743462EFCFBD /* GIDEMMErrorHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = E239D65B6A2337501520AE301AD66927 /* GIDEMMErrorHandler.m */; };
 		6F15CED1C2C90EF0B54504FA14D1D4F9 /* GoogleUtilities-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6AD6D6767474FA86ADA7796972EC48 /* GoogleUtilities-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6F71CE64A6D9E970E468036B9B563B14 /* FBLPromise+Await.h in Headers */ = {isa = PBXBuildFile; fileRef = A6E25A42E7CA19CBFAD913AC2763A365 /* FBLPromise+Await.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -499,6 +499,7 @@
 		8D9DD3BFAECC99954598490B34B04EAC /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5E63F2EDC6C247121749C18F436231D /* CoreGraphics.framework */; };
 		8DE07F51982D51A6CE94388322B977A6 /* vi.lproj in Resources */ = {isa = PBXBuildFile; fileRef = B10523B8F305CD123DFE1D0468E80FBA /* vi.lproj */; };
 		8DF963F021C0D6BC36C4296E3AF7A4E2 /* pb_encode.h in Headers */ = {isa = PBXBuildFile; fileRef = 186461A25EFAA57B09256C506A32A905 /* pb_encode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8E1F8CE2D0AA3DD481A21EBD2610D010 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CEB1A6B3C282F29DF5DDB484BAC2C82 /* Foundation.framework */; };
 		8E46D3C99668474FF1D337350AA81AC0 /* FIRVerifyCustomTokenRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = ED4BB5A923EE8DF21D9F7F21C88DA3C2 /* FIRVerifyCustomTokenRequest.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		8E6B1C7F0D484C8FCA0B62FA0E01458F /* FIRGetAccountInfoRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = E716155E8F77BB779F5A6D7604110930 /* FIRGetAccountInfoRequest.m */; };
 		8E8DDE88F6F3B3D0258F1CD97F211859 /* FIRAuthDefaultUIDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 1438932625E7CCD4BADA81AA203564E6 /* FIRAuthDefaultUIDelegate.h */; settings = {ATTRIBUTES = (Project, ); }; };
@@ -884,7 +885,6 @@
 		F9CFA5C5B014CB39740FD3E1B6D6EDC1 /* FIRComponentType.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD47EC8902ED4496AF0C30B1442EA1B /* FIRComponentType.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		F9FD1B5FCD483CA10CDA48AD15A12ABA /* FIRInstallationsItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CFA00323FD4265D0C24B763BC6E7EF9 /* FIRInstallationsItem.m */; };
 		FA1E9632AFE0BDBB06E0CDA9C371627F /* GDTCOREvent_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 6C524E5BE5F6777DF814DE95C6F100E4 /* GDTCOREvent_Private.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		FA727FCD050461690C63CF3B450F1E01 /* Pods-iosApp-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E6DB2A5F5DADA1DDE45F36B1A2D6AC16 /* Pods-iosApp-dummy.m */; };
 		FA80220FFEF8C1B118B4F2AA5022BBAA /* FIRVerifyClientRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = BA1107AD008B098BD6D10AB1EB5E20F4 /* FIRVerifyClientRequest.m */; };
 		FAAFF9F99420754957C71615D3442984 /* FIRInstallationsStoredAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D4C0F3E589D44A9C8C9D0CB4F1601AF /* FIRInstallationsStoredAuthToken.m */; };
 		FB19ECCBBEEB553F71B749AF5E9C048C /* he.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 97BCCEB0842D396491E0423AC6EC2A58 /* he.lproj */; };
@@ -912,6 +912,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0312F49E878EE77E34B45346552D5EF8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4402AFF83DBDC4DD07E198685FDC2DF2;
+			remoteInfo = FirebaseCore;
+		};
+		04378CDA5A4B16451CB7D1EFFAEFDBC6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DD28B439BE8B17D9339D9B526F144347;
+			remoteInfo = FirebaseAppCheckInterop;
+		};
+		0BE69E6834C4895918409F7ECFAEF0B1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6AE4A3D573DED275B034E20506596C62;
+			remoteInfo = FirebaseAuth;
+		};
 		1072830652D1DC97B1A91FCEC5D6B09D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -940,13 +961,6 @@
 			remoteGlobalIDString = D676E21115185671D7258A56944ABE98;
 			remoteInfo = GTMSessionFetcher;
 		};
-		20CD7CD3D3BC261962A69C3FE685228C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 5C642AA10FB29936669CC269F42079C6;
-			remoteInfo = AppAuth;
-		};
 		2283F5154C77CF110B61F707E02DD045 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -961,19 +975,12 @@
 			remoteGlobalIDString = 8D7F5D5DD528D21A72DC87ADA5B12E2D;
 			remoteInfo = GoogleUtilities;
 		};
-		28C1905132BFDA6C6BBDE276CDB4CA8C /* PBXContainerItemProxy */ = {
+		38C3A2CDE605C338246100006903863F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8777C9F6889E59EFFD631D80AEE9048B;
-			remoteInfo = shared;
-		};
-		3A840F96861381A103CAC2D8DA28A5C4 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D7F5D5DD528D21A72DC87ADA5B12E2D;
-			remoteInfo = GoogleUtilities;
+			remoteGlobalIDString = 5895B432FE4D2F6826C8FF25A09DB6D2;
+			remoteInfo = FirebaseMessaging;
 		};
 		483FBCEF889A16D22E9319E25D850005 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -981,13 +988,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 5C642AA10FB29936669CC269F42079C6;
 			remoteInfo = AppAuth;
-		};
-		4AA2461D5D8FCE3209C620200F4CB01D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CAD3534FC55B0333104E5117C0A9A324;
-			remoteInfo = GoogleSignIn;
 		};
 		4ED7989AB3867F9B313A7E59C8DF736C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1003,12 +1003,12 @@
 			remoteGlobalIDString = 962124A759E27BE4799ED74362BED884;
 			remoteInfo = RecaptchaInterop;
 		};
-		5F216FEF9ACCC6E684C0A5A550CF348F /* PBXContainerItemProxy */ = {
+		63A285CAA8B5F28A2A3FC5FDBF543F92 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 5C0371EE948D0357B8EE0E34ABB44BF0;
-			remoteInfo = GoogleDataTransport;
+			remoteGlobalIDString = 2BBF7206D7FAC92C82A042A99C4A98F8;
+			remoteInfo = PromisesObjC;
 		};
 		691A80C7EB7F93E42E4CEE1973065288 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1031,19 +1031,12 @@
 			remoteGlobalIDString = 2BBF7206D7FAC92C82A042A99C4A98F8;
 			remoteInfo = PromisesObjC;
 		};
-		7208DFB2BE021C33FB0E96671EC5D614 /* PBXContainerItemProxy */ = {
+		75D8A1351B7E3DBC8EF11393B8DC2FC0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = DD28B439BE8B17D9339D9B526F144347;
-			remoteInfo = FirebaseAppCheckInterop;
-		};
-		74224BD7A19E48B5AB4D87B9EFD4B267 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8627999EF1D5E93E13DAFF580DA8CDCF;
-			remoteInfo = GTMAppAuth;
+			remoteGlobalIDString = CAD3534FC55B0333104E5117C0A9A324;
+			remoteInfo = GoogleSignIn;
 		};
 		765E85F4DD60837755A5667A2ECD6567 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1066,19 +1059,12 @@
 			remoteGlobalIDString = 2BBF7206D7FAC92C82A042A99C4A98F8;
 			remoteInfo = PromisesObjC;
 		};
-		8590D511C74AEF4FDAF6C3BE239E89ED /* PBXContainerItemProxy */ = {
+		7FD1FE1387EE04E06AA75F9A1F0D558B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 2BBF7206D7FAC92C82A042A99C4A98F8;
-			remoteInfo = PromisesObjC;
-		};
-		8941AF656A8970A361E4A6093DB3E0B4 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4402AFF83DBDC4DD07E198685FDC2DF2;
-			remoteInfo = FirebaseCore;
+			remoteGlobalIDString = 5C0371EE948D0357B8EE0E34ABB44BF0;
+			remoteInfo = GoogleDataTransport;
 		};
 		8ACAD4816DC3CA5A5E16159CD3C3F1CF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1094,19 +1080,33 @@
 			remoteGlobalIDString = 4402AFF83DBDC4DD07E198685FDC2DF2;
 			remoteInfo = FirebaseCore;
 		};
-		A94BD2D4F8CAE783369BCEF252EC2790 /* PBXContainerItemProxy */ = {
+		93677C6707D3DCA8A0C1D0D30949A033 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 962124A759E27BE4799ED74362BED884;
 			remoteInfo = RecaptchaInterop;
 		};
-		B14BCF06207BE3A0E712FE491D3DF241 /* PBXContainerItemProxy */ = {
+		A494EB55B7BA1EF13DE0333D8C29F88B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D2B5E7DCCBBFB32341D857D01211A1A3;
-			remoteInfo = nanopb;
+			remoteGlobalIDString = 5C642AA10FB29936669CC269F42079C6;
+			remoteInfo = AppAuth;
+		};
+		BE328448B9AEB976F3888E9A2CEFEFA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D7F5D5DD528D21A72DC87ADA5B12E2D;
+			remoteInfo = GoogleUtilities;
+		};
+		C368F537F434BC41EF1BE01AE33CDCF8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 25E9E9A17BC3F670357D7385C521E48E;
+			remoteInfo = FirebaseCoreInternal;
 		};
 		C518BFAEDF21FBCF28B331DE3DCC5BDA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1136,19 +1136,12 @@
 			remoteGlobalIDString = 8D7F5D5DD528D21A72DC87ADA5B12E2D;
 			remoteInfo = GoogleUtilities;
 		};
-		D1BB965AA8ECCEB4E7C6AE13D95023C5 /* PBXContainerItemProxy */ = {
+		D33C046D1AC1A89F3DCD432236BA172C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D676E21115185671D7258A56944ABE98;
 			remoteInfo = GTMSessionFetcher;
-		};
-		D2A8F5C76A9E57CD5100E1BBC6B9E8F7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 87803597EB3F20FC46472B85392EC4FD;
-			remoteInfo = FirebaseInstallations;
 		};
 		D46DE5F9D5D6F27534B452E352CB912C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1156,6 +1149,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8627999EF1D5E93E13DAFF580DA8CDCF;
 			remoteInfo = GTMAppAuth;
+		};
+		D60FE068369A11BA9993ECF83D5C43A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2B5E7DCCBBFB32341D857D01211A1A3;
+			remoteInfo = nanopb;
 		};
 		D65F7CAF6022EB1B43E30F82EED7046F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1171,12 +1171,12 @@
 			remoteGlobalIDString = 8D7F5D5DD528D21A72DC87ADA5B12E2D;
 			remoteInfo = GoogleUtilities;
 		};
-		E0F3189031D353B04F58CB3349197E25 /* PBXContainerItemProxy */ = {
+		DD4094F3D1E9C6049F7137A726B222AE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 6AE4A3D573DED275B034E20506596C62;
-			remoteInfo = FirebaseAuth;
+			remoteGlobalIDString = 8777C9F6889E59EFFD631D80AEE9048B;
+			remoteInfo = shared;
 		};
 		E5923A41CEBB3D5297C22FAB5B351CAB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1192,12 +1192,12 @@
 			remoteGlobalIDString = 5C0371EE948D0357B8EE0E34ABB44BF0;
 			remoteInfo = GoogleDataTransport;
 		};
-		F322107E41A67792DC37D16827B7E5C5 /* PBXContainerItemProxy */ = {
+		EED2FF58E61295A47C9BBBF954252D6D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 25E9E9A17BC3F670357D7385C521E48E;
-			remoteInfo = FirebaseCoreInternal;
+			remoteGlobalIDString = 8627999EF1D5E93E13DAFF580DA8CDCF;
+			remoteInfo = GTMAppAuth;
 		};
 		FB85892CF4DB4E83311A3B221074C78F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1206,19 +1206,18 @@
 			remoteGlobalIDString = 4402AFF83DBDC4DD07E198685FDC2DF2;
 			remoteInfo = FirebaseCore;
 		};
-		FC09CDE5B5AC073AFE8578C68BA07DCE /* PBXContainerItemProxy */ = {
+		FD95F5188D62428007A510FB1D57CB77 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 5895B432FE4D2F6826C8FF25A09DB6D2;
-			remoteInfo = FirebaseMessaging;
+			remoteGlobalIDString = 87803597EB3F20FC46472B85392EC4FD;
+			remoteInfo = FirebaseInstallations;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		00CE01752B7C8CE12E1BA95C46AB40AB /* GIDAppAuthFetcherAuthorizationWithEMMSupport.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GIDAppAuthFetcherAuthorizationWithEMMSupport.m; path = GoogleSignIn/Sources/GIDAppAuthFetcherAuthorizationWithEMMSupport.m; sourceTree = "<group>"; };
 		0137A4CBE9B43D72B342B759A9DF2599 /* NSData+FIRBase64.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSData+FIRBase64.h"; path = "FirebaseAuth/Sources/Utilities/NSData+FIRBase64.h"; sourceTree = "<group>"; };
-		015E0D7EA7331961AB63E5AFECA86BB5 /* Pods-iosApp-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-iosApp-umbrella.h"; sourceTree = "<group>"; };
 		015EFEEAA3EE94D56729F2B1E4FC8C1A /* FIROAuthProvider.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIROAuthProvider.h; path = FirebaseAuth/Sources/Public/FirebaseAuth/FIROAuthProvider.h; sourceTree = "<group>"; };
 		016CCFA934B9B7BADD9760FD5B715222 /* GULSceneDelegateSwizzler.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GULSceneDelegateSwizzler.m; path = GoogleUtilities/AppDelegateSwizzler/GULSceneDelegateSwizzler.m; sourceTree = "<group>"; };
 		0214F5799395AC862FEC1F800C3F1E06 /* FIRPhoneMultiFactorInfo.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRPhoneMultiFactorInfo.h; path = FirebaseAuth/Sources/Public/FirebaseAuth/FIRPhoneMultiFactorInfo.h; sourceTree = "<group>"; };
@@ -1287,7 +1286,6 @@
 		1166997E0D1667A60C91DBE96DAAED00 /* pb_common.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = pb_common.h; sourceTree = "<group>"; };
 		117F1EDE5D98610AB405ACB44A3ACECE /* OIDTokenResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = OIDTokenResponse.h; path = Source/AppAuthCore/OIDTokenResponse.h; sourceTree = "<group>"; };
 		11A45FCAE7D554CA40E2B278A50A4338 /* GoogleUtilities-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleUtilities-Info.plist"; sourceTree = "<group>"; };
-		11C9B998CE0869936AE6BE69270DAAC9 /* Pods-iosApp.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-iosApp.modulemap"; sourceTree = "<group>"; };
 		12B7053A28824911D3CF780C3E26442B /* FIRComponentType.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRComponentType.h; path = FirebaseCore/Extension/FIRComponentType.h; sourceTree = "<group>"; };
 		1385F13BB7F438EE365A03257748088D /* GIDToken.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GIDToken.m; path = GoogleSignIn/Sources/GIDToken.m; sourceTree = "<group>"; };
 		13C8C8B254851998F9289F71229B28A2 /* FirebaseInstallations */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = FirebaseInstallations; path = FirebaseInstallations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1346,6 +1344,7 @@
 		20E7330CC68C2DD625070777C770D000 /* FirebaseCore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FirebaseCore.h; path = FirebaseCore/Sources/Public/FirebaseCore/FirebaseCore.h; sourceTree = "<group>"; };
 		2122ACF1BA80B8AE860D40552EEF51CF /* AppAuth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = AppAuth.h; path = Source/AppAuth.h; sourceTree = "<group>"; };
 		219F2917985DA922EB2B1CB8773A028C /* FIRInstallationsSingleOperationPromiseCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRInstallationsSingleOperationPromiseCache.h; path = FirebaseInstallations/Source/Library/InstallationsIDController/FIRInstallationsSingleOperationPromiseCache.h; sourceTree = "<group>"; };
+		21D7216CE9CE9540A8B1CA632EE3D763 /* Pods-Grupit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-Grupit.modulemap"; sourceTree = "<group>"; };
 		21F8851E0E3B071D2FCC780B336B18D2 /* GTMSessionFetcher.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GTMSessionFetcher.m; path = Sources/Core/GTMSessionFetcher.m; sourceTree = "<group>"; };
 		226C35782330C1523D06123EFE03B5CF /* FIRSecureTokenResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRSecureTokenResponse.h; path = FirebaseAuth/Sources/Backend/RPC/FIRSecureTokenResponse.h; sourceTree = "<group>"; };
 		229AF406FE6D20ECC17BFAF51FFA0C61 /* GULMutableDictionary.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GULMutableDictionary.m; path = GoogleUtilities/Network/GULMutableDictionary.m; sourceTree = "<group>"; };
@@ -1356,9 +1355,9 @@
 		2401C2D64D9E573F727A87FFF9A0315F /* pt.lproj */ = {isa = PBXFileReference; includeInIndex = 1; name = pt.lproj; path = GoogleSignIn/Sources/Strings/pt.lproj; sourceTree = "<group>"; };
 		24084872C373BCDEF5DDA85F5E520EF2 /* GoogleUtilities.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = GoogleUtilities.release.xcconfig; sourceTree = "<group>"; };
 		241B082358B9FE64DD84ADCEB4D43E5B /* FBLPromise+Testing.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FBLPromise+Testing.m"; path = "Sources/FBLPromises/FBLPromise+Testing.m"; sourceTree = "<group>"; };
-		244FC2DAA936A0B07ACEFDC74E2D54B8 /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
 		248563E7CD6A5352E7195432BD155014 /* GIDAuthStateMigration.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GIDAuthStateMigration.h; path = GoogleSignIn/Sources/GIDAuthStateMigration.h; sourceTree = "<group>"; };
 		25182EA04F0A5BF4467AA2FF6563269C /* FIRSendVerificationCodeResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRSendVerificationCodeResponse.h; path = FirebaseAuth/Sources/Backend/RPC/FIRSendVerificationCodeResponse.h; sourceTree = "<group>"; };
+		258E1DA2FF34DBAE292F96C683378E63 /* Pods-Grupit-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Grupit-resources.sh"; sourceTree = "<group>"; };
 		25BD6FC5435F4F68E2F03DB413D9B19D /* GDTCORReachability.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GDTCORReachability.m; path = GoogleDataTransport/GDTCORLibrary/GDTCORReachability.m; sourceTree = "<group>"; };
 		26CC875917F4A4E9B1ADB2705AD05389 /* FIRAuthWebView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRAuthWebView.h; path = FirebaseAuth/Sources/Utilities/FIRAuthWebView.h; sourceTree = "<group>"; };
 		272F756113C742F315CF54B2D7D9DC8D /* nanopb.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = nanopb.modulemap; sourceTree = "<group>"; };
@@ -1416,6 +1415,7 @@
 		34DF72DC4297BB61B927E1389BD90AE5 /* GIDMDMPasscodeCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GIDMDMPasscodeCache.m; path = GoogleSignIn/Sources/GIDMDMPasscodeCache.m; sourceTree = "<group>"; };
 		357328A8263A60CA2A1A21EDF378046F /* FIRDependency.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRDependency.h; path = FirebaseCore/Extension/FIRDependency.h; sourceTree = "<group>"; };
 		3576EFDDCDD90B05AA2C6A053455315E /* FIRGoogleAuthProvider.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRGoogleAuthProvider.h; path = FirebaseAuth/Sources/Public/FirebaseAuth/FIRGoogleAuthProvider.h; sourceTree = "<group>"; };
+		3595AC07ADD0BA0FBB1A713AE04CFA9B /* Pods-Grupit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Grupit-Info.plist"; sourceTree = "<group>"; };
 		35B7587696EC6CEE55EF76951E2F6CAD /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		35EDA11F7189DD6DA3964FFAE6348F07 /* OIDAuthStateErrorDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = OIDAuthStateErrorDelegate.h; path = Source/AppAuthCore/OIDAuthStateErrorDelegate.h; sourceTree = "<group>"; };
 		362BF7FA795E24CE89D20D4AB84084DA /* FIRAuthExceptionUtils.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRAuthExceptionUtils.h; path = FirebaseAuth/Sources/Utilities/FIRAuthExceptionUtils.h; sourceTree = "<group>"; };
@@ -1484,6 +1484,7 @@
 		497E777D675170C85C196F12E0D4FE3A /* FIRSignUpNewUserRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRSignUpNewUserRequest.h; path = FirebaseAuth/Sources/Backend/RPC/FIRSignUpNewUserRequest.h; sourceTree = "<group>"; };
 		49A913F9BF812C88E5EC5CD6534D5F0F /* FIRInstallationsErrorUtil.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRInstallationsErrorUtil.m; path = FirebaseInstallations/Source/Library/Errors/FIRInstallationsErrorUtil.m; sourceTree = "<group>"; };
 		49C207BB40A17BF5E6F3599B11746A55 /* GULURLSessionDataResponse.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GULURLSessionDataResponse.m; path = GoogleUtilities/Environment/URLSessionPromiseWrapper/GULURLSessionDataResponse.m; sourceTree = "<group>"; };
+		4A13611358F533A6DD2B681BE1A68739 /* Pods-Grupit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Grupit.release.xcconfig"; sourceTree = "<group>"; };
 		4AA6D90ABE28FBC7E8BA5FDA393E3900 /* FIRAuthProtoMFAEnrollment.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRAuthProtoMFAEnrollment.m; path = FirebaseAuth/Sources/Backend/RPC/Proto/FIRAuthProtoMFAEnrollment.m; sourceTree = "<group>"; };
 		4AA71DF0707C2881A1AF9D507AF7264D /* FIRInstallationsStoredAuthToken.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRInstallationsStoredAuthToken.h; path = FirebaseInstallations/Source/Library/InstallationsStore/FIRInstallationsStoredAuthToken.h; sourceTree = "<group>"; };
 		4ADDA3D7EF093A0A68CEBDA2C2FF3AAE /* GULHeartbeatDateStorageUserDefaults.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GULHeartbeatDateStorageUserDefaults.m; path = GoogleUtilities/Environment/GULHeartbeatDateStorageUserDefaults.m; sourceTree = "<group>"; };
@@ -1522,7 +1523,6 @@
 		54783EC19C4EEA48A803F3275D01BFF0 /* FIRActionCodeSettings.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRActionCodeSettings.h; path = FirebaseAuth/Sources/Public/FirebaseAuth/FIRActionCodeSettings.h; sourceTree = "<group>"; };
 		548FAAD1DFDC59C82C26E3AC79012441 /* nanopb.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = nanopb.debug.xcconfig; sourceTree = "<group>"; };
 		5586B6B94E4098BB89B73F7BDA92C80D /* FIRMessagingKeychain.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRMessagingKeychain.h; path = FirebaseMessaging/Sources/Token/FIRMessagingKeychain.h; sourceTree = "<group>"; };
-		55ABB06C8A1800962A74E007E7733796 /* Pods-iosApp-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-iosApp-frameworks.sh"; sourceTree = "<group>"; };
 		55AFE1FDF11CAAD453214B5EA3E25855 /* FIRStartMFAEnrollmentResponse.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRStartMFAEnrollmentResponse.m; path = FirebaseAuth/Sources/Backend/RPC/MultiFactor/Enroll/FIRStartMFAEnrollmentResponse.m; sourceTree = "<group>"; };
 		55FED20E7E6C5DD9D3CBA44E0AB4F128 /* _ObjC_HeartbeatsPayload.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = _ObjC_HeartbeatsPayload.swift; path = FirebaseCore/Internal/Sources/HeartbeatLogging/_ObjC_HeartbeatsPayload.swift; sourceTree = "<group>"; };
 		56439F267791DA2847FD9CE22858742C /* FIROAuthProvider.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIROAuthProvider.m; path = FirebaseAuth/Sources/AuthProvider/OAuth/FIROAuthProvider.m; sourceTree = "<group>"; };
@@ -1540,6 +1540,7 @@
 		585E2F805870D549EE57BDCA9E1E26D1 /* OIDAuthorizationService+IOS.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "OIDAuthorizationService+IOS.m"; path = "Source/AppAuth/iOS/OIDAuthorizationService+IOS.m"; sourceTree = "<group>"; };
 		589B505A2CFDA4C6D3CAF13F6BF0A8F9 /* FBLPromise+Await.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FBLPromise+Await.m"; path = "Sources/FBLPromises/FBLPromise+Await.m"; sourceTree = "<group>"; };
 		58B15BC7EF32BC667D62523023C54554 /* NSError+FIRMessaging.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSError+FIRMessaging.m"; path = "FirebaseMessaging/Sources/NSError+FIRMessaging.m"; sourceTree = "<group>"; };
+		58C49617FFA966A72DFF24652589279F /* Pods-Grupit-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Grupit-acknowledgements.markdown"; sourceTree = "<group>"; };
 		59154CE7F4BF394701EACAA903F1B04D /* nanopb-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "nanopb-umbrella.h"; sourceTree = "<group>"; };
 		59798346854AB2E8C63EB99ED7B2EB50 /* OIDEndSessionResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = OIDEndSessionResponse.h; path = Source/AppAuthCore/OIDEndSessionResponse.h; sourceTree = "<group>"; };
 		597F57DF19BC8386EFAA59CD9499CC84 /* FIRMessagingRemoteNotificationsProxy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRMessagingRemoteNotificationsProxy.m; path = FirebaseMessaging/Sources/FIRMessagingRemoteNotificationsProxy.m; sourceTree = "<group>"; };
@@ -1626,7 +1627,6 @@
 		6EC70D4D7D527839EAFCEB42CE3911C5 /* Storage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Storage.swift; path = FirebaseCore/Internal/Sources/HeartbeatLogging/Storage.swift; sourceTree = "<group>"; };
 		6ED075EC144BD5A10A8F84BE160D7DEB /* GDTCORLifecycle.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GDTCORLifecycle.h; path = GoogleDataTransport/GDTCORLibrary/Internal/GDTCORLifecycle.h; sourceTree = "<group>"; };
 		6EE74E08EE28C9D8EB9F5C77D8ED0C3D /* GIDMDMPasscodeState.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GIDMDMPasscodeState.h; path = GoogleSignIn/Sources/GIDMDMPasscodeState.h; sourceTree = "<group>"; };
-		6F3B5FED07117E377CFAC3D49B490F17 /* Pods-iosApp-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-iosApp-resources.sh"; sourceTree = "<group>"; };
 		6F541F219D17D46D80594ADA9F3BDC7B /* FIRInstallationsItem.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRInstallationsItem.h; path = FirebaseInstallations/Source/Library/FIRInstallationsItem.h; sourceTree = "<group>"; };
 		6FA2EEBB456CAE26CE598D3FC079C79F /* FIRComponentContainer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRComponentContainer.h; path = FirebaseCore/Extension/FIRComponentContainer.h; sourceTree = "<group>"; };
 		6FD122EA0AB9AB2A8FFA5F676C795DF0 /* GTMAppAuth */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = GTMAppAuth; path = GTMAppAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1649,9 +1649,7 @@
 		7592206F2FA5EB89F7E3688594121C4B /* OIDFieldMapping.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = OIDFieldMapping.m; path = Source/AppAuthCore/OIDFieldMapping.m; sourceTree = "<group>"; };
 		7630E65A712D38078BDF52B7F0BD8357 /* FIRPhoneAuthCredential_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRPhoneAuthCredential_Internal.h; path = FirebaseAuth/Sources/AuthProvider/Phone/FIRPhoneAuthCredential_Internal.h; sourceTree = "<group>"; };
 		7689578014E43D8655F9D7C801920D69 /* FIRUserMetadata_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRUserMetadata_Internal.h; path = FirebaseAuth/Sources/User/FIRUserMetadata_Internal.h; sourceTree = "<group>"; };
-		76A263267985B0185D85E24D40FCEE9A /* Pods-iosApp-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-iosApp-Info.plist"; sourceTree = "<group>"; };
 		76BA62539B9D36BDDC7260078FD2470C /* FIRGetOOBConfirmationCodeRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRGetOOBConfirmationCodeRequest.h; path = FirebaseAuth/Sources/Backend/RPC/FIRGetOOBConfirmationCodeRequest.h; sourceTree = "<group>"; };
-		76D28488EA8CF5C697DFF07967A9960E /* Pods-iosApp-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-iosApp-acknowledgements.plist"; sourceTree = "<group>"; };
 		772639800E1A83BA013D3306906A338D /* FIRAuthDataResult.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRAuthDataResult.m; path = FirebaseAuth/Sources/Auth/FIRAuthDataResult.m; sourceTree = "<group>"; };
 		7743A2996F4F07269BB2FA31056206D4 /* FIRPhoneMultiFactorInfo.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRPhoneMultiFactorInfo.m; path = FirebaseAuth/Sources/MultiFactor/Phone/FIRPhoneMultiFactorInfo.m; sourceTree = "<group>"; };
 		7791981C4E2208DAA2BA39DD8EDEFD41 /* GTMOAuth2KeychainCompatibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GTMOAuth2KeychainCompatibility.h; path = GTMAppAuth/Sources/Public/GTMAppAuth/GTMOAuth2KeychainCompatibility.h; sourceTree = "<group>"; };
@@ -1721,6 +1719,7 @@
 		881420C4E5BE5EF1412162618692806D /* GULNetworkMessageCode.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GULNetworkMessageCode.h; path = GoogleUtilities/Network/Public/GoogleUtilities/GULNetworkMessageCode.h; sourceTree = "<group>"; };
 		884D07B109C88AFF579D9ED2BE4FE278 /* GIDEMMSupport.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GIDEMMSupport.m; path = GoogleSignIn/Sources/GIDEMMSupport.m; sourceTree = "<group>"; };
 		885949DD10DB62E41BAC2DB214DF69EC /* FIRTOTPMultiFactorGenerator.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRTOTPMultiFactorGenerator.m; path = FirebaseAuth/Sources/MultiFactor/TOTP/FIRTOTPMultiFactorGenerator.m; sourceTree = "<group>"; };
+		88B7CF349C4ABF9C87AD58BCB681BECF /* Pods-Grupit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Grupit-dummy.m"; sourceTree = "<group>"; };
 		890C95A64E45742FED6C97E87C516A1B /* FIRConfiguration.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRConfiguration.h; path = FirebaseCore/Sources/Public/FirebaseCore/FIRConfiguration.h; sourceTree = "<group>"; };
 		8963F08CB7AFF5E2D532A82F2A5D8BDB /* FIRInstallationsBackoffController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRInstallationsBackoffController.m; path = FirebaseInstallations/Source/Library/InstallationsIDController/FIRInstallationsBackoffController.m; sourceTree = "<group>"; };
 		89AFE58514F772CA216173A6BFB17338 /* FIRAuthCredential_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRAuthCredential_Internal.h; path = FirebaseAuth/Sources/AuthProvider/FIRAuthCredential_Internal.h; sourceTree = "<group>"; };
@@ -1867,7 +1866,6 @@
 		AFBF2E5AD31D422ED485F3945C163C70 /* FirebaseMessaging.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FirebaseMessaging.h; path = FirebaseMessaging/Sources/FirebaseMessaging.h; sourceTree = "<group>"; };
 		AFDC006EB7E95355957D095DDE047D81 /* FIRFirebaseUserAgent.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRFirebaseUserAgent.h; path = FirebaseCore/Sources/FIRFirebaseUserAgent.h; sourceTree = "<group>"; };
 		B060BC261BF0B9684AD75B2BB53E0941 /* FBLPromise+Testing.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FBLPromise+Testing.h"; path = "Sources/FBLPromises/include/FBLPromise+Testing.h"; sourceTree = "<group>"; };
-		B097DD7534E741D5C41838011D755842 /* Pods-iosApp */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-iosApp"; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0B29D98303ECCA5771D26F200BAE1ED /* FIRSendVerificationCodeResponse.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRSendVerificationCodeResponse.m; path = FirebaseAuth/Sources/Backend/RPC/FIRSendVerificationCodeResponse.m; sourceTree = "<group>"; };
 		B0C74E042CAEB50B5294E508220098D5 /* FIRMultiFactorConstants.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRMultiFactorConstants.m; path = FirebaseAuth/Sources/MultiFactor/FIRMultiFactorConstants.m; sourceTree = "<group>"; };
 		B100920B4834F9E56744EC5D88BC3840 /* FIRAuthBackend.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRAuthBackend.m; path = FirebaseAuth/Sources/Backend/FIRAuthBackend.m; sourceTree = "<group>"; };
@@ -1933,6 +1931,7 @@
 		C47818469DFA3B9D11EC23159365F656 /* FIRFinalizeMFASignInRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRFinalizeMFASignInRequest.m; path = FirebaseAuth/Sources/Backend/RPC/MultiFactor/SignIn/FIRFinalizeMFASignInRequest.m; sourceTree = "<group>"; };
 		C505BA06D646B42C7030C74AF343FB5D /* de.lproj */ = {isa = PBXFileReference; includeInIndex = 1; name = de.lproj; path = GoogleSignIn/Sources/Strings/de.lproj; sourceTree = "<group>"; };
 		C5162D980A82BEF324BA7ED271522116 /* FIRGetAccountInfoResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRGetAccountInfoResponse.h; path = FirebaseAuth/Sources/Backend/RPC/FIRGetAccountInfoResponse.h; sourceTree = "<group>"; };
+		C564D7B8B91FBE241E306583F8AE8A81 /* Pods-Grupit */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-Grupit"; path = Pods_Grupit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C58E0CB05A4294C412EE874BDE2294D4 /* FIRMessagingCheckinService.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRMessagingCheckinService.m; path = FirebaseMessaging/Sources/Token/FIRMessagingCheckinService.m; sourceTree = "<group>"; };
 		C5A83E464666F0891ADC4DE1F99B113F /* FIRAuthDispatcher.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRAuthDispatcher.m; path = FirebaseAuth/Sources/Auth/FIRAuthDispatcher.m; sourceTree = "<group>"; };
 		C5F82FC23DAE37E04D58C381AE7D8E75 /* FIRAppCheckTokenResultInterop.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRAppCheckTokenResultInterop.h; path = FirebaseAppCheck/Interop/FIRAppCheckTokenResultInterop.h; sourceTree = "<group>"; };
@@ -2025,9 +2024,11 @@
 		DBD47EC8902ED4496AF0C30B1442EA1B /* FIRComponentType.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRComponentType.h; path = FirebaseCore/Extension/FIRComponentType.h; sourceTree = "<group>"; };
 		DBEA7D1690BAF33577348816F7F48C2C /* AppAuth-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "AppAuth-Info.plist"; sourceTree = "<group>"; };
 		DC246C65A6BEF7754DA1B18BFF600255 /* GDTCORLogSourceMetrics.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GDTCORLogSourceMetrics.h; path = GoogleDataTransport/GDTCORLibrary/Private/GDTCORLogSourceMetrics.h; sourceTree = "<group>"; };
+		DC6E9A20F6DF41326D0F29E979902F91 /* Pods-Grupit-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Grupit-frameworks.sh"; sourceTree = "<group>"; };
 		DC8F5861E01F70968BDBE5955CC3848C /* GoogleSignIn-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleSignIn-Info.plist"; sourceTree = "<group>"; };
 		DC942F53064F1598D93DE38CD9DB9C74 /* GDTCORTransport_Private.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GDTCORTransport_Private.h; path = GoogleDataTransport/GDTCORLibrary/Private/GDTCORTransport_Private.h; sourceTree = "<group>"; };
 		DCB01F6DB336336A769D3654ED2D6834 /* FIRAuthTokenResult.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRAuthTokenResult.m; path = FirebaseAuth/Sources/Auth/FIRAuthTokenResult.m; sourceTree = "<group>"; };
+		DCEA3B1EEA7D0C19C381A10AEC236581 /* Pods-Grupit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Grupit.debug.xcconfig"; sourceTree = "<group>"; };
 		DD346835D624787CDEC8573DCAE355A5 /* GIDAppAuthFetcherAuthorizationWithEMMSupport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GIDAppAuthFetcherAuthorizationWithEMMSupport.h; path = GoogleSignIn/Sources/GIDAppAuthFetcherAuthorizationWithEMMSupport.h; sourceTree = "<group>"; };
 		DDCE4DC390E16F778458F5F0B0A9E7C1 /* HeartbeatController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HeartbeatController.swift; path = FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatController.swift; sourceTree = "<group>"; };
 		DF4DF4F6240F81C4E0830A2A9E45CA27 /* FIRMessaging_Private.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRMessaging_Private.h; path = FirebaseMessaging/Sources/FIRMessaging_Private.h; sourceTree = "<group>"; };
@@ -2058,9 +2059,7 @@
 		E3FD87B3B17F724C81046376B4EE4A83 /* FirebaseCore.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = FirebaseCore.modulemap; sourceTree = "<group>"; };
 		E438816EF79B491230B92394602961CF /* GoogleDataTransport-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "GoogleDataTransport-dummy.m"; sourceTree = "<group>"; };
 		E452153BC661E09CCF69FC09D87E6BC6 /* FIRWithdrawMFAResponse.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRWithdrawMFAResponse.m; path = FirebaseAuth/Sources/Backend/RPC/MultiFactor/Unenroll/FIRWithdrawMFAResponse.m; sourceTree = "<group>"; };
-		E462E23B3674BF94EAB1504D506F2803 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		E490EE8AF8CCB2EB16C09ACD3F6C3448 /* FIRMessagingKeychain.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRMessagingKeychain.m; path = FirebaseMessaging/Sources/Token/FIRMessagingKeychain.m; sourceTree = "<group>"; };
-		E4C923318724794E3CC670804C2D6A6B /* Pods-iosApp-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-iosApp-acknowledgements.markdown"; sourceTree = "<group>"; };
 		E4EFD544D8A39AE7C9E4E76ACF0DBEF8 /* GDTCORMetricsController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GDTCORMetricsController.m; path = GoogleDataTransport/GDTCORLibrary/GDTCORMetricsController.m; sourceTree = "<group>"; };
 		E5543F1D3E7C19CA60151CD07AAA98BA /* FIRRevokeTokenRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRRevokeTokenRequest.m; path = FirebaseAuth/Sources/Backend/RPC/FIRRevokeTokenRequest.m; sourceTree = "<group>"; };
 		E562390BC0E41AEA50C78E091F1E9A9E /* FBLPromise+Do.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FBLPromise+Do.h"; path = "Sources/FBLPromises/include/FBLPromise+Do.h"; sourceTree = "<group>"; };
@@ -2073,7 +2072,6 @@
 		E6AC73C31756C16FCEF27A2DD70B5514 /* sk.lproj */ = {isa = PBXFileReference; includeInIndex = 1; name = sk.lproj; path = GoogleSignIn/Sources/Strings/sk.lproj; sourceTree = "<group>"; };
 		E6B43F801FD6B40E8B11D35BD38AB888 /* FIRAuthProtoFinalizeMFAPhoneRequestInfo.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRAuthProtoFinalizeMFAPhoneRequestInfo.h; path = FirebaseAuth/Sources/Backend/RPC/Proto/Phone/FIRAuthProtoFinalizeMFAPhoneRequestInfo.h; sourceTree = "<group>"; };
 		E6C11C4CD6CA8DD00CF3077EA464813C /* OIDEndSessionResponse.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = OIDEndSessionResponse.m; path = Source/AppAuthCore/OIDEndSessionResponse.m; sourceTree = "<group>"; };
-		E6DB2A5F5DADA1DDE45F36B1A2D6AC16 /* Pods-iosApp-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-iosApp-dummy.m"; sourceTree = "<group>"; };
 		E716155E8F77BB779F5A6D7604110930 /* FIRGetAccountInfoRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRGetAccountInfoRequest.m; path = FirebaseAuth/Sources/Backend/RPC/FIRGetAccountInfoRequest.m; sourceTree = "<group>"; };
 		E746535F0BC421B6C9A2FDAF13FF6CDC /* nanopb.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = nanopb.release.xcconfig; sourceTree = "<group>"; };
 		E7624CFBE8DA8D79C057474AC19615E7 /* OIDTokenUtilities.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = OIDTokenUtilities.m; path = Source/AppAuthCore/OIDTokenUtilities.m; sourceTree = "<group>"; };
@@ -2111,6 +2109,7 @@
 		F13B8190AE4CD06FA58F78BCA3D61D7F /* GULSceneDelegateSwizzler_Private.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GULSceneDelegateSwizzler_Private.h; path = GoogleUtilities/AppDelegateSwizzler/Internal/GULSceneDelegateSwizzler_Private.h; sourceTree = "<group>"; };
 		F15B5B25F0212020EBA011AFC2D724EC /* OIDAuthStateChangeDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = OIDAuthStateChangeDelegate.h; path = Source/AppAuthCore/OIDAuthStateChangeDelegate.h; sourceTree = "<group>"; };
 		F1B0DA6AB00A17F7F209F68F770C4857 /* OIDTokenRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = OIDTokenRequest.m; path = Source/AppAuthCore/OIDTokenRequest.m; sourceTree = "<group>"; };
+		F2A42EC1CA6AC036DEEB7DCF20B08DE5 /* Pods-Grupit-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Grupit-acknowledgements.plist"; sourceTree = "<group>"; };
 		F2C5EC975466ACCB67B27F80A532FBA4 /* GIDToken.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = GIDToken.h; path = GoogleSignIn/Sources/Public/GoogleSignIn/GIDToken.h; sourceTree = "<group>"; };
 		F2C8DE1D98EBBDFA2AE5D87653F4C96C /* da.lproj */ = {isa = PBXFileReference; includeInIndex = 1; name = da.lproj; path = GoogleSignIn/Sources/Strings/da.lproj; sourceTree = "<group>"; };
 		F2E8CB4B099F1A48D2D73BE8360A7AF1 /* FIRAuthDispatcher.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FIRAuthDispatcher.h; path = FirebaseAuth/Sources/Auth/FIRAuthDispatcher.h; sourceTree = "<group>"; };
@@ -2134,6 +2133,7 @@
 		F61FDD47275FBCC9FFE4E3A73B1CC4BB /* FIRTOTPMultiFactorAssertion+Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FIRTOTPMultiFactorAssertion+Internal.h"; path = "FirebaseAuth/Sources/MultiFactor/TOTP/FIRTOTPMultiFactorAssertion+Internal.h"; sourceTree = "<group>"; };
 		F689FE659003D8F609BC33661DBD2029 /* FIRAuthWebUtils.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRAuthWebUtils.m; path = FirebaseAuth/Sources/Utilities/FIRAuthWebUtils.m; sourceTree = "<group>"; };
 		F69894126D4D968F949155ADAA95489A /* sv.lproj */ = {isa = PBXFileReference; includeInIndex = 1; name = sv.lproj; path = GoogleSignIn/Sources/Strings/sv.lproj; sourceTree = "<group>"; };
+		F6C51D00A4C8416FDE0E7A8D9E7DB894 /* Pods-Grupit-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Grupit-umbrella.h"; sourceTree = "<group>"; };
 		F746B35AD461F8B42872A9FAC7482D21 /* FIRMessagingAnalytics.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FIRMessagingAnalytics.m; path = FirebaseMessaging/Sources/FIRMessagingAnalytics.m; sourceTree = "<group>"; };
 		F76B97D962BEA0F04D09F558810B07F9 /* OIDURLQueryComponent.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = OIDURLQueryComponent.m; path = Source/AppAuthCore/OIDURLQueryComponent.m; sourceTree = "<group>"; };
 		F81680C55FCF9A3026ED66A996B9664D /* GULHeartbeatDateStorage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = GULHeartbeatDateStorage.m; path = GoogleUtilities/Environment/GULHeartbeatDateStorage.m; sourceTree = "<group>"; };
@@ -2179,6 +2179,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		08C06503765C4F45C2A05DB7381BF2A4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E1F8CE2D0AA3DD481A21EBD2610D010 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0A9095B6AA2B07B172DD6E24293C1199 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -2230,14 +2238,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				31F386FEC76FF6C127B79B6C1288C729 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		67B10C554ECB70CE9318542D2D61A6CD /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				20EBAA857C9A4544AAAAD4D46E5D9240 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2801,6 +2801,14 @@
 			path = FirebaseAuth;
 			sourceTree = "<group>";
 		};
+		2B914FF7C6CEFE7400D998F0B8133A01 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				948CB39A76A1287FBEECECF86131377C /* Pods-Grupit */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
 		3546D16B9806BA69D7D7231DD2D1464B /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -2850,30 +2858,6 @@
 			);
 			name = "Support Files";
 			path = "../Target Support Files/FirebaseAppCheckInterop";
-			sourceTree = "<group>";
-		};
-		561310402AEE977F3AF8720B43C54E42 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				3FD1B4C1246D643E9476438C28048FA8 /* AppAuth */,
-				81418C93A311F0492F62A8F88C3BD66B /* FirebaseAppCheckInterop */,
-				43B1E4CD7B30B9FD278100133C2AC788 /* FirebaseAuth */,
-				E2B63D462DB7F827C4B11FD51E4F8E2D /* FirebaseCore */,
-				148D0F9E8C7373FEAF40D800FC5F1BAA /* FirebaseCoreInternal */,
-				13C8C8B254851998F9289F71229B28A2 /* FirebaseInstallations */,
-				5B654B4B042BA7DC93766943A643E42B /* FirebaseMessaging */,
-				856B5CD56F194FAD26EA91620B66D614 /* GoogleDataTransport */,
-				FD56AB51475BC5F592781EE2692D1412 /* GoogleSignIn */,
-				E5BA41B7F2E1FE47F9ABCAC27C9E4281 /* GoogleSignIn-GoogleSignIn */,
-				B43874C6CBB50E7134FBEC24BABFE14F /* GoogleUtilities */,
-				6FD122EA0AB9AB2A8FFA5F676C795DF0 /* GTMAppAuth */,
-				C1998E0D8085221AD87F89B614C10E52 /* GTMSessionFetcher */,
-				06FC5C9CF96D60C50FCD47D339C91951 /* nanopb */,
-				B097DD7534E741D5C41838011D755842 /* Pods-iosApp */,
-				3347A1AB6546F0A3977529B8F199DC41 /* PromisesObjC */,
-				33D34D2210961B1CBFEC1D194B0AAB9F /* RecaptchaInterop */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		5642875AA944A4A1440A39F54186119C /* Support Files */ = {
@@ -3245,6 +3229,30 @@
 			name = Core;
 			sourceTree = "<group>";
 		};
+		80B08ECBF240D0B14C094BB1A22985F7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3FD1B4C1246D643E9476438C28048FA8 /* AppAuth */,
+				81418C93A311F0492F62A8F88C3BD66B /* FirebaseAppCheckInterop */,
+				43B1E4CD7B30B9FD278100133C2AC788 /* FirebaseAuth */,
+				E2B63D462DB7F827C4B11FD51E4F8E2D /* FirebaseCore */,
+				148D0F9E8C7373FEAF40D800FC5F1BAA /* FirebaseCoreInternal */,
+				13C8C8B254851998F9289F71229B28A2 /* FirebaseInstallations */,
+				5B654B4B042BA7DC93766943A643E42B /* FirebaseMessaging */,
+				856B5CD56F194FAD26EA91620B66D614 /* GoogleDataTransport */,
+				FD56AB51475BC5F592781EE2692D1412 /* GoogleSignIn */,
+				E5BA41B7F2E1FE47F9ABCAC27C9E4281 /* GoogleSignIn-GoogleSignIn */,
+				B43874C6CBB50E7134FBEC24BABFE14F /* GoogleUtilities */,
+				6FD122EA0AB9AB2A8FFA5F676C795DF0 /* GTMAppAuth */,
+				C1998E0D8085221AD87F89B614C10E52 /* GTMSessionFetcher */,
+				06FC5C9CF96D60C50FCD47D339C91951 /* nanopb */,
+				C564D7B8B91FBE241E306583F8AE8A81 /* Pods-Grupit */,
+				3347A1AB6546F0A3977529B8F199DC41 /* PromisesObjC */,
+				33D34D2210961B1CBFEC1D194B0AAB9F /* RecaptchaInterop */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		81B3E8247F97E1976CA5FE1DEBF82BE6 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -3297,6 +3305,24 @@
 			);
 			name = "Support Files";
 			path = "../Target Support Files/GoogleSignIn";
+			sourceTree = "<group>";
+		};
+		948CB39A76A1287FBEECECF86131377C /* Pods-Grupit */ = {
+			isa = PBXGroup;
+			children = (
+				21D7216CE9CE9540A8B1CA632EE3D763 /* Pods-Grupit.modulemap */,
+				58C49617FFA966A72DFF24652589279F /* Pods-Grupit-acknowledgements.markdown */,
+				F2A42EC1CA6AC036DEEB7DCF20B08DE5 /* Pods-Grupit-acknowledgements.plist */,
+				88B7CF349C4ABF9C87AD58BCB681BECF /* Pods-Grupit-dummy.m */,
+				DC6E9A20F6DF41326D0F29E979902F91 /* Pods-Grupit-frameworks.sh */,
+				3595AC07ADD0BA0FBB1A713AE04CFA9B /* Pods-Grupit-Info.plist */,
+				258E1DA2FF34DBAE292F96C683378E63 /* Pods-Grupit-resources.sh */,
+				F6C51D00A4C8416FDE0E7A8D9E7DB894 /* Pods-Grupit-umbrella.h */,
+				DCEA3B1EEA7D0C19C381A10AEC236581 /* Pods-Grupit.debug.xcconfig */,
+				4A13611358F533A6DD2B681BE1A68739 /* Pods-Grupit.release.xcconfig */,
+			);
+			name = "Pods-Grupit";
+			path = "Target Support Files/Pods-Grupit";
 			sourceTree = "<group>";
 		};
 		951F47F8F2553EA931041ACFCBA8F5CE /* Pod */ = {
@@ -3486,24 +3512,6 @@
 			path = "../Target Support Files/FirebaseCoreInternal";
 			sourceTree = "<group>";
 		};
-		BA6B7BC2729F657E9D3682E55CA6E980 /* Pods-iosApp */ = {
-			isa = PBXGroup;
-			children = (
-				11C9B998CE0869936AE6BE69270DAAC9 /* Pods-iosApp.modulemap */,
-				E4C923318724794E3CC670804C2D6A6B /* Pods-iosApp-acknowledgements.markdown */,
-				76D28488EA8CF5C697DFF07967A9960E /* Pods-iosApp-acknowledgements.plist */,
-				E6DB2A5F5DADA1DDE45F36B1A2D6AC16 /* Pods-iosApp-dummy.m */,
-				55ABB06C8A1800962A74E007E7733796 /* Pods-iosApp-frameworks.sh */,
-				76A263267985B0185D85E24D40FCEE9A /* Pods-iosApp-Info.plist */,
-				6F3B5FED07117E377CFAC3D49B490F17 /* Pods-iosApp-resources.sh */,
-				015E0D7EA7331961AB63E5AFECA86BB5 /* Pods-iosApp-umbrella.h */,
-				E462E23B3674BF94EAB1504D506F2803 /* Pods-iosApp.debug.xcconfig */,
-				244FC2DAA936A0B07ACEFDC74E2D54B8 /* Pods-iosApp.release.xcconfig */,
-			);
-			name = "Pods-iosApp";
-			path = "Target Support Files/Pods-iosApp";
-			sourceTree = "<group>";
-		};
 		BE9148BA48E724946DB30783482C64BC /* shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -3523,8 +3531,8 @@
 				58AAD176B64323B9974E5B70EC8B12DC /* Development Pods */,
 				0656CE04288357F0748AB498835BA03E /* Frameworks */,
 				104BA5A8BEE819544F6A45BB2AD51853 /* Pods */,
-				561310402AEE977F3AF8720B43C54E42 /* Products */,
-				D456857FB6E5BC3266BEC21401D60DB5 /* Targets Support Files */,
+				80B08ECBF240D0B14C094BB1A22985F7 /* Products */,
+				2B914FF7C6CEFE7400D998F0B8133A01 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -3535,14 +3543,6 @@
 				1C28E73035AC516D0C0F5909D5DB4DCB /* GULUserDefaults.m */,
 			);
 			name = UserDefaults;
-			sourceTree = "<group>";
-		};
-		D456857FB6E5BC3266BEC21401D60DB5 /* Targets Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				BA6B7BC2729F657E9D3682E55CA6E980 /* Pods-iosApp */,
-			);
-			name = "Targets Support Files";
 			sourceTree = "<group>";
 		};
 		D5FA1F998F04501E7ED3B65F0E8FB4FC /* AppAuth */ = {
@@ -3776,6 +3776,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0FFF2564A315259400CAB2E58C8AB34D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3FE477BBC03A58D1A44CFC11282076F9 /* Pods-Grupit-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		187A695464397D98D5BE188F47FDB6A3 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -3891,14 +3899,6 @@
 				C6F10EB168F5B10062048BBC3AA2A3E8 /* FIRLibrary.h in Headers */,
 				19C4EA6512F355F77F6D90FECFB43CC2 /* FIRLogger.h in Headers */,
 				B1094EB396A269B6A4C573BA8F350687 /* FIROptionsInternal.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		46C35550D9A24AC2E6EF0AF50A46F104 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3E9F0A0CDBBD8A679A281E65232D8E0D /* Pods-iosApp-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4663,38 +4663,38 @@
 			productReference = 81418C93A311F0492F62A8F88C3BD66B /* FirebaseAppCheckInterop */;
 			productType = "com.apple.product-type.framework";
 		};
-		ED39C638569286489CD697A6C8964146 /* Pods-iosApp */ = {
+		FC9CDE1D93060C6A2D83FDE50FB9FB3C /* Pods-Grupit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 47522247E36B8695D96ACCA6E990F770 /* Build configuration list for PBXNativeTarget "Pods-iosApp" */;
+			buildConfigurationList = 9896959285FB6E527F29064DAD2D23C3 /* Build configuration list for PBXNativeTarget "Pods-Grupit" */;
 			buildPhases = (
-				46C35550D9A24AC2E6EF0AF50A46F104 /* Headers */,
-				E1C1482FABD3166152CE4118FF3E53AD /* Sources */,
-				67B10C554ECB70CE9318542D2D61A6CD /* Frameworks */,
-				E27A7DF9C4E666E93862CBCF4B552903 /* Resources */,
+				0FFF2564A315259400CAB2E58C8AB34D /* Headers */,
+				54EC2B513EFE78B748E7FBF677D1E30F /* Sources */,
+				08C06503765C4F45C2A05DB7381BF2A4 /* Frameworks */,
+				3203E1189FD4354EB4002E2181DC93B3 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				43C2EEEC3F2CF87F26BA18B6799AEEDE /* PBXTargetDependency */,
-				03FC63F8DAA2D3E271AAA24CEAB3836D /* PBXTargetDependency */,
-				BED6B71B52C114496842ACA3022A27D9 /* PBXTargetDependency */,
-				5219484DF11F8300A5699F4BB7BACED4 /* PBXTargetDependency */,
-				916AABC79FD33C251D2357C4A7E65B8A /* PBXTargetDependency */,
-				83890F49963ED161EEB3F5A41690DB00 /* PBXTargetDependency */,
-				F704AF58F116CB0DDC058320AD644AEE /* PBXTargetDependency */,
-				16D656D5A78A6E2518D9E77431132127 /* PBXTargetDependency */,
-				20E5B4A77C8A488C1A4B1FC332D61AC9 /* PBXTargetDependency */,
-				BE17046BD2FD7098EDC8F336AB78506D /* PBXTargetDependency */,
-				2D013D38AE9D636DE31670BA5F8D4446 /* PBXTargetDependency */,
-				20AEEE6DB81624057D414723DE973155 /* PBXTargetDependency */,
-				F404F5E17AF60445FD94F0D19976930E /* PBXTargetDependency */,
-				ACD1D662B9E6AE4B0C6092DBC2C7B68E /* PBXTargetDependency */,
-				E76CB23B4F8E9E6B0C8FE568E464A36E /* PBXTargetDependency */,
-				78163C3B12B788CF55F19EF07E0030F0 /* PBXTargetDependency */,
+				B4CACC1DA22896FBBCD76206C046B9AF /* PBXTargetDependency */,
+				966856A106F5BF7DD2EC0070E210326E /* PBXTargetDependency */,
+				71B5D329670B3658B6AD5EE60F030ADA /* PBXTargetDependency */,
+				349F7716EAE8CAF775F7E5B592D80849 /* PBXTargetDependency */,
+				D6B2AB46EEF1DA69AADCB6E45D0D4745 /* PBXTargetDependency */,
+				478CD361EDA17E1E77095572A82D8A7F /* PBXTargetDependency */,
+				35D76894006D3511BB3B90FB4CF8EA60 /* PBXTargetDependency */,
+				FC657A51D116C992ED4469A390860E86 /* PBXTargetDependency */,
+				E36AEBFD8D9859ABFB577CFB39396DBE /* PBXTargetDependency */,
+				59961F3A6140C2BF4F6F6D750D778493 /* PBXTargetDependency */,
+				0A395A31175328A805F62BB6B24E8170 /* PBXTargetDependency */,
+				30EBD2EA76A0030C87A9B193F384E400 /* PBXTargetDependency */,
+				65B3CAA1A7DBF3DCF57BBAFF97BA4A53 /* PBXTargetDependency */,
+				860983B0623E0628FDD1374BA881CB5B /* PBXTargetDependency */,
+				CAC17445168C050910EC4CCCA7F0E1FF /* PBXTargetDependency */,
+				A012E5F5D5D3DC7762319E0F004F4F1F /* PBXTargetDependency */,
 			);
-			name = "Pods-iosApp";
-			productName = Pods_iosApp;
-			productReference = B097DD7534E741D5C41838011D755842 /* Pods-iosApp */;
+			name = "Pods-Grupit";
+			productName = Pods_Grupit;
+			productReference = C564D7B8B91FBE241E306583F8AE8A81 /* Pods-Grupit */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -4707,7 +4707,7 @@
 				LastUpgradeCheck = 1240;
 			};
 			buildConfigurationList = 4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */;
-			compatibilityVersion = "Xcode 10.0";
+			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -4752,7 +4752,7 @@
 				zh_TW,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			productRefGroup = 561310402AEE977F3AF8720B43C54E42 /* Products */;
+			productRefGroup = 80B08ECBF240D0B14C094BB1A22985F7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -4770,7 +4770,7 @@
 				8627999EF1D5E93E13DAFF580DA8CDCF /* GTMAppAuth */,
 				D676E21115185671D7258A56944ABE98 /* GTMSessionFetcher */,
 				D2B5E7DCCBBFB32341D857D01211A1A3 /* nanopb */,
-				ED39C638569286489CD697A6C8964146 /* Pods-iosApp */,
+				FC9CDE1D93060C6A2D83FDE50FB9FB3C /* Pods-Grupit */,
 				2BBF7206D7FAC92C82A042A99C4A98F8 /* PromisesObjC */,
 				962124A759E27BE4799ED74362BED884 /* RecaptchaInterop */,
 				8777C9F6889E59EFFD631D80AEE9048B /* shared */,
@@ -4809,6 +4809,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2DE9CAF821DA733AF87E03FB3357AFE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3203E1189FD4354EB4002E2181DC93B3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -4927,13 +4934,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E27A7DF9C4E666E93862CBCF4B552903 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E7A13FE3ABAF48E47455C716864922CF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -5035,6 +5035,14 @@
 				8C4FB694B32A9C633F3D772F1BE278FA /* me.nanopb.c in Sources */,
 				E25C73A133C346E9FFDF418A38659A75 /* NSDictionary+FIRMessaging.m in Sources */,
 				EBE16D0575B098C3ABD1D4B599475016 /* NSError+FIRMessaging.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54EC2B513EFE78B748E7FBF677D1E30F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6EB2E9AFD07BB2DF8C27E2F3EB7C5AAD /* Pods-Grupit-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5259,14 +5267,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E1C1482FABD3166152CE4118FF3E53AD /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				FA727FCD050461690C63CF3B450F1E01 /* Pods-iosApp-dummy.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		ED4861E133C5C110EF341F1889A69F92 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -5446,47 +5446,41 @@
 			target = 5C642AA10FB29936669CC269F42079C6 /* AppAuth */;
 			targetProxy = E5923A41CEBB3D5297C22FAB5B351CAB /* PBXContainerItemProxy */;
 		};
-		03FC63F8DAA2D3E271AAA24CEAB3836D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = FirebaseAppCheckInterop;
-			target = DD28B439BE8B17D9339D9B526F144347 /* FirebaseAppCheckInterop */;
-			targetProxy = 7208DFB2BE021C33FB0E96671EC5D614 /* PBXContainerItemProxy */;
-		};
 		06510BAAD9AD41590F562523CD55E1A6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "GoogleSignIn-GoogleSignIn";
 			target = 7DFA91ED3A3D0BC020C3C843A3D1EB38 /* GoogleSignIn-GoogleSignIn */;
 			targetProxy = C6EC2110943ED26DEAABF075E4A9A387 /* PBXContainerItemProxy */;
 		};
-		16D656D5A78A6E2518D9E77431132127 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = GTMAppAuth;
-			target = 8627999EF1D5E93E13DAFF580DA8CDCF /* GTMAppAuth */;
-			targetProxy = 74224BD7A19E48B5AB4D87B9EFD4B267 /* PBXContainerItemProxy */;
-		};
-		20AEEE6DB81624057D414723DE973155 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = GoogleUtilities;
-			target = 8D7F5D5DD528D21A72DC87ADA5B12E2D /* GoogleUtilities */;
-			targetProxy = 3A840F96861381A103CAC2D8DA28A5C4 /* PBXContainerItemProxy */;
-		};
-		20E5B4A77C8A488C1A4B1FC332D61AC9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = GTMSessionFetcher;
-			target = D676E21115185671D7258A56944ABE98 /* GTMSessionFetcher */;
-			targetProxy = D1BB965AA8ECCEB4E7C6AE13D95023C5 /* PBXContainerItemProxy */;
-		};
-		2D013D38AE9D636DE31670BA5F8D4446 /* PBXTargetDependency */ = {
+		0A395A31175328A805F62BB6B24E8170 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = GoogleSignIn;
 			target = CAD3534FC55B0333104E5117C0A9A324 /* GoogleSignIn */;
-			targetProxy = 4AA2461D5D8FCE3209C620200F4CB01D /* PBXContainerItemProxy */;
+			targetProxy = 75D8A1351B7E3DBC8EF11393B8DC2FC0 /* PBXContainerItemProxy */;
+		};
+		30EBD2EA76A0030C87A9B193F384E400 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GoogleUtilities;
+			target = 8D7F5D5DD528D21A72DC87ADA5B12E2D /* GoogleUtilities */;
+			targetProxy = BE328448B9AEB976F3888E9A2CEFEFA5 /* PBXContainerItemProxy */;
 		};
 		31C39F850257DF5C614C51E47C814E1A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = FirebaseAppCheckInterop;
 			target = DD28B439BE8B17D9339D9B526F144347 /* FirebaseAppCheckInterop */;
 			targetProxy = 765E85F4DD60837755A5667A2ECD6567 /* PBXContainerItemProxy */;
+		};
+		349F7716EAE8CAF775F7E5B592D80849 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FirebaseCore;
+			target = 4402AFF83DBDC4DD07E198685FDC2DF2 /* FirebaseCore */;
+			targetProxy = 0312F49E878EE77E34B45346552D5EF8 /* PBXContainerItemProxy */;
+		};
+		35D76894006D3511BB3B90FB4CF8EA60 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FirebaseMessaging;
+			target = 5895B432FE4D2F6826C8FF25A09DB6D2 /* FirebaseMessaging */;
+			targetProxy = 38C3A2CDE605C338246100006903863F /* PBXContainerItemProxy */;
 		};
 		3677768B37E49D4D6BCA889623C2E2E4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5506,17 +5500,11 @@
 			target = 5C0371EE948D0357B8EE0E34ABB44BF0 /* GoogleDataTransport */;
 			targetProxy = E996FF59BC22519D66B02CF49B6C4163 /* PBXContainerItemProxy */;
 		};
-		43C2EEEC3F2CF87F26BA18B6799AEEDE /* PBXTargetDependency */ = {
+		478CD361EDA17E1E77095572A82D8A7F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = AppAuth;
-			target = 5C642AA10FB29936669CC269F42079C6 /* AppAuth */;
-			targetProxy = 20CD7CD3D3BC261962A69C3FE685228C /* PBXContainerItemProxy */;
-		};
-		5219484DF11F8300A5699F4BB7BACED4 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = FirebaseCore;
-			target = 4402AFF83DBDC4DD07E198685FDC2DF2 /* FirebaseCore */;
-			targetProxy = 8941AF656A8970A361E4A6093DB3E0B4 /* PBXContainerItemProxy */;
+			name = FirebaseInstallations;
+			target = 87803597EB3F20FC46472B85392EC4FD /* FirebaseInstallations */;
+			targetProxy = FD95F5188D62428007A510FB1D57CB77 /* PBXContainerItemProxy */;
 		};
 		5404AE2060991FBB33A8BFFFB3C9C251 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5529,6 +5517,24 @@
 			name = PromisesObjC;
 			target = 2BBF7206D7FAC92C82A042A99C4A98F8 /* PromisesObjC */;
 			targetProxy = 7DE51CE22D6CD43E1B458B31AF705E69 /* PBXContainerItemProxy */;
+		};
+		59961F3A6140C2BF4F6F6D750D778493 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GoogleDataTransport;
+			target = 5C0371EE948D0357B8EE0E34ABB44BF0 /* GoogleDataTransport */;
+			targetProxy = 7FD1FE1387EE04E06AA75F9A1F0D558B /* PBXContainerItemProxy */;
+		};
+		65B3CAA1A7DBF3DCF57BBAFF97BA4A53 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = PromisesObjC;
+			target = 2BBF7206D7FAC92C82A042A99C4A98F8 /* PromisesObjC */;
+			targetProxy = 63A285CAA8B5F28A2A3FC5FDBF543F92 /* PBXContainerItemProxy */;
+		};
+		71B5D329670B3658B6AD5EE60F030ADA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FirebaseAuth;
+			target = 6AE4A3D573DED275B034E20506596C62 /* FirebaseAuth */;
+			targetProxy = 0BE69E6834C4895918409F7ECFAEF0B1 /* PBXContainerItemProxy */;
 		};
 		72DA949470B22CFD655C928BEA074E48 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5548,12 +5554,6 @@
 			target = 4402AFF83DBDC4DD07E198685FDC2DF2 /* FirebaseCore */;
 			targetProxy = 8FE9CA6EF25EB1DDDA27F5F93ECB3CEE /* PBXContainerItemProxy */;
 		};
-		78163C3B12B788CF55F19EF07E0030F0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = shared;
-			target = 8777C9F6889E59EFFD631D80AEE9048B /* shared */;
-			targetProxy = 28C1905132BFDA6C6BBDE276CDB4CA8C /* PBXContainerItemProxy */;
-		};
 		80B647AC96B0097013BCE3DE6C401096 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = GTMAppAuth;
@@ -5566,11 +5566,11 @@
 			target = D676E21115185671D7258A56944ABE98 /* GTMSessionFetcher */;
 			targetProxy = 6DB64997AD4D4D58FA8DED47656B942A /* PBXContainerItemProxy */;
 		};
-		83890F49963ED161EEB3F5A41690DB00 /* PBXTargetDependency */ = {
+		860983B0623E0628FDD1374BA881CB5B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = FirebaseInstallations;
-			target = 87803597EB3F20FC46472B85392EC4FD /* FirebaseInstallations */;
-			targetProxy = D2A8F5C76A9E57CD5100E1BBC6B9E8F7 /* PBXContainerItemProxy */;
+			name = RecaptchaInterop;
+			target = 962124A759E27BE4799ED74362BED884 /* RecaptchaInterop */;
+			targetProxy = 93677C6707D3DCA8A0C1D0D30949A033 /* PBXContainerItemProxy */;
 		};
 		8957054FEFB99BCBEF7FC5C998DFF7D9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5584,11 +5584,17 @@
 			target = 5C642AA10FB29936669CC269F42079C6 /* AppAuth */;
 			targetProxy = 483FBCEF889A16D22E9319E25D850005 /* PBXContainerItemProxy */;
 		};
-		916AABC79FD33C251D2357C4A7E65B8A /* PBXTargetDependency */ = {
+		966856A106F5BF7DD2EC0070E210326E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = FirebaseCoreInternal;
-			target = 25E9E9A17BC3F670357D7385C521E48E /* FirebaseCoreInternal */;
-			targetProxy = F322107E41A67792DC37D16827B7E5C5 /* PBXContainerItemProxy */;
+			name = FirebaseAppCheckInterop;
+			target = DD28B439BE8B17D9339D9B526F144347 /* FirebaseAppCheckInterop */;
+			targetProxy = 04378CDA5A4B16451CB7D1EFFAEFDBC6 /* PBXContainerItemProxy */;
+		};
+		A012E5F5D5D3DC7762319E0F004F4F1F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = shared;
+			target = 8777C9F6889E59EFFD631D80AEE9048B /* shared */;
+			targetProxy = DD4094F3D1E9C6049F7137A726B222AE /* PBXContainerItemProxy */;
 		};
 		AA1E91033126B93E14A13F2533CD122E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5596,23 +5602,11 @@
 			target = D2B5E7DCCBBFB32341D857D01211A1A3 /* nanopb */;
 			targetProxy = 116630B2DA22AD3E8ABEB03A852AD74B /* PBXContainerItemProxy */;
 		};
-		ACD1D662B9E6AE4B0C6092DBC2C7B68E /* PBXTargetDependency */ = {
+		B4CACC1DA22896FBBCD76206C046B9AF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = RecaptchaInterop;
-			target = 962124A759E27BE4799ED74362BED884 /* RecaptchaInterop */;
-			targetProxy = A94BD2D4F8CAE783369BCEF252EC2790 /* PBXContainerItemProxy */;
-		};
-		BE17046BD2FD7098EDC8F336AB78506D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = GoogleDataTransport;
-			target = 5C0371EE948D0357B8EE0E34ABB44BF0 /* GoogleDataTransport */;
-			targetProxy = 5F216FEF9ACCC6E684C0A5A550CF348F /* PBXContainerItemProxy */;
-		};
-		BED6B71B52C114496842ACA3022A27D9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = FirebaseAuth;
-			target = 6AE4A3D573DED275B034E20506596C62 /* FirebaseAuth */;
-			targetProxy = E0F3189031D353B04F58CB3349197E25 /* PBXContainerItemProxy */;
+			name = AppAuth;
+			target = 5C642AA10FB29936669CC269F42079C6 /* AppAuth */;
+			targetProxy = A494EB55B7BA1EF13DE0333D8C29F88B /* PBXContainerItemProxy */;
 		};
 		C19CBD0BD08AA48CFD72CE9002EBA918 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5626,11 +5620,23 @@
 			target = 8D7F5D5DD528D21A72DC87ADA5B12E2D /* GoogleUtilities */;
 			targetProxy = 1B8A227A320F98B828A983C7BDEB8FF7 /* PBXContainerItemProxy */;
 		};
+		CAC17445168C050910EC4CCCA7F0E1FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = nanopb;
+			target = D2B5E7DCCBBFB32341D857D01211A1A3 /* nanopb */;
+			targetProxy = D60FE068369A11BA9993ECF83D5C43A0 /* PBXContainerItemProxy */;
+		};
 		D14A6FBB68F60E3A0CD73BD40F6F5E4B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = GoogleUtilities;
 			target = 8D7F5D5DD528D21A72DC87ADA5B12E2D /* GoogleUtilities */;
 			targetProxy = 23736F2EE9325B2753F5A1345E405BB3 /* PBXContainerItemProxy */;
+		};
+		D6B2AB46EEF1DA69AADCB6E45D0D4745 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FirebaseCoreInternal;
+			target = 25E9E9A17BC3F670357D7385C521E48E /* FirebaseCoreInternal */;
+			targetProxy = C368F537F434BC41EF1BE01AE33CDCF8 /* PBXContainerItemProxy */;
 		};
 		D832FA35AF5289F9385F61DE2EDDB3E0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5650,11 +5656,11 @@
 			target = D676E21115185671D7258A56944ABE98 /* GTMSessionFetcher */;
 			targetProxy = 1EFA448513588551AE6002FDBDC3BCED /* PBXContainerItemProxy */;
 		};
-		E76CB23B4F8E9E6B0C8FE568E464A36E /* PBXTargetDependency */ = {
+		E36AEBFD8D9859ABFB577CFB39396DBE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = nanopb;
-			target = D2B5E7DCCBBFB32341D857D01211A1A3 /* nanopb */;
-			targetProxy = B14BCF06207BE3A0E712FE491D3DF241 /* PBXContainerItemProxy */;
+			name = GTMSessionFetcher;
+			target = D676E21115185671D7258A56944ABE98 /* GTMSessionFetcher */;
+			targetProxy = D33C046D1AC1A89F3DCD432236BA172C /* PBXContainerItemProxy */;
 		};
 		E89C51DE4F5CA3F796E7DA97F773A54C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5674,23 +5680,17 @@
 			target = D676E21115185671D7258A56944ABE98 /* GTMSessionFetcher */;
 			targetProxy = 4ED7989AB3867F9B313A7E59C8DF736C /* PBXContainerItemProxy */;
 		};
-		F404F5E17AF60445FD94F0D19976930E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = PromisesObjC;
-			target = 2BBF7206D7FAC92C82A042A99C4A98F8 /* PromisesObjC */;
-			targetProxy = 8590D511C74AEF4FDAF6C3BE239E89ED /* PBXContainerItemProxy */;
-		};
 		F6513C9C7F68C1BF6BCEBC817F31F20F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = FirebaseCoreInternal;
 			target = 25E9E9A17BC3F670357D7385C521E48E /* FirebaseCoreInternal */;
 			targetProxy = 7ADD4C39B2704FFB9033BA28EEDBD0EB /* PBXContainerItemProxy */;
 		};
-		F704AF58F116CB0DDC058320AD644AEE /* PBXTargetDependency */ = {
+		FC657A51D116C992ED4469A390860E86 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = FirebaseMessaging;
-			target = 5895B432FE4D2F6826C8FF25A09DB6D2 /* FirebaseMessaging */;
-			targetProxy = FC09CDE5B5AC073AFE8578C68BA07DCE /* PBXContainerItemProxy */;
+			name = GTMAppAuth;
+			target = 8627999EF1D5E93E13DAFF580DA8CDCF /* GTMAppAuth */;
+			targetProxy = EED2FF58E61295A47C9BBBF954252D6D /* PBXContainerItemProxy */;
 		};
 		FF0FF91D935880903143D73759BA30CB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5701,83 +5701,9 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		0658104C3B4437BCE6B80129733E2351 /* Debug */ = {
+		007AA66CB42A7FB9239AC396396CDADC /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 678D20EE78B9F54F28033A58F36678CE /* GoogleDataTransport.debug.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport.modulemap";
-				PRODUCT_MODULE_NAME = GoogleDataTransport;
-				PRODUCT_NAME = GoogleDataTransport;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		12A8E1CF245AFEE203F4AF11307BA542 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 52681524FD3A399D7E70FD70BF8A9927 /* PromisesObjC.release.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/PromisesObjC/PromisesObjC-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/PromisesObjC/PromisesObjC.modulemap";
-				PRODUCT_MODULE_NAME = FBLPromises;
-				PRODUCT_NAME = FBLPromises;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		1B43B3FDEEAC153FF650E6E4DC32AF55 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4BBC6C86DC0DB5C780C2E4514C0C4F0B /* RecaptchaInterop.debug.xcconfig */;
+			baseConfigurationReference = 08CA7BECB8D34081DD5231B5B0BDC2F3 /* GTMAppAuth.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGNING_ALLOWED = NO;
@@ -5792,8 +5718,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				GCC_PREFIX_HEADER = "Target Support Files/RecaptchaInterop/RecaptchaInterop-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop-Info.plist";
+				INFOPLIST_FILE = "Target Support Files/GTMAppAuth/GTMAppAuth-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -5801,22 +5726,23 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop.modulemap";
-				PRODUCT_MODULE_NAME = RecaptchaInterop;
-				PRODUCT_NAME = RecaptchaInterop;
+				MODULEMAP_FILE = "Target Support Files/GTMAppAuth/GTMAppAuth.modulemap";
+				PRODUCT_MODULE_NAME = GTMAppAuth;
+				PRODUCT_NAME = GTMAppAuth;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Debug;
+			name = Release;
 		};
-		28315A7C6FF72E72E310DE87D4D757CC /* Release */ = {
+		077B7F11C89A3DA64B54AC95932F7807 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7D785BC7A8DFD2B5B5309E87D1545898 /* FirebaseAppCheckInterop.release.xcconfig */;
+			baseConfigurationReference = D50205116621E54E3D5371514B6B777F /* FirebaseAppCheckInterop.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGNING_ALLOWED = NO;
@@ -5846,7 +5772,44 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		2C3B175EA9417E262F7A9241F266E685 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24084872C373BCDEF5DDA85F5E520EF2 /* GoogleUtilities.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities.modulemap";
+				PRODUCT_MODULE_NAME = GoogleUtilities;
+				PRODUCT_NAME = GoogleUtilities;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -5854,7 +5817,7 @@
 			};
 			name = Release;
 		};
-		2FF8EC8633938380222A9A81B136DD8E /* Release */ = {
+		2E22B169D461FCE09A5267E365B98FE6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E746535F0BC421B6C9A2FDAF13FF6CDC /* nanopb.release.xcconfig */;
 			buildSettings = {
@@ -5885,51 +5848,13 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
-		};
-		31BAE8FF40CE69BC184749D07B9FBE97 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 37979249040B5D16266A937B96B92C89 /* GTMSessionFetcher.debug.xcconfig */;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher.modulemap";
-				PRODUCT_MODULE_NAME = GTMSessionFetcher;
-				PRODUCT_NAME = GTMSessionFetcher;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
 		};
 		33BD511F357B620BB71C7F8351C02C45 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -6008,50 +5933,9 @@
 			};
 			name = Release;
 		};
-		43EF6ECB30E85AE8D3ECEAFEE3191776 /* Debug */ = {
+		3C7F95C3C4FFD6A17813515AD21DCCE5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E462E23B3674BF94EAB1504D506F2803 /* Pods-iosApp.debug.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/Pods-iosApp/Pods-iosApp-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-iosApp/Pods-iosApp.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		4B2B2BB77B46FB6F1E5B81B043E7A63F /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = A988CA8936C2B1BB74392F8D81235E5F /* RecaptchaInterop.release.xcconfig */;
+			baseConfigurationReference = 036A772019B436D5D2A12264EAE74AF0 /* GTMSessionFetcher.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGNING_ALLOWED = NO;
@@ -6066,8 +5950,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				GCC_PREFIX_HEADER = "Target Support Files/RecaptchaInterop/RecaptchaInterop-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop-Info.plist";
+				INFOPLIST_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -6075,13 +5958,13 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop.modulemap";
-				PRODUCT_MODULE_NAME = RecaptchaInterop;
-				PRODUCT_NAME = RecaptchaInterop;
+				MODULEMAP_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher.modulemap";
+				PRODUCT_MODULE_NAME = GTMSessionFetcher;
+				PRODUCT_NAME = GTMSessionFetcher;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -6089,9 +5972,9 @@
 			};
 			name = Release;
 		};
-		4B874B37D3F10081B46E5591C946904C /* Release */ = {
+		48C4116A3161C0DA7989A1E88F6DCA29 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 53E22E5E5BAE967CB82EFD2BAA73B1EB /* GoogleDataTransport.release.xcconfig */;
+			baseConfigurationReference = F4DEAB78B59BC6289B3FEFF399C3F979 /* AppAuth.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
@@ -6105,7 +5988,8 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport-Info.plist";
+				GCC_PREFIX_HEADER = "Target Support Files/AppAuth/AppAuth-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/AppAuth/AppAuth-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -6113,13 +5997,13 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport.modulemap";
-				PRODUCT_MODULE_NAME = GoogleDataTransport;
-				PRODUCT_NAME = GoogleDataTransport;
+				MODULEMAP_FILE = "Target Support Files/AppAuth/AppAuth.modulemap";
+				PRODUCT_MODULE_NAME = AppAuth;
+				PRODUCT_NAME = AppAuth;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -6189,11 +6073,10 @@
 			};
 			name = Release;
 		};
-		5B19A6E2EAB4E748F8366B3DFD8566D3 /* Release */ = {
+		61B25A52857AA65D403905F0CC6BD68E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 036A772019B436D5D2A12264EAE74AF0 /* GTMSessionFetcher.release.xcconfig */;
+			baseConfigurationReference = A045FC377551DE1719394132D6D64C2B /* AppAuth.debug.xcconfig */;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
 				CODE_SIGN_IDENTITY = "Don't Code Sign";
@@ -6206,7 +6089,8 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher-Info.plist";
+				GCC_PREFIX_HEADER = "Target Support Files/AppAuth/AppAuth-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/AppAuth/AppAuth-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -6214,23 +6098,22 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher.modulemap";
-				PRODUCT_MODULE_NAME = GTMSessionFetcher;
-				PRODUCT_NAME = GTMSessionFetcher;
+				MODULEMAP_FILE = "Target Support Files/AppAuth/AppAuth.modulemap";
+				PRODUCT_MODULE_NAME = AppAuth;
+				PRODUCT_NAME = AppAuth;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
 		};
-		6A85B71E85C52686454D345FFA94E697 /* Debug */ = {
+		66BC5F3A6C2C813958AA75758CDAEF50 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 548FAAD1DFDC59C82C26E3AC79012441 /* nanopb.debug.xcconfig */;
+			baseConfigurationReference = 9C51326B6A86DF0542B99FF3D03A27AE /* GoogleUtilities.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
@@ -6244,8 +6127,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				GCC_PREFIX_HEADER = "Target Support Files/nanopb/nanopb-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/nanopb/nanopb-Info.plist";
+				INFOPLIST_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -6253,13 +6135,13 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/nanopb/nanopb.modulemap";
-				PRODUCT_MODULE_NAME = nanopb;
-				PRODUCT_NAME = nanopb;
+				MODULEMAP_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities.modulemap";
+				PRODUCT_MODULE_NAME = GoogleUtilities;
+				PRODUCT_NAME = GoogleUtilities;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -6304,48 +6186,10 @@
 			};
 			name = Debug;
 		};
-		6C68DD6D7D6E2DE1698865373B82AC34 /* Debug */ = {
+		738DE9E68D4AF39B746D89769716BB7A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9C51326B6A86DF0542B99FF3D03A27AE /* GoogleUtilities.debug.xcconfig */;
+			baseConfigurationReference = 4BBC6C86DC0DB5C780C2E4514C0C4F0B /* RecaptchaInterop.debug.xcconfig */;
 			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities.modulemap";
-				PRODUCT_MODULE_NAME = GoogleUtilities;
-				PRODUCT_NAME = GoogleUtilities;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		6E88F18E6226C9D2C940DEB6B943423F /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 244FC2DAA936A0B07ACEFDC74E2D54B8 /* Pods-iosApp.release.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
@@ -6359,7 +6203,8 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/Pods-iosApp/Pods-iosApp-Info.plist";
+				GCC_PREFIX_HEADER = "Target Support Files/RecaptchaInterop/RecaptchaInterop-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -6367,21 +6212,18 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-iosApp/Pods-iosApp.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				MODULEMAP_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop.modulemap";
+				PRODUCT_MODULE_NAME = RecaptchaInterop;
+				PRODUCT_NAME = RecaptchaInterop;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
 		};
 		7788304DD8B540971201F0986CA4F8F5 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -6415,6 +6257,86 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
 				SWIFT_VERSION = 5.3;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		79EF8400C270996719AAB593B55F8D8D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A13611358F533A6DD2B681BE1A68739 /* Pods-Grupit.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/Pods-Grupit/Pods-Grupit-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-Grupit/Pods-Grupit.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		7CF9DAA80DB69E3AAD543494EFAC4419 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 37979249040B5D16266A937B96B92C89 /* GTMSessionFetcher.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/GTMSessionFetcher/GTMSessionFetcher.modulemap";
+				PRODUCT_MODULE_NAME = GTMSessionFetcher;
+				PRODUCT_NAME = GTMSessionFetcher;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -6461,82 +6383,6 @@
 			};
 			name = Release;
 		};
-		859E8832FC0E6D15F8B017733E248186 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = F4DEAB78B59BC6289B3FEFF399C3F979 /* AppAuth.release.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				GCC_PREFIX_HEADER = "Target Support Files/AppAuth/AppAuth-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/AppAuth/AppAuth-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/AppAuth/AppAuth.modulemap";
-				PRODUCT_MODULE_NAME = AppAuth;
-				PRODUCT_NAME = AppAuth;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		8C20B4DC49AAE80A57103552AB4053E4 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CEF6030DE8E1DD94AFE65C42A8BE615B /* GoogleSignIn.debug.xcconfig */;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn.modulemap";
-				PRODUCT_MODULE_NAME = GoogleSignIn;
-				PRODUCT_NAME = GoogleSignIn;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
 		8E5B53D5BF0854E1E6B2A91ADD0F992D /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2D8C1A7AD65FFF1559A5F1020F64A71D /* GoogleSignIn.release.xcconfig */;
@@ -6576,44 +6422,6 @@
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
-		};
-		945475389E6998558FD49D72931F006F /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2D8C1A7AD65FFF1559A5F1020F64A71D /* GoogleSignIn.release.xcconfig */;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn.modulemap";
-				PRODUCT_MODULE_NAME = GoogleSignIn;
-				PRODUCT_NAME = GoogleSignIn;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
 		};
 		99B698A441DFC815FC27A810434CAE48 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -6741,7 +6549,7 @@
 			};
 			name = Debug;
 		};
-		ACC628E3E41F703E9390BEECA9E86A9E /* Debug */ = {
+		A47D72EEE9EC9BA1946C4A7D59FD0227 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3C850A5F90FF274436B4A568E2E0AE09 /* GTMAppAuth.debug.xcconfig */;
 			buildSettings = {
@@ -6772,50 +6580,12 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
-		};
-		B81D23F685978BFE991DD7D2194E0E49 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 24084872C373BCDEF5DDA85F5E520EF2 /* GoogleUtilities.release.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/GoogleUtilities/GoogleUtilities.modulemap";
-				PRODUCT_MODULE_NAME = GoogleUtilities;
-				PRODUCT_NAME = GoogleUtilities;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
 		};
 		BDA41C5C88A9856D4693247BDD37F430 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -6856,11 +6626,46 @@
 			};
 			name = Debug;
 		};
-		C488B9303928724EC64EA29FACD1DC0E /* Debug */ = {
+		BF63EA97FD9E3622B033B771EAD58754 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D50205116621E54E3D5371514B6B777F /* FirebaseAppCheckInterop.debug.xcconfig */;
+			baseConfigurationReference = 0B9674EE0E4F893A9F556A8BB29C84A1 /* PromisesObjC.debug.xcconfig */;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/PromisesObjC/PromisesObjC-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/PromisesObjC/PromisesObjC.modulemap";
+				PRODUCT_MODULE_NAME = FBLPromises;
+				PRODUCT_NAME = FBLPromises;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		C0EAB6F21BAEC608B404D53C6F180DE9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 678D20EE78B9F54F28033A58F36678CE /* GoogleDataTransport.debug.xcconfig */;
+			buildSettings = {
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
 				CODE_SIGN_IDENTITY = "Don't Code Sign";
@@ -6873,8 +6678,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				GCC_PREFIX_HEADER = "Target Support Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop-Info.plist";
+				INFOPLIST_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -6882,13 +6686,13 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop.modulemap";
-				PRODUCT_MODULE_NAME = FirebaseAppCheckInterop;
-				PRODUCT_NAME = FirebaseAppCheckInterop;
+				MODULEMAP_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport.modulemap";
+				PRODUCT_MODULE_NAME = GoogleDataTransport;
+				PRODUCT_NAME = GoogleDataTransport;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -6927,6 +6731,197 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
 				SWIFT_VERSION = 5.3;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		C64B7DB0AFBC0DDD7A662882B5187C1E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A988CA8936C2B1BB74392F8D81235E5F /* RecaptchaInterop.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				GCC_PREFIX_HEADER = "Target Support Files/RecaptchaInterop/RecaptchaInterop-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/RecaptchaInterop/RecaptchaInterop.modulemap";
+				PRODUCT_MODULE_NAME = RecaptchaInterop;
+				PRODUCT_NAME = RecaptchaInterop;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		C81C47A8176ECEFCFD297E14BE96FCFD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 548FAAD1DFDC59C82C26E3AC79012441 /* nanopb.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				GCC_PREFIX_HEADER = "Target Support Files/nanopb/nanopb-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/nanopb/nanopb-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/nanopb/nanopb.modulemap";
+				PRODUCT_MODULE_NAME = nanopb;
+				PRODUCT_NAME = nanopb;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		CAD506797A15FD305F3EC04A9EA81F5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2D8C1A7AD65FFF1559A5F1020F64A71D /* GoogleSignIn.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn.modulemap";
+				PRODUCT_MODULE_NAME = GoogleSignIn;
+				PRODUCT_NAME = GoogleSignIn;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		CB3EA9214125AE0C0B6641D8CEB4BF83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CEF6030DE8E1DD94AFE65C42A8BE615B /* GoogleSignIn.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/GoogleSignIn/GoogleSignIn.modulemap";
+				PRODUCT_MODULE_NAME = GoogleSignIn;
+				PRODUCT_NAME = GoogleSignIn;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		CC66BCC45C54C96ECAF408638C2BE5AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 53E22E5E5BAE967CB82EFD2BAA73B1EB /* GoogleDataTransport.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/GoogleDataTransport/GoogleDataTransport.modulemap";
+				PRODUCT_MODULE_NAME = GoogleDataTransport;
+				PRODUCT_NAME = GoogleDataTransport;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -6994,10 +6989,11 @@
 			};
 			name = Debug;
 		};
-		DB9CAFC27F6824D854A8A6E3CAD1D6C9 /* Debug */ = {
+		E6FF3CF539FF40EBB7441D3C0F9554D9 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A045FC377551DE1719394132D6D64C2B /* AppAuth.debug.xcconfig */;
+			baseConfigurationReference = 7D785BC7A8DFD2B5B5309E87D1545898 /* FirebaseAppCheckInterop.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
 				CODE_SIGN_IDENTITY = "Don't Code Sign";
@@ -7010,8 +7006,8 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXPANDED_CODE_SIGN_IDENTITY = "";
-				GCC_PREFIX_HEADER = "Target Support Files/AppAuth/AppAuth-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/AppAuth/AppAuth-Info.plist";
+				GCC_PREFIX_HEADER = "Target Support Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -7019,13 +7015,92 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/AppAuth/AppAuth.modulemap";
-				PRODUCT_MODULE_NAME = AppAuth;
-				PRODUCT_NAME = AppAuth;
+				MODULEMAP_FILE = "Target Support Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop.modulemap";
+				PRODUCT_MODULE_NAME = FirebaseAppCheckInterop;
+				PRODUCT_NAME = FirebaseAppCheckInterop;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		E85989A7BA0027ABCAB75A6BAA0E2F15 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 52681524FD3A399D7E70FD70BF8A9927 /* PromisesObjC.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/PromisesObjC/PromisesObjC-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/PromisesObjC/PromisesObjC.modulemap";
+				PRODUCT_MODULE_NAME = FBLPromises;
+				PRODUCT_NAME = FBLPromises;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		F01234820DAA882AED656458966B2EA8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DCEA3B1EEA7D0C19C381A10AEC236581 /* Pods-Grupit.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "Don't Code Sign";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXPANDED_CODE_SIGN_IDENTITY = "";
+				INFOPLIST_FILE = "Target Support Files/Pods-Grupit/Pods-Grupit-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-Grupit/Pods-Grupit.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -7071,81 +7146,6 @@
 			};
 			name = Release;
 		};
-		FD8A73AF73B5FB40EA148FC4DB8B43E1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 08CA7BECB8D34081DD5231B5B0BDC2F3 /* GTMAppAuth.release.xcconfig */;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/GTMAppAuth/GTMAppAuth-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/GTMAppAuth/GTMAppAuth.modulemap";
-				PRODUCT_MODULE_NAME = GTMAppAuth;
-				PRODUCT_NAME = GTMAppAuth;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		FF2B7FE6C4BCC7022CF46B725C0A8A23 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0B9674EE0E4F893A9F556A8BB29C84A1 /* PromisesObjC.debug.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "Don't Code Sign";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				EXPANDED_CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = "Target Support Files/PromisesObjC/PromisesObjC-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/PromisesObjC/PromisesObjC.modulemap";
-				PRODUCT_MODULE_NAME = FBLPromises;
-				PRODUCT_NAME = FBLPromises;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -7161,8 +7161,8 @@
 		0B02D42DEEF0C8703433731E2A6D2587 /* Build configuration list for PBXNativeTarget "GoogleUtilities" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6C68DD6D7D6E2DE1698865373B82AC34 /* Debug */,
-				B81D23F685978BFE991DD7D2194E0E49 /* Release */,
+				66BC5F3A6C2C813958AA75758CDAEF50 /* Debug */,
+				2C3B175EA9417E262F7A9241F266E685 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7170,8 +7170,8 @@
 		1166072F19D605AE7E4B016DD27CFA21 /* Build configuration list for PBXNativeTarget "GTMAppAuth" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				ACC628E3E41F703E9390BEECA9E86A9E /* Debug */,
-				FD8A73AF73B5FB40EA148FC4DB8B43E1 /* Release */,
+				A47D72EEE9EC9BA1946C4A7D59FD0227 /* Debug */,
+				007AA66CB42A7FB9239AC396396CDADC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7188,8 +7188,8 @@
 		2D97C185A5D514FB434B640B16109400 /* Build configuration list for PBXNativeTarget "GoogleSignIn" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8C20B4DC49AAE80A57103552AB4053E4 /* Debug */,
-				945475389E6998558FD49D72931F006F /* Release */,
+				CB3EA9214125AE0C0B6641D8CEB4BF83 /* Debug */,
+				CAD506797A15FD305F3EC04A9EA81F5E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7197,17 +7197,8 @@
 		3105E5EC9B498D08F0D3D1E69577242B /* Build configuration list for PBXNativeTarget "RecaptchaInterop" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				1B43B3FDEEAC153FF650E6E4DC32AF55 /* Debug */,
-				4B2B2BB77B46FB6F1E5B81B043E7A63F /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		47522247E36B8695D96ACCA6E990F770 /* Build configuration list for PBXNativeTarget "Pods-iosApp" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				43EF6ECB30E85AE8D3ECEAFEE3191776 /* Debug */,
-				6E88F18E6226C9D2C940DEB6B943423F /* Release */,
+				738DE9E68D4AF39B746D89769716BB7A /* Debug */,
+				C64B7DB0AFBC0DDD7A662882B5187C1E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7224,8 +7215,8 @@
 		4A2CA357377B73F4BEA378B81060652B /* Build configuration list for PBXNativeTarget "GoogleDataTransport" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0658104C3B4437BCE6B80129733E2351 /* Debug */,
-				4B874B37D3F10081B46E5591C946904C /* Release */,
+				C0EAB6F21BAEC608B404D53C6F180DE9 /* Debug */,
+				CC66BCC45C54C96ECAF408638C2BE5AA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7233,8 +7224,8 @@
 		6E94A62E6C611FBBA915DD3E1A3FE671 /* Build configuration list for PBXNativeTarget "nanopb" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A85B71E85C52686454D345FFA94E697 /* Debug */,
-				2FF8EC8633938380222A9A81B136DD8E /* Release */,
+				C81C47A8176ECEFCFD297E14BE96FCFD /* Debug */,
+				2E22B169D461FCE09A5267E365B98FE6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7242,8 +7233,8 @@
 		7B395F985D6C3DEF0309B43C2322A074 /* Build configuration list for PBXNativeTarget "PromisesObjC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FF2B7FE6C4BCC7022CF46B725C0A8A23 /* Debug */,
-				12A8E1CF245AFEE203F4AF11307BA542 /* Release */,
+				BF63EA97FD9E3622B033B771EAD58754 /* Debug */,
+				E85989A7BA0027ABCAB75A6BAA0E2F15 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7251,8 +7242,17 @@
 		7DA0050AC7D840C3110CAA9D804C7FEE /* Build configuration list for PBXNativeTarget "FirebaseAppCheckInterop" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C488B9303928724EC64EA29FACD1DC0E /* Debug */,
-				28315A7C6FF72E72E310DE87D4D757CC /* Release */,
+				077B7F11C89A3DA64B54AC95932F7807 /* Debug */,
+				E6FF3CF539FF40EBB7441D3C0F9554D9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9896959285FB6E527F29064DAD2D23C3 /* Build configuration list for PBXNativeTarget "Pods-Grupit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F01234820DAA882AED656458966B2EA8 /* Debug */,
+				79EF8400C270996719AAB593B55F8D8D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7287,8 +7287,8 @@
 		AA5A2205A881DE5528CA6FE384DDD74F /* Build configuration list for PBXNativeTarget "AppAuth" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DB9CAFC27F6824D854A8A6E3CAD1D6C9 /* Debug */,
-				859E8832FC0E6D15F8B017733E248186 /* Release */,
+				61B25A52857AA65D403905F0CC6BD68E /* Debug */,
+				48C4116A3161C0DA7989A1E88F6DCA29 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -7305,8 +7305,8 @@
 		BD0126B1034F8EE2D6EC23DC09277F42 /* Build configuration list for PBXNativeTarget "GTMSessionFetcher" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				31BAE8FF40CE69BC184749D07B9FBE97 /* Debug */,
-				5B19A6E2EAB4E748F8366B3DFD8566D3 /* Release */,
+				7CF9DAA80DB69E3AAD543494EFAC4419 /* Debug */,
+				3C7F95C3C4FFD6A17813515AD21DCCE5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

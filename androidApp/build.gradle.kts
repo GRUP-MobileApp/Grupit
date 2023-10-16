@@ -24,13 +24,13 @@ android {
             keyPassword = keystorePassword
         }
     }
-    compileSdk = 33
+    compileSdk = 34
     defaultConfig {
         applicationId = "com.grup.android"
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 2
-        versionName = "1.0"
+        versionName = "1.1"
         signingConfig = signingConfigs.getByName("release")
     }
 
@@ -59,11 +59,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
+    //noinspection GradleDependency
     implementation("androidx.core:core-ktx:1.10.1")
 
     // Jetpack Compose
-    //noinspection GradleDependency
     implementation("androidx.compose.ui:ui:$composeVersion")
+    //noinspection GradleDependency
     implementation("androidx.activity:activity-compose:1.7.2")
     //noinspection GradleDependency
     implementation("androidx.compose.ui:ui-tooling:$composeVersion")
@@ -72,7 +73,7 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Google Play Services
-    implementation ("com.google.android.gms:play-services-auth:20.6.0")
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.android.gms:play-services-base:18.2.0")
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")

@@ -64,7 +64,7 @@ internal class TransactionViewModel : LoggedInViewModel() {
         ): Boolean =
             rawSplitStrategyAmounts.values.sum() == totalMoneyAmount
 
-        object EvenSplit : SplitStrategy() {
+        data object EvenSplit : SplitStrategy() {
             override val name: String = "Even Split"
             override val editable: Boolean = false
             override fun generateSplit(
@@ -78,14 +78,9 @@ internal class TransactionViewModel : LoggedInViewModel() {
                 totalMoneyAmount: Double,
                 splitStrategyAmounts: Map<UserInfo, Double>
             ): Map<UserInfo, Double> = splitStrategyAmounts
-
-            override fun isValid(
-                totalMoneyAmount: Double,
-                rawSplitStrategyAmounts: Map<UserInfo, Double>
-            ): Boolean = true
         }
 
-        object UnevenSplit : SplitStrategy() {
+        data object UnevenSplit : SplitStrategy() {
             override val name: String = "Uneven Split"
 
             override fun generateSplit(
@@ -103,7 +98,7 @@ internal class TransactionViewModel : LoggedInViewModel() {
             ): Map<UserInfo, Double> = splitStrategyAmounts
         }
 
-        object PercentageSplit : SplitStrategy() {
+        data object PercentageSplit : SplitStrategy() {
             override val name: String = "Percentage Split"
             override val showMoneyAmount: Boolean = true
 

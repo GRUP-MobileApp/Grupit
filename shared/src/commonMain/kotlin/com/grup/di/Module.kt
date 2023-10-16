@@ -84,7 +84,7 @@ fun initKoin() {
     }
 }
 
-fun initAuthManager(authManager: AuthManager) {
+fun initAuthManager(authManager: AuthManager = AuthManager()) {
     loadKoinModules(
         module {
             single { authManager }

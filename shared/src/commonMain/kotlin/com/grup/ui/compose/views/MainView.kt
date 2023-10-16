@@ -612,10 +612,13 @@ private fun ActiveSettleActions(
     ) {
         H1Text(text = "Active Settle", fontWeight = FontWeight.Medium)
         LazyHorizontalGrid(
-            rows = GridCells.Fixed(count = 2),
+            rows = GridCells.Fixed(count = if (activeSettleActions.size >= 3) 2 else 1),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
-            modifier = Modifier.height(cardSize.times(2) + AppTheme.dimensions.appPadding)
+            modifier = Modifier.height(
+                cardSize.times(if (activeSettleActions.size >= 3) 2 else 1) +
+                        AppTheme.dimensions.appPadding
+            )
         ) {
             items(
                 activeSettleActions.sortedWith(
