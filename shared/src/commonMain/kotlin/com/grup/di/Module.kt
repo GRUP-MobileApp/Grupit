@@ -14,6 +14,11 @@ import com.grup.service.*
 import com.grup.service.GroupService
 import com.grup.service.DebtActionService
 import com.grup.service.UserService
+import com.grup.ui.viewmodel.CreateGroupViewModel
+import com.grup.ui.viewmodel.GroupInvitesViewModel
+import com.grup.ui.viewmodel.GroupDetailsViewModel
+import com.grup.ui.viewmodel.GroupsViewModel
+import com.grup.ui.viewmodel.NotificationsViewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -65,6 +70,14 @@ internal val testRepositoriesModule = module {
     single<ISettingsDataStore> { SettingsDataStore() }
 }
 
+internal val viewModelsModule = module {
+    factory { GroupsViewModel() }
+    factory { GroupDetailsViewModel() }
+    factory { NotificationsViewModel() }
+    factory { GroupInvitesViewModel() }
+    factory { CreateGroupViewModel() }
+}
+
 internal val releaseAppModule = module {
     includes(servicesModule, releaseRepositoriesModule)
 }
@@ -79,7 +92,7 @@ fun initKoin() {
             module {
                 single { httpClient }
                 single { AuthManager() }
-            }
+            }, viewModelsModule
         )
     }
 }

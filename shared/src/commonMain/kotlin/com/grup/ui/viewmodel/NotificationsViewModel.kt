@@ -94,7 +94,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     var notificationsCount: MutableStateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
 
     fun logGroupNotificationsDate() = coroutineScope.launch {
-        apiServer.updateLatestTime(MainViewModel.selectedGroup)
+        apiServer.updateLatestTime(selectedGroup)
     }
 
     // DebtAction

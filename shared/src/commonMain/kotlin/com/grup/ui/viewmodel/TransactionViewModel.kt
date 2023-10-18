@@ -16,9 +16,6 @@ internal class TransactionViewModel : LoggedInViewModel() {
         const val SETTLE_TRANSACTION = "Add"
     }
 
-    private val selectedGroup
-        get() = MainViewModel.selectedGroup
-
     // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
     // change during lifecycle.
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()

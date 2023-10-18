@@ -72,6 +72,8 @@ kotlin {
                 // Voyager
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
 
                 // MOKO
                 implementation("dev.icerock.moko:resources:$mokoResourcesVersion")

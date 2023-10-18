@@ -1,19 +1,26 @@
 package com.grup.ui.compose.views
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.models.Group
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoDate
 import com.grup.ui.apptheme.AppTheme
@@ -23,24 +30,27 @@ import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.models.Notification
-import com.grup.ui.viewmodel.MainViewModel
+import com.grup.ui.viewmodel.GroupsViewModel
 import com.grup.ui.viewmodel.NotificationsViewModel
 
-internal class GroupNotificationsView : Screen {
+internal class NotificationsView : Screen {
     @Composable
     override fun Content() {
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            val notificationsViewModel: NotificationsViewModel =
-                rememberScreenModel { NotificationsViewModel() }
+            val notificationsViewModel = getScreenModel<NotificationsViewModel>()
             val navigator = LocalNavigator.currentOrThrow
 
             notificationsViewModel.logGroupNotificationsDate()
-            GroupNotificationsLayout(
-                notificationsViewModel = notificationsViewModel,
-                navigator = navigator
-            )
+            CompositionLocalProvider(
+                LocalContentColor provides AppTheme.colors.onSecondary
+            ) {
+                GroupNotificationsLayout(
+                    notificationsViewModel = notificationsViewModel,
+                    navigator = navigator
+                )
+            }
         }
     }
 
@@ -51,15 +61,26 @@ private fun GroupNotificationsLayout(
     notificationsViewModel: NotificationsViewModel,
     navigator: Navigator
 ) {
-    val selectedGroup: Group = MainViewModel.selectedGroup
     val notifications: Map<String, List<Notification>> by
         notificationsViewModel.notifications.collectAsStateWithLifecycle()
 
-    SimpleLazyListPage(
-        pageName = "Notifications",
-        onBackPress = { navigator.pop() }
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
-        items(notifications[selectedGroup.id] ?: emptyList()) { notification ->
+        item {
+            H1Text(
+                text = "Notifications",
+                color = AppTheme.colors.onSecondary,
+                modifier = Modifier.fillMaxWidth(0.95f)
+            )
+        }
+        items(
+            notifications[notificationsViewModel.selectedGroup.id] ?: emptyList()
+        ) { notification ->
             val sideContent: (@Composable ColumnScope.() -> Unit)? =
                 when (notification) {
                     is Notification.IncomingDebtAction -> {

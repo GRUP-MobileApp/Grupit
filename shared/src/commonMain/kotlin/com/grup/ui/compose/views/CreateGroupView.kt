@@ -19,23 +19,24 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.viewmodel.CreateGroupViewModel
 
-internal class CreateGroupView(
-    private val createGroupOnClick: (groupName: String) -> Unit
-) : Screen {
+internal class CreateGroupView : Screen {
     @Composable
     override fun Content() {
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
+            val createGroupViewModel = getScreenModel<CreateGroupViewModel>()
             val navigator = LocalNavigator.currentOrThrow
 
             CreateGroupLayout(
-                createGroupOnClick = createGroupOnClick,
+                createGroupViewModel = createGroupViewModel,
                 navigator = navigator
             )
         }
@@ -44,7 +45,7 @@ internal class CreateGroupView(
 
 @Composable
 private fun CreateGroupLayout(
-    createGroupOnClick: (groupName: String) -> Unit,
+    createGroupViewModel: CreateGroupViewModel,
     navigator: Navigator
 ) {
     var groupName: String by remember { mutableStateOf("") }
@@ -54,8 +55,11 @@ private fun CreateGroupLayout(
             CreateGroupTopBar(
                 onBackPress = { navigator.pop() },
                 createGroupOnClick = {
-                    createGroupOnClick(groupName)
-                    navigator.pop()
+                    createGroupViewModel.createGroup(
+                        groupName = groupName,
+                        onSuccess = { navigator.pop() },
+                        onFailure = { }
+                    )
                 }
             )
         },

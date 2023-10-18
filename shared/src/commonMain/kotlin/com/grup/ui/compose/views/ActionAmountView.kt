@@ -16,7 +16,7 @@ import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlin.math.min
 
-internal class ActionAmountScreen(
+internal class ActionAmountView(
     private val actionType: String,
     private val existingActionId: String? = null
 ) : Screen {

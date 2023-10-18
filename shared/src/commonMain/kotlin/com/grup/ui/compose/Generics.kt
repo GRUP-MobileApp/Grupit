@@ -750,46 +750,6 @@ internal fun RecentActivityList(
     }
 }
 
-internal data class MenuItem(
-    val id: String,
-    val title: String,
-    val contentDescription: String,
-    val icon: ImageVector,
-    val onClick: () -> Unit
-)
-
-@Composable
-internal fun DrawerSettings(
-    items: List<MenuItem>,
-    itemTextStyle: TextStyle = TextStyle(fontSize = 15.sp)
-) {
-    LazyColumn(
-        verticalArrangement = Arrangement.Bottom)
-    {
-        items(items) { menuItem ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = menuItem.onClick)
-                    .padding(13.dp)
-            ) {
-                Icon(
-                    imageVector = menuItem.icon,
-                    contentDescription = menuItem.contentDescription,
-                    tint = AppTheme.colors.onSecondary
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = menuItem.title,
-                    style = itemTextStyle,
-                    color = AppTheme.colors.onSecondary,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
-}
-
 @Composable
 internal fun UsernameSearchBar(
     modifier: Modifier = Modifier,

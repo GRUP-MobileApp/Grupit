@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
@@ -19,6 +23,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,11 +87,32 @@ private fun AccountSettingsLayout(
             NotificationSettings(
                 groupNotificationEntries = groupNotificationEntries,
                 toggleGroupNotification = { notificationName ->
-                    accountSettingsViewModel.toggleGroupNotificationType(
-                        *AccountSettingsViewModel.groupNotificationEntries[notificationName]!!
-                    )
+                    groupNotificationEntries[notificationName] =
+                        accountSettingsViewModel.toggleGroupNotificationType(
+                            *AccountSettingsViewModel.groupNotificationEntries[notificationName]!!
+                        )
                 }
             )
+        }
+        item {
+            TextButton(
+                modifier = Modifier
+                    .padding(horizontal = AppTheme.dimensions.paddingExtraLarge)
+                    .clip(AppTheme.shapes.extraLarge),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = AppTheme.colors.secondary
+                ),
+                shape = AppTheme.shapes.circleShape,
+                onClick = {
+                    accountSettingsViewModel.logOut {
+                        navigator.popUntil { screen ->
+                            screen is ReleaseLoginView || screen is DebugLoginView
+                        }
+                    }
+                }
+            ) {
+                H1Text(text = "Log Out", color = AppTheme.colors.deny,)
+            }
         }
     }
 }

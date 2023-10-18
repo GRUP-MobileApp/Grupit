@@ -2,6 +2,7 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.grup.exceptions.APIException
+import com.grup.models.Group
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,9 +10,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 internal class GroupMembersViewModel : LoggedInViewModel() {
-    private val selectedGroup
-        get() = MainViewModel.selectedGroup
-
     // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
     // change during lifecycle.
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
@@ -25,10 +23,10 @@ internal class GroupMembersViewModel : LoggedInViewModel() {
         }.asState()
 
     sealed class InviteResult {
-        object Sent : InviteResult()
-        object Pending : InviteResult()
+        data object Sent : InviteResult()
+        data object Pending : InviteResult()
         data class Error(val exception: Exception) : InviteResult()
-        object None : InviteResult()
+        data object None : InviteResult()
     }
 
     private val _inviteResult = MutableStateFlow<InviteResult>(InviteResult.None)
