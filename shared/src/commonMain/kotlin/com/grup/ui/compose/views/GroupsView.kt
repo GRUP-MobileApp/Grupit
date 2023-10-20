@@ -2,43 +2,38 @@ package com.grup.ui.compose.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.Scaffold
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.Group
+import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.GroupRowCard
 import com.grup.ui.compose.SmallIcon
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.viewmodel.GroupsViewModel
-import kotlinx.coroutines.launch
 
 internal class GroupsView : Screen {
     @Composable
@@ -60,25 +55,13 @@ private fun GroupsLayout(
     navigator: Navigator
 ) {
     val groups: List<Group> by groupsViewModel.groups.collectAsStateWithLifecycle()
+    val myUserInfos: List<UserInfo> by groupsViewModel.myUserInfosFlow.collectAsStateWithLifecycle()
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
-            contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
-            modifier = Modifier
-                .fillMaxSize()
-                .background(AppTheme.colors.primary)
-        ) {
-            item {
-                H1Text(text = "Groups")
-            }
-            item {
-                Row(horizontalArrangement = Arrangement.End) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { },
+                actions = {
                     IconButton(
                         onClick = {
                             navigator.push(CreateGroupView())
@@ -86,45 +69,41 @@ private fun GroupsLayout(
                     ) {
                         SmallIcon(
                             imageVector = Icons.Filled.Add,
-                            contentDescription = "Back"
+                            contentDescription = "Create Group"
                         )
                     }
-                }
-            }
-            items(groups) { group ->
-                GroupCard(
-                    group = group,
-                    onClick = {
-                        groupsViewModel.selectGroup(group)
-                        navigator.push(GroupDetailsView())
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun GroupCard(
-    group: Group,
-    onClick: () -> Unit,
-    cardSize: Dp = 140.dp
-) {
-    Box(
-        modifier = Modifier
-            .clip(AppTheme.shapes.large)
-            .size(cardSize)
-            .background(AppTheme.colors.secondary)
-            .clickable(onClick = onClick)
+                },
+                backgroundColor = AppTheme.colors.primary
+            )
+        },
+        backgroundColor = AppTheme.colors.primary,
+        modifier = Modifier.fillMaxSize()
     ) {
-        Column(
-            verticalArrangement = Arrangement.SpaceAround,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        LazyColumn(
+            contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(AppTheme.dimensions.cardPadding)
         ) {
-            H1Text(text = group.groupName)
+            items(groups) { group ->
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(AppTheme.dimensions.bigItemRowCardHeight)
+                        .fillMaxWidth()
+                        .clip(AppTheme.shapes.large)
+                        .background(AppTheme.colors.secondary)
+                        .clickable {
+                            groupsViewModel.selectGroup(group)
+                            navigator.push(GroupDetailsView())
+                        }
+                        .padding(AppTheme.dimensions.rowCardPadding)
+                ) {
+                    GroupRowCard(
+                        group = group,
+                        userInfo = myUserInfos.find { it.groupId == group.id }!!
+                    )
+                }
+            }
         }
     }
 }

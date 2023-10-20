@@ -11,6 +11,8 @@ internal data class AppDimensions(
     val cardPadding: Dp = 20.dp,
 
     val rowCardPadding: Dp = 15.dp,
+    val itemRowCardHeight: Dp = 70.dp,
+    val bigItemRowCardHeight: Dp = 100.dp,
 
     val paddingSmall: Dp = 5.dp,
     val paddingMedium: Dp = 10.dp,

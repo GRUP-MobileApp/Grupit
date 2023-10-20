@@ -15,7 +15,6 @@ import com.grup.service.GroupService
 import com.grup.service.DebtActionService
 import com.grup.service.UserService
 import com.grup.ui.viewmodel.CreateGroupViewModel
-import com.grup.ui.viewmodel.GroupInvitesViewModel
 import com.grup.ui.viewmodel.GroupDetailsViewModel
 import com.grup.ui.viewmodel.GroupsViewModel
 import com.grup.ui.viewmodel.NotificationsViewModel
@@ -74,7 +73,6 @@ internal val viewModelsModule = module {
     factory { GroupsViewModel() }
     factory { GroupDetailsViewModel() }
     factory { NotificationsViewModel() }
-    factory { GroupInvitesViewModel() }
     factory { CreateGroupViewModel() }
 }
 

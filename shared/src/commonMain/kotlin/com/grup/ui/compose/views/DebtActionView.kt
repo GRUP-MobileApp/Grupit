@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -302,13 +301,13 @@ private fun SelectedDebtorsList(
                 .weight(1f)
         ) {
             items(splitStrategyDebtAmounts.keys.toTypedArray()) { userInfo ->
-                UserInfoRowCard(
-                    userInfo = userInfo,
+                UserRowCard(
+                    user = userInfo.user,
                     sideContent = {
                         splitStrategyDebtAmounts[userInfo]?.let { debtAmount ->
                             MoneyAmount(
                                 moneyAmount = debtAmount,
-                                moneyAmountTextColor =
+                                color =
                                     if (userHasSetDebtAmount(userInfo))
                                         AppTheme.colors.onSecondary
                                     else
@@ -458,8 +457,8 @@ private fun SelectDebtorsChecklist(
                 horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                UserInfoRowCard(
-                    userInfo = userInfo,
+                UserRowCard(
+                    user = userInfo.user,
                     mainContent = {
                         H1Text(text = userInfo.user.displayName)
                         Caption(text = "Balance: ${userInfo.userBalance.asMoneyAmount()}")

@@ -165,6 +165,32 @@ private fun GroupDetailsLayout(
 
     modalSheets {
         Scaffold(
+            topBar = {
+                TopAppBar(
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navigator.pop() }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    title = { H1Text(text = selectedGroup.groupName) },
+                    actions = {
+                        IconButton(
+                            onClick = { navigator.push(GroupMembersView()) }
+                        ) {
+                            SmallIcon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Members"
+                            )
+                        }
+                    },
+                    backgroundColor = AppTheme.colors.primary
+                )
+            },
             backgroundColor = AppTheme.colors.primary,
             modifier = Modifier
                 .fillMaxSize()
@@ -176,23 +202,6 @@ private fun GroupDetailsLayout(
                 modifier = Modifier
                     .padding(padding)
             ) {
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        H1Text(text = selectedGroup.groupName)
-                        IconButton(
-                            onClick = { navigator.push(GroupMembersView()) }
-                        ) {
-                            SmallIcon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Members"
-                            )
-                        }
-                    }
-                }
                 myUserInfo?.let { myUserInfo ->
                     item {
                         GroupBalanceCard(
@@ -451,8 +460,8 @@ private fun DebtActionDetails(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
-        UserInfoRowCard(
-            userInfo = debtAction.debteeUserInfo,
+        UserRowCard(
+            user = debtAction.debteeUserInfo.user,
             mainContent = {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -463,7 +472,6 @@ private fun DebtActionDetails(
                 }
                 H1Text(text = debtAction.debteeUserInfo.user.displayName, fontSize = 28.sp)
             },
-            sideContent = null,
             iconSize = 80.dp
         )
         MoneyAmount(moneyAmount = debtAction.totalAmount, fontSize = 60.sp)
@@ -573,8 +581,8 @@ private fun SettleActionDetails(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier.fillMaxSize()
         ) {
-            UserInfoRowCard(
-                userInfo = settleAction.debteeUserInfo,
+            UserRowCard(
+                user = settleAction.debteeUserInfo.user,
                 mainContent = {
                     Caption(text = settleAction.debteeUserInfo.user.displayName)
                     MoneyAmount(
@@ -680,8 +688,8 @@ private fun TransactionRecordRowCard(
     modifier: Modifier = Modifier,
     transactionRecord: TransactionRecord
 ) {
-    UserInfoRowCard(
-        userInfo = transactionRecord.debtorUserInfo,
+    UserRowCard(
+        user = transactionRecord.debtorUserInfo.user,
         iconSize = 50.dp,
         mainContent = {
             H1Text(text = transactionRecord.debtorUserInfo.user.displayName)

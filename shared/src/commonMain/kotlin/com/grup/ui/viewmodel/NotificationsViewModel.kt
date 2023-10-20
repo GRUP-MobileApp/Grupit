@@ -67,18 +67,31 @@ internal class NotificationsViewModel : LoggedInViewModel() {
             }
         }
 
+    private val _groupInvitesFlow = apiServer.getAllGroupInvitesAsFlow()
+    private val incomingGroupInvites: StateFlow<List<Notification>> =
+        _groupInvitesFlow.map { groupInvites ->
+            groupInvites.filter { groupInvite ->
+                groupInvite.inviteeId == apiServer.user.id &&
+                        groupInvite.dateAccepted == GroupInvite.PENDING
+            }.map { groupInvite ->
+                Notification.IncomingGroupInvite(groupInvite)
+            }
+        }.asNotification(emptyList())
+
     val notifications: StateFlow<Map<String, List<Notification>>> =
         combine(
             incomingDebtActionsAsNotification,
             outgoingDebtActionsAsNotification,
             incomingTransactionsOnSettleActionsAsNotification,
-            outgoingTransactionsOnSettleActionsAsNotification
+            outgoingTransactionsOnSettleActionsAsNotification,
+            incomingGroupInvites
         ) { allNotifications: Array<List<Notification>> ->
             allNotifications.flatMap { it }.sortedByDescending { notification ->
                 notification.date
             }.groupBy { notification ->
                 notification.groupId
             }
+        // TODO: Can change this on onEach to update notificationsCount
         }.combine(latestDatesFlow) { notifications, lastViewDates ->
             notificationsCount.value = notifications.map { (groupId, groupNotifications) ->
                 groupId to groupNotifications.count { notification ->
@@ -91,7 +104,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
             notifications
         }.asNotification(emptyMap())
 
-    var notificationsCount: MutableStateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
+    private var notificationsCount: MutableStateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
 
     fun logGroupNotificationsDate() = coroutineScope.launch {
         apiServer.updateLatestTime(selectedGroup)
@@ -119,6 +132,14 @@ internal class NotificationsViewModel : LoggedInViewModel() {
         transactionRecord: TransactionRecord
     ) = coroutineScope.launch {
         apiServer.rejectSettleActionTransaction(settleAction, transactionRecord)
+    }
+
+    // Group Invite
+    fun acceptGroupInvite(groupInvite: GroupInvite) = coroutineScope.launch {
+        apiServer.acceptGroupInvite(groupInvite)
+    }
+    fun rejectGroupInvite(groupInvite: GroupInvite) = coroutineScope.launch {
+        apiServer.rejectGroupInvite(groupInvite)
     }
 
     private fun <T: Iterable<Notification>> T.afterDate(date: String) =

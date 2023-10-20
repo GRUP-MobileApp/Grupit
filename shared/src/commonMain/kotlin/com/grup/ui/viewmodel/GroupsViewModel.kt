@@ -1,11 +1,9 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.coroutineScope
-import com.grup.exceptions.APIException
 import com.grup.models.Group
+import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 internal class GroupsViewModel : LoggedInViewModel() {
     private val _groupsFlow = apiServer.getAllGroupsAsFlow()
@@ -18,6 +16,9 @@ internal class GroupsViewModel : LoggedInViewModel() {
             selectedGroupMutable.value = newGroups.getOrNull(0)
         }
     }.asState()
+
+    private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
+    val myUserInfosFlow: StateFlow<List<UserInfo>> = _myUserInfosFlow.asState()
 
     fun selectGroup(group: Group) {
         selectedGroupMutable.value = group

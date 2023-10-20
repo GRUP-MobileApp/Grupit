@@ -109,8 +109,7 @@ private fun GroupMembersLayout(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                Modifier.background(AppTheme.colors.primary)
+                                contentDescription = "Back"
                             )
                         }
                     },

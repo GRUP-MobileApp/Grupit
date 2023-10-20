@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
@@ -75,10 +73,7 @@ private fun AccountSettingsLayout(
         }
     }
 
-    SimpleLazyListPage(
-        pageName = "Account Settings",
-        onBackPress = { navigator.pop() }
-    ) {
+    SimpleLazyListPage(pageName = "Account Settings") {
         item {
             ProfileSettings(user = accountSettingsViewModel.userObject)
         }

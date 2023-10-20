@@ -7,7 +7,7 @@ import com.grup.ui.compose.asMoneyAmount
 internal sealed class Notification {
     abstract val date: String
     abstract val groupId: String
-    abstract val userInfo: UserInfo
+    abstract val user: User
     open val dismissible: Boolean = true
     abstract fun displayText(): String
 
@@ -19,8 +19,8 @@ internal sealed class Notification {
             get() = debtAction.date
         override val groupId: String
             get() = debtAction.groupId
-        override val userInfo: UserInfo
-            get() = debtAction.debteeUserInfo
+        override val user: User
+            get() = debtAction.debteeUserInfo.user
         override val dismissible: Boolean = false
 
         override fun displayText(): String =
@@ -44,8 +44,8 @@ internal sealed class Notification {
             }
         override val groupId: String
             get() = debtAction.groupId
-        override val userInfo: UserInfo
-            get() = transactionRecord.debtorUserInfo
+        override val user: User
+            get() = transactionRecord.debtorUserInfo.user
 
         override fun displayText(): String =
             "${transactionRecord.debtorUserInfo.user.displayName} has accepted a debt of " +
@@ -60,8 +60,8 @@ internal sealed class Notification {
             get() = transactionRecord.dateCreated
         override val groupId: String
             get() = settleAction.groupId
-        override val userInfo: UserInfo
-            get() = transactionRecord.debtorUserInfo
+        override val user: User
+            get() = transactionRecord.debtorUserInfo.user
         override val dismissible: Boolean = false
 
         override fun displayText(): String =
@@ -86,11 +86,23 @@ internal sealed class Notification {
             }
         override val groupId: String
             get() = settleAction.groupId
-        override val userInfo: UserInfo
-            get() = settleAction.debteeUserInfo
+        override val user: User
+            get() = settleAction.debteeUserInfo.user
 
         override fun displayText(): String =
             "${settleAction.debteeUserInfo.user.displayName} accepted your settlement for " +
                     transactionRecord.balanceChange.asMoneyAmount()
+    }
+
+    data class IncomingGroupInvite(val groupInvite: GroupInvite) : Notification() {
+        override val date: String
+            get() = groupInvite.date
+        override val groupId: String
+            get() = groupInvite.groupId
+        override val user: User
+            get() = groupInvite.inviter
+        override val dismissible: Boolean = false
+        override fun displayText(): String =
+            "${user.username} is inviting you to \"${groupInvite.groupName}\""
     }
 }

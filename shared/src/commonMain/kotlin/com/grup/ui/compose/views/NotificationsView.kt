@@ -3,9 +3,7 @@ package com.grup.ui.compose.views
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.LocalContentColor
@@ -28,9 +26,7 @@ import com.grup.ui.compose.*
 import com.grup.ui.compose.AcceptRejectRow
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1Text
-import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.models.Notification
-import com.grup.ui.viewmodel.GroupsViewModel
 import com.grup.ui.viewmodel.NotificationsViewModel
 
 internal class NotificationsView : Screen {
@@ -119,35 +115,39 @@ private fun GroupNotificationsLayout(
                             )
                         }
                     }
+                    is Notification.IncomingGroupInvite -> {
+                        {
+                            AcceptRejectRow(
+                                acceptOnClick = {
+                                    notificationsViewModel.acceptGroupInvite(
+                                        notification.groupInvite
+                                    )
+                                },
+                                rejectOnClick = {
+                                    notificationsViewModel.rejectGroupInvite(
+                                        notification.groupInvite
+                                    )
+                                }
+                            )
+                        }
+                    }
                     else -> null
                 }
-            NotificationRowCard(
-                notification = notification,
+            UserRowCard(
+                user = notification.user,
+                iconSize = 60.dp,
+                mainContent = {
+                    Caption(
+                        text = isoDate(notification.date),
+                        fontSize = 12.sp
+                    )
+                    H1Text(
+                        text = notification.displayText(),
+                        fontSize = 16.sp
+                    )
+                },
                 sideContent = sideContent
             )
         }
     }
-}
-
-@Composable
-private fun NotificationRowCard(
-    notification: Notification,
-    mainContent: @Composable ColumnScope.() -> Unit = {
-        Caption(
-            text = isoDate(notification.date),
-            fontSize = 12.sp
-        )
-        H1Text(
-            text = notification.displayText(),
-            fontSize = 16.sp
-        )
-    },
-    sideContent: (@Composable ColumnScope.() -> Unit)?,
-) {
-    UserInfoRowCard(
-        userInfo = notification.userInfo,
-        iconSize = 60.dp,
-        mainContent = mainContent,
-        sideContent = sideContent
-    )
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.*
+import com.grup.models.Group
 import com.grup.models.User
 import com.grup.ui.apptheme.AppTheme
 import com.grup.models.UserInfo
@@ -268,29 +269,25 @@ internal fun ProfileIcon(
 }
 
 @Composable
+internal fun GroupIcon(
+    modifier: Modifier = Modifier,
+    group: Group,
+    iconSize: Dp = 50.dp
+) {
+    Image(
+        imageVector = Icons.Default.Person,
+        contentDescription = group.groupName,
+        modifier = modifier
+            .size(iconSize)
+    )
+}
+
+@Composable
 internal fun SimpleLazyListPage(
     pageName: String,
-    onBackPress: () -> Unit,
     content: LazyListScope.() -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { },
-                backgroundColor = AppTheme.colors.primary,
-                navigationIcon = {
-                    IconButton(onClick = onBackPress) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            Modifier.background(AppTheme.colors.primary)
-                        )
-                    }
-                }
-            )
-        },
-        backgroundColor = AppTheme.colors.primary
-    ) { padding ->
+    Scaffold(backgroundColor = AppTheme.colors.primary) { padding ->
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -346,16 +343,34 @@ internal fun UserInfoRowCard(
     mainContent: @Composable ColumnScope.() -> Unit = {
         H1Text(text = userInfo.user.displayName, fontSize = 24.sp)
     },
-    sideContent: (@Composable ColumnScope.() -> Unit)? = {
-        MoneyAmount(
-            moneyAmount = userInfo.userBalance,
-            fontSize = 24.sp,
-        )
+    iconSize: Dp = 50.dp,
+) {
+    UserRowCard(
+        user = userInfo.user,
+        mainContent = mainContent,
+        sideContent = {
+            MoneyAmount(
+                moneyAmount = userInfo.userBalance,
+                fontSize = 24.sp,
+            )
+        },
+        iconSize = iconSize,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun UserRowCard(
+    modifier: Modifier = Modifier,
+    user: User,
+    mainContent: @Composable ColumnScope.() -> Unit = {
+        H1Text(text = user.displayName, fontSize = 24.sp)
     },
+    sideContent: (@Composable ColumnScope.() -> Unit)? = null,
     iconSize: Dp = 50.dp,
     iconContent: @Composable () -> Unit = {
         ProfileIcon(
-            user = userInfo.user,
+            user = user,
             iconSize = iconSize
         )
     }
@@ -390,8 +405,8 @@ internal fun TransactionActivityRowCard(
     modifier: Modifier = Modifier,
     transactionActivity: TransactionActivity
 ) {
-    UserInfoRowCard(
-        userInfo = transactionActivity.userInfo,
+    UserRowCard(
+        user = transactionActivity.userInfo.user,
         mainContent = {
             Caption(
                 text =
@@ -411,7 +426,40 @@ internal fun TransactionActivityRowCard(
                 MoneyAmount(moneyAmount = transactionActivity.amount, fontSize = 20.sp)
             }
         },
-        modifier = modifier.height(70.dp)
+        modifier = modifier.height(AppTheme.dimensions.itemRowCardHeight)
+    )
+}
+
+@Composable
+internal fun GroupRowCard(
+    modifier: Modifier = Modifier,
+    group: Group,
+    userInfo: UserInfo
+) {
+    IconRowCard(
+        mainContent = {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                H1Text(text = group.groupName)
+            }
+        },
+        sideContent = {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                MoneyAmount(
+                    moneyAmount = userInfo.userBalance,
+                    color = if (userInfo.userBalance >= 0) AppTheme.colors.confirm
+                            else AppTheme.colors.deny
+                )
+            }
+        },
+        iconContent = { GroupIcon(group = group) },
+        modifier = modifier
     )
 }
 
@@ -420,7 +468,7 @@ internal fun MoneyAmount(
     modifier: Modifier = Modifier,
     moneyAmount: Double,
     fontSize: TextUnit = 30.sp,
-    moneyAmountTextColor: Color = Color.Unspecified
+    color: Color = Color.Unspecified
 ) {
     Row(
         verticalAlignment = Alignment.Top,
@@ -434,6 +482,7 @@ internal fun MoneyAmount(
                         withStyle(
                             SpanStyle(
                                 fontSize = fontSize.times(0.5f),
+                                color = color,
                                 baselineShift = BaselineShift(0.4f)
                             )
                         ) {
@@ -442,7 +491,7 @@ internal fun MoneyAmount(
                         withStyle(
                             SpanStyle(
                                 fontSize = fontSize,
-                                color = moneyAmountTextColor
+                                color = color
                             )
                         ) {
                             append(moneyAmount)
