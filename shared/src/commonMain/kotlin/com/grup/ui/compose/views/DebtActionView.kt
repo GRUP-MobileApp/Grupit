@@ -34,11 +34,9 @@ import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.SmallIcon
-import com.grup.ui.compose.UserInfoRowCard
 import com.grup.ui.compose.UsernameSearchBar
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 internal class DebtActionView(
     private val debtActionAmount: Double,
@@ -89,7 +87,6 @@ private fun DebtActionLayout(
         splitStrategy.generateSplit(debtActionAmount, rawSplitStrategyDebtAmounts)
 
     var keyPadUserInfo: UserInfo? by remember { mutableStateOf(null) }
-    var keyPadInitialDebtAmount: Double by remember { mutableStateOf(0.0) }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         AddDebtorBottomSheet(
@@ -108,7 +105,7 @@ private fun DebtActionLayout(
             keyPadUserInfo?.let { userInfo ->
                 KeyPadBottomSheet(
                     state = debtAmountBottomSheetState,
-                    initialMoneyAmount = keyPadInitialDebtAmount,
+                    initialMoneyAmount = rawSplitStrategyDebtAmounts[userInfo] ?: 0.0,
                     isEnabled = { debtAmount ->
                         debtAmount <= splitStrategyDebtAmounts.values.sum()
                     },
@@ -127,8 +124,20 @@ private fun DebtActionLayout(
     modalSheets {
         Scaffold(
             topBar = {
-                DebtActionTopBar(
-                    onBackPress = { navigator.pop() }
+                TopAppBar(
+                    title = { },
+                    backgroundColor = AppTheme.colors.primary,
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navigator.pop() }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = AppTheme.colors.onSecondary
+                            )
+                        }
+                    }
                 )
             }
         ) { padding ->
@@ -173,19 +182,18 @@ private fun DebtActionLayout(
                                 scope.launch { addDebtorBottomSheetState.show() }
                             }
                         )
-                        SelectedDebtorsList(
-                            splitStrategyDebtAmounts = splitStrategyDebtAmounts,
-                            userHasSetDebtAmount = { userInfo ->
+                        UserInfoAmountsList(
+                            userInfoMoneyAmounts = splitStrategyDebtAmounts,
+                            userInfoHasSetAmount = { userInfo ->
                                 if (!splitStrategy.editable) {
                                     true
                                 } else {
                                     rawSplitStrategyDebtAmounts[userInfo] != null
                                 }
                             },
-                            debtAmountOnClick = { userInfo, debtAmount ->
+                            userInfoAmountOnClick = { userInfo ->
                                 if (splitStrategy.editable) {
                                     keyPadUserInfo = userInfo
-                                    keyPadInitialDebtAmount = debtAmount
                                     scope.launch { debtAmountBottomSheetState.show() }
                                 }
                             },
@@ -214,27 +222,6 @@ private fun DebtActionLayout(
             }
         }
     }
-}
-
-@Composable
-private fun DebtActionTopBar(
-    onBackPress: () -> Unit
-) {
-    TopAppBar(
-        title = { },
-        backgroundColor = AppTheme.colors.primary,
-        navigationIcon = {
-            IconButton(
-                onClick = onBackPress
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = AppTheme.colors.onSecondary
-                )
-            }
-        }
-    )
 }
 
 @Composable
@@ -278,50 +265,6 @@ private fun DebtActionSettings(
             H1Text(text = " between:", fontSize = 20.sp)
         }
         AddDebtorButton(addDebtorsOnClick = addDebtorsOnClick)
-    }
-}
-
-@Composable
-private fun SelectedDebtorsList(
-    splitStrategyDebtAmounts: Map<UserInfo, Double>,
-    userHasSetDebtAmount: (UserInfo) -> Boolean,
-    debtAmountOnClick: ((UserInfo, Double) -> Unit),
-    modifier: Modifier = Modifier
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            items(splitStrategyDebtAmounts.keys.toTypedArray()) { userInfo ->
-                UserRowCard(
-                    user = userInfo.user,
-                    sideContent = {
-                        splitStrategyDebtAmounts[userInfo]?.let { debtAmount ->
-                            MoneyAmount(
-                                moneyAmount = debtAmount,
-                                color =
-                                    if (userHasSetDebtAmount(userInfo))
-                                        AppTheme.colors.onSecondary
-                                    else
-                                        AppTheme.colors.caption,
-                                fontSize = 26.sp,
-                                modifier = Modifier.clickable {
-                                    debtAmountOnClick(userInfo, debtAmount)
-                                }
-                            )
-                        }
-                    }
-                )
-            }
-        }
     }
 }
 
@@ -377,8 +320,9 @@ private fun AddDebtorBottomSheet(
                 }
                 Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                 SelectDebtorsChecklist(
-                    usernameSearchQuery = usernameSearchQuery,
-                    userInfos = userInfos,
+                    userInfos = userInfos.filter { userInfo ->
+                        userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
+                    },
                     selectedUsers = selectedUsers,
                     onCheckedChange = { userInfo, isSelected ->
                         selectedUsers = if (isSelected) {
@@ -394,51 +338,8 @@ private fun AddDebtorBottomSheet(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun KeyPadBottomSheet(
-    state: ModalBottomSheetState,
-    initialMoneyAmount: Double,
-    isEnabled: (Double) -> Boolean,
-    onClick: (Double) -> Unit,
-    onBackPress: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    var moneyAmount: String by remember { mutableStateOf("0") }
-    LaunchedEffect(initialMoneyAmount) {
-        moneyAmount = if (initialMoneyAmount % 1 == 0.0)
-            initialMoneyAmount.roundToInt().toString()
-        else
-            initialMoneyAmount.asPureMoneyAmount()
-    }
-
-    BackPressModalBottomSheetLayout(
-        sheetState = state,
-        sheetContent = {
-            KeyPadScreenLayout(
-                moneyAmount = moneyAmount,
-                onMoneyAmountChange = { moneyAmount = it },
-                confirmButton = {
-                    val actualMoneyAmount = moneyAmount.toDouble()
-                    H1ConfirmTextButton(
-                        text = "Confirm",
-                        enabled = isEnabled(actualMoneyAmount),
-                        onClick = {
-                            onClick(actualMoneyAmount)
-                            onBackPress()
-                        }
-                    )
-                },
-                onBackPress = onBackPress
-            )
-        },
-        content = content
-    )
-}
-
 @Composable
 private fun SelectDebtorsChecklist(
-    usernameSearchQuery: String,
     userInfos: List<UserInfo>,
     selectedUsers: Set<UserInfo>,
     onCheckedChange: (UserInfo, Boolean) -> Unit
@@ -448,11 +349,7 @@ private fun SelectDebtorsChecklist(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        items(
-            userInfos.filter { userInfo ->
-                userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
-            }
-        ) { userInfo ->
+        items(userInfos) { userInfo ->
             Row(
                 horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier.fillMaxWidth()

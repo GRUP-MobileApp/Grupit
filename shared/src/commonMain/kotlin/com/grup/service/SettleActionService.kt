@@ -14,39 +14,39 @@ import org.koin.core.component.inject
 internal class SettleActionService : KoinComponent {
     private val settleActionRepository: ISettleActionRepository by inject()
 
-    suspend fun createSettleAction(settleAmount: Double, debtee: UserInfo): SettleAction {
-        if (debtee.userBalance < settleAmount) {
-            throw NegativeBalanceException("SettleAction for $settleAmount results in negative " +
-                    "balance")
+    suspend fun createSettleAction(
+        debtor: UserInfo,
+        transactionRecords: List<TransactionRecord>
+    ): SettleAction {
+        if (transactionRecords.isEmpty()) {
+            throw InvalidTransactionRecordException("Empty transaction records")
         }
-        return settleActionRepository.createSettleAction(settleAmount, debtee)
+        transactionRecords.sumOf { it.balanceChange }.let { settleAmount ->
+            if (debtor.userBalance + settleAmount > 0) {
+                throw NegativeBalanceException("SettleAction for $settleAmount results in " +
+                        "overpayment")
+            }
+
+        }
+        return settleActionRepository.createSettleAction(debtor, transactionRecords)
             ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
-                    " ${debtee.groupId}")
+                    " ${debtor.groupId}")
     }
 
-    suspend fun createSettleActionTransaction(
+    suspend fun acceptSettleAction(
         settleAction: SettleAction,
-        myTransactionRecord: TransactionRecord
+        transactionRecord: TransactionRecord
     ) {
-        if (settleAction.remainingAmount < myTransactionRecord.balanceChange) {
-            throw InvalidTransactionRecordException("Can't settle for more than remaining amount")
-        }
-        settleActionRepository.addTransactionRecord(settleAction, myTransactionRecord)
-    }
-
-    suspend fun acceptTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.transactionRecords.find {
-                it.debtorUserInfo.id == transactionRecord.debtorUserInfo.id &&
-                        it.dateCreated == transactionRecord.dateCreated
+                it.userInfo.id == transactionRecord.userInfo.id
             }?.dateAccepted = getCurrentTime()
         }
     }
-    suspend fun rejectTransactionRecord(settleAction: SettleAction, transactionRecord: TransactionRecord) {
+    suspend fun rejectSettleAction(settleAction: SettleAction, transactionRecord: TransactionRecord) {
         settleActionRepository.updateSettleAction(settleAction) {
             this.transactionRecords.find {
-                it.debtorUserInfo.id == transactionRecord.debtorUserInfo.id &&
-                        it.dateCreated == transactionRecord.dateCreated
+                it.userInfo.id == transactionRecord.userInfo.id
             }?.dateAccepted = TransactionRecord.REJECTED
         }
     }

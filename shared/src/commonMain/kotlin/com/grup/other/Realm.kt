@@ -29,19 +29,19 @@ internal fun <T: BaseRealmObject> MutableRealm.getLatestFields(obj: T): T {
                 _inviter = getLatestFields(inviter)
             }
             is RealmSettleAction -> {
-                _debteeUserInfo = getLatestFields(debteeUserInfo)
+                _userInfo = getLatestFields(userInfo)
                 _transactionRecords.forEachIndexed { i, transactionRecord ->
                     _transactionRecords[i] = getLatestFields(transactionRecord)
                 }
             }
             is RealmDebtAction -> {
-                _debteeUserInfo = getLatestFields(debteeUserInfo)
+                _userInfo = getLatestFields(userInfo)
                 _transactionRecords.forEachIndexed { i, transactionRecord ->
                     _transactionRecords[i] = getLatestFields(transactionRecord)
                 }
             }
             is RealmTransactionRecord -> {
-                _debtorUserInfo = getLatestFields(debtorUserInfo)
+                _userInfo = getLatestFields(userInfo)
             }
             is RealmUserInfo -> {
                 _user = getLatestFields(user)
@@ -72,22 +72,22 @@ private fun BaseRealmObject.resolve() {
             inviter.resolve()
         }
         is RealmSettleAction -> {
-            debteeUserInfo.resolve()
+            userInfo.resolve()
             _transactionRecords.forEach { transactionRecord ->
-                transactionRecord.debtorUserInfo.resolve()
+                transactionRecord.userInfo.resolve()
             }
         }
         is RealmDebtAction -> {
-            debteeUserInfo.resolve()
+            userInfo.resolve()
             _transactionRecords.forEach { transactionRecord ->
-                transactionRecord.debtorUserInfo.resolve()
+                transactionRecord.userInfo.resolve()
             }
         }
         is RealmUserInfo -> {
             user.resolve()
         }
         is RealmTransactionRecord -> {
-            debtorUserInfo.resolve()
+            userInfo.resolve()
         }
         else -> { }
     }

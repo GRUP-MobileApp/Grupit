@@ -10,12 +10,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 internal class TransactionViewModel : LoggedInViewModel() {
-    companion object {
-        const val DEBT = "Request"
-        const val SETTLE = "Settle"
-        const val SETTLE_TRANSACTION = "Add"
-    }
-
     // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
     // change during lifecycle.
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
@@ -30,7 +24,7 @@ internal class TransactionViewModel : LoggedInViewModel() {
         }
     }.asState()
 
-    val myUserInfo: StateFlow<UserInfo> = _userInfosFlow.map { userInfos ->
+    private val myUserInfo: StateFlow<UserInfo> = _userInfosFlow.map { userInfos ->
         userInfos.find { userInfo ->
             userInfo.user.id == userObject.id
         }!!
@@ -123,41 +117,30 @@ internal class TransactionViewModel : LoggedInViewModel() {
 
     // DebtAction
     fun createDebtAction(
-        debtAmounts: Map<UserInfo, Double>,
+        debtActionAmounts: Map<UserInfo, Double>,
         message: String
     ) = apiServer.createDebtAction(
-        debtAmounts.map { (userInfo, balanceChange) ->
-            DataTransactionRecord(userInfo, balanceChange)
-        },
         myUserInfo.value,
-        message
+        message,
+        debtActionAmounts.map { (userInfo, balanceChange) ->
+            DataTransactionRecord(userInfo, balanceChange)
+        }
     )
 
     // SettleAction
     fun createSettleAction(
-        settleAmount: Double, onSuccess: (SettleAction) -> Unit, onFailure: (String?) -> Unit
+        settleActionAmounts: Map<UserInfo, Double>, onSuccess: (SettleAction) -> Unit, onFailure: (String?) -> Unit
     ) = coroutineScope.launch {
         try {
-            apiServer.createSettleAction(settleAmount, myUserInfo.value).let(onSuccess)
+            apiServer.createSettleAction(
+                myUserInfo.value,
+                settleActionAmounts.map { (userInfo, balanceChange) ->
+                    DataTransactionRecord(userInfo, balanceChange)
+                }
+            ).let(onSuccess)
         } catch (e: APIException) {
             onFailure(e.message)
         }
 
     }
-
-    fun createSettleActionTransaction(
-        settleAction: SettleAction,
-        amount: Double,
-        myUserInfo: UserInfo
-    ) = coroutineScope.launch {
-        apiServer.createSettleActionTransaction(
-            settleAction,
-            DataTransactionRecord(myUserInfo, amount)
-        )
-    }
-
-    fun getSettleAction(settleActionId: String) =
-        apiServer.getAllSettleActionsAsFlow().map { settleActions ->
-            settleActions.find { settleActionId == it.id }!!
-        }.asState()
 }

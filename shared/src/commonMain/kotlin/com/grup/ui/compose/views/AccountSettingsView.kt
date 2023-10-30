@@ -30,16 +30,20 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.grup.models.User
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
+import com.grup.ui.compose.H1DenyTextButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.ProfileIcon
 import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 
-internal class AccountSettingsView : Screen {
+internal class AccountSettingsView(
+    private val logOutOnClick: () -> Unit
+) : Screen {
     @Composable
     override fun Content() {
         val accountSettingsViewModel: AccountSettingsViewModel =
@@ -51,7 +55,8 @@ internal class AccountSettingsView : Screen {
         ) {
             AccountSettingsLayout(
                 accountSettingsViewModel = accountSettingsViewModel,
-                navigator = navigator
+                navigator = navigator,
+                logOutOnClick = logOutOnClick
             )
         }
     }
@@ -60,7 +65,8 @@ internal class AccountSettingsView : Screen {
 @Composable
 private fun AccountSettingsLayout(
     accountSettingsViewModel: AccountSettingsViewModel,
-    navigator: Navigator
+    navigator: Navigator,
+    logOutOnClick: () -> Unit
 ) {
     val groupNotificationEntries: SnapshotStateMap<String, Boolean> = remember {
         mutableStateMapOf<String, Boolean>().apply {
@@ -90,24 +96,12 @@ private fun AccountSettingsLayout(
             )
         }
         item {
-            TextButton(
-                modifier = Modifier
-                    .padding(horizontal = AppTheme.dimensions.paddingExtraLarge)
-                    .clip(AppTheme.shapes.extraLarge),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = AppTheme.colors.secondary
-                ),
-                shape = AppTheme.shapes.circleShape,
+            H1DenyTextButton(
+                text = "Log Out",
                 onClick = {
-                    accountSettingsViewModel.logOut {
-                        navigator.popUntil { screen ->
-                            screen is ReleaseLoginView || screen is DebugLoginView
-                        }
-                    }
+
                 }
-            ) {
-                H1Text(text = "Log Out", color = AppTheme.colors.deny,)
-            }
+            )
         }
     }
 }

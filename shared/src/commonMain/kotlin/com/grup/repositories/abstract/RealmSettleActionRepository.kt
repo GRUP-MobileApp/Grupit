@@ -4,8 +4,8 @@ import com.grup.interfaces.ISettleActionRepository
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
+import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmSettleAction
-import com.grup.models.realm.RealmTransactionRecord
 import com.grup.models.realm.RealmUserInfo
 import com.grup.other.copyNestedObjectToRealm
 import com.grup.other.getLatestFields
@@ -19,15 +19,17 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
     protected abstract val realm: Realm
 
     override suspend fun createSettleAction(
-        settleAmount: Double,
-        debtee: UserInfo
+        debtor: UserInfo,
+        transactionRecords: List<TransactionRecord>
     ): RealmSettleAction? {
         return realm.write {
             copyNestedObjectToRealm(
                 RealmSettleAction().apply {
-                    this._groupId = debtee.groupId
-                    this._debteeUserInfo = debtee as RealmUserInfo
-                    this._settleAmount = settleAmount
+                    this._groupId = debtor.groupId
+                    this._userInfo = debtor as RealmUserInfo
+                    _transactionRecords.addAll(
+                        transactionRecords.map { it.toRealmTransactionRecord() }
+                    )
                 }
             )
         }
@@ -38,10 +40,7 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
         block: SettleAction.() -> Unit
     ): RealmSettleAction? {
         return realm.write {
-            copyToRealm(
-                (settleAction as RealmSettleAction).apply(block),
-                UpdatePolicy.ALL
-            )
+            findLatest(settleAction as RealmSettleAction)!!.apply(block)
         }
     }
 

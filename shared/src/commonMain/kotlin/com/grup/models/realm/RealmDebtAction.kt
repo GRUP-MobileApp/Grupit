@@ -5,7 +5,6 @@ import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.other.createId
 import com.grup.other.getCurrentTime
-import com.grup.other.idSerialName
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
@@ -18,8 +17,8 @@ internal class RealmDebtAction : DebtAction(), RealmObject {
 
     override val groupId: String
         get() = _groupId ?: throw MissingFieldException("DebtAction with id $_id missing groupId")
-    override val debteeUserInfo: RealmUserInfo
-        get() = _debteeUserInfo
+    override val userInfo: RealmUserInfo
+        get() = _userInfo
             ?: throw MissingFieldException("DebtAction with id $_id missing debteeUserInfo")
     override val message: String
         get() = _message
@@ -31,8 +30,8 @@ internal class RealmDebtAction : DebtAction(), RealmObject {
 
     @PersistedName("groupId")
     var _groupId: String? = null
-    @PersistedName("debteeUserInfo")
-    var _debteeUserInfo: RealmUserInfo? = null
+    @PersistedName("userInfo")
+    var _userInfo: RealmUserInfo? = null
     @PersistedName("message")
     var _message: String? = null
     @PersistedName("transactionRecords")

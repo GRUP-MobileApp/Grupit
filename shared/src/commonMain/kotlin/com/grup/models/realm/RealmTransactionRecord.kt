@@ -5,12 +5,11 @@ import com.grup.models.TransactionRecord
 import com.grup.other.getCurrentTime
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.annotations.PersistedName
-import kotlinx.serialization.SerialName
 
 @PersistedName("TransactionRecord")
 internal class RealmTransactionRecord : TransactionRecord(), EmbeddedRealmObject {
-    override val debtorUserInfo: RealmUserInfo
-        get() = _debtorUserInfo
+    override val userInfo: RealmUserInfo
+        get() = _userInfo
             ?: throw MissingFieldException("TransactionRecord missing debtorUserInfo")
     override var balanceChange: Double
         get() = _balanceChange
@@ -22,8 +21,8 @@ internal class RealmTransactionRecord : TransactionRecord(), EmbeddedRealmObject
         get() = _dateAccepted
         set(value) { _dateAccepted = value }
 
-    @PersistedName("debtorUserInfo")
-    var _debtorUserInfo: RealmUserInfo? = null
+    @PersistedName("userInfo")
+    var _userInfo: RealmUserInfo? = null
     @PersistedName("balanceChange")
     var _balanceChange: Double? = null
     @PersistedName("dateCreated")

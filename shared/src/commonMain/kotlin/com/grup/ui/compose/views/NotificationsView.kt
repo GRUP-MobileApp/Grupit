@@ -97,17 +97,17 @@ private fun GroupNotificationsLayout(
                             )
                         }
                     }
-                    is Notification.IncomingTransactionOnSettleAction -> {
+                    is Notification.IncomingSettleAction -> {
                         {
                             AcceptRejectRow(
                                 acceptOnClick = {
-                                    notificationsViewModel.acceptSettleActionTransaction(
+                                    notificationsViewModel.acceptSettleAction(
                                         notification.settleAction,
                                         notification.transactionRecord
                                     )
                                 },
                                 rejectOnClick = {
-                                    notificationsViewModel.rejectSettleActionTransaction(
+                                    notificationsViewModel.rejectSettleAction(
                                         notification.settleAction,
                                         notification.transactionRecord
                                     )

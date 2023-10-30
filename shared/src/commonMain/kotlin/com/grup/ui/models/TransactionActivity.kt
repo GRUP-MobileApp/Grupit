@@ -1,6 +1,5 @@
 package com.grup.ui.models
 
-import com.grup.exceptions.PendingTransactionRecordException
 import com.grup.models.*
 
 internal sealed class TransactionActivity {
@@ -17,7 +16,7 @@ internal sealed class TransactionActivity {
         override val action: Action
             get() = debtAction
         override val userInfo: UserInfo
-            get() = debtAction.debteeUserInfo
+            get() = debtAction.userInfo
         override val date: String
             get() = debtAction.date
         override val amount: Double
@@ -34,41 +33,15 @@ internal sealed class TransactionActivity {
         override val action: Action
             get() = settleAction
         override val userInfo: UserInfo
-            get() = settleAction.debteeUserInfo
+            get() = settleAction.userInfo
         override val date: String
             get() = settleAction.date
         override val amount: Double
             get() = settleAction.totalAmount
         override val activityName: String
-            get() = "Completed Settle"
+            get() = if (settleAction.transactionRecords.any { !it.isAccepted }) "Settle"
+                    else "Completed Settle"
 
         override fun displayText() = "created a new settlement"
-    }
-
-    data class SettlePartialSettleAction(
-        val settleAction: SettleAction,
-        val transactionRecord: TransactionRecord
-    ) : TransactionActivity() {
-        override val action: Action
-            get() = settleAction
-        override val userInfo: UserInfo
-            get() = transactionRecord.debtorUserInfo
-        override val date: String
-            get() = transactionRecord.let { transactionRecord ->
-                if (!transactionRecord.isAccepted) {
-                    throw PendingTransactionRecordException(
-                        "TransactionRecord still pending for Settle Action " +
-                                "with id ${settleAction.id}"
-                    )
-                }
-                transactionRecord.dateAccepted
-            }
-        override val amount: Double
-            get() = transactionRecord.balanceChange
-        override val activityName: String
-            get() = "Settle Request"
-
-        override fun displayText(): String =
-            "paid ${settleAction.debteeUserInfo.user.displayName}"
     }
 }

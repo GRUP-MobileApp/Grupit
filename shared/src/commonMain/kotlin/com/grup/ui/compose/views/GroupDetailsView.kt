@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -40,11 +39,9 @@ import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.ProfileIcon
 import com.grup.ui.compose.SmallIcon
-import com.grup.ui.compose.UserInfoRowCard
 import com.grup.ui.compose.recentActivityList
 import com.grup.ui.models.TransactionActivity
 import com.grup.ui.viewmodel.GroupDetailsViewModel
-import com.grup.ui.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
 
 internal class GroupDetailsView : Screen {
@@ -82,7 +79,7 @@ private fun GroupDetailsLayout(
     val groupActivity: List<TransactionActivity> by
         groupDetailsViewModel.groupActivity.collectAsStateWithLifecycle()
     val activeSettleActions: List<SettleAction> by
-        groupDetailsViewModel.activeSettleActions.collectAsStateWithLifecycle()
+        groupDetailsViewModel.incomingSettleActions.collectAsStateWithLifecycle()
 
     // Not getting updated
     var selectedAction: Action? by remember { mutableStateOf(null) }
@@ -132,19 +129,8 @@ private fun GroupDetailsLayout(
                                 is SettleAction -> SettleActionDetails(
                                     settleAction = selectedAction,
                                     myUserInfo = userInfo,
-                                    navigateSettleActionTransactionOnClick = {
-                                        if (userInfo.userBalance < 0) {
-                                            navigator.push(
-                                                ActionAmountView(
-                                                    actionType =
-                                                        TransactionViewModel.SETTLE_TRANSACTION,
-                                                    existingActionId = selectedAction.id
-                                                )
-                                            )
-                                        }
-                                    },
-                                    acceptSettleActionTransactionOnClick = { transactionRecord ->
-                                        groupDetailsViewModel.acceptSettleActionTransaction(
+                                    acceptSettleActionOnClick = { transactionRecord ->
+                                        groupDetailsViewModel.acceptSettleAction(
                                             selectedAction,
                                             transactionRecord
                                         )
@@ -209,17 +195,11 @@ private fun GroupDetailsLayout(
                                 .fillMaxWidth(),
                             myUserInfo = myUserInfo,
                             navigateDebtActionAmountOnClick = {
-                                navigator.push(
-                                    ActionAmountView(actionType = TransactionViewModel.DEBT)
-                                )
+                                navigator.push(ActionAmountView())
                             },
                             navigateSettleActionAmountOnClick = {
-                                if (myUserInfo.userBalance > 0) {
-                                    navigator.push(
-                                        ActionAmountView(
-                                            actionType = TransactionViewModel.SETTLE
-                                        )
-                                    )
+                                if (myUserInfo.userBalance < 0) {
+                                    navigator.push(SettleActionView())
                                 }
                             }
                         )
@@ -230,7 +210,7 @@ private fun GroupDetailsLayout(
                             ActiveSettleActions(
                                 activeSettleActions = activeSettleActions,
                                 isMySettleAction = { settleAction ->
-                                    settleAction.debteeUserInfo.user.id == myUserInfo.user.id
+                                    settleAction.userInfo.user.id == myUserInfo.user.id
                                 },
                                 settleActionCardOnClick = selectAction,
                                 modifier = Modifier.fillMaxWidth()
@@ -344,7 +324,7 @@ private fun GroupBalanceCard(
                 Spacer(modifier = Modifier.width(AppTheme.dimensions.spacing))
                 H1ConfirmTextButton(
                     text = "Settle",
-                    enabled = myUserInfo.userBalance > 0,
+                    enabled = myUserInfo.userBalance < 0,
                     onClick = navigateSettleActionAmountOnClick,
                     modifier = Modifier.weight(1f)
                 )
@@ -443,8 +423,8 @@ private fun SettleActionCard(
                     .fillMaxWidth()
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
-                ProfileIcon(user = settleAction.debteeUserInfo.user, iconSize = 50.dp)
-                MoneyAmount(moneyAmount = settleAction.remainingAmount, fontSize = 24.sp)
+                ProfileIcon(user = settleAction.userInfo.user, iconSize = 50.dp)
+                MoneyAmount(moneyAmount = settleAction.totalAmount, fontSize = 24.sp)
             }
         }
     }
@@ -461,7 +441,7 @@ private fun DebtActionDetails(
         modifier = modifier.fillMaxSize()
     ) {
         UserRowCard(
-            user = debtAction.debteeUserInfo.user,
+            user = debtAction.userInfo.user,
             mainContent = {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -470,7 +450,7 @@ private fun DebtActionDetails(
                     Caption(text = "Debt")
                     Caption(text = "${isoDate(debtAction.date)} at ${isoTime(debtAction.date)}")
                 }
-                H1Text(text = debtAction.debteeUserInfo.user.displayName, fontSize = 28.sp)
+                H1Text(text = debtAction.userInfo.user.displayName, fontSize = 28.sp)
             },
             iconSize = 80.dp
         )
@@ -518,8 +498,7 @@ private fun SettleActionDetails(
     modifier: Modifier = Modifier,
     settleAction: SettleAction,
     myUserInfo: UserInfo,
-    navigateSettleActionTransactionOnClick: () -> Unit,
-    acceptSettleActionTransactionOnClick: (TransactionRecord) -> Unit
+    acceptSettleActionOnClick: (TransactionRecord) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val acceptPendingTransactionBottomSheetState =
@@ -530,10 +509,9 @@ private fun SettleActionDetails(
     var selectedTransaction: TransactionRecord? by remember { mutableStateOf(null) }
 
     val isMyAction: Boolean =
-        (myUserInfo.user.id == settleAction.debteeUserInfo.user.id)
+        (myUserInfo.user.id == settleAction.userInfo.user.id)
     if (
         isMyAction &&
-        settleAction.remainingAmount > 0 &&
         settleAction.transactionRecords.any {
             it.dateAccepted == TransactionRecord.PENDING
         }
@@ -554,7 +532,7 @@ private fun SettleActionDetails(
                         modifier = modifier.fillMaxWidth()
                     ) {
                         H1Text(
-                            text = "${selectedTransaction.debtorUserInfo.user.displayName} " +
+                            text = "${selectedTransaction.userInfo.user.displayName} " +
                                     "is paying " +
                                     selectedTransaction.balanceChange.asMoneyAmount()
                         )
@@ -563,7 +541,7 @@ private fun SettleActionDetails(
                                 text = "Accept",
                                 scale = 0.8f,
                                 onClick = {
-                                    acceptSettleActionTransactionOnClick(selectedTransaction)
+                                    acceptSettleActionOnClick(selectedTransaction)
                                     scope.launch { acceptPendingTransactionBottomSheetState.hide() }
                                 }
                             )
@@ -582,11 +560,11 @@ private fun SettleActionDetails(
             modifier = modifier.fillMaxSize()
         ) {
             UserRowCard(
-                user = settleAction.debteeUserInfo.user,
+                user = settleAction.userInfo.user,
                 mainContent = {
-                    Caption(text = settleAction.debteeUserInfo.user.displayName)
+                    Caption(text = settleAction.userInfo.user.displayName)
                     MoneyAmount(
-                        moneyAmount = settleAction.remainingAmount,
+                        moneyAmount = settleAction.totalAmount,
                         fontSize = 60.sp
                     )
                 },
@@ -670,15 +648,6 @@ private fun SettleActionDetails(
                     }
                 }
             }
-
-            H1ConfirmTextButton(
-                text = "Settle",
-                onClick = navigateSettleActionTransactionOnClick,
-                enabled = !isMyAction &&
-                        myUserInfo.userBalance < 0 &&
-                        settleAction.remainingAmount > 0,
-                modifier = Modifier.padding(AppTheme.dimensions.cardPadding)
-            )
         }
     }
 }
@@ -689,10 +658,10 @@ private fun TransactionRecordRowCard(
     transactionRecord: TransactionRecord
 ) {
     UserRowCard(
-        user = transactionRecord.debtorUserInfo.user,
+        user = transactionRecord.userInfo.user,
         iconSize = 50.dp,
         mainContent = {
-            H1Text(text = transactionRecord.debtorUserInfo.user.displayName)
+            H1Text(text = transactionRecord.userInfo.user.displayName)
             Caption(
                 text =
                     if (transactionRecord.isAccepted)

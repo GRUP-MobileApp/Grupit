@@ -10,7 +10,7 @@ abstract class TransactionRecord {
         const val REJECTED = "REJECTED"
 
         data class DataTransactionRecord(
-            override val debtorUserInfo: UserInfo,
+            override val userInfo: UserInfo,
             override var balanceChange: Double,
         ) : TransactionRecord() {
             override val dateCreated: String = getCurrentTime()
@@ -18,7 +18,7 @@ abstract class TransactionRecord {
         }
     }
 
-    abstract val debtorUserInfo: UserInfo
+    abstract val userInfo: UserInfo
     abstract var balanceChange: Double
     abstract val dateCreated: String
     abstract var dateAccepted: String
@@ -28,7 +28,7 @@ abstract class TransactionRecord {
 
     internal fun toRealmTransactionRecord(): RealmTransactionRecord =
         RealmTransactionRecord().apply {
-            _debtorUserInfo = this@TransactionRecord.debtorUserInfo as RealmUserInfo
+            _userInfo = this@TransactionRecord.userInfo as RealmUserInfo
             _balanceChange = this@TransactionRecord.balanceChange
             _dateCreated = this@TransactionRecord.dateCreated
             _dateAccepted = this@TransactionRecord.dateAccepted

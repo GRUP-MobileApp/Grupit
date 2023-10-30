@@ -42,6 +42,7 @@ import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
+import kotlin.math.roundToInt
 
 private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
@@ -190,6 +191,35 @@ internal fun H1ConfirmTextButton(
             fontWeight = FontWeight.Bold,
             fontSize = fontSize.times(scale),
             color = AppTheme.colors.onSecondary,
+        )
+    }
+}
+
+@Composable
+internal fun H1DenyTextButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    scale: Float = 1f,
+    width: Dp = 150.dp,
+    height: Dp = 45.dp,
+    fontSize: TextUnit = 20.sp,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    TextButton(
+        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
+        modifier = modifier
+            .width(width.times(scale))
+            .height(height.times(scale)),
+        shape = AppTheme.shapes.circleShape,
+        enabled = enabled,
+        onClick = onClick
+    ) {
+        H1Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize.times(scale),
+            color = AppTheme.colors.deny,
         )
     }
 }
@@ -504,6 +534,55 @@ internal fun MoneyAmount(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+internal fun KeyPadBottomSheet(
+    state: ModalBottomSheetState,
+    initialMoneyAmount: Double,
+    maxMoneyAmount: Double = Double.MAX_VALUE,
+    isEnabled: (Double) -> Boolean = { true },
+    onClick: (Double) -> Unit,
+    onBackPress: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    var moneyAmount: String by remember { mutableStateOf("0") }
+    LaunchedEffect(initialMoneyAmount) {
+        moneyAmount = if (initialMoneyAmount % 1 == 0.0)
+            initialMoneyAmount.roundToInt().toString()
+        else
+            initialMoneyAmount.asPureMoneyAmount()
+    }
+
+    BackPressModalBottomSheetLayout(
+        sheetState = state,
+        sheetContent = {
+            KeyPadScreenLayout(
+                moneyAmount = moneyAmount,
+                onMoneyAmountChange = { newActionAmount ->
+                    moneyAmount = if (newActionAmount.toDouble() > maxMoneyAmount) {
+                        maxMoneyAmount.toString().trimEnd('0')
+                    } else {
+                        newActionAmount
+                    }
+                },
+                confirmButton = {
+                    val actualMoneyAmount = moneyAmount.toDouble()
+                    H1ConfirmTextButton(
+                        text = "Confirm",
+                        enabled = isEnabled(actualMoneyAmount),
+                        onClick = {
+                            onClick(actualMoneyAmount)
+                            onBackPress()
+                        }
+                    )
+                },
+                onBackPress = onBackPress
+            )
+        },
+        content = content
+    )
+}
+
 @Composable
 internal fun KeyPadScreenLayout(
     moneyAmount: String,
@@ -697,6 +776,48 @@ internal fun KeyPad(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun UserInfoAmountsList(
+    userInfoMoneyAmounts: Map<UserInfo, Double>,
+    userInfoHasSetAmount: (UserInfo) -> Boolean,
+    userInfoAmountOnClick: (UserInfo) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            items(userInfoMoneyAmounts.toList()) { (userInfo, moneyAmount) ->
+                UserRowCard(
+                    user = userInfo.user,
+                    sideContent = {
+                        MoneyAmount(
+                            moneyAmount = moneyAmount,
+                            color =
+                            if (userInfoHasSetAmount(userInfo))
+                                AppTheme.colors.onSecondary
+                            else
+                                AppTheme.colors.caption,
+                            fontSize = 26.sp,
+                            modifier = Modifier.clickable {
+                                userInfoAmountOnClick(userInfo)
+                            }
+                        )
+                    }
+                )
             }
         }
     }

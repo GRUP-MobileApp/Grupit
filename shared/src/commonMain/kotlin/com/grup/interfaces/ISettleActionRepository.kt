@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 internal interface ISettleActionRepository : IRepository {
     suspend fun createSettleAction(
-        settleAmount: Double,
-        debtee: UserInfo
+        debtor: UserInfo,
+        transactionRecords: List<TransactionRecord>
     ): SettleAction?
 
     // TODO: Can't update transactionRecords RealmList inside SettleAction.() -> Unit block

@@ -20,11 +20,11 @@ internal sealed class Notification {
         override val groupId: String
             get() = debtAction.groupId
         override val user: User
-            get() = debtAction.debteeUserInfo.user
+            get() = debtAction.userInfo.user
         override val dismissible: Boolean = false
 
         override fun displayText(): String =
-            "${debtAction.debteeUserInfo.user.displayName} is requesting " +
+            "${debtAction.userInfo.user.displayName} is requesting " +
                     "${transactionRecord.balanceChange.asMoneyAmount()} from you"
     }
 
@@ -45,14 +45,14 @@ internal sealed class Notification {
         override val groupId: String
             get() = debtAction.groupId
         override val user: User
-            get() = transactionRecord.debtorUserInfo.user
+            get() = transactionRecord.userInfo.user
 
         override fun displayText(): String =
-            "${transactionRecord.debtorUserInfo.user.displayName} has accepted a debt of " +
+            "${transactionRecord.userInfo.user.displayName} has accepted a debt of " +
                     "${transactionRecord.balanceChange.asMoneyAmount()} from you"
     }
 
-    data class IncomingTransactionOnSettleAction(
+    data class IncomingSettleAction(
         val settleAction: SettleAction,
         val transactionRecord: TransactionRecord
     ) : Notification() {
@@ -61,22 +61,21 @@ internal sealed class Notification {
         override val groupId: String
             get() = settleAction.groupId
         override val user: User
-            get() = transactionRecord.debtorUserInfo.user
+            get() = settleAction.userInfo.user
         override val dismissible: Boolean = false
 
         override fun displayText(): String =
-            "${transactionRecord.debtorUserInfo.user.displayName} is settling " +
-                    "${transactionRecord.balanceChange.asMoneyAmount()} out of your " +
-                    "${settleAction.remainingAmount.asMoneyAmount()} request"
+            "${user.displayName} is settling for " +
+                    transactionRecord.balanceChange.asMoneyAmount()
     }
 
-    data class DebteeAcceptSettleActionTransaction(
+    data class DebteeAcceptSettleAction(
         val settleAction: SettleAction,
         val transactionRecord: TransactionRecord
     ) : Notification() {
         override val date: String
             get() = transactionRecord.let { transactionRecord ->
-                if (!transactionRecord.isAccepted) {
+                if (transactionRecord.isAccepted) {
                     throw PendingTransactionRecordException(
                         "TransactionRecord still pending for Settle Action " +
                                 "with id ${settleAction.id}"
@@ -87,10 +86,10 @@ internal sealed class Notification {
         override val groupId: String
             get() = settleAction.groupId
         override val user: User
-            get() = settleAction.debteeUserInfo.user
+            get() = transactionRecord.userInfo.user
 
         override fun displayText(): String =
-            "${settleAction.debteeUserInfo.user.displayName} accepted your settlement for " +
+            "${user.displayName} accepted your settlement for " +
                     transactionRecord.balanceChange.asMoneyAmount()
     }
 

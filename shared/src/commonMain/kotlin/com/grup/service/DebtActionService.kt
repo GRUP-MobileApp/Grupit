@@ -1,5 +1,6 @@
 package com.grup.service
 
+import com.grup.exceptions.InvalidTransactionRecordException
 import com.grup.exceptions.NotCreatedException
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.models.DebtAction
@@ -17,6 +18,9 @@ internal class DebtActionService : KoinComponent {
         transactionRecords: List<TransactionRecord>,
         message: String
     ): DebtAction {
+        if (transactionRecords.isEmpty()) {
+            throw InvalidTransactionRecordException("Empty transaction records")
+        }
         return debtActionRepository.createDebtAction(debtee, transactionRecords, message)
             ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
                 " ${debtee.groupId}")
@@ -25,7 +29,7 @@ internal class DebtActionService : KoinComponent {
     suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionRepository.updateDebtAction(debtAction) {
             transactionRecords.find { transactionRecord ->
-                transactionRecord.debtorUserInfo.id == myTransactionRecord.debtorUserInfo.id
+                transactionRecord.userInfo.id == myTransactionRecord.userInfo.id
             }?.dateAccepted = getCurrentTime()
         }
     }
@@ -33,7 +37,7 @@ internal class DebtActionService : KoinComponent {
     suspend fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {
         debtActionRepository.updateDebtAction(debtAction) {
             transactionRecords.find { transactionRecord ->
-                transactionRecord.debtorUserInfo.id == myTransactionRecord.debtorUserInfo.id
+                transactionRecord.userInfo.id == myTransactionRecord.userInfo.id
             }?.dateAccepted = TransactionRecord.REJECTED
         }
     }

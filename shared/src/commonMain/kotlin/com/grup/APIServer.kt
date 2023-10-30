@@ -56,9 +56,9 @@ class APIServer private constructor(
 
     // DebtAction
     fun createDebtAction(
-        transactionRecords: List<TransactionRecord>,
         debtee: UserInfo,
-        message: String
+        message: String,
+        transactionRecords: List<TransactionRecord>
     ) = debtActionController.createDebtAction(transactionRecords, debtee, message)
     suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
         debtActionController.acceptDebtAction(debtAction, myTransactionRecord)
@@ -68,20 +68,16 @@ class APIServer private constructor(
         debtActionController.getAllDebtActionsAsFlow()
 
     // SettleAction
-    suspend fun createSettleAction(settleAmount: Double, debtee: UserInfo) =
-        settleActionController.createSettleAction(settleAmount, debtee)
-    suspend fun createSettleActionTransaction(
-        settleAction: SettleAction,
-        myTransactionRecord: TransactionRecord
-    ) = settleActionController.createSettleActionTransaction(settleAction, myTransactionRecord)
-    suspend fun acceptSettleActionTransaction(
+    suspend fun createSettleAction(debtor: UserInfo, transactionRecords: List<TransactionRecord>) =
+        settleActionController.createSettleAction(debtor, transactionRecords)
+    suspend fun acceptSettleAction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = settleActionController.acceptSettleActionTransaction(settleAction, transactionRecord)
-    suspend fun rejectSettleActionTransaction(
+    ) = settleActionController.acceptSettleAction(settleAction, transactionRecord)
+    suspend fun rejectSettleAction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = settleActionController.rejectSettleActionTransaction(settleAction, transactionRecord)
+    ) = settleActionController.rejectSettleAction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() =
         settleActionController.getAllSettleActionsAsFlow()
 

@@ -23,7 +23,7 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
         return realm.writeBlocking {
             copyNestedObjectToRealm(
                 RealmDebtAction().apply {
-                    _debteeUserInfo = debtee as RealmUserInfo
+                    _userInfo = debtee as RealmUserInfo
                     _groupId = debtee.groupId
                     _transactionRecords.addAll(
                         transactionRecords.map { it.toRealmTransactionRecord() }

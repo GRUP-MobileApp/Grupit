@@ -27,8 +27,8 @@ internal class UserInfoService : KoinComponent {
         transactionRecord: TransactionRecord,
         allowNegative: Boolean = true
     ) {
-        val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo
-        val debteeUserInfo: UserInfo = debtAction.debteeUserInfo
+        val debtorUserInfo: UserInfo = transactionRecord.userInfo
+        val debteeUserInfo: UserInfo = debtAction.userInfo
 
         if (!allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange < 0) {
             throw NegativeBalanceException("TransactionRecord between debtor with id " +
@@ -45,32 +45,22 @@ internal class UserInfoService : KoinComponent {
         }
     }
 
-    suspend fun applySettleAction(settleAction: SettleAction) {
-        val debteeUserInfo: UserInfo = settleAction.debteeUserInfo
-
-        if (debteeUserInfo.userBalance < settleAction.settleAmount) {
-            throw NegativeBalanceException("SettleAction with id ${settleAction.id}" +
-                    "results in negative balance")
-        }
-
-        userInfoRepository.updateUserInfo(debteeUserInfo) { userInfo ->
-            userInfo.userBalance -= settleAction.settleAmount
-        }
-    }
-
-    suspend fun applyPartialSettleActionTransactionRecord(
+    suspend fun applySettleActionTransactionRecord(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) {
-        val debtorUserInfo: UserInfo = transactionRecord.debtorUserInfo
+        val debteeUserInfo: UserInfo = transactionRecord.userInfo
+        val debtorUserInfo: UserInfo = settleAction.userInfo
 
-        if (transactionRecord.balanceChange > settleAction.remainingAmount) {
-            throw NegativeBalanceException("TransactionRecord between debtor with id " +
-                    "${debtorUserInfo.user.id} and debtee with id " +
-                    "${settleAction.debteeUserInfo} in SettleAction with id " +
-                    "${settleAction.id} results in negative remaining amount")
+        if (debtorUserInfo.userBalance + transactionRecord.balanceChange > 0) {
+            throw NegativeBalanceException("Repayment from " +
+                    "${debtorUserInfo.user.displayName} to " +
+                    "${debteeUserInfo.user.displayName} results in overpayment")
         }
 
+        userInfoRepository.updateUserInfo(debteeUserInfo) { userInfo ->
+            userInfo.userBalance -= transactionRecord.balanceChange
+        }
         userInfoRepository.updateUserInfo(debtorUserInfo) { userInfo ->
             userInfo.userBalance += transactionRecord.balanceChange
         }

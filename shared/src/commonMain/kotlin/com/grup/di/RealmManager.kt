@@ -56,9 +56,8 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
             }
         } ?: throw NotLoggedInException("Not logged into Realm")
 
-    override suspend fun startDBTransaction(transaction: () -> Unit) = realm.write {
-        transaction()
-    }
+    override suspend fun <T> startDBTransaction(transaction: () -> T) =
+        realm.write { transaction() }
 
 
     private val realm: Realm = app.currentUser?.let { realmUser ->

@@ -1,7 +1,8 @@
 package com.grup.ui.compose.views
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
@@ -16,7 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.core.annotation.ExperimentalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -82,7 +85,16 @@ class MainView : Screen {
 
         @Composable
         override fun Content() {
-            Navigator(AccountSettingsView())
+            val navigator = LocalNavigator.currentOrThrow
+            Navigator(
+                AccountSettingsView(
+                    logOutOnClick = {
+                        navigator.popUntil { screen ->
+                            screen is ReleaseLoginView || screen is DebugLoginView
+                        }
+                    }
+                )
+            )
         }
     }
 
@@ -96,7 +108,6 @@ class MainView : Screen {
             tabDisposable = { TabDisposable(navigator = it, tabs = tabs) }
         ) {
             Scaffold(
-                modifier = Modifier.fillMaxSize(),
                 backgroundColor = AppTheme.colors.primary,
                 bottomBar = {
                     BottomNavigation(
@@ -105,8 +116,10 @@ class MainView : Screen {
                         tabs.forEach { TabNavigationItem(it) }
                     }
                 }
-            ) {
-                CurrentTab()
+            ) { padding ->
+                Box(modifier = Modifier.padding(padding)) {
+                    CurrentTab()
+                }
             }
         }
     }

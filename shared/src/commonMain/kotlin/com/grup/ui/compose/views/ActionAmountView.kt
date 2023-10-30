@@ -16,37 +16,23 @@ import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlin.math.min
 
-internal class ActionAmountView(
-    private val actionType: String,
-    private val existingActionId: String? = null
-) : Screen {
+internal class ActionAmountView : Screen {
     @Composable
     override fun Content() {
-        val transactionViewModel: TransactionViewModel =
-            rememberScreenModel { TransactionViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            ActionAmountLayout(
-                transactionViewModel = transactionViewModel,
-                navigator = navigator,
-                actionType = actionType,
-                existingActionId = existingActionId
-            )
+            ActionAmountLayout(navigator = navigator,)
         }
     }
 }
 
 @Composable
 private fun ActionAmountLayout(
-    transactionViewModel: TransactionViewModel,
     navigator: Navigator,
-    actionType: String,
-    existingActionId: String?
 ) {
-    val myUserInfo: UserInfo by transactionViewModel.myUserInfo.collectAsStateWithLifecycle()
     var actionAmount: String by remember { mutableStateOf("0") }
 
     val onBackPress: () -> Unit = { navigator.pop() }
@@ -57,86 +43,29 @@ private fun ActionAmountLayout(
             newActionAmount
         }
     }
+    var message: String by remember { mutableStateOf("") }
 
-    when (actionType) {
-        TransactionViewModel.DEBT -> {
-            var message: String by remember { mutableStateOf("") }
-
-            KeyPadScreenLayout(
-                moneyAmount = actionAmount,
-                onMoneyAmountChange = { onActionAmountChange(it) },
-                message = message,
-                onMessageChange = { message = it },
-                confirmButton = {
-                    actionAmount.toDouble().let { amount ->
-                        H1ConfirmTextButton(
-                            text = actionType,
-                            enabled = amount > 0 && message.isNotBlank(),
-                            onClick = {
-                                navigator.push(
-                                    DebtActionView(
-                                        debtActionAmount = amount,
-                                        message = message
-                                    )
-                                )
-                            }
+    KeyPadScreenLayout(
+        moneyAmount = actionAmount,
+        onMoneyAmountChange = { onActionAmountChange(it) },
+        message = message,
+        onMessageChange = { message = it },
+        confirmButton = {
+            actionAmount.toDouble().let { amount ->
+                H1ConfirmTextButton(
+                    text = "Request",
+                    enabled = amount > 0 && message.isNotBlank(),
+                    onClick = {
+                        navigator.push(
+                            DebtActionView(
+                                debtActionAmount = amount,
+                                message = message
+                            )
                         )
                     }
-                },
-                onBackPress = onBackPress
-            )
-        }
-        TransactionViewModel.SETTLE -> {
-            KeyPadScreenLayout(
-                moneyAmount = actionAmount,
-                onMoneyAmountChange = { onActionAmountChange(it, myUserInfo.userBalance) },
-                confirmButton = {
-                    actionAmount.toDouble().let { amount ->
-                        H1ConfirmTextButton(
-                            text = actionType,
-                            enabled = amount > 0,
-                            onClick = {
-                                transactionViewModel.createSettleAction(
-                                    settleAmount = amount,
-                                    onSuccess = { onBackPress() },
-                                    onFailure = { }
-                                )
-                            }
-                        )
-                    }
-                },
-                onBackPress = onBackPress
-            )
-        }
-        TransactionViewModel.SETTLE_TRANSACTION -> {
-            val settleAction: SettleAction by
-            transactionViewModel.getSettleAction(existingActionId!!).collectAsStateWithLifecycle()
-            KeyPadScreenLayout(
-                moneyAmount = actionAmount,
-                onMoneyAmountChange = {
-                    onActionAmountChange(
-                        it,
-                        min(settleAction.remainingAmount, -1 * myUserInfo.userBalance)
-                    )
-                },
-                confirmButton = {
-                    actionAmount.toDouble().let { amount ->
-                        H1ConfirmTextButton(
-                            text = actionType,
-                            enabled = amount > 0,
-                            onClick = {
-                                transactionViewModel.createSettleActionTransaction(
-                                    settleAction,
-                                    amount,
-                                    myUserInfo
-                                )
-                                onBackPress()
-                            }
-                        )
-                    }
-                },
-                onBackPress = onBackPress,
-            )
-        }
-    }
+                )
+            }
+        },
+        onBackPress = onBackPress
+    )
 }

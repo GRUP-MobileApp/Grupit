@@ -8,7 +8,6 @@ import com.grup.other.getCurrentTime
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PersistedName
 import io.realm.kotlin.types.annotations.PrimaryKey
 
@@ -16,51 +15,23 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 internal class RealmSettleAction : SettleAction(), RealmObject {
     @PrimaryKey override var _id: String = createId()
 
-    override val debteeUserInfo: RealmUserInfo
-        get() = _debteeUserInfo
+    override val userInfo: RealmUserInfo
+        get() = _userInfo
             ?: throw MissingFieldException("SettleAction with id $_id missing debtee")
     override val groupId: String
         get() = _groupId
             ?: throw MissingFieldException("SettleAction with id $_id missing groupId")
-    // TODO: _transactionRecords.add throwing Realm error even if it's being used in an apply block
-    // invoked inside a realm.write
-    @Ignore
-    override val transactionRecords: MutableList<TransactionRecord> =
-        object : AbstractMutableList<TransactionRecord>() {
-            override fun get(index: Int): TransactionRecord = _transactionRecords[index]
-
-            override fun add(index: Int, element: TransactionRecord) {
-                println("adding transactionRecord ${element.balanceChange}")
-                _transactionRecords.add(index, element.toRealmTransactionRecord())
-            }
-
-
-            override fun removeAt(index: Int): TransactionRecord =
-                _transactionRecords.removeAt(index)
-
-            override fun set(index: Int, element: TransactionRecord): TransactionRecord =
-                _transactionRecords.set(index, element.toRealmTransactionRecord())
-
-            override val size: Int
-                get() = _transactionRecords.size
-        }
-
+    override val transactionRecords: List<TransactionRecord>
+        get() = _transactionRecords
     override val date: String
         get() = _date
 
-    override val settleAmount: Double
-        get() = _settleAmount
-            ?: throw MissingFieldException("SettleAction with id $_id missing settleAmount")
-
-    @PersistedName("debteeUserInfo")
-    var _debteeUserInfo: RealmUserInfo? = null
+    @PersistedName("userInfo")
+    var _userInfo: RealmUserInfo? = null
     @PersistedName("groupId")
     var _groupId: String? = null
     @PersistedName("transactionRecords")
     var _transactionRecords: RealmList<RealmTransactionRecord> = realmListOf()
     @PersistedName("date")
     private var _date: String = getCurrentTime()
-
-    @PersistedName("settleAmount")
-    var _settleAmount: Double? = null
 }

@@ -39,33 +39,23 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
                 settleAction.groupId == selectedGroup.id
             }
         }
-    // Active SettleActions to be displayed, oldest first
-    val activeSettleActions: StateFlow<List<SettleAction>> =
+    // Incoming SettleActions to be displayed, oldest first
+    val incomingSettleActions: StateFlow<List<SettleAction>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                settleAction.remainingAmount > 0
+                settleAction.transactionRecords.any { transactionRecord ->
+                    transactionRecord.userInfo.user.id == userObject.id &&
+                            !transactionRecord.isAccepted
+                }
             }.sortedBy { it.date }
         }.asState()
 
-    private val completedSettleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
+    private val settleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                settleAction.remainingAmount == 0.0
+                !incomingSettleActions.value.contains(settleAction)
             }.map { settleAction ->
                 TransactionActivity.CreateSettleAction(settleAction)
-            }
-        }
-    private val settleActionTransactionsAsTransactionActivity: Flow<List<TransactionActivity>> =
-        _settleActionsFlow.map { settleActions ->
-            settleActions.flatMap { settleAction ->
-                settleAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.isAccepted
-                }.map { transactionRecord ->
-                    TransactionActivity.SettlePartialSettleAction(
-                        settleAction,
-                        transactionRecord
-                    )
-                }
             }
         }
 
@@ -73,8 +63,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     val groupActivity: StateFlow<List<TransactionActivity>> =
         combine(
             debtActionsAsTransactionActivity,
-            completedSettleActionsAsTransactionActivity,
-            settleActionTransactionsAsTransactionActivity
+            settleActionsAsTransactionActivity
         ) { allTransactionActivities: Array<List<TransactionActivity>> ->
             allTransactionActivities.flatMap { it }.sortedByDescending { transactionActivity ->
                 transactionActivity.date
@@ -82,10 +71,10 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
         }.asInitialEmptyState()
 
     // SettleAction
-    fun acceptSettleActionTransaction(
+    fun acceptSettleAction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) = coroutineScope.launch {
-        apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
+        apiServer.acceptSettleAction(settleAction, transactionRecord)
     }
 }

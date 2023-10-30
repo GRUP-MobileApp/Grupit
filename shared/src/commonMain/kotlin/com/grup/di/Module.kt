@@ -18,6 +18,7 @@ import com.grup.ui.viewmodel.CreateGroupViewModel
 import com.grup.ui.viewmodel.GroupDetailsViewModel
 import com.grup.ui.viewmodel.GroupsViewModel
 import com.grup.ui.viewmodel.NotificationsViewModel
+import com.grup.ui.viewmodel.TransactionViewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -74,6 +75,7 @@ internal val viewModelsModule = module {
     factory { GroupDetailsViewModel() }
     factory { NotificationsViewModel() }
     factory { CreateGroupViewModel() }
+    factory { TransactionViewModel() }
 }
 
 internal val releaseAppModule = module {

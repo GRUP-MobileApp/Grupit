@@ -18,9 +18,6 @@ internal class DebtActionController : KoinComponent {
         debtee: UserInfo,
         message: String
     ): DebtAction {
-        if (transactionRecords.isEmpty()) {
-            throw InvalidTransactionRecordException("Empty transaction records")
-        }
         return debtActionService.createDebtAction(debtee, transactionRecords, message)
     }
 
