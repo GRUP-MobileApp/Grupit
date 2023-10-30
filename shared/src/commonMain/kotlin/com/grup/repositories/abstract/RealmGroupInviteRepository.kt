@@ -11,6 +11,7 @@ import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 internal abstract class RealmGroupInviteRepository : IGroupInviteRepository {
     protected abstract val realm: Realm

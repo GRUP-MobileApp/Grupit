@@ -16,7 +16,7 @@ internal class GroupMembersViewModel : LoggedInViewModel() {
     val userInfos: StateFlow<List<UserInfo>> =
         _userInfosFlow.map { userInfos ->
             userInfos.filter { userInfo ->
-                userInfo.groupId == selectedGroup.id
+                userInfo.groupId == selectedGroup?.id
             }.sortedBy { userInfo ->
                 if (userInfo.user.id == userObject.id) "" else userInfo.user.displayName
             }
@@ -37,13 +37,15 @@ internal class GroupMembersViewModel : LoggedInViewModel() {
     }
 
     fun inviteUserToGroup(username: String) {
-        _inviteResult.value = InviteResult.Pending
-        coroutineScope.launch {
-            try {
-                apiServer.inviteUserToGroup(username, selectedGroup)
-                _inviteResult.value = InviteResult.Sent
-            } catch (e: APIException) {
-                _inviteResult.value = InviteResult.Error(e)
+        selectedGroup?.let { group ->
+            _inviteResult.value = InviteResult.Pending
+            coroutineScope.launch {
+                try {
+                    apiServer.inviteUserToGroup(username, group)
+                    _inviteResult.value = InviteResult.Sent
+                } catch (e: APIException) {
+                    _inviteResult.value = InviteResult.Error(e)
+                }
             }
         }
     }

@@ -65,15 +65,4 @@ internal class UserInfoService : KoinComponent {
             userInfo.userBalance += transactionRecord.balanceChange
         }
     }
-
-    suspend fun updateLatestTime(group: Group) {
-        val myUserInfo: UserInfo =
-            findMyUserInfosAsFlow().first().find {
-                it.groupId == group.id
-            }!!
-
-        userInfoRepository.updateUserInfo(myUserInfo) { userInfo ->
-            userInfo.latestViewDate = getCurrentTime()
-        }
-    }
 }

@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
@@ -21,7 +19,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +27,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.grup.models.User
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.Caption
@@ -41,9 +37,7 @@ import com.grup.ui.compose.ProfileIcon
 import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 
-internal class AccountSettingsView(
-    private val logOutOnClick: () -> Unit
-) : Screen {
+internal class AccountSettingsView : Screen {
     @Composable
     override fun Content() {
         val accountSettingsViewModel: AccountSettingsViewModel =
@@ -55,8 +49,7 @@ internal class AccountSettingsView(
         ) {
             AccountSettingsLayout(
                 accountSettingsViewModel = accountSettingsViewModel,
-                navigator = navigator,
-                logOutOnClick = logOutOnClick
+                navigator = navigator
             )
         }
     }
@@ -65,8 +58,7 @@ internal class AccountSettingsView(
 @Composable
 private fun AccountSettingsLayout(
     accountSettingsViewModel: AccountSettingsViewModel,
-    navigator: Navigator,
-    logOutOnClick: () -> Unit
+    navigator: Navigator
 ) {
     val groupNotificationEntries: SnapshotStateMap<String, Boolean> = remember {
         mutableStateMapOf<String, Boolean>().apply {
@@ -99,7 +91,7 @@ private fun AccountSettingsLayout(
             H1DenyTextButton(
                 text = "Log Out",
                 onClick = {
-
+                    // TODO: Pop till LoginView
                 }
             )
         }

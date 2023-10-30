@@ -3,6 +3,7 @@ package com.grup.models.realm
 import com.grup.exceptions.MissingFieldException
 import com.grup.models.User
 import com.grup.other.createId
+import com.grup.other.getCurrentTime
 import com.grup.other.idSerialName
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PersistedName
@@ -28,6 +29,9 @@ internal class RealmUser() : User(), RealmObject {
         get() = _profilePictureURL
             ?: throw MissingFieldException("User with id $_id missing displayName")
         set(value) { _profilePictureURL = value }
+    override var latestViewDate: String
+        get() = _latestViewDate
+        set(value) { _latestViewDate = value }
 
     @PersistedName("username")
     @SerialName("username")
@@ -38,4 +42,7 @@ internal class RealmUser() : User(), RealmObject {
     @PersistedName("profilePictureURL")
     @SerialName("profilePictureURL")
     var _profilePictureURL: String? = null
+    @PersistedName("latestViewDate")
+    @SerialName("latestViewDate")
+    var _latestViewDate: String = getCurrentTime()
 }

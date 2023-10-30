@@ -15,7 +15,7 @@ internal class TransactionViewModel : LoggedInViewModel() {
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
         .map { userInfos ->
             userInfos.filter { userInfo ->
-                userInfo.groupId == selectedGroup.id
+                userInfo.groupId == selectedGroup?.id
             }
         }
     val userInfos: StateFlow<List<UserInfo>> = _userInfosFlow.map { userInfos ->
@@ -27,7 +27,7 @@ internal class TransactionViewModel : LoggedInViewModel() {
     private val myUserInfo: StateFlow<UserInfo> = _userInfosFlow.map { userInfos ->
         userInfos.find { userInfo ->
             userInfo.user.id == userObject.id
-        }!!
+        }!! // TODO: Remove double bang
     }.asState()
 
 

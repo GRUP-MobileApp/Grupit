@@ -29,8 +29,8 @@ internal abstract class LoggedInViewModel : KoinComponent, ScreenModel {
     protected open val userObject: User
         get() = apiServer.user
 
-    val selectedGroup: Group
-        get() = selectedGroupMutable.value!!
+    val selectedGroup: Group?
+        get() = selectedGroupMutable.value
 
     protected fun <T> Flow<T>.asState() =
         this.let { flow ->

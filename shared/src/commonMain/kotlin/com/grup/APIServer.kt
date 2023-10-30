@@ -42,7 +42,7 @@ class APIServer private constructor(
     // UserInfo
     fun getMyUserInfosAsFlow() = userInfoController.getMyUserInfosAsFlow()
     fun getAllUserInfosAsFlow() = userInfoController.getAllUserInfosAsFlow()
-    suspend fun updateLatestTime(group: Group) = userInfoController.updateLatestTime(group)
+    suspend fun updateLatestTime(user: User) = userController.updateLatestTime(user)
 
     // GroupInvite
     suspend fun inviteUserToGroup(username: String, group: Group) =

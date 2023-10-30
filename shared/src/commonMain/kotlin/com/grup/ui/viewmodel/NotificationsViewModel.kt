@@ -8,12 +8,6 @@ import kotlinx.coroutines.launch
 
 internal class NotificationsViewModel : LoggedInViewModel() {
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
-    private val latestDatesFlow: Flow<Map<String, String>> =
-        _myUserInfosFlow.map { myUserInfos ->
-            myUserInfos.associate { userInfo ->
-                userInfo.groupId to userInfo.latestViewDate
-            }
-        }
 
     // Hot flow containing all DebtActions across all groups that the user is a part of
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
@@ -71,17 +65,17 @@ internal class NotificationsViewModel : LoggedInViewModel() {
         }
 
     private val _groupInvitesFlow = apiServer.getAllGroupInvitesAsFlow()
-    private val incomingGroupInvites: StateFlow<List<Notification>> =
+    private val incomingGroupInvites: Flow<List<Notification>> =
         _groupInvitesFlow.map { groupInvites ->
             groupInvites.filter { groupInvite ->
-                groupInvite.inviteeId == apiServer.user.id &&
+                groupInvite.inviteeId == userObject.id &&
                         groupInvite.dateAccepted == GroupInvite.PENDING
             }.map { groupInvite ->
                 Notification.IncomingGroupInvite(groupInvite)
             }
-        }.asNotification(emptyList())
+        }
 
-    val notifications: StateFlow<Map<String, List<Notification>>> =
+    val notifications: StateFlow<List<Notification>> =
         combine(
             incomingDebtActionsAsNotification,
             outgoingDebtActionsAsNotification,
@@ -91,26 +85,14 @@ internal class NotificationsViewModel : LoggedInViewModel() {
         ) { allNotifications: Array<List<Notification>> ->
             allNotifications.flatMap { it }.sortedByDescending { notification ->
                 notification.date
-            }.groupBy { notification ->
-                notification.groupId
             }
-        // TODO: Can change this on onEach to update notificationsCount
-        }.combine(latestDatesFlow) { notifications, lastViewDates ->
-            notificationsCount.value = notifications.map { (groupId, groupNotifications) ->
-                groupId to groupNotifications.count { notification ->
-                    !notification.dismissible ||
-                    lastViewDates[groupId]?.let { lastViewDate ->
-                        notification.date > lastViewDate
-                    } ?: true
-                }
-            }.toMap()
-            notifications
-        }.asNotification(emptyMap())
+        // TODO: Add unread notificationsCount
+        }.asNotification(emptyList())
 
-    private var notificationsCount: MutableStateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
+    private var notificationsCount: MutableStateFlow<Int> = MutableStateFlow(0)
 
     fun logGroupNotificationsDate() = coroutineScope.launch {
-        apiServer.updateLatestTime(selectedGroup)
+        apiServer.updateLatestTime(userObject)
     }
 
     // DebtAction

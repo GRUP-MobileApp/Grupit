@@ -85,16 +85,7 @@ class MainView : Screen {
 
         @Composable
         override fun Content() {
-            val navigator = LocalNavigator.currentOrThrow
-            Navigator(
-                AccountSettingsView(
-                    logOutOnClick = {
-                        navigator.popUntil { screen ->
-                            screen is ReleaseLoginView || screen is DebugLoginView
-                        }
-                    }
-                )
-            )
+            Navigator(AccountSettingsView())
         }
     }
 

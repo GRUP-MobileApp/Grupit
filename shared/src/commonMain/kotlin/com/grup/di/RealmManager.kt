@@ -3,6 +3,7 @@ package com.grup.di
 import com.grup.exceptions.MissingFieldException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.interfaces.DBManager
+import com.grup.models.GroupInvite
 import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmGroup
 import com.grup.models.realm.RealmGroupInvite

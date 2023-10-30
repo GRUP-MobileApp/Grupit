@@ -27,4 +27,8 @@ internal class UserController : KoinComponent {
     suspend fun usernameExists(username: String): Boolean {
         return userService.getUserByUsername(username) != null
     }
+
+    suspend fun updateLatestTime(user: User) {
+        userService.updateLatestTime(user)
+    }
 }

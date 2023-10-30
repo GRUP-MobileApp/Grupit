@@ -5,6 +5,7 @@ import com.grup.exceptions.NotCreatedException
 import com.grup.interfaces.IImagesRepository
 import com.grup.interfaces.IUserRepository
 import com.grup.models.User
+import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -35,5 +36,11 @@ internal class UserService : KoinComponent {
             throw EmptyArgumentException("Please enter a username")
         }
         return userRepository.findUserByUsername(username)
+    }
+
+    suspend fun updateLatestTime(user: User) {
+        userRepository.updateUser(user) {
+            this.latestViewDate = getCurrentTime()
+        }
     }
 }

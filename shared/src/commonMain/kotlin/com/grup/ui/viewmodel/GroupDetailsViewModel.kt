@@ -12,7 +12,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     val myUserInfo: StateFlow<UserInfo?> =
         _myUserInfosFlow.map { userInfos ->
             userInfos.find { userInfo ->
-                userInfo.groupId == selectedGroup.id
+                userInfo.groupId == selectedGroup?.id
             }
         }.asState()
 
@@ -20,7 +20,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
         .map { debtActions ->
             debtActions.filter { debtAction ->
-                debtAction.groupId == selectedGroup.id
+                debtAction.groupId == selectedGroup?.id
             }
         }
     private val debtActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
@@ -36,7 +36,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     private val _settleActionsFlow = apiServer.getAllSettleActionsAsFlow()
         .map { settleActions ->
             settleActions.filter { settleAction ->
-                settleAction.groupId == selectedGroup.id
+                settleAction.groupId == selectedGroup?.id
             }
         }
     // Incoming SettleActions to be displayed, oldest first

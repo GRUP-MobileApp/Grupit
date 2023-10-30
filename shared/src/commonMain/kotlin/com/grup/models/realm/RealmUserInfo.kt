@@ -27,9 +27,6 @@ internal class RealmUserInfo(): UserInfo(), RealmObject {
         set(value) { _userBalance = value }
     override val joinDate: String
         get() = _joinDate
-    override var latestViewDate: String
-        get() = _latestViewDate
-        set(value) { _latestViewDate = value }
 
     @PersistedName("userId")
     var _userId: String? = null
@@ -41,6 +38,4 @@ internal class RealmUserInfo(): UserInfo(), RealmObject {
     var _userBalance: Double = 0.0
     @PersistedName("joinDate")
     var _joinDate: String = getCurrentTime()
-    @PersistedName("latestViewDate")
-    var _latestViewDate: String = _joinDate
 }

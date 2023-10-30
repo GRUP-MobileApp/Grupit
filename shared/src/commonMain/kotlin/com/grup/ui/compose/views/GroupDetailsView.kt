@@ -74,7 +74,7 @@ private fun GroupDetailsLayout(
     )
     val lazyListState = rememberLazyListState()
 
-    val selectedGroup: Group = groupDetailsViewModel.selectedGroup
+    val selectedGroup: Group = groupDetailsViewModel.selectedGroup!!
     val myUserInfo: UserInfo? by groupDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
         groupDetailsViewModel.groupActivity.collectAsStateWithLifecycle()

@@ -42,7 +42,7 @@ internal class NotificationsView : Screen {
             CompositionLocalProvider(
                 LocalContentColor provides AppTheme.colors.onSecondary
             ) {
-                GroupNotificationsLayout(
+                NotificationsLayout(
                     notificationsViewModel = notificationsViewModel,
                     navigator = navigator
                 )
@@ -53,11 +53,11 @@ internal class NotificationsView : Screen {
 }
 
 @Composable
-private fun GroupNotificationsLayout(
+private fun NotificationsLayout(
     notificationsViewModel: NotificationsViewModel,
     navigator: Navigator
 ) {
-    val notifications: Map<String, List<Notification>> by
+    val notifications: List<Notification> by
         notificationsViewModel.notifications.collectAsStateWithLifecycle()
 
     LazyColumn(
@@ -75,7 +75,7 @@ private fun GroupNotificationsLayout(
             )
         }
         items(
-            notifications[notificationsViewModel.selectedGroup.id] ?: emptyList()
+            notifications
         ) { notification ->
             val sideContent: (@Composable ColumnScope.() -> Unit)? =
                 when (notification) {
