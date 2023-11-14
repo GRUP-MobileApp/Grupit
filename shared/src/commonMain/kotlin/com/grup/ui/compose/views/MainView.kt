@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.core.annotation.ExperimentalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -28,7 +28,8 @@ import cafe.adriel.voyager.navigator.tab.TabNavigator
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.grup.ui.apptheme.AppTheme
 
-class MainView : Screen {
+internal class MainView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     private object GroupsTab : Tab {
         override val options: TabOptions
             @Composable
@@ -96,7 +97,9 @@ class MainView : Screen {
     override fun Content() {
         TabNavigator(
             GroupsTab,
-            tabDisposable = { TabDisposable(navigator = it, tabs = tabs) }
+            tabDisposable = {
+                TabDisposable(navigator = it, tabs = tabs)
+            }
         ) {
             Scaffold(
                 backgroundColor = AppTheme.colors.primary,
@@ -122,7 +125,9 @@ class MainView : Screen {
         BottomNavigationItem(
             selected = tabNavigator.current.key == tab.key,
             onClick = { tabNavigator.current = tab },
-            icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) }
+            icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) },
+            selectedContentColor = AppTheme.colors.confirm,
+            unselectedContentColor = AppTheme.colors.onPrimary
         )
     }
 }

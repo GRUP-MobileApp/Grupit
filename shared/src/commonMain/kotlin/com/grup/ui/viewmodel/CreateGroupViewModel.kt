@@ -1,6 +1,6 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.APIException
 import com.grup.models.Group
 import kotlinx.coroutines.launch
@@ -11,7 +11,7 @@ internal class CreateGroupViewModel : LoggedInViewModel() {
         groupName: String,
         onSuccess: (Group) -> Unit,
         onFailure: (String?) -> Unit
-    ) = coroutineScope.launch {
+    ) = screenModelScope.launch {
         try {
             apiServer.createGroup(groupName).let(onSuccess)
         } catch (e: APIException) {

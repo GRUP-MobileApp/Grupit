@@ -1,7 +1,7 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.APIServer
 import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
@@ -24,7 +24,7 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
         ) : LoginResult()
         data class PendingLogin(val authProvider: AuthManager.AuthProvider) : LoginResult()
         data class Error(val exception: Exception) : LoginResult()
-        object None : LoginResult()
+        data object None : LoginResult()
 
         private fun isSuccessLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
             (this is SuccessLogin) && (this.authProvider == authProvider)
@@ -39,7 +39,7 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
     private val _loginResult = MutableStateFlow<LoginResult>(LoginResult.None)
     val loginResult: StateFlow<LoginResult> = _loginResult
 
-    fun loginEmailPassword(email: String, password: String) = coroutineScope.launch {
+    fun loginEmailPassword(email: String, password: String) = screenModelScope.launch {
         _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.EmailPassword)
         try {
             APIServer.loginEmailAndPassword(email, password).let { apiServer ->
@@ -61,7 +61,7 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
     }
 
     fun registerEmailPassword(email: String, password: String) =
-        coroutineScope.launch {
+        screenModelScope.launch {
             _loginResult.value = LoginResult.PendingLogin(
                 AuthManager.AuthProvider.EmailPasswordRegister
             )
@@ -84,7 +84,7 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
             }
         }
 
-    fun loginGoogleAccount(googleAccountToken: String) = coroutineScope.launch {
+    fun loginGoogleAccount(googleAccountToken: String) = screenModelScope.launch {
         _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Google)
         try {
             APIServer.loginGoogleAccountToken(googleAccountToken).let { apiServer ->
@@ -101,10 +101,6 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
         } catch (e: LoginException) {
             _loginResult.value = LoginResult.Error(e)
         }
-    }
-
-    fun consumeLoginResult() {
-        _loginResult.value = LoginResult.None
     }
 
     private fun injectApiServer(apiServer: APIServer) {

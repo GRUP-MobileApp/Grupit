@@ -1,5 +1,5 @@
 package com.grup.exceptions
 
-internal class EmptyArgumentException(
+class EmptyArgumentException(
     override val message: String? = "Empty argument"
 ) : APIException(message)

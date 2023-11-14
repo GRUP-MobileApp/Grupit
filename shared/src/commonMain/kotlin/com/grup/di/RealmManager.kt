@@ -3,7 +3,6 @@ package com.grup.di
 import com.grup.exceptions.MissingFieldException
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.interfaces.DBManager
-import com.grup.models.GroupInvite
 import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmGroup
 import com.grup.models.realm.RealmGroupInvite
@@ -87,14 +86,10 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
                     )
                 }
                 .name("syncedRealm")
+                .schemaVersion(0)
+                .syncClientResetStrategy(SyncResetStrategy(this))
                 .build()
-        ).also { realm ->
-            loadKoinModules(
-                module {
-                    single { realm }
-                }
-            )
-        }
+        )
     } ?: throw NotLoggedInException()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -163,15 +158,15 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
                         "${groupId}_Group"
                     )
                     add(
-                        realm.query<RealmUserInfo>("_groupId == $0", groupId),
+                        realm.query<RealmUserInfo>("groupId == $0", groupId),
                         "${groupId}_UserInfo"
                     )
                     add(
-                        realm.query<RealmDebtAction>("_groupId == $0", groupId),
+                        realm.query<RealmDebtAction>("groupId == $0", groupId),
                         "${groupId}_DebtAction"
                     )
                     add(
-                        realm.query<RealmSettleAction>("_groupId == $0", groupId),
+                        realm.query<RealmSettleAction>("groupId == $0", groupId),
                         "${groupId}_SettleAction"
                     )
                     NotificationsService.subscribeGroupNotifications(groupId)
@@ -196,22 +191,18 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
         realm.syncSession.downloadAllServerChanges(5.seconds)
         userSubscriptionsJob.start()
         groupSubscriptionsJob.start()
-        loadKoinModules(if (isDebug) debugAppModule else releaseAppModule)
+        loadKoinModules(realmModules(realm, isDebug))
     }
 
-    override suspend fun close() {
+    override suspend fun logOut() {
         app.currentUser?.apply { logOut() } ?: throw NotLoggedInException()
-        realm.close()
         userSubscriptionsJob.cancel()
         groupSubscriptionsJob.cancel()
         NotificationsService.unsubscribeAllNotifications()
-        unloadKoinModules(
-            listOf(
-                module {
-                    single { realm }
-                },
-                if (isDebug) debugAppModule else releaseAppModule
-            )
-        )
+        unloadKoinModules(realmModules(realm, isDebug))
+    }
+
+    override suspend fun close() {
+        realm.close()
     }
 }

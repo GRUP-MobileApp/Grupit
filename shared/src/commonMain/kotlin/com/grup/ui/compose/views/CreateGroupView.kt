@@ -19,6 +19,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -27,6 +29,7 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.CreateGroupViewModel
 
 internal class CreateGroupView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         CompositionLocalProvider(

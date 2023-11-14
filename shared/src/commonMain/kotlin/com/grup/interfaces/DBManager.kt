@@ -6,5 +6,6 @@ internal interface DBManager {
     val authProvider: AuthManager.AuthProvider
 
     suspend fun <T> startDBTransaction(transaction: () -> T): T
+    suspend fun logOut()
     suspend fun close()
 }

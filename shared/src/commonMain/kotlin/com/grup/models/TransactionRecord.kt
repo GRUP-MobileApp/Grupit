@@ -26,6 +26,9 @@ abstract class TransactionRecord {
     val isAccepted: Boolean
         get() = !(dateAccepted == PENDING || dateAccepted == REJECTED)
 
+    val isPending: Boolean
+        get() = dateAccepted == PENDING
+
     internal fun toRealmTransactionRecord(): RealmTransactionRecord =
         RealmTransactionRecord().apply {
             _userInfo = this@TransactionRecord.userInfo as RealmUserInfo

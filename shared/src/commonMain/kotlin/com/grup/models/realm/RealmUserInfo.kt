@@ -10,12 +10,7 @@ import io.realm.kotlin.types.annotations.PersistedName
 import io.realm.kotlin.types.annotations.PrimaryKey
 
 @PersistedName("UserInfo")
-internal class RealmUserInfo(): UserInfo(), RealmObject {
-    constructor(user: RealmUser) : this() {
-        this._user = user
-        this._userId = user.id
-    }
-
+internal class RealmUserInfo : UserInfo(), RealmObject {
     @PrimaryKey override var _id: String = createId()
 
     override val user: RealmUser

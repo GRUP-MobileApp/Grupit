@@ -12,12 +12,14 @@ internal data class AppDimensions(
 
     val rowCardPadding: Dp = 15.dp,
     val itemRowCardHeight: Dp = 70.dp,
-    val bigItemRowCardHeight: Dp = 100.dp,
+    val bigItemRowCardHeight: Dp = 90.dp,
 
     val paddingSmall: Dp = 5.dp,
     val paddingMedium: Dp = 10.dp,
     val paddingLarge: Dp = 20.dp,
     val paddingExtraLarge: Dp = 30.dp,
+
+    val tinySpace: Dp = 8.dp,
 
     val spacingSmall: Dp = 5.dp,
     val spacing: Dp = 10.dp,
@@ -31,7 +33,8 @@ internal data class AppDimensions(
     val smallButtonSize: Dp = 24.dp,
     val shadowElevationSize: Dp = 6.dp,
 
-    val smallFont: TextUnit = 20.sp
+    val smallFont: TextUnit = 20.sp,
+    val mediumFont: TextUnit = 30.sp
 )
 
 internal val defaultDimensions = AppDimensions()

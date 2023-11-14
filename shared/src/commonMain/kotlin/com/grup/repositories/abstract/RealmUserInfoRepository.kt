@@ -20,7 +20,9 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
         // TODO: Check that you only have <= 3 userInfos at a time
         return realm.write {
             copyNestedObjectToRealm(
-                RealmUserInfo(user as RealmUser).apply {
+                RealmUserInfo().apply {
+                    _user = user as RealmUser
+                    _userId = user.id
                     _groupId = groupId
                 }
             )

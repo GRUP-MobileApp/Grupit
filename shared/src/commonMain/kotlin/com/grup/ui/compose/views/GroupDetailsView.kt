@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -45,6 +47,7 @@ import com.grup.ui.viewmodel.GroupDetailsViewModel
 import kotlinx.coroutines.launch
 
 internal class GroupDetailsView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -231,66 +234,6 @@ private fun GroupDetailsLayout(
 }
 
 @Composable
-private fun NoGroupsDisplay() {
-    Text(text = " ^ Create or join a group", color = AppTheme.colors.onSecondary)
-}
-
-@Composable
-private fun GroupNavigationRow(
-    group: Group,
-    onGroupClick: () -> Unit,
-    groupNotificationsAmount: Int,
-    isSelected: Boolean
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = AppTheme.dimensions.appPadding)
-            .clip(AppTheme.shapes.medium)
-            .clickable(onClick = onGroupClick)
-
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = AppTheme.dimensions.paddingSmall)
-        ) {
-            BadgedBox(
-                badge = {
-                    if (!isSelected && groupNotificationsAmount > 0) {
-                        Badge(
-                            backgroundColor = AppTheme.colors.error,
-                            modifier = Modifier
-                                .offset((-6).dp, (8).dp)
-                                .size(16.dp)
-                                .clip(AppTheme.shapes.circleShape)
-                                .align(Alignment.Center)
-                        ) {
-                            H1Text(
-                                text = groupNotificationsAmount.toString(),
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                },
-                modifier = Modifier.apply {
-                    if (isSelected) border(width = 2.dp, color = Color.White)
-                }
-            ) {
-                SmallIcon(imageVector = Icons.Default.Home, contentDescription = group.groupName)
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            H1Text(
-                text = group.groupName,
-                color = AppTheme.colors.onSecondary,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
 private fun GroupBalanceCard(
     modifier: Modifier = Modifier,
     myUserInfo: UserInfo,
@@ -317,13 +260,13 @@ private fun GroupBalanceCard(
                     .padding(top = AppTheme.dimensions.spacing)
             ) {
                 H1ConfirmTextButton(
-                    text = "Debt",
+                    text = "Request",
                     onClick = navigateDebtActionAmountOnClick,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(AppTheme.dimensions.spacing))
                 H1ConfirmTextButton(
-                    text = "Settle",
+                    text = "Pay",
                     enabled = myUserInfo.userBalance < 0,
                     onClick = navigateSettleActionAmountOnClick,
                     modifier = Modifier.weight(1f)
@@ -479,7 +422,7 @@ private fun DebtActionDetails(
                 .background(AppTheme.colors.secondary)
         ) {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.cardPadding),
                 modifier = Modifier
                     .padding(vertical = AppTheme.dimensions.cardPadding)
                     .padding(horizontal = AppTheme.dimensions.rowCardPadding)
@@ -607,7 +550,7 @@ private fun SettleActionDetails(
                     .background(AppTheme.colors.secondary)
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.cardPadding),
                     modifier = Modifier
                         .padding(vertical = AppTheme.dimensions.cardPadding)
                         .padding(horizontal = AppTheme.dimensions.rowCardPadding)

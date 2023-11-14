@@ -115,5 +115,5 @@ class APIServer private constructor(
             APIServer(ReleaseRealmManager.loginGoogle(googleAccountToken))
     }
 
-    suspend fun logOut() = dbManager.close()
+    suspend fun logOut() = dbManager.logOut()
 }

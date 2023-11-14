@@ -1,14 +1,12 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.models.*
 import com.grup.ui.models.Notification
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 internal class NotificationsViewModel : LoggedInViewModel() {
-    private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
-
     // Hot flow containing all DebtActions across all groups that the user is a part of
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
     private val incomingDebtActionsAsNotification: Flow<List<Notification>> =
@@ -54,7 +52,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
                 settleAction.userInfo.user.id == userObject.id
             }.flatMap { settleAction ->
                 settleAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.dateAccepted == TransactionRecord.PENDING
+                    transactionRecord.isAccepted
                 }.map { transactionRecord ->
                     Notification.DebteeAcceptSettleAction(
                         settleAction,
@@ -91,17 +89,17 @@ internal class NotificationsViewModel : LoggedInViewModel() {
 
     private var notificationsCount: MutableStateFlow<Int> = MutableStateFlow(0)
 
-    fun logGroupNotificationsDate() = coroutineScope.launch {
+    fun logGroupNotificationsDate() = screenModelScope.launch {
         apiServer.updateLatestTime(userObject)
     }
 
     // DebtAction
     fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        coroutineScope.launch {
+        screenModelScope.launch {
             apiServer.acceptDebtAction(debtAction, myTransactionRecord)
         }
     fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        coroutineScope.launch {
+        screenModelScope.launch {
             apiServer.rejectDebtAction(debtAction, myTransactionRecord)
         }
 
@@ -109,21 +107,21 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     fun acceptSettleAction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = coroutineScope.launch {
+    ) = screenModelScope.launch {
         apiServer.acceptSettleAction(settleAction, transactionRecord)
     }
     fun rejectSettleAction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = coroutineScope.launch {
+    ) = screenModelScope.launch {
         apiServer.rejectSettleAction(settleAction, transactionRecord)
     }
 
     // Group Invite
-    fun acceptGroupInvite(groupInvite: GroupInvite) = coroutineScope.launch {
+    fun acceptGroupInvite(groupInvite: GroupInvite) = screenModelScope.launch {
         apiServer.acceptGroupInvite(groupInvite)
     }
-    fun rejectGroupInvite(groupInvite: GroupInvite) = coroutineScope.launch {
+    fun rejectGroupInvite(groupInvite: GroupInvite) = screenModelScope.launch {
         apiServer.rejectGroupInvite(groupInvite)
     }
 

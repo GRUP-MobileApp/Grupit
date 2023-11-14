@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -30,6 +32,7 @@ import com.grup.ui.models.Notification
 import com.grup.ui.viewmodel.NotificationsViewModel
 
 internal class NotificationsView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         CompositionLocalProvider(
@@ -138,7 +141,7 @@ private fun NotificationsLayout(
                 iconSize = 60.dp,
                 mainContent = {
                     Caption(
-                        text = isoDate(notification.date),
+                        text = "${isoDate(notification.date)} at ${isoTime(notification.date)}",
                         fontSize = 12.sp
                     )
                     H1Text(

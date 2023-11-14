@@ -15,8 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -32,13 +34,13 @@ import com.grup.ui.viewmodel.GroupMembersViewModel
 import kotlinx.coroutines.launch
 
 internal class GroupMembersView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            val groupMembersViewModel: GroupMembersViewModel =
-                rememberScreenModel { GroupMembersViewModel() }
+            val groupMembersViewModel = getScreenModel<GroupMembersViewModel>()
             val navigator = LocalNavigator.currentOrThrow
             GroupMembersLayout(
                 groupMembersViewModel = groupMembersViewModel,
@@ -246,6 +248,7 @@ private fun AddToGroupBottomSheetLayout(
             ) {
                 UsernameSearchBar(
                     usernameSearchQuery = addToGroupUsernameSearchQuery,
+                    labelText = "Search by username",
                     onQueryChange = onQueryChange,
                     border = usernameSearchBarBorderColor,
                     modifier = Modifier.padding(top = AppTheme.dimensions.paddingSmall)

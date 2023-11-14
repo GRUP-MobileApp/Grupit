@@ -22,8 +22,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -38,10 +40,10 @@ import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 
 internal class AccountSettingsView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val accountSettingsViewModel: AccountSettingsViewModel =
-            rememberScreenModel { AccountSettingsViewModel() }
+        val accountSettingsViewModel = getScreenModel<AccountSettingsViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -91,7 +93,9 @@ private fun AccountSettingsLayout(
             H1DenyTextButton(
                 text = "Log Out",
                 onClick = {
-                    // TODO: Pop till LoginView
+                    accountSettingsViewModel.logOut {
+                        navigator.popUntilRoot()
+                    }
                 }
             )
         }
@@ -119,7 +123,7 @@ private fun ProfileSettings(user: User) {
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
             ) {
                 H1Text(text = user.displayName)
-                Caption(text = "@${user.username}")
+                Caption(text = user.username)
             }
             Spacer(modifier = Modifier.weight(1f))
             H1ConfirmTextButton(
@@ -143,12 +147,13 @@ private fun NotificationSettings(
             .fillMaxWidth()
             .clip(AppTheme.shapes.extraLarge)
             .background(AppTheme.colors.secondary)
+            .padding(vertical = AppTheme.dimensions.tinySpace)
+            .padding(horizontal = AppTheme.dimensions.cardPadding)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppTheme.dimensions.cardPadding)
         ) {
             groupNotificationEntries.forEach { (notificationName, toggled) ->
                 SettingSlider(

@@ -12,8 +12,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -23,13 +25,13 @@ import com.grup.library.MR
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import dev.icerock.moko.resources.compose.painterResource
 
-class StartView(
+internal class StartView(
     private val isDebug: Boolean
 ) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val startViewModel: StartViewModel = rememberScreenModel { StartViewModel() }
+        val startViewModel = getScreenModel<StartViewModel>()
 
         LaunchedEffect(true) {
             startViewModel.silentSignIn(isDebug = isDebug)
@@ -65,15 +67,15 @@ private fun StartLayout(
                     ReleaseLoginView()
                 }
             )
-            startViewModel.consumeSignInResult()
+            startViewModel.consumeSilentSignInResult()
         }
         is StartViewModel.SilentSignInResult.SignedIn -> {
             navigator.push(MainView())
-            startViewModel.consumeSignInResult()
+            startViewModel.consumeSilentSignInResult()
         }
         is StartViewModel.SilentSignInResult.SignedInWelcomeSlideshow -> {
             navigator.push(listOf(MainView(), WelcomeView()))
-            startViewModel.consumeSignInResult()
+            startViewModel.consumeSilentSignInResult()
         }
         is StartViewModel.SilentSignInResult.Error -> {
             // TODO: Handle error
@@ -84,7 +86,7 @@ private fun StartLayout(
                     ReleaseLoginView()
                 }
             )
-            startViewModel.consumeSignInResult()
+            startViewModel.consumeSilentSignInResult()
         }
         is StartViewModel.SilentSignInResult.None -> { }
     }

@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.google.firebase.FirebaseApp
 import com.grup.di.initKoin
 
 class MainApplication : Application() {
@@ -25,6 +26,8 @@ class MainApplication : Application() {
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+
+        FirebaseApp.initializeApp(applicationContext)
 
         initKoin()
     }

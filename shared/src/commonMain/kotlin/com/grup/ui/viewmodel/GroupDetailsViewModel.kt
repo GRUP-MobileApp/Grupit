@@ -1,6 +1,6 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.models.*
 import com.grup.ui.models.TransactionActivity
 import kotlinx.coroutines.flow.*
@@ -74,7 +74,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     fun acceptSettleAction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = coroutineScope.launch {
+    ) = screenModelScope.launch {
         apiServer.acceptSettleAction(settleAction, transactionRecord)
     }
 }

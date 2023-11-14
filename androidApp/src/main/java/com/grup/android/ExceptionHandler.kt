@@ -2,12 +2,28 @@ package com.grup.android
 
 import android.content.Context
 import android.widget.Toast
+import com.google.android.gms.common.util.CrashUtils
+import com.grup.exceptions.APIException
+import javax.security.auth.login.LoginException
 
 class ExceptionHandler(
     private val context: Context
 ) : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(t: Thread, e: Throwable) {
-        e.printStackTrace()
-        Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+        when(e) {
+            is APIException -> {
+                e.printStackTrace()
+                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+            }
+            is LoginException -> {
+                e.printStackTrace()
+                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+            }
+            else -> {
+                e.printStackTrace()
+                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                throw e
+            }
+        }
     }
 }

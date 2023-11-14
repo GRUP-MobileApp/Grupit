@@ -16,8 +16,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -29,9 +31,10 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.viewmodel.LoginViewModel
 
 internal class DebugLoginView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val loginViewModel: LoginViewModel = rememberScreenModel { LoginViewModel() }
+        val loginViewModel = getScreenModel<LoginViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -61,11 +64,9 @@ private fun DebugLoginLayout(
     when(loginResult) {
         is LoginViewModel.LoginResult.SuccessLogin -> {
             navigator.push(MainView())
-            loginViewModel.consumeLoginResult()
         }
         is LoginViewModel.LoginResult.SuccessLoginWelcomeSlideshow -> {
             navigator.push(listOf(MainView(), WelcomeView()))
-            loginViewModel.consumeLoginResult()
         }
         else -> {}
     }

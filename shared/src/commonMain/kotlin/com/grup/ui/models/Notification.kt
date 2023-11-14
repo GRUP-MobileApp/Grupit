@@ -33,15 +33,14 @@ internal sealed class Notification {
         val transactionRecord: TransactionRecord
     ) : Notification() {
         override val date: String
-            get() = transactionRecord.let { transactionRecord ->
-                if (!transactionRecord.isAccepted) {
+            get() =
+                if (transactionRecord.isPending)
                     throw PendingTransactionRecordException(
-                        "TransactionRecord still pending for Debt Action " +
+                        "TransactionRecord still pending for Settle Action " +
                                 "with id ${debtAction.id}"
                     )
-                }
-                transactionRecord.dateAccepted
-            }
+                else transactionRecord.dateAccepted
+
         override val groupId: String
             get() = debtAction.groupId
         override val user: User
@@ -74,15 +73,14 @@ internal sealed class Notification {
         val transactionRecord: TransactionRecord
     ) : Notification() {
         override val date: String
-            get() = transactionRecord.let { transactionRecord ->
-                if (transactionRecord.isAccepted) {
+            get() =
+                if (transactionRecord.isPending)
                     throw PendingTransactionRecordException(
                         "TransactionRecord still pending for Settle Action " +
                                 "with id ${settleAction.id}"
                     )
-                }
-                transactionRecord.dateAccepted
-            }
+                 else transactionRecord.dateAccepted
+
         override val groupId: String
             get() = settleAction.groupId
         override val user: User

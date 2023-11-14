@@ -2,21 +2,18 @@ package com.grup.ui.compose.views
 
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.models.SettleAction
-import com.grup.models.UserInfo
-import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.compose.H1ConfirmTextButton
-import com.grup.ui.viewmodel.TransactionViewModel
-import kotlin.math.min
 
 internal class ActionAmountView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow

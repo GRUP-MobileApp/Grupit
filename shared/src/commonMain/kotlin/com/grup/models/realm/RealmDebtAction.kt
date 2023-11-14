@@ -2,6 +2,7 @@ package com.grup.models.realm
 
 import com.grup.exceptions.MissingFieldException
 import com.grup.models.DebtAction
+import com.grup.models.Group
 import com.grup.models.TransactionRecord
 import com.grup.other.createId
 import com.grup.other.getCurrentTime
@@ -30,6 +31,8 @@ internal class RealmDebtAction : DebtAction(), RealmObject {
 
     @PersistedName("groupId")
     var _groupId: String? = null
+//    @PersistedName("group")
+//    var _group: Group? = null
     @PersistedName("userInfo")
     var _userInfo: RealmUserInfo? = null
     @PersistedName("message")

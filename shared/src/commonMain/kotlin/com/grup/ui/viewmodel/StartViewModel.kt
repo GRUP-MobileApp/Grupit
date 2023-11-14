@@ -1,7 +1,7 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.APIServer
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.platform.signin.AuthManager
@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
@@ -19,15 +18,15 @@ class StartViewModel : ScreenModel, KoinComponent {
         data class SignedInWelcomeSlideshow(
             val authProvider: AuthManager.AuthProvider
         ) : SilentSignInResult()
-        object NotSignedIn : SilentSignInResult()
+        data object NotSignedIn : SilentSignInResult()
         data class Error(val exception: Exception) : SilentSignInResult()
-        object None : SilentSignInResult()
+        data object None : SilentSignInResult()
     }
 
     private val _silentSignInResult = MutableStateFlow<SilentSignInResult>(SilentSignInResult.None)
     val silentSignInResult: StateFlow<SilentSignInResult> = _silentSignInResult
 
-    fun silentSignIn(isDebug: Boolean = false) = coroutineScope.launch {
+    fun silentSignIn(isDebug: Boolean = false) = screenModelScope.launch {
         try {
             if (isDebug) {
                 APIServer.debugSilentSignIn()
@@ -48,7 +47,7 @@ class StartViewModel : ScreenModel, KoinComponent {
         }
     }
 
-    fun consumeSignInResult() {
+    fun consumeSilentSignInResult() {
         _silentSignInResult.value = SilentSignInResult.None
     }
 

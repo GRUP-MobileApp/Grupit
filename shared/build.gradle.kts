@@ -149,10 +149,6 @@ kotlin {
                 // Firebase Auth
                 implementation("com.google.firebase:firebase-auth-ktx")
 
-                // Firebase Crashlytics
-                implementation("com.google.firebase:firebase-analytics-ktx")
-                implementation("com.google.firebase:firebase-crashlytics-ktx")
-
                 // Firebase Cloud Messaging
                 implementation("com.google.firebase:firebase-messaging-ktx")
 

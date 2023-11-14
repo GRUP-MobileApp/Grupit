@@ -1,6 +1,6 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.APIException
 import com.grup.models.User
 import com.grup.platform.image.cropCenterSquareImage
@@ -14,10 +14,10 @@ import kotlinx.coroutines.launch
 
 internal class WelcomeViewModel : LoggedInViewModel() {
     sealed class NameValidity {
-        object Valid : NameValidity()
+        data object Valid : NameValidity()
         data class Invalid(val error: String) : NameValidity()
-        object Pending : NameValidity()
-        object None : NameValidity()
+        data object Pending : NameValidity()
+        data object None : NameValidity()
     }
 
     private var currentJob: Job? = null
@@ -41,7 +41,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         validateUsername(
             username = username,
             onValid = {
-                currentJob = coroutineScope.launch {
+                currentJob = screenModelScope.launch {
                     if (!apiServer.validUsername(username)) {
                         _usernameValidity.value = NameValidity.Invalid("Username taken")
                     } else {
@@ -94,7 +94,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         profilePictureBitmap: Bitmap?,
         onSuccess: (User) -> Unit,
         onFailure: (String?) -> Unit
-    ) = coroutineScope.launch {
+    ) = screenModelScope.launch {
         try {
             apiServer.registerUser(
                 username,

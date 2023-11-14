@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -122,6 +123,45 @@ internal fun AutoSizingH1Text(
         },
         modifier = modifier
     )
+}
+
+@Composable
+internal fun InvisibleTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    labelText: String? = null,
+    error: String? = null,
+) {
+    val borderColor: Color = if (error != null) AppTheme.colors.error else AppTheme.colors.primary
+    Column {
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier.width(IntrinsicSize.Min),
+            placeholder = {
+                labelText?.let {
+                    H1Text(
+                        text = it,
+                        fontSize = AppTheme.dimensions.smallFont,
+                        color = AppTheme.colors.onPrimary
+                    )
+                }
+            },
+            textStyle = TextStyle(
+                color = AppTheme.colors.onPrimary,
+                fontSize = AppTheme.dimensions.smallFont
+            ),
+            singleLine = true,
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = AppTheme.colors.primary,
+                focusedIndicatorColor = borderColor,
+                unfocusedIndicatorColor = borderColor,
+                cursorColor = AppTheme.colors.confirm
+            )
+        )
+        Caption(text = error ?: "", modifier = Modifier.alpha(if (error != null) 1f else 0f))
+    }
 }
 
 @Composable
@@ -302,7 +342,7 @@ internal fun ProfileIcon(
 internal fun GroupIcon(
     modifier: Modifier = Modifier,
     group: Group,
-    iconSize: Dp = 50.dp
+    iconSize: Dp = 45.dp
 ) {
     Image(
         imageVector = Icons.Default.Person,
@@ -464,7 +504,8 @@ internal fun TransactionActivityRowCard(
 internal fun GroupRowCard(
     modifier: Modifier = Modifier,
     group: Group,
-    userInfo: UserInfo
+    userBalance: Double,
+    membersCount: Int
 ) {
     IconRowCard(
         mainContent = {
@@ -474,6 +515,16 @@ internal fun GroupRowCard(
                 modifier = Modifier.fillMaxHeight()
             ) {
                 H1Text(text = group.groupName)
+                Caption(
+                    text = "$membersCount " + when(membersCount) {
+                        1 -> {
+                            "person"
+                        }
+                        else -> {
+                            "people"
+                        }
+                    }
+                )
             }
         },
         sideContent = {
@@ -482,9 +533,10 @@ internal fun GroupRowCard(
                 modifier = Modifier.fillMaxHeight()
             ) {
                 MoneyAmount(
-                    moneyAmount = userInfo.userBalance,
-                    color = if (userInfo.userBalance >= 0) AppTheme.colors.confirm
-                            else AppTheme.colors.deny
+                    moneyAmount = userBalance,
+                    color = if (userBalance >= 0) AppTheme.colors.confirm
+                            else AppTheme.colors.deny,
+                    fontSize = 24.sp
                 )
             }
         },
@@ -498,6 +550,7 @@ internal fun MoneyAmount(
     modifier: Modifier = Modifier,
     moneyAmount: Double,
     fontSize: TextUnit = 30.sp,
+    fontWeight: FontWeight? = null,
     color: Color = Color.Unspecified
 ) {
     Row(
@@ -512,6 +565,7 @@ internal fun MoneyAmount(
                         withStyle(
                             SpanStyle(
                                 fontSize = fontSize.times(0.5f),
+                                fontWeight = fontWeight,
                                 color = color,
                                 baselineShift = BaselineShift(0.4f)
                             )
@@ -521,6 +575,7 @@ internal fun MoneyAmount(
                         withStyle(
                             SpanStyle(
                                 fontSize = fontSize,
+                                fontWeight = fontWeight,
                                 color = color
                             )
                         ) {
@@ -924,6 +979,7 @@ internal fun RecentActivityList(
 internal fun UsernameSearchBar(
     modifier: Modifier = Modifier,
     usernameSearchQuery: String,
+    labelText: String = "Search",
     onQueryChange: (String) -> Unit,
     border: Color = Color.Transparent
 ) {
@@ -931,7 +987,7 @@ internal fun UsernameSearchBar(
         TextField(
             value = usernameSearchQuery,
             onValueChange = onQueryChange,
-            label = { Text("Search", color = AppTheme.colors.primary) },
+            label = { Text(text = labelText, color = AppTheme.colors.primary) },
             singleLine = true,
             shape = RoundedCornerShape(10.dp),
             trailingIcon = {

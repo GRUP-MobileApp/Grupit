@@ -10,7 +10,10 @@ internal val white = Color(0xFFFFFFFF)
 internal val off_white = Color(0xBBF5F5F4)
 internal val green = Color(0xFF65B540)
 internal val red = Color(0xFFEF1A1A)
-internal val red_error = Color(0xffff0033)
+internal val red_error = Color(0xFFFF0033)
+
+internal val light_blue = Color(0xFF00C7F2)
+internal val light_vermillion = Color(0xFFFF7355)
 
 internal class AppColors(
     primary: Color,
@@ -75,8 +78,8 @@ internal fun appColors(
     secondary: Color = grey,
     onPrimary: Color = off_white,
     onSecondary: Color = white,
-    confirm: Color = green,
-    deny: Color = red,
+    confirm: Color = light_blue,
+    deny: Color = light_vermillion,
     caption: Color = light_grey,
     error: Color = red_error
 ): AppColors = AppColors(

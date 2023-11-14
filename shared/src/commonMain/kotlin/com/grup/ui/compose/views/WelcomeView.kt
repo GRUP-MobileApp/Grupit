@@ -22,8 +22,10 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -32,6 +34,7 @@ import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.compose.InvisibleTextField
 import com.grup.ui.viewmodel.WelcomeViewModel
 import dev.icerock.moko.media.Bitmap
 import dev.icerock.moko.media.compose.BindMediaPickerEffect
@@ -45,9 +48,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 class WelcomeView : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val welcomeViewModel: WelcomeViewModel = rememberScreenModel { WelcomeViewModel() }
+        val welcomeViewModel= getScreenModel<WelcomeViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -114,11 +118,12 @@ private fun WelcomeLayout(
                 }
             }
             when (page) {
-                0 ->
-                    SetUsername(
+                0 -> WelcomePage(onClickContinue = scrollNext)
+                1 ->
+                    ProfilePage(
                         username = username,
                         onUsernameChange = {
-                            username = it
+                            username = it.substring(0, 11)
                             welcomeViewModel.checkUsername(username)
                         },
                         usernameValidity = usernameValidity,
@@ -126,7 +131,8 @@ private fun WelcomeLayout(
                             if (usernameValidity is WelcomeViewModel.NameValidity.Valid) {
                                 scrollNext()
                             }
-                        }
+                        },
+                        onClickBack = scrollBack
                     )
                 1 ->
                     SetDisplayName(
@@ -188,49 +194,34 @@ private fun WelcomeLayout(
 
             }
         }
-
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = AppTheme.dimensions.paddingExtraLarge),
+                .padding(bottom = AppTheme.dimensions.paddingExtraLarge)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                repeat(pageCount) { iteration ->
-                    val color = if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(AppTheme.shapes.circleShape)
-                            .background(color)
-                            .size(8.dp)
+            repeat(pageCount) { iteration ->
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(AppTheme.shapes.circleShape)
+                        .background(
+                            if (pagerState.currentPage == iteration) Color.DarkGray
+                            else Color.LightGray
+                        )
+                        .size(8.dp)
 
-                    )
-                }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun SetUsername(
-    username: String,
-    onUsernameChange: (String) -> Unit,
-    usernameValidity: WelcomeViewModel.NameValidity,
+private fun WelcomePage(
     onClickContinue: () -> Unit
 ) {
-    val borderColor: Color =
-        when(usernameValidity) {
-            WelcomeViewModel.NameValidity.Valid -> AppTheme.colors.confirm
-            is WelcomeViewModel.NameValidity.Invalid -> AppTheme.colors.error
-            WelcomeViewModel.NameValidity.Pending -> Color.LightGray
-            WelcomeViewModel.NameValidity.None -> Color.Gray
-        }
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -245,53 +236,61 @@ private fun SetUsername(
             text = "Welcome!",
             fontSize = 50.sp,
             fontWeight = FontWeight.Bold,
-            color = AppTheme.colors.onSecondary
+            color = AppTheme.colors.onSecondary,
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
         Spacer(modifier = Modifier.height(50.dp))
         H1Text(
-            text = "Enter a unique username",
+            text = "Grupit records your person-to-person debts in a group and simplifies it " +
+                "into one overall balance.",
+            modifier = Modifier.fillMaxWidth(0.8f)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        ArrowRow(onClickContinue = onClickContinue)
+    }
+}
+
+@Composable
+private fun ProfilePage(
+    username: String,
+    onUsernameChange: (String) -> Unit,
+    usernameValidity: WelcomeViewModel.NameValidity,
+    onClickContinue: () -> Unit,
+    onClickBack: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraLarge),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .border(1.dp, Color.White)
+            .padding(
+                top = AppTheme.dimensions.paddingExtraLarge,
+                bottom = 100.dp,
+            )
+    ) {
+        H1Text(
+            text = "Let's set up your profile.",
             fontSize = 23.sp,
             fontWeight = FontWeight.Bold,
-            color = AppTheme.colors.onSecondary
+            color = AppTheme.colors.onSecondary,
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            OutlinedTextField(
-                value = username,
-                onValueChange = onUsernameChange,
-                textStyle = TextStyle(color = AppTheme.colors.onSecondary),
-                placeholder = { H1Text(text = "Username") },
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = borderColor,
-                    unfocusedBorderColor = borderColor
-                ),
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .background(AppTheme.colors.secondary)
-            )
-            if (usernameValidity is WelcomeViewModel.NameValidity.Invalid) {
-                Caption(
-                    text = usernameValidity.error,
-                    color = AppTheme.colors.error
-                )
-            }
-            Spacer(modifier = Modifier.weight(1.0f))
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth(0.9f)
-            ) {
-                H1Text(
-                    text = "Next >",
-                    modifier = Modifier.clickable(onClick = onClickContinue)
-                )
-            }
-        }
+        InvisibleTextField(
+            value = username,
+            onValueChange = onUsernameChange,
+            labelText = "Username",
+            error = when(usernameValidity) {
+                is WelcomeViewModel.NameValidity.Invalid -> usernameValidity.error
+                else -> null
+            },
+            modifier = Modifier.align(Alignment.Start).border(1.dp, Color.White)
+        )
+        Spacer(modifier = Modifier.weight(1.0f))
+        ArrowRow(onClickBack = onClickBack, onClickContinue = onClickContinue)
     }
 }
 
@@ -457,20 +456,8 @@ private fun SetDisplayName(
             }
         }
         Spacer(modifier = Modifier.weight(1.0f))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier.fillMaxWidth(0.9f)
-        ) {
-            H1Text(
-                text = "< Back",
-                modifier = Modifier.clickable(onClick = onClickBack)
-            )
-            H1Text(
-                text = "Next >",
-                modifier = Modifier.clickable(onClick = onClickContinue)
-            )
-        }
+
+        ArrowRow(onClickBack = onClickBack, onClickContinue = onClickContinue)
     }
 }
 
@@ -533,21 +520,29 @@ private fun TutorialPage(
                 H1Text(text = text)
             }
         }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(top = AppTheme.dimensions.paddingLarge)
-        ) {
+        ArrowRow(onClickBack = onClickBack, onClickContinue = registerOnClick)
+    }
+}
+
+@Composable
+private fun ArrowRow(
+    onClickBack: (() -> Unit)? = null,
+    onClickContinue: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        modifier = Modifier.fillMaxWidth(0.9f)
+    ) {
+        onClickBack?.let {
             H1Text(
                 text = "< Back",
-                modifier = Modifier.clickable(onClick = onClickBack)
-            )
-            H1Text(
-                text = "Finish >",
-                modifier = Modifier.clickable(onClick = registerOnClick)
+                modifier = Modifier.clickable(onClick = it)
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
+        H1Text(
+            text = "Next >",
+            modifier = Modifier.clickable(onClick = onClickContinue)
+        )
     }
 }
