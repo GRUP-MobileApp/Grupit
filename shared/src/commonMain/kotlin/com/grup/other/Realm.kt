@@ -27,15 +27,18 @@ internal fun <T: BaseRealmObject> MutableRealm.getLatestFields(obj: T): T {
         when (this) {
             is RealmGroupInvite -> {
                 _inviter = getLatestFields(inviter)
+                _group = getLatestFields(group)
             }
             is RealmSettleAction -> {
                 _userInfo = getLatestFields(userInfo)
+                _group = getLatestFields(group)
                 _transactionRecords.forEachIndexed { i, transactionRecord ->
                     _transactionRecords[i] = getLatestFields(transactionRecord)
                 }
             }
             is RealmDebtAction -> {
                 _userInfo = getLatestFields(userInfo)
+                _group = getLatestFields(group)
                 _transactionRecords.forEachIndexed { i, transactionRecord ->
                     _transactionRecords[i] = getLatestFields(transactionRecord)
                 }
@@ -45,6 +48,7 @@ internal fun <T: BaseRealmObject> MutableRealm.getLatestFields(obj: T): T {
             }
             is RealmUserInfo -> {
                 _user = getLatestFields(user)
+                _group = getLatestFields(group)
             }
         }
     }
@@ -70,21 +74,25 @@ private fun BaseRealmObject.resolve() {
     when (this) {
         is RealmGroupInvite -> {
             inviter.resolve()
+            group.resolve()
         }
         is RealmSettleAction -> {
             userInfo.resolve()
+            group.resolve()
             _transactionRecords.forEach { transactionRecord ->
                 transactionRecord.userInfo.resolve()
             }
         }
         is RealmDebtAction -> {
             userInfo.resolve()
+            group.resolve()
             _transactionRecords.forEach { transactionRecord ->
                 transactionRecord.userInfo.resolve()
             }
         }
         is RealmUserInfo -> {
             user.resolve()
+            group.resolve()
         }
         is RealmTransactionRecord -> {
             userInfo.resolve()

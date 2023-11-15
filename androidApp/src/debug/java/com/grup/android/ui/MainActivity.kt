@@ -3,7 +3,7 @@ package com.grup.android.ui
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.grup.android.*
+import com.grup.android.ExceptionHandler
 import com.grup.ui.compose.Application
 
 

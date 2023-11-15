@@ -40,7 +40,7 @@ internal class GroupInviteController : KoinComponent {
     }
 
     suspend fun acceptGroupInvite(groupInvite: GroupInvite, user: User) {
-        userInfoService.createUserInfo(user, groupInvite.groupId)
+        userInfoService.createUserInfo(user, groupInvite.group)
         groupInviteService.deleteGroupInvite(groupInvite)
     }
 

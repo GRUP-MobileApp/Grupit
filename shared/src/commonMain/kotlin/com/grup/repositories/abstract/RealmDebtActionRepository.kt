@@ -8,8 +8,8 @@ import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmUserInfo
 import com.grup.other.copyNestedObjectToRealm
 import com.grup.other.toResolvedListFlow
-import io.realm.kotlin.ext.query
 import io.realm.kotlin.Realm
+import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
 
 internal abstract class RealmDebtActionRepository : IDebtActionRepository {
@@ -24,7 +24,8 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
             copyNestedObjectToRealm(
                 RealmDebtAction().apply {
                     _userInfo = debtee as RealmUserInfo
-                    _groupId = debtee.groupId
+                    _group = debtee._group
+                    _groupId = debtee.group.id
                     _transactionRecords.addAll(
                         transactionRecords.map { it.toRealmTransactionRecord() }
                     )

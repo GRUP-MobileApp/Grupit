@@ -1,11 +1,12 @@
 package com.grup.interfaces
 
+import com.grup.models.Group
 import com.grup.models.User
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.Flow
 
 internal interface IUserInfoRepository : IRepository {
-    suspend fun createUserInfo(user: User, groupId: String): UserInfo?
+    suspend fun createUserInfo(user: User, group: Group): UserInfo?
 
     fun findUserInfosByGroupId(groupId: String): List<UserInfo>
     fun findMyUserInfosAsFlow(): Flow<List<UserInfo>>

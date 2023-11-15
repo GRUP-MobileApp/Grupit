@@ -13,13 +13,15 @@ internal abstract class RealmUserRepository : IUserRepository {
 
     override suspend fun createMyUser(
         username: String,
-        displayName: String
+        displayName: String,
+        venmoUsername: String?
     ): RealmUser? {
         return realm.write {
             copyNestedObjectToRealm(
                 RealmUser().apply {
                     this._username = username
                     this._displayName = displayName
+                    this._venmoUsername = venmoUsername
                 }
             )
         }

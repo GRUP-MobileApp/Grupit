@@ -23,13 +23,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
-import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
-import com.grup.ui.compose.H1Text
-import com.grup.ui.compose.UserInfoRowCard
-import com.grup.ui.compose.UsernameSearchBar
 import com.grup.ui.viewmodel.GroupMembersViewModel
 import kotlinx.coroutines.launch
 

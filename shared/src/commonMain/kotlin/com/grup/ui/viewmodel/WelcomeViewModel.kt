@@ -91,6 +91,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     fun registerUserObject(
         username: String,
         displayName: String,
+        venmoUsername: String?,
         profilePictureBitmap: Bitmap?,
         onSuccess: (User) -> Unit,
         onFailure: (String?) -> Unit
@@ -99,6 +100,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
             apiServer.registerUser(
                 username,
                 displayName,
+                venmoUsername,
                 profilePictureBitmap?.let { cropCenterSquareImage(it) } ?: byteArrayOf()
             ).let(onSuccess)
         } catch (e: APIException) {

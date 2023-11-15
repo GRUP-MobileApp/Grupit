@@ -16,9 +16,10 @@ internal class UserService : KoinComponent {
     suspend fun createMyUser(
         username: String,
         displayName: String,
+        venmoUsername: String?,
         profilePicture: ByteArray
     ): User {
-        return userRepository.createMyUser(username, displayName)?.also { user ->
+        return userRepository.createMyUser(username, displayName, venmoUsername)?.also { user ->
             imagesRepository.uploadProfilePicture(user, profilePicture).let { profilePictureURL ->
                 userRepository.updateUser(user) {
                     this.profilePictureURL = profilePictureURL

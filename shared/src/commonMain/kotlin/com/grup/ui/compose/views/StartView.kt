@@ -13,16 +13,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.viewmodel.StartViewModel
 import com.grup.library.MR
+import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.viewmodel.StartViewModel
 import dev.icerock.moko.resources.compose.painterResource
 
 internal class StartView(

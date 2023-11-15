@@ -1,29 +1,30 @@
 package com.grup.repositories.abstract
 
 import com.grup.interfaces.IUserInfoRepository
+import com.grup.models.Group
 import com.grup.models.User
 import com.grup.models.UserInfo
+import com.grup.models.realm.RealmGroup
 import com.grup.models.realm.RealmUser
 import com.grup.models.realm.RealmUserInfo
 import com.grup.other.copyNestedObjectToRealm
 import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.mongodb.subscriptions
-import io.realm.kotlin.mongodb.sync.asQuery
 import kotlinx.coroutines.flow.Flow
 
 internal abstract class RealmUserInfoRepository : IUserInfoRepository {
     protected abstract val realm: Realm
 
-    override suspend fun createUserInfo(user: User, groupId: String): RealmUserInfo? {
+    override suspend fun createUserInfo(user: User, group: Group): RealmUserInfo? {
         // TODO: Check that you only have <= 3 userInfos at a time
         return realm.write {
             copyNestedObjectToRealm(
                 RealmUserInfo().apply {
                     _user = user as RealmUser
                     _userId = user.id
-                    _groupId = groupId
+                    _group = group as RealmGroup
+                    _groupId = group.id
                 }
             )
         }
@@ -34,8 +35,7 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
     }
 
     override fun findMyUserInfosAsFlow(): Flow<List<RealmUserInfo>> {
-        return realm.subscriptions.findByName("UserInfos")!!
-            .asQuery<RealmUserInfo>().toResolvedListFlow()
+        return realm.query<RealmUserInfo>().toResolvedListFlow()
     }
 
     override fun findAllUserInfosAsFlow(): Flow<List<RealmUserInfo>> {

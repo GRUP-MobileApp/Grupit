@@ -1,7 +1,12 @@
 package com.grup.ui.compose.views
 
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.LocalContentColor
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -9,8 +14,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.*
 import com.grup.ui.compose.H1ConfirmTextButton
+import com.grup.ui.compose.KeyPadScreenLayout
 
 internal class ActionAmountView : Screen {
     override val key: ScreenKey = uniqueScreenKey

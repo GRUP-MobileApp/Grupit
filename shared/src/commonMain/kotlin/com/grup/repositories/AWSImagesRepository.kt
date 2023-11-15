@@ -6,11 +6,15 @@ import com.grup.models.User
 import com.grup.other.AWS_IMAGES_API_KEY
 import com.grup.other.AWS_IMAGES_API_URL
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.http.content.*
+import io.ktor.client.HttpClient
+import io.ktor.client.request.header
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.content.ByteArrayContent
+import io.ktor.http.contentType
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

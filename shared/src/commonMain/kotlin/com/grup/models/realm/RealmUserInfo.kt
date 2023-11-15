@@ -4,7 +4,6 @@ import com.grup.exceptions.MissingFieldException
 import com.grup.models.UserInfo
 import com.grup.other.createId
 import com.grup.other.getCurrentTime
-import com.grup.other.idSerialName
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PersistedName
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -15,8 +14,8 @@ internal class RealmUserInfo : UserInfo(), RealmObject {
 
     override val user: RealmUser
         get() = _user ?: throw MissingFieldException("UserInfo with id $_id missing User")
-    override val groupId: String
-        get() = _groupId ?: throw MissingFieldException("UserInfo with id $_id missing groupId")
+    override val group: RealmGroup
+        get() = _group ?: throw MissingFieldException("UserInfo with id $_id missing groupId")
     override var userBalance: Double
         get() = _userBalance
         set(value) { _userBalance = value }
@@ -29,6 +28,8 @@ internal class RealmUserInfo : UserInfo(), RealmObject {
     var _user: RealmUser? = null
     @PersistedName("groupId")
     var _groupId: String? = null
+    @PersistedName("group")
+    var _group: RealmGroup? = null
     @PersistedName("userBalance")
     var _userBalance: Double = 0.0
     @PersistedName("joinDate")

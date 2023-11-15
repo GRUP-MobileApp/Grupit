@@ -18,8 +18,8 @@ internal class RealmSettleAction : SettleAction(), RealmObject {
     override val userInfo: RealmUserInfo
         get() = _userInfo
             ?: throw MissingFieldException("SettleAction with id $_id missing debtee")
-    override val groupId: String
-        get() = _groupId
+    override val group: RealmGroup
+        get() = _group
             ?: throw MissingFieldException("SettleAction with id $_id missing groupId")
     override val transactionRecords: List<TransactionRecord>
         get() = _transactionRecords
@@ -30,6 +30,8 @@ internal class RealmSettleAction : SettleAction(), RealmObject {
     var _userInfo: RealmUserInfo? = null
     @PersistedName("groupId")
     var _groupId: String? = null
+    @PersistedName("group")
+    var _group: RealmGroup? = null
     @PersistedName("transactionRecords")
     var _transactionRecords: RealmList<RealmTransactionRecord> = realmListOf()
     @PersistedName("date")

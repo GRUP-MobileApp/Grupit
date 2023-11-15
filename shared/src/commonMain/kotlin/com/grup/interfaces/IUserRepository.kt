@@ -5,7 +5,8 @@ import com.grup.models.User
 internal interface IUserRepository : IRepository {
     suspend fun createMyUser(
         username: String,
-        displayName: String
+        displayName: String,
+        venmoUsername: String? = null
     ): User?
 
     fun findMyUser(): User?

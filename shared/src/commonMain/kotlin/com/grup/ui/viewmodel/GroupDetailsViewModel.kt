@@ -1,9 +1,14 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.grup.models.*
+import com.grup.models.SettleAction
+import com.grup.models.TransactionRecord
+import com.grup.models.UserInfo
 import com.grup.ui.models.TransactionActivity
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 internal class GroupDetailsViewModel : LoggedInViewModel() {
@@ -12,7 +17,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     val myUserInfo: StateFlow<UserInfo?> =
         _myUserInfosFlow.map { userInfos ->
             userInfos.find { userInfo ->
-                userInfo.groupId == selectedGroup?.id
+                userInfo.group.id == selectedGroup?.id
             }
         }.asState()
 
@@ -20,7 +25,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
         .map { debtActions ->
             debtActions.filter { debtAction ->
-                debtAction.groupId == selectedGroup?.id
+                debtAction.group.id == selectedGroup?.id
             }
         }
     private val debtActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
@@ -36,7 +41,7 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
     private val _settleActionsFlow = apiServer.getAllSettleActionsAsFlow()
         .map { settleActions ->
             settleActions.filter { settleAction ->
-                settleAction.groupId == selectedGroup?.id
+                settleAction.group.id == selectedGroup?.id
             }
         }
     // Incoming SettleActions to be displayed, oldest first

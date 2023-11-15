@@ -1,11 +1,24 @@
 package com.grup
 
-import com.grup.controllers.*
-import com.grup.di.*
+import com.grup.controllers.AccountSettingsController
+import com.grup.controllers.DebtActionController
+import com.grup.controllers.GroupController
+import com.grup.controllers.GroupInviteController
+import com.grup.controllers.SettleActionController
+import com.grup.controllers.UserController
+import com.grup.controllers.UserInfoController
+import com.grup.di.DebugRealmManager
+import com.grup.di.ReleaseRealmManager
 import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
-import com.grup.models.*
 import com.grup.interfaces.DBManager
+import com.grup.models.DebtAction
+import com.grup.models.Group
+import com.grup.models.GroupInvite
+import com.grup.models.SettleAction
+import com.grup.models.TransactionRecord
+import com.grup.models.User
+import com.grup.models.UserInfo
 import com.grup.other.AccountSettings
 import com.grup.platform.signin.AuthManager
 import kotlin.coroutines.cancellation.CancellationException
@@ -31,8 +44,9 @@ class APIServer private constructor(
     suspend fun registerUser(
         username: String,
         displayName: String,
+        venmoUsername: String?,
         profilePicture: ByteArray
-    ) = userController.createUser(username, displayName, profilePicture)
+    ) = userController.createUser(username, displayName, venmoUsername, profilePicture)
     suspend fun validUsername(username: String) = !userController.usernameExists(username)
 
     // Group

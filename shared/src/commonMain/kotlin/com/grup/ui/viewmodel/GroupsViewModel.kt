@@ -14,7 +14,7 @@ internal class GroupsViewModel : LoggedInViewModel() {
     private val _groupsFlow = apiServer.getAllGroupsAsFlow()
     val groups: StateFlow<List<Group>> = _groupsFlow.combine(myUserInfosFlow) { groups, userInfos ->
         groups.sortedBy { group ->
-            userInfos.find { it.groupId == group.id }?.joinDate
+            userInfos.find { it.group.id == group.id }?.joinDate
         }
     }.onEach { newGroups ->
             selectedGroup?.let { nonNullGroup ->

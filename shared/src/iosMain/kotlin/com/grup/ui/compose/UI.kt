@@ -1,14 +1,12 @@
 package com.grup.ui.compose
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import kotlinx.coroutines.flow.StateFlow
-import platform.Foundation.*
+import platform.Foundation.NSNumber
+import platform.Foundation.NSNumberFormatter
+import platform.Foundation.NSNumberFormatterCurrencyStyle
 
 internal actual fun getCurrencySymbol(): String =
     // TODO: Use NSLocaleCurrencyCode

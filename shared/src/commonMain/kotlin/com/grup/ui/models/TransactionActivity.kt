@@ -1,6 +1,9 @@
 package com.grup.ui.models
 
-import com.grup.models.*
+import com.grup.models.Action
+import com.grup.models.DebtAction
+import com.grup.models.SettleAction
+import com.grup.models.UserInfo
 
 internal sealed class TransactionActivity {
     abstract val action: Action

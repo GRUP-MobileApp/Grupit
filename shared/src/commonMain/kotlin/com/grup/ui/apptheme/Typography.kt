@@ -5,8 +5,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import dev.icerock.moko.resources.compose.fontFamilyResource
 import com.grup.library.MR
+import dev.icerock.moko.resources.compose.fontFamilyResource
 
 internal class AppTypography {
     val h1: TextStyle

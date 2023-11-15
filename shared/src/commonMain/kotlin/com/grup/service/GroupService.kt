@@ -14,7 +14,7 @@ internal class GroupService : KoinComponent {
 
     suspend fun createGroup(user: User, groupName: String): Group {
         return groupRepository.createGroup(user, groupName)?.also { group ->
-            userInfoRepository.createUserInfo(user, group.id)
+            userInfoRepository.createUserInfo(user, group)
         } ?: throw NotCreatedException("Error creating group $groupName")
     }
 

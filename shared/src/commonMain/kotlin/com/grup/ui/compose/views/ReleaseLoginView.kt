@@ -1,7 +1,13 @@
 package com.grup.ui.compose.views
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -17,11 +23,11 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.ui.compose.collectAsStateWithLifecycle
-import com.grup.ui.compose.H1Text
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.viewmodel.LoginViewModel
 import com.grup.ui.compose.GoogleSignInButton
+import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.viewmodel.LoginViewModel
 
 internal class ReleaseLoginView : Screen {
     override val key: ScreenKey = uniqueScreenKey

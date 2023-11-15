@@ -13,11 +13,12 @@ internal class UserController : KoinComponent {
     suspend fun createUser(
         username: String,
         displayName: String,
-        profilePicture: ByteArray
+        venmoUsername: String?,
+        profilePicture: ByteArray,
     ): User {
         validationService.validateUsername(username)
         validationService.validateNickname(displayName)
-        return userService.createMyUser(username, displayName, profilePicture)
+        return userService.createMyUser(username, displayName, venmoUsername, profilePicture)
     }
 
     fun getMyUser(): User? {

@@ -2,7 +2,7 @@ package com.grup.models
 
 sealed class Action : BaseEntity() {
     abstract val userInfo: UserInfo
-    abstract val groupId: String
+    abstract val group: Group
     abstract val transactionRecords: List<TransactionRecord>
     abstract val date: String
 

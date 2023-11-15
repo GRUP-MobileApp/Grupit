@@ -12,6 +12,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -21,13 +22,14 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.ui.compose.collectAsStateWithLifecycle
-import com.grup.ui.compose.isoDate
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.*
 import com.grup.ui.compose.AcceptRejectRow
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.UserRowCard
+import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.compose.isoDate
+import com.grup.ui.compose.isoTime
 import com.grup.ui.models.Notification
 import com.grup.ui.viewmodel.NotificationsViewModel
 
@@ -143,6 +145,11 @@ private fun NotificationsLayout(
                     Caption(
                         text = "${isoDate(notification.date)} at ${isoTime(notification.date)}",
                         fontSize = 12.sp
+                    )
+                    H1Text(
+                        text = notification.group.groupName,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp
                     )
                     H1Text(
                         text = notification.displayText(),

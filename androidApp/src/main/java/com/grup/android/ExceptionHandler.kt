@@ -2,7 +2,6 @@ package com.grup.android
 
 import android.content.Context
 import android.widget.Toast
-import com.google.android.gms.common.util.CrashUtils
 import com.grup.exceptions.APIException
 import javax.security.auth.login.LoginException
 

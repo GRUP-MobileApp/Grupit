@@ -2,17 +2,20 @@ package com.grup.service
 
 import com.grup.exceptions.NegativeBalanceException
 import com.grup.interfaces.IUserInfoRepository
-import com.grup.models.*
-import com.grup.other.getCurrentTime
-import kotlinx.coroutines.flow.first
+import com.grup.models.DebtAction
+import com.grup.models.Group
+import com.grup.models.SettleAction
+import com.grup.models.TransactionRecord
+import com.grup.models.User
+import com.grup.models.UserInfo
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal class UserInfoService : KoinComponent {
     private val userInfoRepository: IUserInfoRepository by inject()
 
-    suspend fun createUserInfo(user: User, groupId: String): UserInfo? {
-        return userInfoRepository.createUserInfo(user, groupId)
+    suspend fun createUserInfo(user: User, group: Group): UserInfo? {
+        return userInfoRepository.createUserInfo(user, group)
     }
 
     fun findUserInfosByGroupId(groupId: String): List<UserInfo> {

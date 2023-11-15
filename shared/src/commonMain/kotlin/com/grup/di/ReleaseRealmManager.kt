@@ -2,7 +2,8 @@ package com.grup.di
 
 import com.grup.exceptions.login.InvalidGoogleAccountException
 import com.grup.interfaces.DBManager
-import io.realm.kotlin.mongodb.*
+import io.realm.kotlin.mongodb.Credentials
+import io.realm.kotlin.mongodb.GoogleAuthType
 import io.realm.kotlin.mongodb.exceptions.AuthException
 
 internal class ReleaseRealmManager private constructor() : RealmManager() {

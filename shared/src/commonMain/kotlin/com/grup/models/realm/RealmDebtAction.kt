@@ -2,7 +2,6 @@ package com.grup.models.realm
 
 import com.grup.exceptions.MissingFieldException
 import com.grup.models.DebtAction
-import com.grup.models.Group
 import com.grup.models.TransactionRecord
 import com.grup.other.createId
 import com.grup.other.getCurrentTime
@@ -16,8 +15,8 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 internal class RealmDebtAction : DebtAction(), RealmObject {
     @PrimaryKey override var _id: String = createId()
 
-    override val groupId: String
-        get() = _groupId ?: throw MissingFieldException("DebtAction with id $_id missing groupId")
+    override val group: RealmGroup
+        get() = _group ?: throw MissingFieldException("DebtAction with id $_id missing groupId")
     override val userInfo: RealmUserInfo
         get() = _userInfo
             ?: throw MissingFieldException("DebtAction with id $_id missing debteeUserInfo")
@@ -31,8 +30,8 @@ internal class RealmDebtAction : DebtAction(), RealmObject {
 
     @PersistedName("groupId")
     var _groupId: String? = null
-//    @PersistedName("group")
-//    var _group: Group? = null
+    @PersistedName("group")
+    var _group: RealmGroup? = null
     @PersistedName("userInfo")
     var _userInfo: RealmUserInfo? = null
     @PersistedName("message")

@@ -23,7 +23,7 @@ internal class DebtActionService : KoinComponent {
         }
         return debtActionRepository.createDebtAction(debtee, transactionRecords, message)
             ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
-                " ${debtee.groupId}")
+                " ${debtee.group.id}")
     }
 
     suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) {

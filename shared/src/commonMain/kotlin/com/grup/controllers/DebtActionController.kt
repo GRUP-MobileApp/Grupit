@@ -1,6 +1,5 @@
 package com.grup.controllers
 
-import com.grup.exceptions.InvalidTransactionRecordException
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo

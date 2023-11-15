@@ -3,7 +3,7 @@ package com.grup.di
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.interfaces.DBManager
-import io.realm.kotlin.mongodb.*
+import io.realm.kotlin.mongodb.Credentials
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException

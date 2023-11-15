@@ -5,10 +5,12 @@ import com.grup.other.MONGODB_API_ENDPOINT
 import com.grup.other.TEST_MONGODB_API_ENDPOINT
 import com.grup.other.copyNestedObjectToRealm
 import com.grup.repositories.abstract.RealmUserRepository
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.realm.kotlin.Realm
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.serialization.json.Json
@@ -26,13 +28,15 @@ internal class SyncedUserRepository(
 
     override suspend fun createMyUser(
         username: String,
-        displayName: String
+        displayName: String,
+        venmoUsername: String?
     ): RealmUser {
         return realm.write {
             copyNestedObjectToRealm(
                 RealmUser(myUserId).apply {
                     this._username = username
                     this._displayName = displayName
+                    this._venmoUsername = venmoUsername
                 }
             )
         }.also {

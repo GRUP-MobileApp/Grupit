@@ -30,7 +30,7 @@ internal class SettleActionService : KoinComponent {
         }
         return settleActionRepository.createSettleAction(debtor, transactionRecords)
             ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
-                    " ${debtor.groupId}")
+                    " ${debtor.group.id}")
     }
 
     suspend fun acceptSettleAction(
