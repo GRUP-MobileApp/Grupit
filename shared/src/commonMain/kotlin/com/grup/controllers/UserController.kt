@@ -17,7 +17,7 @@ internal class UserController : KoinComponent {
         profilePicture: ByteArray,
     ): User {
         validationService.validateUsername(username)
-        validationService.validateNickname(displayName)
+        validationService.displayName(displayName)
         return userService.createMyUser(username, displayName, venmoUsername, profilePicture)
     }
 

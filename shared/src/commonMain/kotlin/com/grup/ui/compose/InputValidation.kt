@@ -1,17 +1,14 @@
 package com.grup.ui.compose
 
-internal val usernameRegex: Regex =
-    Regex("^[a-zA-Z0-9._-]+$")
-
-internal val nameRegex: Regex =
-    Regex("^[a-zA-Z ,.'-]+$")
+import com.grup.service.ValidationService.Companion.nameRegex
+import com.grup.service.ValidationService.Companion.usernameRegex
 
 fun validateUsername(username: String, onValid: () -> Unit, onError: (String) -> Unit) {
-    if (username.isEmpty()) {
-        onError("")
+    if (username.isBlank()) {
+        onError("Username cannot be blank")
     } else if (!username.matches(usernameRegex)) {
-        onError("Only alphanumeric characters, \".\", \"-\", and \"_\" are allowed")
-    } else if (username.length > 12) {
+        onError("Only alphanumeric characters, \' . \', \' - \', and \' _ \' are allowed")
+    } else if (username.length > 14) {
         onError("Max 12 characters")
     } else if (username.length < 5) {
         onError("Username must be at least 5 characters")
@@ -20,13 +17,35 @@ fun validateUsername(username: String, onValid: () -> Unit, onError: (String) ->
     }
 }
 
-fun validateName(name: String, onValid: () -> Unit, onError: (String) -> Unit) {
-    if (name.isEmpty()) {
-        onError("")
-    } else if (name.length > 12) {
-        onError("Max 12 characters")
+fun validateName(
+    name: String,
+    isBlank: Boolean = false,
+    onValid: () -> Unit,
+    onError: (String) -> Unit
+) {
+    if (name.isBlank() && !isBlank) {
+        onError("Name cannot be blank")
     } else if (!name.matches(nameRegex)) {
-        onError("Invalid characters")
+        onError("Contains invalid characters")
+    } else if (name.length > 14) {
+        onError("Max 12 characters")
+    } else {
+        onValid()
+    }
+}
+
+fun validateVenmoUsername(
+    venmoUsername: String,
+    isBlank: Boolean = false,
+    onValid: () -> Unit,
+    onError: (String) -> Unit
+) {
+    if (venmoUsername.isBlank() && !isBlank) {
+        onError("Name cannot be blank")
+    } else if (!venmoUsername.matches(usernameRegex)) {
+        onError("Contains invalid characters")
+    } else if (venmoUsername.length > 30) {
+        onError("Max 30 characters")
     } else {
         onValid()
     }

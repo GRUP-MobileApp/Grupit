@@ -186,7 +186,7 @@ kotlin {
 android {
     signingConfigs {
         create("release") {
-            storeFile = file("/Users/justinxu/Documents/keystore/signedkey")
+            storeFile = file("../androidApp/signedkey")
             storePassword = keystorePassword
             keyAlias = "upload"
             keyPassword = keystorePassword

@@ -75,7 +75,12 @@ private fun AccountSettingsLayout(
 
     SimpleLazyListPage(pageName = "Account Settings") {
         item {
-            ProfileSettings(user = accountSettingsViewModel.userObject)
+            ProfileSettings(
+                user = accountSettingsViewModel.userObject,
+                onEditProfile = {
+                    // Display edit profile page
+                }
+            )
         }
         item {
             SettingHeader(text = "Group Notifications")
@@ -103,7 +108,10 @@ private fun AccountSettingsLayout(
 }
 
 @Composable
-private fun ProfileSettings(user: User) {
+private fun ProfileSettings(
+    user: User,
+    onEditProfile: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,9 +136,7 @@ private fun ProfileSettings(user: User) {
             Spacer(modifier = Modifier.weight(1f))
             H1ConfirmTextButton(
                 text = "Edit Profile",
-                onClick = {
-
-                },
+                onClick = onEditProfile,
                 scale = 0.8f
             )
         }

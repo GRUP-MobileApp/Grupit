@@ -33,8 +33,8 @@ internal data class AppDimensions(
     val smallButtonSize: Dp = 24.dp,
     val shadowElevationSize: Dp = 6.dp,
 
-    val smallFont: TextUnit = 20.sp,
-    val mediumFont: TextUnit = 30.sp
+    val smallFont: TextUnit = 16.sp,
+    val mediumFont: TextUnit = 24.sp
 )
 
 internal val defaultDimensions = AppDimensions()

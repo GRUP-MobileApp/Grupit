@@ -6,6 +6,7 @@ import com.grup.models.User
 import com.grup.platform.image.cropCenterSquareImage
 import com.grup.ui.compose.validateName
 import com.grup.ui.compose.validateUsername
+import com.grup.ui.compose.validateVenmoUsername
 import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,9 @@ internal class WelcomeViewModel : LoggedInViewModel() {
 
     private val _lastNameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
     val lastNameValidity: StateFlow<NameValidity> = _lastNameValidity
+
+    private val _venmoUsernameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
+    val venmoUsernameValidity: StateFlow<NameValidity> = _venmoUsernameValidity
 
     fun checkUsername(username: String) {
         if (username.isEmpty()) {
@@ -57,7 +61,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
 
     fun checkFirstNameValidity(firstName: String) {
         if (firstName.isEmpty()) {
-            _usernameValidity.value = NameValidity.None
+            _firstNameValidity.value = NameValidity.None
             return
         }
         _firstNameValidity.value = NameValidity.Pending
@@ -73,17 +77,36 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     }
     fun checkLastNameValidity(lastName: String) {
         if (lastName.isEmpty()) {
-            _usernameValidity.value = NameValidity.None
+            _lastNameValidity.value = NameValidity.None
             return
         }
         _lastNameValidity.value = NameValidity.Pending
         validateName(
             name = lastName,
+            isBlank = true,
             onValid = {
                 _lastNameValidity.value = NameValidity.Valid
             },
             onError = { error ->
                 _lastNameValidity.value = NameValidity.Invalid(error)
+            }
+        )
+    }
+
+    fun checkVenmoUsernameValidity(venmoUsername: String) {
+        if (venmoUsername.isEmpty()) {
+            _venmoUsernameValidity.value = NameValidity.None
+            return
+        }
+        _venmoUsernameValidity.value = NameValidity.Pending
+        validateVenmoUsername(
+            venmoUsername = venmoUsername,
+            isBlank = true,
+            onValid = {
+                _venmoUsernameValidity.value = NameValidity.Valid
+            },
+            onError = { error ->
+                _venmoUsernameValidity.value = NameValidity.Invalid(error)
             }
         )
     }

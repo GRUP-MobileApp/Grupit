@@ -10,7 +10,7 @@ import com.grup.ui.compose.Application
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
+//        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
         setContent {
             Application(isDebug = true)

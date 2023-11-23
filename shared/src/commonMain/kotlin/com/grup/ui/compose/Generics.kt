@@ -1,6 +1,7 @@
 package com.grup.ui.compose
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.TextFieldDefaults.indicatorLine
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -22,6 +24,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -125,43 +128,63 @@ internal fun AutoSizingH1Text(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun InvisibleTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    labelText: String? = null,
-    error: String? = null,
+    placeholder: String? = null,
+    fontSize: TextUnit = AppTheme.dimensions.mediumFont,
+    indicatorColor: Color = AppTheme.colors.primary,
+    interactionSource: InteractionSource = remember { MutableInteractionSource() },
 ) {
-    val borderColor: Color = if (error != null) AppTheme.colors.error else AppTheme.colors.primary
-    Column {
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = modifier.width(IntrinsicSize.Min),
-            placeholder = {
-                labelText?.let {
-                    H1Text(
-                        text = it,
-                        fontSize = AppTheme.dimensions.smallFont,
-                        color = AppTheme.colors.onPrimary
-                    )
-                }
-            },
-            textStyle = TextStyle(
-                color = AppTheme.colors.onPrimary,
-                fontSize = AppTheme.dimensions.smallFont
+    val colors: TextFieldColors = TextFieldDefaults.textFieldColors(
+        backgroundColor = AppTheme.colors.primary,
+        focusedIndicatorColor = indicatorColor,
+        unfocusedIndicatorColor = indicatorColor,
+    )
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .width(IntrinsicSize.Min)
+            .indicatorLine(
+                enabled = true,
+                isError = false,
+                interactionSource = interactionSource,
+                colors = colors
             ),
-            singleLine = true,
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = AppTheme.colors.primary,
-                focusedIndicatorColor = borderColor,
-                unfocusedIndicatorColor = borderColor,
-                cursorColor = AppTheme.colors.confirm
+        decorationBox = @Composable { innerTextField ->
+            TextFieldDefaults.TextFieldDecorationBox(
+                value = value,
+                visualTransformation = VisualTransformation.None,
+                innerTextField = innerTextField,
+                placeholder = placeholder?.let {
+                    {
+                        H1Text(
+                            text = it,
+                            fontSize = fontSize,
+                            color = AppTheme.colors.onPrimary,
+                            maxLines = 1,
+                        )
+                    }
+                },
+                singleLine = true,
+                enabled = true,
+                interactionSource = interactionSource,
+                colors = colors,
+                contentPadding = PaddingValues(AppTheme.dimensions.paddingSmall)
             )
-        )
-        Caption(text = error ?: "", modifier = Modifier.alpha(if (error != null) 1f else 0f))
-    }
+        },
+        textStyle = TextStyle(
+            color = AppTheme.colors.onSecondary,
+            fontFamily = AppTheme.typography.h1.fontFamily,
+            fontSize = fontSize
+        ),
+        singleLine = true,
+        cursorBrush = SolidColor(Color.White)
+    )
 }
 
 @Composable
@@ -175,7 +198,7 @@ internal fun Caption(
         text = text,
         modifier = modifier,
         color = color,
-        style = AppTheme.typography.smallFont,
+        style = AppTheme.typography.caption,
         fontSize = fontSize,
         maxLines = 1
     )

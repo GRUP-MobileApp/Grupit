@@ -10,15 +10,15 @@ data class AuthManager(
     @Serializable
     sealed class AuthProvider {
         @SerialName("Google")
-        object Google : AuthProvider()
+        data object Google : AuthProvider()
         @SerialName("Apple")
-        object Apple : AuthProvider()
+        data object Apple : AuthProvider()
         @SerialName("EmailPassword")
-        object EmailPassword : AuthProvider()
+        data object EmailPassword : AuthProvider()
         @SerialName("EmailPasswordRegister")
-        object EmailPasswordRegister : AuthProvider()
+        data object EmailPasswordRegister : AuthProvider()
         @SerialName("None")
-        object None : AuthProvider()
+        data object None : AuthProvider()
     }
 
     fun getSignInManagerFromProvider(authProvider: AuthProvider) = when(authProvider) {

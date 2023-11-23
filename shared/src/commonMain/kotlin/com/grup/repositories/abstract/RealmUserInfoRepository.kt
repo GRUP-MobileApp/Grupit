@@ -44,7 +44,7 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
 
     override suspend fun updateUserInfo(
         userInfo: UserInfo,
-        block: (UserInfo) -> Unit
+        block: (UserInfo) -> Unit,
     ): RealmUserInfo? {
         return realm.write {
             findLatest(userInfo as RealmUserInfo)!!.apply(block)

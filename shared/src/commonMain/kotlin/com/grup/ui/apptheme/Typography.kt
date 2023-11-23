@@ -16,7 +16,7 @@ internal class AppTypography {
             fontWeight = FontWeight.Normal,
             fontSize = 24.sp
         )
-    val smallFont: TextStyle
+    val caption: TextStyle
         @Composable
         get() = TextStyle(
             fontFamily = fontFamilyResource(MR.fonts.ProximaNova.regular),

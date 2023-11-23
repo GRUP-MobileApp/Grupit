@@ -1,15 +1,21 @@
 package com.grup.service
 
 import com.grup.exceptions.ValidationException
-import com.grup.ui.compose.nameRegex
-import com.grup.ui.compose.usernameRegex
 
 internal class ValidationService {
+    internal companion object {
+        val usernameRegex: Regex =
+            Regex("^[a-zA-Z0-9._-]+$")
+
+        val nameRegex: Regex =
+            Regex("^[a-zA-Z ,.'-]+$")
+    }
+
     fun validateUsername(username: String) {
-        if (username.isEmpty()) {
+        if (username.isBlank()) {
             throw ValidationException("Empty username")
         } else if (!username.matches(usernameRegex)) {
-            throw ValidationException("Contains non alphabet characters")
+            throw ValidationException("Contains non alphanumeric characters")
         } else if (username.length > 12) {
             throw ValidationException("Username can only be at most 12 characters long")
         } else if (username.length < 5) {
@@ -17,15 +23,13 @@ internal class ValidationService {
         }
     }
 
-    fun validateNickname(fullName: String) {
-        if (fullName.count { it == ' '} != 1) {
-            throw ValidationException("Illegal word count in display name")
-        } else if (fullName.isBlank()) {
+    fun displayName(displayName: String) {
+        if (displayName.isBlank()) {
             throw ValidationException("Empty first/last name")
-        } else if (fullName.length > 21) {
-            throw ValidationException("Max 20 characters for first and last name")
-        } else if (!fullName.matches(nameRegex)) {
+        } else if (!displayName.matches(nameRegex)) {
             throw ValidationException("Invalid characters in display name")
+        } else if (displayName.length > 28) {
+            throw ValidationException("Max 20 characters for first and last name")
         }
     }
 }

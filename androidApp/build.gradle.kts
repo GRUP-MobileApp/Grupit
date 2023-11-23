@@ -18,7 +18,7 @@ plugins {
 android {
     signingConfigs {
         create("release") {
-            storeFile = file("/Users/justinxu/Documents/keystore/signedkey")
+            storeFile = file("signedkey")
             storePassword = keystorePassword
             keyAlias = "upload"
             keyPassword = keystorePassword
