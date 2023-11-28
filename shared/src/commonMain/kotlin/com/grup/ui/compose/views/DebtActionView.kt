@@ -81,6 +81,8 @@ private fun DebtActionLayout(
 
     var keyPadUserInfo: UserInfo? by remember { mutableStateOf(null) }
 
+
+
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         AddDebtorBottomSheet(
             userInfos = userInfos,

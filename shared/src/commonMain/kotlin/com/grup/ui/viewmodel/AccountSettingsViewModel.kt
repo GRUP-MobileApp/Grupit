@@ -11,6 +11,12 @@ import org.koin.core.component.inject
 
 
 internal class AccountSettingsViewModel : LoggedInViewModel(), KoinComponent {
+    enum class Pages(pageNumber: Int) {
+        MAIN_SETTINGS_PAGE(0),
+        EDIT_PROFILE_PAGE(1),
+        EDIT_DISPLAY_NAME_PAGE(2)
+    }
+
     companion object {
         val groupNotificationEntries: Map<String, Array<AccountSettings.GroupNotificationType>> = mapOf(
             "Incoming money requests" to arrayOf(
