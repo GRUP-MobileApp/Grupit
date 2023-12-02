@@ -69,71 +69,33 @@ private fun GroupDetailsLayout(
     val myUserInfo: UserInfo? by groupDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
         groupDetailsViewModel.groupActivity.collectAsStateWithLifecycle()
-    val activeSettleActions: List<SettleAction> by
-        groupDetailsViewModel.incomingSettleActions.collectAsStateWithLifecycle()
+    val incomingActions: List<Action> by
+        groupDetailsViewModel.incomingActions.collectAsStateWithLifecycle()
 
     // Not getting updated
     var selectedAction: Action? by remember { mutableStateOf(null) }
-
     val selectAction: (Action) -> Unit = { action ->
         selectedAction = action
         scope.launch { actionDetailsBottomSheetState.show() }
     }
+
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         selectedAction?.let { selectedAction ->
-            BackPressModalBottomSheetLayout(
+            ActionDetailsBottomSheet(
                 sheetState = actionDetailsBottomSheetState,
-                sheetContent = {
-                    Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = {},
-                                navigationIcon = {
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch {
-                                                actionDetailsBottomSheetState.hide()
-                                            }
-                                        }
-                                    ) {
-                                        SmallIcon(
-                                            imageVector = Icons.Filled.ArrowBack,
-                                            contentDescription = "Back"
-                                        )
-                                    }
-                                },
-                                backgroundColor = AppTheme.colors.primary
-                            )
+                action = selectedAction,
+                isMyTransactionRecord = { transactionRecord ->
+                    transactionRecord.userInfo.user.id == myUserInfo?.user?.id
+                            && transactionRecord.isPending
+                },
+                acceptAction = { action ->
+                    groupDetailsViewModel.acceptAction(
+                        action = action,
+                        onSuccess = {
+                            scope.launch { actionDetailsBottomSheetState.hide() }
                         },
-                        backgroundColor = AppTheme.colors.primary,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) { padding ->
-                        myUserInfo?.let { userInfo ->
-                            when (selectedAction) {
-                                is DebtAction -> DebtActionDetails(
-                                    debtAction = selectedAction,
-                                    modifier = Modifier
-                                        .padding(padding)
-                                        .padding(AppTheme.dimensions.appPadding)
-                                )
-                                is SettleAction -> SettleActionDetails(
-                                    settleAction = selectedAction,
-                                    myUserInfo = userInfo,
-                                    acceptSettleActionOnClick = { transactionRecord ->
-                                        groupDetailsViewModel.acceptSettleAction(
-                                            selectedAction,
-                                            transactionRecord
-                                        )
-                                        scope.launch { actionDetailsBottomSheetState.hide() }
-                                    },
-                                    modifier = Modifier
-                                        .padding(padding)
-                                        .padding(AppTheme.dimensions.appPadding)
-                                )
-                            }
-                        }
-                    }
+                        onError = { }
+                    )
                 },
                 content = content
             )
@@ -154,7 +116,7 @@ private fun GroupDetailsLayout(
                             )
                         }
                     },
-                    title = { H1Text(text = selectedGroup.groupName) },
+                    title = { H1Header(text = selectedGroup.groupName) },
                     actions = {
                         IconButton(
                             onClick = { navigator.push(GroupMembersView()) }
@@ -186,7 +148,7 @@ private fun GroupDetailsLayout(
                                 .fillMaxWidth(),
                             myUserInfo = myUserInfo,
                             navigateDebtActionAmountOnClick = {
-                                navigator.push(ActionAmountView())
+                                navigator.push(DebtActionView())
                             },
                             navigateSettleActionAmountOnClick = {
                                 if (myUserInfo.userBalance < 0) {
@@ -196,14 +158,11 @@ private fun GroupDetailsLayout(
                         )
                         Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingLarge))
                     }
-                    if (activeSettleActions.isNotEmpty()) {
+                    if (incomingActions.isNotEmpty()) {
                         item {
-                            ActiveSettleActions(
-                                activeSettleActions = activeSettleActions,
-                                isMySettleAction = { settleAction ->
-                                    settleAction.userInfo.user.id == myUserInfo.user.id
-                                },
-                                settleActionCardOnClick = selectAction,
+                            IncomingActions(
+                                actions = incomingActions,
+                                actionCardOnClick = selectAction,
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingLarge))
@@ -252,7 +211,7 @@ private fun GroupBalanceCard(
                     onClick = navigateDebtActionAmountOnClick,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(AppTheme.dimensions.spacing))
+                Spacer(modifier = Modifier.width(AppTheme.dimensions.cardPadding))
                 H1ConfirmTextButton(
                     text = "Pay",
                     enabled = myUserInfo.userBalance < 0,
@@ -265,10 +224,9 @@ private fun GroupBalanceCard(
 }
 
 @Composable
-private fun ActiveSettleActions(
-    activeSettleActions: List<SettleAction>,
-    isMySettleAction: (SettleAction) -> Boolean,
-    settleActionCardOnClick: (SettleAction) -> Unit,
+private fun IncomingActions(
+    actions: List<Action>,
+    actionCardOnClick: (Action) -> Unit,
     cardSize: Dp = 140.dp,
     modifier: Modifier = Modifier
 ) {
@@ -276,95 +234,50 @@ private fun ActiveSettleActions(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier
     ) {
-        H1Text(text = "Active Settle", fontWeight = FontWeight.Medium)
+        H1Header(text = "Incoming", fontWeight = FontWeight.Medium)
         LazyHorizontalGrid(
-            rows = GridCells.Fixed(count = if (activeSettleActions.size >= 3) 2 else 1),
+            rows = GridCells.Fixed(count = if (actions.size >= 3) 2 else 1),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
             modifier = Modifier.height(
-                cardSize.times(if (activeSettleActions.size >= 3) 2 else 1) +
+                cardSize.times(if (actions.size >= 3) 2 else 1) +
                         AppTheme.dimensions.appPadding
             )
         ) {
-            items(
-                activeSettleActions.sortedWith(
-                    compareByDescending<SettleAction> { settleAction ->
-                        isMySettleAction(settleAction)
-                    }.thenBy { settleAction ->
-                        settleAction.date
-                    }
-                )
-            ) {settleAction ->
-                SettleActionCard(
-                    settleAction = settleAction,
-                    settleActionCardOnClick = {
-                        settleActionCardOnClick(settleAction)
-                    },
-                    isMySettleAction = isMySettleAction(settleAction),
-                    cardSize = cardSize
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettleActionCard(
-    settleAction: SettleAction,
-    settleActionCardOnClick: () -> Unit,
-    isMySettleAction: Boolean = false,
-    cardSize: Dp = 140.dp
-) {
-    BadgedBox(
-        badge = {
-            settleAction.transactionRecords.count { transactionRecord ->
-                transactionRecord.dateAccepted == TransactionRecord.PENDING
-            }.let { notificationCount ->
-                if (isMySettleAction && notificationCount > 0) {
-                    Badge(
-                        backgroundColor = AppTheme.colors.error,
-                        modifier = Modifier
-                            .offset((-18).dp, (18.dp))
-                            .clip(AppTheme.shapes.circleShape)
-                            .align(Alignment.Center)
-                    ) {
-                        H1Text(
-                            text = notificationCount.toString(),
-                            fontSize = 14.sp
+            items(actions) {action ->
+                Column(
+                    verticalArrangement = Arrangement.SpaceAround,
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(cardSize)
+                        .clip(AppTheme.shapes.large)
+                        .background(AppTheme.colors.secondary)
+                        .clickable { actionCardOnClick(action) }
+                        .padding(AppTheme.dimensions.cardPadding)
+                ) {
+                    ProfileIcon(user = action.userInfo.user, iconSize = 50.dp)
+                    Column {
+                        Caption(
+                            text = when(action) {
+                                is DebtAction -> "Request"
+                                is SettleAction -> "Pay"
+                            }
                         )
+                        MoneyAmount(moneyAmount = action.totalAmount, fontSize = 24.sp)
                     }
                 }
             }
         }
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(AppTheme.shapes.large)
-                .size(cardSize)
-                .background(
-                    if (isMySettleAction) AppTheme.colors.confirm
-                    else AppTheme.colors.secondary
-                )
-                .clickable(onClick = settleActionCardOnClick)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppTheme.dimensions.cardPadding)
-            ) {
-                ProfileIcon(user = settleAction.userInfo.user, iconSize = 50.dp)
-                MoneyAmount(moneyAmount = settleAction.totalAmount, fontSize = 24.sp)
-            }
-        }
     }
 }
 
 @Composable
-private fun DebtActionDetails(
+private fun ActionDetails(
     modifier: Modifier = Modifier,
-    debtAction: DebtAction,
+    action: Action,
+    isMyTransactionRecord: (TransactionRecord) -> Boolean,
+    acceptAction: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -372,213 +285,65 @@ private fun DebtActionDetails(
         modifier = modifier.fillMaxSize()
     ) {
         UserRowCard(
-            user = debtAction.userInfo.user,
+            user = action.userInfo.user,
             mainContent = {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Caption(text = "Debt")
-                    Caption(text = "${isoDate(debtAction.date)} at ${isoTime(debtAction.date)}")
+                    Caption(
+                        text = when(action) {
+                            is DebtAction -> "Request"
+                            is SettleAction -> "Pay"
+                        }
+                    )
+                    Caption(
+                        text = "${isoDate(action.date)} at ${isoTime(action.date)}",
+                        fontSize = AppTheme.typography.tinyFont
+                    )
                 }
-                H1Text(text = debtAction.userInfo.user.displayName, fontSize = 28.sp)
+                H1Text(text = action.userInfo.user.displayName, fontSize = 28.sp)
             },
             iconSize = 80.dp
         )
-        MoneyAmount(moneyAmount = debtAction.totalAmount, fontSize = 60.sp)
-        H1Text(
-            text = "\"" + debtAction.message + "\"",
-            modifier = Modifier.padding(top = AppTheme.dimensions.spacingMedium)
-        )
-        Box(
-            contentAlignment = Alignment.BottomStart,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = AppTheme.dimensions.paddingMedium)
-        ) {
+        MoneyAmount(moneyAmount = action.totalAmount, fontSize = 60.sp)
+        if (action is DebtAction) {
             H1Text(
-                text = "Transactions",
-                modifier = Modifier.padding(top = AppTheme.dimensions.paddingMedium)
+                text = "\"${action.message}\"",
+                modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingMedium)
             )
         }
+        H1Header(text = "Transactions", modifier = Modifier.align(Alignment.Start))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
                 .clip(AppTheme.shapes.extraLarge)
                 .background(AppTheme.colors.secondary)
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.cardPadding),
-                modifier = Modifier
-                    .padding(vertical = AppTheme.dimensions.cardPadding)
-                    .padding(horizontal = AppTheme.dimensions.rowCardPadding)
+                contentPadding = PaddingValues(
+                    horizontal = AppTheme.dimensions.rowCardPadding,
+                    vertical = AppTheme.dimensions.cardPadding
+                )
             ) {
-                items(debtAction.transactionRecords) { transactionRecord ->
-                    TransactionRecordRowCard(transactionRecord = transactionRecord)
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun SettleActionDetails(
-    modifier: Modifier = Modifier,
-    settleAction: SettleAction,
-    myUserInfo: UserInfo,
-    acceptSettleActionOnClick: (TransactionRecord) -> Unit
-) {
-    val scope = rememberCoroutineScope()
-    val acceptPendingTransactionBottomSheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-
-    val tabTitles: MutableList<String> = mutableListOf("Accepted")
-    var selectedTabIndex: Int by remember { mutableStateOf(0) }
-    var selectedTransaction: TransactionRecord? by remember { mutableStateOf(null) }
-
-    val isMyAction: Boolean =
-        (myUserInfo.user.id == settleAction.userInfo.user.id)
-    if (
-        isMyAction &&
-        settleAction.transactionRecords.any {
-            it.dateAccepted == TransactionRecord.PENDING
-        }
-    ) {
-        tabTitles.add("Pending")
-    }
-    selectedTabIndex = 0
-
-    val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
-        selectedTransaction?.let { selectedTransaction ->
-            BackPressModalBottomSheetLayout(
-                sheetState = acceptPendingTransactionBottomSheetState,
-                sheetContent = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement
-                            .spacedBy(AppTheme.dimensions.spacingMedium),
-                        modifier = modifier.fillMaxWidth()
-                    ) {
-                        H1Text(
-                            text = "${selectedTransaction.userInfo.user.displayName} " +
-                                    "is paying " +
-                                    selectedTransaction.balanceChange.asMoneyAmount()
-                        )
-                        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                            H1ConfirmTextButton(
-                                text = "Accept",
-                                scale = 0.8f,
-                                onClick = {
-                                    acceptSettleActionOnClick(selectedTransaction)
-                                    scope.launch { acceptPendingTransactionBottomSheetState.hide() }
-                                }
-                            )
-                        }
-                    }
-                },
-                content = content
-            )
-        } ?: content()
-    }
-
-    modalSheets {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier.fillMaxSize()
-        ) {
-            UserRowCard(
-                user = settleAction.userInfo.user,
-                mainContent = {
-                    Caption(text = settleAction.userInfo.user.displayName)
-                    MoneyAmount(
-                        moneyAmount = settleAction.totalAmount,
-                        fontSize = 60.sp
+                items(
+                    action.transactionRecords.sortedBy { isMyTransactionRecord(it) }
+                ) { transactionRecord ->
+                    TransactionRecordRowCard(
+                        transactionRecord = transactionRecord,
+                        isMyTransactionRecord = isMyTransactionRecord(transactionRecord)
                     )
-                },
-                sideContent = {
-                    Column(horizontalAlignment = Alignment.End) {
-                        Caption(text = "Settle")
-                        Caption(text = isoDate(settleAction.date))
-                    }
-                },
-                iconSize = 80.dp
+                }
+            }
+        }
+        if (action.transactionRecords.any { isMyTransactionRecord(it) }) {
+            Spacer(modifier = Modifier.weight(1f))
+            H1ConfirmTextButton(
+                text = "Accept",
+                onClick = acceptAction
             )
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = AppTheme.dimensions.paddingMedium)
-            ) {
-                tabTitles.forEachIndexed { index, tabTitle ->
-                    if (tabTitle == tabTitles[selectedTabIndex]) {
-                        H1Text(
-                            text = tabTitle,
-                            modifier = Modifier.clickable { selectedTabIndex = index }
-                        )
-                    } else {
-                        Caption(
-                            text = tabTitle,
-                            modifier = Modifier.clickable { selectedTabIndex = index }
-                        )
-                    }
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .clip(AppTheme.shapes.extraLarge)
-                    .background(AppTheme.colors.secondary)
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.cardPadding),
-                    modifier = Modifier
-                        .padding(vertical = AppTheme.dimensions.cardPadding)
-                        .padding(horizontal = AppTheme.dimensions.rowCardPadding)
-                ) {
-                    when (tabTitles[selectedTabIndex]) {
-                        "Accepted" -> {
-                            settleAction.transactionRecords.filter { transactionRecord ->
-                                transactionRecord.isAccepted
-                            }.let { acceptedTransactions ->
-                                acceptedTransactions.forEach { acceptedTransaction ->
-                                    TransactionRecordRowCard(
-                                        transactionRecord = acceptedTransaction,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
-                        }
-                        "Pending" -> {
-                            settleAction.transactionRecords.filter { transactionRecord ->
-                                transactionRecord.dateAccepted == TransactionRecord.PENDING
-                            }.let { pendingTransactions ->
-                                pendingTransactions.forEach { pendingTransaction ->
-                                    TransactionRecordRowCard(
-                                        transactionRecord = pendingTransaction,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                selectedTransaction = pendingTransaction
-                                                scope.launch {
-                                                    acceptPendingTransactionBottomSheetState
-                                                        .show()
-                                                }
-                                            }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -586,7 +351,8 @@ private fun SettleActionDetails(
 @Composable
 private fun TransactionRecordRowCard(
     modifier: Modifier = Modifier,
-    transactionRecord: TransactionRecord
+    transactionRecord: TransactionRecord,
+    isMyTransactionRecord: Boolean = false
 ) {
     UserRowCard(
         user = transactionRecord.userInfo.user,
@@ -602,8 +368,46 @@ private fun TransactionRecordRowCard(
             )
         },
         sideContent = {
-            MoneyAmount(moneyAmount = transactionRecord.balanceChange, fontSize = 24.sp)
+            MoneyAmount(
+                moneyAmount = transactionRecord.balanceChange,
+                fontSize = 24.sp,
+                color = if (isMyTransactionRecord) AppTheme.colors.confirm
+                        else AppTheme.colors.onSecondary
+            )
         },
         modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ActionDetailsBottomSheet(
+    action: Action,
+    isMyTransactionRecord: (TransactionRecord) -> Boolean,
+    acceptAction: (Action) -> Unit,
+    sheetState: ModalBottomSheetState,
+    content: @Composable () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+
+    BackPressModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            BackPressScaffold(
+                onBackPress = {
+                    scope.launch { sheetState.hide() }
+                }
+            ) { padding ->
+                ActionDetails(
+                    action = action,
+                    isMyTransactionRecord = isMyTransactionRecord,
+                    acceptAction = { acceptAction(action) },
+                    modifier = Modifier
+                        .padding(padding)
+                        .padding(AppTheme.dimensions.appPadding)
+                )
+            }
+        },
+        content = content
     )
 }

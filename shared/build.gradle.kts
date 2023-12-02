@@ -46,6 +46,8 @@ kotlin {
         extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
 
         pod("FirebaseMessaging")
+        pod("FirebaseAuth")
+        pod("GoogleSignIn")
 
         // Maps custom Xcode configuration to NativeBuildType
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
@@ -73,6 +75,7 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
 
                 // MOKO

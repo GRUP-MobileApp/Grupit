@@ -9,6 +9,7 @@ import com.grup.interfaces.ISettleActionRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.interfaces.IUserRepository
 import com.grup.platform.di.httpClient
+import com.grup.platform.notification.NotificationManager
 import com.grup.platform.signin.AuthManager
 import com.grup.repositories.AWSImagesRepository
 import com.grup.repositories.SettingsDataStore
@@ -98,8 +99,8 @@ internal val viewModelsModule = module {
     factory { GroupsViewModel() }
     factory { GroupDetailsViewModel() }
     factory { GroupMembersViewModel() }
-    factory { NotificationsViewModel() }
     factory { CreateGroupViewModel() }
+    factory { NotificationsViewModel() }
     factory { TransactionViewModel() }
     factory { AccountSettingsViewModel() }
     factory { StartViewModel() }
@@ -122,7 +123,6 @@ fun initKoin() {
         modules(
             module {
                 single { httpClient }
-                single { AuthManager() }
             },
             viewModelsModule,
             servicesModule
@@ -130,10 +130,18 @@ fun initKoin() {
     }
 }
 
-fun initAuthManager(authManager: AuthManager = AuthManager()) {
+fun initAuthManager(authManager: AuthManager) {
     loadKoinModules(
         module {
             single { authManager }
+        }
+    )
+}
+
+fun initNotificationManager(notificationManager: NotificationManager) {
+    loadKoinModules(
+        module {
+            single { notificationManager }
         }
     )
 }

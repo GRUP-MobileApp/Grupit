@@ -48,6 +48,10 @@ class APIServer private constructor(
         profilePicture: ByteArray
     ) = userController.createUser(username, displayName, venmoUsername, profilePicture)
     suspend fun validUsername(username: String) = !userController.usernameExists(username)
+    suspend fun updateUser(block: User.() -> Unit) = userController.updateUser(user, block)
+    suspend fun updateProfilePicture(profilePicture: ByteArray) =
+        userController.updateProfilePicture(user, profilePicture)
+    suspend fun updateLatestTime() = userController.updateLatestTime(user)
 
     // Group
     suspend fun createGroup(groupName: String) = groupController.createGroup(user, groupName)
@@ -56,7 +60,6 @@ class APIServer private constructor(
     // UserInfo
     fun getMyUserInfosAsFlow() = userInfoController.getMyUserInfosAsFlow()
     fun getAllUserInfosAsFlow() = userInfoController.getAllUserInfosAsFlow()
-    suspend fun updateLatestTime(user: User) = userController.updateLatestTime(user)
 
     // GroupInvite
     suspend fun inviteUserToGroup(username: String, group: Group) =

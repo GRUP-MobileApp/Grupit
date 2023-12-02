@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -55,7 +54,27 @@ internal fun H1Text(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onSecondary,
-    fontSize: TextUnit = TextUnit.Unspecified,
+    fontSize: TextUnit = AppTheme.typography.mediumFont,
+    fontWeight: FontWeight? = null,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = AppTheme.typography.h1,
+        fontSize = fontSize,
+        fontWeight = fontWeight,
+        maxLines = maxLines,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun H1Header(
+    modifier: Modifier = Modifier,
+    text: String,
+    color: Color = AppTheme.colors.onSecondary,
+    fontSize: TextUnit = AppTheme.typography.headerFont,
     fontWeight: FontWeight? = null,
     maxLines: Int = Int.MAX_VALUE,
 ) {
@@ -135,7 +154,7 @@ internal fun InvisibleTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String? = null,
-    fontSize: TextUnit = AppTheme.dimensions.mediumFont,
+    fontSize: TextUnit = AppTheme.typography.mediumFont,
     indicatorColor: Color = AppTheme.colors.primary,
     interactionSource: InteractionSource = remember { MutableInteractionSource() },
 ) {
@@ -192,7 +211,7 @@ internal fun Caption(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onPrimary,
-    fontSize: TextUnit = 14.sp
+    fontSize: TextUnit = AppTheme.typography.smallFont
 ) {
     Text(
         text = text,
@@ -231,9 +250,9 @@ internal fun H1ConfirmTextButton(
     modifier: Modifier = Modifier,
     text: String,
     scale: Float = 1f,
-    width: Dp = 150.dp,
-    height: Dp = 45.dp,
-    fontSize: TextUnit = 20.sp,
+    width: Dp = 140.dp,
+    height: Dp = 42.dp,
+    fontSize: TextUnit = AppTheme.typography.mediumFont,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -263,9 +282,9 @@ internal fun H1DenyTextButton(
     modifier: Modifier = Modifier,
     text: String,
     scale: Float = 1f,
-    width: Dp = 150.dp,
-    height: Dp = 45.dp,
-    fontSize: TextUnit = 20.sp,
+    width: Dp = 140.dp,
+    height: Dp = 42.dp,
+    fontSize: TextUnit = AppTheme.typography.mediumFont,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -355,9 +374,10 @@ internal fun ProfileIcon(
         resource = painterResource,
         contentDescription = "Profile Picture",
         contentScale = ContentScale.Crop,
-        modifier = modifier
+        modifier = Modifier
             .clip(AppTheme.shapes.circleShape)
             .size(iconSize)
+            .then(modifier)
     )
 }
 
@@ -376,6 +396,40 @@ internal fun GroupIcon(
 }
 
 @Composable
+internal fun BackPressScaffold(
+    onBackPress: () -> Unit,
+    title: String? = null,
+    actions: @Composable RowScope.() -> Unit = { },
+    content: @Composable (PaddingValues) -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    title?.let { title ->
+                        H1Header(text = title, color = AppTheme.colors.onSecondary)
+                    }
+                },
+                actions = actions,
+                backgroundColor = AppTheme.colors.primary,
+                navigationIcon = {
+                    IconButton(onClick = onBackPress) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                }
+            )
+        },
+        backgroundColor = AppTheme.colors.primary,
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        content(padding)
+    }
+}
+
+@Composable
 internal fun SimpleLazyListPage(
     pageName: String,
     content: LazyListScope.() -> Unit
@@ -390,7 +444,7 @@ internal fun SimpleLazyListPage(
                 .padding(padding)
         ) {
             item {
-                H1Text(
+                H1Header(
                     text = pageName,
                     color = AppTheme.colors.onSecondary,
                     modifier = Modifier.fillMaxWidth(0.95f)
@@ -433,8 +487,9 @@ internal fun IconRowCard(
 internal fun UserInfoRowCard(
     modifier: Modifier = Modifier,
     userInfo: UserInfo,
+    coloredMoneyAmount: Boolean = true,
     mainContent: @Composable ColumnScope.() -> Unit = {
-        H1Text(text = userInfo.user.displayName, fontSize = 24.sp)
+        H1Text(text = userInfo.user.displayName)
     },
     iconSize: Dp = 50.dp,
 ) {
@@ -445,6 +500,11 @@ internal fun UserInfoRowCard(
             MoneyAmount(
                 moneyAmount = userInfo.userBalance,
                 fontSize = 24.sp,
+                color = if (coloredMoneyAmount) {
+                    if (userInfo.userBalance >= 0) AppTheme.colors.confirm else AppTheme.colors.deny
+                } else {
+                    AppTheme.colors.onSecondary
+                }
             )
         },
         iconSize = iconSize,
@@ -457,7 +517,7 @@ internal fun UserRowCard(
     modifier: Modifier = Modifier,
     user: User,
     mainContent: @Composable ColumnScope.() -> Unit = {
-        H1Text(text = user.displayName, fontSize = 24.sp)
+        H1Text(text = user.displayName)
     },
     sideContent: (@Composable ColumnScope.() -> Unit)? = null,
     iconSize: Dp = 50.dp,
@@ -503,12 +563,14 @@ internal fun TransactionActivityRowCard(
         mainContent = {
             Caption(
                 text =
-                "${transactionActivity.activityName} at ${isoTime(transactionActivity.date)}"
+                "${transactionActivity.activityName} at ${isoTime(transactionActivity.date)}",
+                fontSize = AppTheme.typography.tinyFont,
+                modifier = Modifier.padding(bottom = AppTheme.dimensions.spacingSmall)
             )
-            H1Text(text = transactionActivity.userInfo.user.displayName, fontSize = 18.sp)
+            H1Text(text = transactionActivity.userInfo.user.displayName)
             H1Text(
                 text = transactionActivity.displayText(),
-                fontSize = 16.sp,
+                fontSize = AppTheme.typography.smallFont,
             )
         },
         sideContent = {
@@ -664,33 +726,14 @@ internal fun KeyPadBottomSheet(
 @Composable
 internal fun KeyPadScreenLayout(
     moneyAmount: String,
-    moneyAmountFontSize: TextUnit = 98.sp,
     onMoneyAmountChange: (String) -> Unit,
     message: String? = null,
     onMessageChange: ((String) -> Unit)? = null,
     confirmButton: @Composable () -> Unit,
+    moneyAmountFontSize: TextUnit = 98.sp,
     onBackPress: () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                backgroundColor = AppTheme.colors.primary,
-                navigationIcon = {
-                    IconButton(
-                        onClick = onBackPress
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = AppTheme.colors.onSecondary
-                        )
-                    }
-                }
-            )
-        },
-        backgroundColor = AppTheme.colors.primary
-    ) { padding ->
+    BackPressScaffold(onBackPress = onBackPress) { padding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             modifier = Modifier
@@ -916,7 +959,7 @@ internal fun LazyListScope.recentActivityList(
 //        }
 //    }
     item {
-        H1Text(
+        H1Header(
             text = "Recent Transactions",
             fontWeight = FontWeight.Medium,
             modifier = Modifier
@@ -964,7 +1007,7 @@ internal fun RecentActivityList(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         modifier = modifier.fillMaxWidth()
     ) {
-        H1Text(text = "Recent Transactions", fontWeight = FontWeight.Medium)
+        H1Header(text = "Recent Transactions", fontWeight = FontWeight.Medium)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -986,10 +1029,7 @@ internal fun RecentActivityList(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         groupActivityByDate[date]!!.forEach { transactionActivity ->
-                            H1Text(
-                                text = transactionActivity.displayText(),
-                                fontSize = 18.sp
-                            )
+                            H1Text(text = transactionActivity.displayText())
                         }
                     }
                 }
@@ -1052,7 +1092,7 @@ internal fun TransparentTextField(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        if(value.isBlank() && placeholder.isNotBlank() && !isFocused) {
+        if (value.isBlank() && placeholder.isNotBlank() && !isFocused) {
             Caption(
                 text = placeholder,
                 fontSize = fontSize,

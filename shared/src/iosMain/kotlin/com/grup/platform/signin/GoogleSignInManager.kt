@@ -1,18 +1,47 @@
 package com.grup.platform.signin
 
-actual class GoogleSignInManager(
-    private val signInClosure: ((String) -> Unit) -> Unit,
-    private val signOutClosure: () -> Unit,
-    private val disconnectClosure: () -> Unit
-) : SignInManager() {
+import cocoapods.FirebaseAuth.FIRAuth
+import cocoapods.FirebaseAuth.FIRGoogleAuthProvider
+import cocoapods.GoogleSignIn.GIDSignIn
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.UIKit.UIApplication
+import platform.UIKit.UIWindow
+
+actual class GoogleSignInManager: SignInManager() {
     private lateinit var signInCallback: (String) -> Unit
-    override fun signIn() = signInClosure(signInCallback)
+    override fun signIn() {
+        GIDSignIn.sharedInstance.signInWithPresentingViewController(
+            (UIApplication.sharedApplication.windows as List<UIWindow>)
+                .first().rootViewController ?: throw Exception()
+        ) { signInResult, error ->
+            if (error != null) {
+                throw Exception()
+            }
 
-    override fun signOut() = signOutClosure()
+            signInResult?.user?.let { user ->
+                FIRAuth.auth().signInWithCredential(
+                    FIRGoogleAuthProvider.credentialWithIDToken(
+                        IDToken = user.idToken?.tokenString ?: throw Exception(),
+                        accessToken = user.accessToken.tokenString
+                    )
+                ) { _, _ ->
+                    signInCallback(user.accessToken.tokenString)
+                }
+            }
+        }
+    }
 
-    override fun disconnect() = disconnectClosure()
+    @OptIn(ExperimentalForeignApi::class)
+    override fun signOut() {
+        GIDSignIn.sharedInstance.signOut()
+        FIRAuth.auth().signOut(null)
+    }
 
-    fun setSignInCallback(signInCallback: (String) -> Unit) {
+    override fun disconnect() {
+        GIDSignIn.sharedInstance.disconnectWithCompletion {  }
+    }
+
+    fun setSignInCallBack(signInCallback: (String) -> Unit) {
         this.signInCallback = signInCallback
     }
 }

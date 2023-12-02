@@ -7,14 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,6 +32,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.KeyPadBottomSheet
 import com.grup.ui.compose.MoneyAmount
@@ -97,25 +92,7 @@ private fun SettleActionLayout(
     }
 
     modalSheets {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { },
-                    backgroundColor = AppTheme.colors.primary,
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { navigator.pop() }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = AppTheme.colors.onSecondary
-                            )
-                        }
-                    }
-                )
-            }
-        ) { padding ->
+        BackPressScaffold(onBackPress = { navigator.pop() }) { padding ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),

@@ -36,13 +36,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
             options: [.alert, .sound, .badge],
             completionHandler: { (granted, error) in
                 if granted {
-                    DispatchQueue.main.async() {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
+                    application.registerForRemoteNotifications()
                 }
             }
         )
-        application.registerForRemoteNotifications()
         
         return true
     }

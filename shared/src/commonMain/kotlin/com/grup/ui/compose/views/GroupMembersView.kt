@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,29 +95,12 @@ private fun GroupMembersLayout(
     }
 
     modalSheets {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { },
-                    backgroundColor = AppTheme.colors.primary,
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { navigator.pop() }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    },
-                    actions = {
-                        AddToGroupButton(
-                            addToGroupOnClick = openAddToGroupBottomSheet
-                        )
-                    }
-                )
-            },
-            backgroundColor = AppTheme.colors.primary,
+        BackPressScaffold(
+            title = "Members",
+            onBackPress = { navigator.pop() },
+            actions = {
+                AddToGroupButton(addToGroupOnClick = openAddToGroupBottomSheet)
+            }
         ) { padding ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
@@ -131,11 +113,6 @@ private fun GroupMembersLayout(
                     .background(AppTheme.colors.secondary)
                     .padding(AppTheme.dimensions.cardPadding)
             ) {
-                H1Text(
-                    text = "Members",
-                    color = AppTheme.colors.onSecondary,
-                    modifier = Modifier.fillMaxWidth(0.95f)
-                )
                 UsernameSearchBar(
                     usernameSearchQuery = usernameSearchQuery,
                     onQueryChange = { username ->
@@ -169,6 +146,10 @@ private fun UsersList(
         itemsIndexed(userInfos) { _, userInfo ->
             UserInfoRowCard(
                 userInfo = userInfo,
+                mainContent = {
+                    H1Text(text = userInfo.user.displayName)
+                    Caption(text = "@${userInfo.user.venmoUsername}")
+                },
                 modifier = Modifier.clickable { userInfoOnClick(userInfo) }
             )
         }
@@ -189,14 +170,12 @@ private fun GroupMemberInfoBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
                     .padding(AppTheme.dimensions.appPadding)
             ) {
                 UserInfoRowCard(
                     userInfo = selectedUserInfo,
                     iconSize = 64.dp
                 )
-                Divider()
             }
         },
         content = content

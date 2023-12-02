@@ -2,7 +2,6 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.APIException
-import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord.Companion.DataTransactionRecord
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
@@ -129,7 +128,9 @@ internal class TransactionViewModel : LoggedInViewModel() {
 
     // SettleAction
     fun createSettleAction(
-        settleActionAmounts: Map<UserInfo, Double>, onSuccess: (SettleAction) -> Unit, onFailure: (String?) -> Unit
+        settleActionAmounts: Map<UserInfo, Double>,
+        onSuccess: () -> Unit,
+        onFailure: (String?) -> Unit
     ) = screenModelScope.launch {
         try {
             apiServer.createSettleAction(
@@ -137,10 +138,10 @@ internal class TransactionViewModel : LoggedInViewModel() {
                 settleActionAmounts.map { (userInfo, balanceChange) ->
                     DataTransactionRecord(userInfo, balanceChange)
                 }
-            ).let(onSuccess)
+            )
+            onSuccess()
         } catch (e: APIException) {
             onFailure(e.message)
         }
-
     }
 }

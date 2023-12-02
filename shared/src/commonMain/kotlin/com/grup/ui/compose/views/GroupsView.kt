@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Scaffold
@@ -25,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -39,7 +37,7 @@ import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.GroupRowCard
-import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.SmallIcon
 import com.grup.ui.compose.collectAsStateWithLifecycle
@@ -67,20 +65,18 @@ private fun GroupsLayout(
     navigator: Navigator
 ) {
     val groups: List<Group> by groupsViewModel.groups.collectAsStateWithLifecycle()
-    val myUserInfos: List<UserInfo> by groupsViewModel.myUserInfosFlow.collectAsStateWithLifecycle()
-
     val userInfos: List<UserInfo> by groupsViewModel.userInfosFlow.collectAsStateWithLifecycle()
+
+    val myUserInfos: List<UserInfo> = userInfos.filter { userInfo ->
+        userInfo.user.id == groupsViewModel.userObject.id
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            navigator.push(CreateGroupView())
-                        }
-                    ) {
+                    IconButton(onClick = { navigator.push(CreateGroupView()) }) {
                         SmallIcon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = "Create Group"
@@ -101,31 +97,21 @@ private fun GroupsLayout(
                 .fillMaxSize()
         ) {
             item {
-                Caption(
-                    text = "Overall Balance",
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Caption(text = "Overall Balance")
             }
             item {
                 myUserInfos.sumOf { it.userBalance }.let { overallBalance ->
                     MoneyAmount(
                         moneyAmount = overallBalance,
                         color = if (overallBalance >= 0) AppTheme.colors.confirm
-                                else AppTheme.colors.deny,
+                        else AppTheme.colors.deny,
                         fontSize = 50.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.fillMaxWidth(0.9f)
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
             item {
-                Divider(
-                    color = AppTheme.colors.secondary,
-                    thickness = Dp.Hairline
-                )
-            }
-            item {
-                H1Text(
+                H1Header(
                     text = "Groups",
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier
@@ -148,7 +134,9 @@ private fun GroupsLayout(
                 ) {
                     GroupRowCard(
                         group = group,
-                        userBalance = myUserInfos.find { it.group.id == group.id }!!.userBalance,
+                        userBalance = myUserInfos.find { userInfo ->
+                            userInfo.group.id == group.id
+                        }?.userBalance ?: 0.0,
                         membersCount = userInfos.count { it.group.id == group.id }
                     )
                 }

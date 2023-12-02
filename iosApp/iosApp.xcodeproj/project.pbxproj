@@ -12,6 +12,7 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		B56303342A02314A00D55F5A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56303332A02314A00D55F5A /* ContentView.swift */; };
+		B565DE492B19799900B39B39 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B565DE482B19799900B39B39 /* UserNotifications.framework */; };
 		B57A9DA62A789C0E006ADA11 /* NotificationCenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */; };
 		B5F1AC5329E66CF600664A05 /* proxima_nova.otf in Resources */ = {isa = PBXBuildFile; fileRef = B5F1AC5229E66CF600664A05 /* proxima_nova.otf */; };
 		B5F1AC5829E792EE00664A05 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1AC5729E792EE00664A05 /* AppDelegate.swift */; };
@@ -29,6 +30,7 @@
 		A53D2BDB0F9261150EDFE7B6 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		B51E3B322AA2AE7900D64CF1 /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		B56303332A02314A00D55F5A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B565DE482B19799900B39B39 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterDelegate.swift; sourceTree = "<group>"; };
 		B5F1AC5229E66CF600664A05 /* proxima_nova.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = proxima_nova.otf; sourceTree = "<group>"; };
 		B5F1AC5729E792EE00664A05 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -44,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B565DE492B19799900B39B39 /* UserNotifications.framework in Frameworks */,
 				013DD98E03F91F00F7A04A44 /* Pods_Grupit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -98,6 +101,7 @@
 		AF43DB1E5493F31EB03DBC81 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B565DE482B19799900B39B39 /* UserNotifications.framework */,
 				FF7F7143D953AC6F09215844 /* Pods_Grupit.framework */,
 			);
 			name = Frameworks;

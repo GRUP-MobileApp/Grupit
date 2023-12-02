@@ -1,8 +1,8 @@
-package com.grup.service
+package com.grup.platform.notification
 
 import com.google.firebase.messaging.FirebaseMessaging
 
-internal actual object NotificationsService {
+actual class NotificationManager {
     actual fun subscribeGroupNotifications(groupId: String) {
         FirebaseMessaging.getInstance().subscribeToTopic("group_$groupId")
     }

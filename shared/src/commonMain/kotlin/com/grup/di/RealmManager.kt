@@ -14,7 +14,7 @@ import com.grup.other.APP_ID
 import com.grup.other.TEST_APP_ID
 import com.grup.other.idSerialName
 import com.grup.platform.signin.AuthManager
-import com.grup.service.NotificationsService
+import com.grup.platform.notification.NotificationManager
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
@@ -30,12 +30,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import kotlin.jvm.JvmStatic
 import kotlin.time.Duration.Companion.seconds
 
-internal open class RealmManager(private val isDebug: Boolean = false) : DBManager {
+internal open class RealmManager(private val isDebug: Boolean = false) : DBManager, KoinComponent {
     protected companion object {
         @JvmStatic
         protected val releaseApp: App = App.create(APP_ID)
@@ -54,6 +56,8 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
                 else -> AuthManager.AuthProvider.None
             }
         } ?: throw NotLoggedInException("Not logged into Realm")
+
+    private val notificationManager: NotificationManager by inject()
 
     override suspend fun <T> startDBTransaction(transaction: () -> T) =
         realm.write { transaction() }
@@ -168,14 +172,14 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
                         realm.query<RealmSettleAction>("groupId == $0", groupId),
                         "${groupId}_SettleAction"
                     )
-                    NotificationsService.subscribeGroupNotifications(groupId)
+                    notificationManager.subscribeGroupNotifications(groupId)
                 }
                 prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
                     remove("${groupId}_Group")
                     remove("${groupId}_UserInfo")
                     remove("${groupId}_DebtAction")
                     remove("${groupId}_SettleAction")
-                    NotificationsService.unsubscribeGroupNotifications(groupId)
+                    notificationManager.unsubscribeGroupNotifications(groupId)
                 }
             }
             prevSubscribedGroupIds = newGroupIds
@@ -220,7 +224,7 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
 
     suspend fun open() {
         app.currentUser?.let { realmUser ->
-            NotificationsService.subscribePersonalNotifications(realmUser.id)
+            notificationManager.subscribePersonalNotifications(realmUser.id)
         } ?: throw NotLoggedInException()
         realm.subscriptions.waitForSynchronization(5.seconds)
         realm.syncSession.downloadAllServerChanges(5.seconds)
@@ -235,7 +239,7 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
         userSubscriptionsJob.cancel()
         groupSubscriptionsJob.cancel()
         groupOnlySubscriptionJob.cancel()
-        NotificationsService.unsubscribeAllNotifications()
+        notificationManager.unsubscribeAllNotifications()
         unloadKoinModules(realmModules(realm, isDebug))
     }
 

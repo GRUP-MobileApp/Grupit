@@ -26,6 +26,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabDisposable
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import cafe.adriel.voyager.transitions.SlideTransition
 import com.grup.ui.apptheme.AppTheme
 
 internal class MainView : Screen {
@@ -46,7 +47,11 @@ internal class MainView : Screen {
 
         @Composable
         override fun Content() {
-            Navigator(GroupsView())
+            Navigator(GroupsView()) { navigator ->
+                SlideTransition(navigator = navigator) { screen ->
+                    screen.Content()
+                }
+            }
         }
     }
 

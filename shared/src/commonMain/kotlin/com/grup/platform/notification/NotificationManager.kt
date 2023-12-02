@@ -1,7 +1,6 @@
-package com.grup.service
+package com.grup.platform.notification
 
-// TODO: Not really a service
-internal expect object NotificationsService {
+expect class NotificationManager {
     fun subscribeGroupNotifications(groupId: String)
     fun unsubscribeGroupNotifications(groupId: String)
 

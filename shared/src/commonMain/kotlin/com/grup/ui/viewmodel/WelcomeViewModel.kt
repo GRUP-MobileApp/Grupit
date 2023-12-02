@@ -116,7 +116,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         displayName: String,
         venmoUsername: String?,
         profilePictureBitmap: Bitmap?,
-        onSuccess: (User) -> Unit,
+        onSuccess: () -> Unit,
         onFailure: (String?) -> Unit
     ) = screenModelScope.launch {
         try {
@@ -125,7 +125,8 @@ internal class WelcomeViewModel : LoggedInViewModel() {
                 displayName,
                 venmoUsername,
                 profilePictureBitmap?.let { cropCenterSquareImage(it) } ?: byteArrayOf()
-            ).let(onSuccess)
+            )
+            onSuccess()
         } catch (e: APIException) {
             onFailure(e.message)
         }

@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         )
+        initNotificationManager(notificationManager = NotificationManager())
 
         setContent {
             Application()

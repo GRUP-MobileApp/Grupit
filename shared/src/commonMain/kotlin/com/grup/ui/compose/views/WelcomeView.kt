@@ -1,34 +1,24 @@
 package com.grup.ui.compose.views
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.InteractionSource
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.TextFieldColors
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TextFieldDefaults.indicatorLine
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -53,7 +43,6 @@ import dev.icerock.moko.media.picker.CanceledException
 import dev.icerock.moko.media.picker.MediaSource
 import dev.icerock.moko.permissions.DeniedException
 import kotlinx.coroutines.launch
-import kotlin.math.max
 import kotlin.math.min
 
 internal class WelcomeView : Screen {
@@ -171,7 +160,7 @@ private fun WelcomeLayout(
                             }
                         )
 
-                    3 -> TutorialPage()
+                    3 -> FinalPage()
                 }
             }
         }
@@ -270,7 +259,6 @@ private fun ProfilePage(
     ) {
         H1Text(
             text = "Let's set up your profile.",
-            fontSize = 22.sp,
             fontWeight = FontWeight.Medium,
             color = AppTheme.colors.onSecondary,
             modifier = Modifier.fillMaxWidth(0.8f)
@@ -363,7 +351,7 @@ private fun SetProfilePicture(
 }
 
 @Composable
-private fun TutorialPage() {
+private fun FinalPage() {
     val textList: List<AnnotatedString> = listOf(
         buildAnnotatedString {
             append("To record a transaction, send a ")
@@ -428,7 +416,6 @@ private fun ProfileTextField(
     onValueChange: (String) -> Unit,
     placeholder: String? = null,
     valueValidity: WelcomeViewModel.NameValidity,
-    fontSize: TextUnit = AppTheme.dimensions.mediumFont,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
@@ -438,7 +425,6 @@ private fun ProfileTextField(
             value = value,
             onValueChange = onValueChange,
             placeholder = placeholder,
-            fontSize = fontSize,
             indicatorColor = when(valueValidity) {
                 is WelcomeViewModel.NameValidity.Valid -> AppTheme.colors.confirm
                 is WelcomeViewModel.NameValidity.Invalid -> AppTheme.colors.error
@@ -463,6 +449,9 @@ private fun ArrowRow(
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
+
+    val isFinalPage: Boolean = pagerState.currentPage == pagerState.pageCount - 1
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
@@ -484,9 +473,10 @@ private fun ArrowRow(
             }
             Spacer(modifier = Modifier.weight(1f))
             H1Text(
-                text = "Next >",
+                text = if (isFinalPage) "Finish >"
+                       else "Next >",
                 modifier = Modifier.clickable {
-                    if (pagerState.currentPage == pagerState.pageCount) {
+                    if (isFinalPage) {
                         onLastNext()
                     } else if (allowNext(pagerState.currentPage)) {
                         scope.launch {

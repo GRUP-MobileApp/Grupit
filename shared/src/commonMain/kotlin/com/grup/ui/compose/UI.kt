@@ -2,6 +2,7 @@ package com.grup.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.ui.text.toLowerCase
 import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDateTime
@@ -24,10 +25,11 @@ internal fun Double.asPureMoneyAmount(): String =
 
 // Date
 
-fun isoDate(date: String) = LocalDateTime.parse(date).date.let {  localDate ->
-    "${localDate.monthNumber}-${localDate.dayOfMonth}"
+fun isoDate(date: String) = LocalDateTime.parse(date).date.let { localDate ->
+    "${localDate.month.name.substring(0, 3).let { it.first() + it.substring(1).lowercase() }} " +
+            "${localDate.dayOfMonth}"
 }
-fun isoFullDate(date: String) = "${isoDate(date)}-${LocalDateTime.parse(date).year}"
+fun isoFullDate(date: String) = "${isoDate(date)} ${LocalDateTime.parse(date).year}"
 
 fun isoTime(date: String) = LocalDateTime.parse(date).time.let { localTime ->
     localTime.hour.let { hour ->

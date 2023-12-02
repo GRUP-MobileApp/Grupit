@@ -31,15 +31,9 @@ internal data class AppDimensions(
     val topBarSize: Float = 0.07f,
     val smallIconSize: Dp = 30.dp,
     val smallButtonSize: Dp = 24.dp,
-    val shadowElevationSize: Dp = 6.dp,
-
-    val smallFont: TextUnit = 16.sp,
-    val mediumFont: TextUnit = 24.sp
+    val shadowElevationSize: Dp = 6.dp
 )
 
 internal val defaultDimensions = AppDimensions()
-internal val smallDimensions = AppDimensions(
-    smallButtonSize = 16.dp
-)
 
 internal val LocalDimensions = staticCompositionLocalOf { defaultDimensions }

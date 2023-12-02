@@ -1,8 +1,10 @@
 package com.grup.controllers
 
 import com.grup.models.User
+import com.grup.other.getCurrentTime
 import com.grup.service.UserService
 import com.grup.service.ValidationService
+import dev.icerock.moko.media.Bitmap
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -29,7 +31,17 @@ internal class UserController : KoinComponent {
         return userService.getUserByUsername(username) != null
     }
 
+    suspend fun updateUser(user: User, block: User.() -> Unit): User {
+        return userService.updateUser(user, block)
+    }
+
+    suspend fun updateProfilePicture(user: User, profilePicture: ByteArray) {
+        userService.updateProfilePicture(user, profilePicture)
+    }
+
     suspend fun updateLatestTime(user: User) {
-        userService.updateLatestTime(user)
+        userService.updateUser(user) {
+            latestViewDate = getCurrentTime()
+        }
     }
 }

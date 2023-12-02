@@ -5,7 +5,6 @@ import com.grup.exceptions.NotCreatedException
 import com.grup.interfaces.IImagesRepository
 import com.grup.interfaces.IUserRepository
 import com.grup.models.User
-import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -20,11 +19,7 @@ internal class UserService : KoinComponent {
         profilePicture: ByteArray
     ): User {
         return userRepository.createMyUser(username, displayName, venmoUsername)?.also { user ->
-            imagesRepository.uploadProfilePicture(user, profilePicture).let { profilePictureURL ->
-                userRepository.updateUser(user) {
-                    this.profilePictureURL = profilePictureURL
-                }
-            }
+            updateProfilePicture(user, profilePicture)
         } ?: throw NotCreatedException("Error creating user object")
     }
 
@@ -39,9 +34,15 @@ internal class UserService : KoinComponent {
         return userRepository.findUserByUsername(username)
     }
 
-    suspend fun updateLatestTime(user: User) {
-        userRepository.updateUser(user) {
-            this.latestViewDate = getCurrentTime()
+    suspend fun updateUser(user: User, block: User.() -> Unit): User {
+        return userRepository.updateUser(user, block)
+    }
+
+    suspend fun updateProfilePicture(user: User, profilePicture: ByteArray) {
+        imagesRepository.uploadProfilePicture(user, profilePicture).let { profilePictureURL ->
+            userRepository.updateUser(user) {
+                this.profilePictureURL = profilePictureURL
+            }
         }
     }
 }

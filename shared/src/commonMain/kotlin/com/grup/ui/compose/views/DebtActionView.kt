@@ -1,5 +1,12 @@
 package com.grup.ui.compose.views
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
@@ -31,10 +37,7 @@ import com.grup.ui.compose.*
 import com.grup.ui.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
 
-internal class DebtActionView(
-    private val debtActionAmount: Double,
-    private val message: String
-) : Screen {
+internal class DebtActionView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
@@ -46,21 +49,99 @@ internal class DebtActionView(
         ) {
             DebtActionLayout(
                 transactionViewModel = transactionViewModel,
-                navigator = navigator,
-                debtActionAmount = debtActionAmount,
-                message = message
+                navigator = navigator
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DebtActionLayout(
     transactionViewModel: TransactionViewModel,
-    navigator: Navigator,
+    navigator: Navigator
+) {
+    var currentPage: Int by remember { mutableStateOf(0) }
+
+    val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
+
+    var debtActionAmount: String by remember { mutableStateOf("0") }
+    var message: String by remember { mutableStateOf("") }
+
+    AnimatedContent(
+        targetState = currentPage,
+        transitionSpec = {
+            if (targetState > initialState) {
+                (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
+                    slideOutHorizontally { height -> -height } + fadeOut())
+            } else {
+                (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(
+                    slideOutHorizontally { height -> height } + fadeOut())
+            }.using(
+                SizeTransform(clip = false)
+            )
+        }
+    ) { page ->
+        when(page) {
+            0 -> DebtActionKeypadPage(
+                debtActionAmount = debtActionAmount,
+                onDebtActionAmountChange = { newMoneyAmount ->
+                    debtActionAmount = if (newMoneyAmount.toDouble() > 999999999) {
+                        999999999.toString().trimEnd('0')
+                    } else {
+                        newMoneyAmount
+                    }
+                },
+                message = message,
+                onMessageChange = { message = it },
+                onBackPress = { navigator.pop() },
+                changePageDebtActionDetails = { currentPage = 1 }
+            )
+            1 -> DebtActionDetailsPage(
+                userInfos = userInfos,
+                debtActionAmount = debtActionAmount.toDouble(),
+                onBackPress = { currentPage = 0 },
+                createDebtAction = { debtActionAmounts ->
+                    transactionViewModel.createDebtAction(debtActionAmounts, message)
+                    navigator.pop()
+                }
+            )
+        }
+    }
+
+}
+
+@Composable
+private fun DebtActionKeypadPage(
+    debtActionAmount: String,
+    onDebtActionAmountChange: (String) -> Unit,
+    message: String,
+    onMessageChange: (String) -> Unit,
+    onBackPress: () -> Unit,
+    changePageDebtActionDetails: () -> Unit
+) {
+    KeyPadScreenLayout(
+        moneyAmount = debtActionAmount,
+        onMoneyAmountChange = { onDebtActionAmountChange(it) },
+        message = message,
+        onMessageChange = { onMessageChange(it) },
+        confirmButton = {
+            H1ConfirmTextButton(
+                text = "Request",
+                enabled = debtActionAmount.toDouble() > 0 && message.isNotBlank(),
+                onClick = changePageDebtActionDetails
+            )
+        },
+        onBackPress = onBackPress
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun DebtActionDetailsPage(
+    userInfos: List<UserInfo>,
     debtActionAmount: Double,
-    message: String
+    onBackPress: () -> Unit,
+    createDebtAction: (Map<UserInfo, Double>) -> Unit
 ) {
     val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val debtAmountBottomSheetState = rememberModalBottomSheetState(
@@ -69,7 +150,6 @@ private fun DebtActionLayout(
     )
     val scope = rememberCoroutineScope()
 
-    val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
     var splitStrategy: TransactionViewModel.SplitStrategy by remember {
         mutableStateOf(TransactionViewModel.SplitStrategy.EvenSplit)
     }
@@ -81,7 +161,9 @@ private fun DebtActionLayout(
 
     var keyPadUserInfo: UserInfo? by remember { mutableStateOf(null) }
 
-
+    LaunchedEffect(debtActionAmount) {
+        rawSplitStrategyDebtAmounts.clear()
+    }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
         AddDebtorBottomSheet(
@@ -117,25 +199,7 @@ private fun DebtActionLayout(
     }
 
     modalSheets {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { },
-                    backgroundColor = AppTheme.colors.primary,
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { navigator.pop() }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = AppTheme.colors.onSecondary
-                            )
-                        }
-                    }
-                )
-            }
-        ) { padding ->
+        BackPressScaffold(onBackPress = onBackPress) { padding ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
@@ -201,15 +265,12 @@ private fun DebtActionLayout(
                                 splitStrategyDebtAmounts
                             ),
                             onClick = {
-                                transactionViewModel.createDebtAction(
+                                createDebtAction(
                                     splitStrategy.splitToMoneyAmounts(
                                         debtActionAmount,
                                         splitStrategyDebtAmounts
-                                    ),
-                                    message
+                                    )
                                 )
-                                navigator.pop()
-                                navigator.pop()
                             }
                         )
                     }
@@ -231,7 +292,7 @@ private fun DebtActionSettings(
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            H1Text(text = "by ", fontSize = 20.sp)
+            H1Text(text = "by ")
             Box(
                 modifier = Modifier
                     .clip(AppTheme.shapes.medium)
@@ -252,12 +313,9 @@ private fun DebtActionSettings(
                     }
                     .padding(AppTheme.dimensions.spacingSmall)
             ) {
-                H1Text(
-                    text = splitStrategy.name,
-                    fontSize = 20.sp
-                )
+                H1Text(text = splitStrategy.name)
             }
-            H1Text(text = " between:", fontSize = 20.sp)
+            H1Text(text = " between:")
         }
         AddDebtorButton(addDebtorsOnClick = addDebtorsOnClick)
     }

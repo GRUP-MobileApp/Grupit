@@ -1,21 +1,11 @@
 package com.grup.ui.compose.views
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -25,9 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -37,6 +24,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.compose.BackPressScaffold
+import com.grup.ui.compose.H1ConfirmTextButton
+import com.grup.ui.compose.InvisibleTextField
 import com.grup.ui.viewmodel.CreateGroupViewModel
 
 internal class CreateGroupView : Screen {
@@ -64,67 +54,36 @@ private fun CreateGroupLayout(
 ) {
     var groupName: String by remember { mutableStateOf("") }
 
-    Scaffold(
-        topBar = {
-            CreateGroupTopBar(
-                onBackPress = { navigator.pop() },
-                createGroupOnClick = {
-                    createGroupViewModel.createGroup(
-                        groupName = groupName,
-                        onSuccess = { navigator.pop() },
-                        onFailure = { }
-                    )
-                }
-            )
-        },
-        backgroundColor = AppTheme.colors.primary,
-        modifier = Modifier.fillMaxSize()
-    ) { padding ->
+    BackPressScaffold(onBackPress = { navigator.pop() }, title = "New Group") { padding ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(AppTheme.colors.primary)
+                .padding(AppTheme.dimensions.appPadding)
         ) {
-            TextField(
-                label = { Text("Group Name", color = AppTheme.colors.onSecondary) },
+            InvisibleTextField(
+                placeholder = "Name",
                 value = groupName,
                 onValueChange = { groupName = it },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 modifier = Modifier
                     .padding(5.dp)
                     .clip(shape = AppTheme.shapes.medium)
             )
+            Spacer(modifier = Modifier.weight(1f))
+            H1ConfirmTextButton(
+                text = "Create",
+                onClick = {
+                    createGroupViewModel.createGroup(
+                        groupName = groupName,
+                        onSuccess = {
+                            navigator.pop()
+                        },
+                        onFailure = { }
+                    )
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
     }
-}
-
-@Composable
-private fun CreateGroupTopBar(
-    onBackPress: () -> Unit,
-    createGroupOnClick: () -> Unit
-) {
-    TopAppBar(
-        title = { Text("Create a group", color = AppTheme.colors.onSecondary) },
-        actions = {
-            ClickableText(
-                text = AnnotatedString(text = "Create"),
-                style = TextStyle(color = AppTheme.colors.onSecondary),
-                onClick = { createGroupOnClick() }
-            )
-        },
-        backgroundColor = AppTheme.colors.primary,
-        navigationIcon = {
-            IconButton(
-                onClick = onBackPress
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                )
-            }
-        }
-    )
 }

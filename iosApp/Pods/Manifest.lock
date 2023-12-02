@@ -70,7 +70,9 @@ PODS:
   - PromisesObjC (2.3.1)
   - RecaptchaInterop (100.0.0)
   - shared (1.0):
+    - FirebaseAuth
     - FirebaseMessaging
+    - GoogleSignIn
 
 DEPENDENCIES:
   - FirebaseAuth
@@ -116,8 +118,8 @@ SPEC CHECKSUMS:
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
-  shared: 8ca6a3370992140fab5f2ef3d6b70a789e4bfe98
+  shared: 8f8ba61329afbe6b05922415a1134b14b435066d
 
 PODFILE CHECKSUM: a9d58165e538cceb3e501231b6aa31149340a2f0
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.12.1

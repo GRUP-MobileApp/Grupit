@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.LocalContentColor
@@ -14,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -142,18 +142,18 @@ private fun NotificationsLayout(
                 user = notification.user,
                 iconSize = 60.dp,
                 mainContent = {
-                    Caption(
-                        text = "${isoDate(notification.date)} at ${isoTime(notification.date)}",
-                        fontSize = 12.sp
-                    )
                     H1Text(
                         text = notification.group.groupName,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
                     )
                     H1Text(
                         text = notification.displayText(),
-                        fontSize = 16.sp
+                        fontSize = AppTheme.typography.smallFont
+                    )
+                    Caption(
+                        text = "${isoDate(notification.date)} at ${isoTime(notification.date)}",
+                        fontSize = AppTheme.typography.tinyFont,
+                        modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingSmall)
                     )
                 },
                 sideContent = sideContent

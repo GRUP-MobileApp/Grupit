@@ -97,7 +97,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private var notificationsCount: MutableStateFlow<Int> = MutableStateFlow(0)
 
     fun logGroupNotificationsDate() = screenModelScope.launch {
-        apiServer.updateLatestTime(userObject)
+        apiServer.updateLatestTime()
     }
 
     // DebtAction

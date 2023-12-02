@@ -24,15 +24,15 @@ internal actual fun GoogleSignInButton(
     googleSignInManager: GoogleSignInManager,
     signInCallback: (String) -> Unit
 ) {
-    LaunchedEffect(googleSignInManager) {
-        googleSignInManager.setSignInCallback(signInCallback)
-    }
-
     val pendingLogin: Boolean = loginResult is LoginViewModel.LoginResult.PendingLogin
+
+    LaunchedEffect(key1 = googleSignInManager) {
+        googleSignInManager.setSignInCallBack(signInCallback)
+    }
 
     Button(
         onClick = {
-            if (!pendingLogin) {
+            if (loginResult !is LoginViewModel.LoginResult.PendingLogin) {
                 googleSignInManager.signIn()
             }
         },
@@ -54,7 +54,6 @@ internal actual fun GoogleSignInButton(
             )
             H1Text(
                 text = "Sign in with Google",
-                fontSize = 20.sp,
                 modifier = Modifier.padding(6.dp)
             )
         }

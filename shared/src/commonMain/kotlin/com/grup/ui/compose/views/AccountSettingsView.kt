@@ -1,14 +1,13 @@
 package com.grup.ui.compose.views
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,22 +18,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.BottomSheetState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.rememberBottomSheetState
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +34,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,17 +48,23 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.User
-import com.grup.other.AccountSettings
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.BackPressModalBottomSheetLayout
+import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1DenyTextButton
 import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.InvisibleTextField
 import com.grup.ui.compose.ProfileIcon
 import com.grup.ui.compose.SimpleLazyListPage
-import com.grup.ui.compose.SmallIcon
 import com.grup.ui.viewmodel.AccountSettingsViewModel
+import com.grup.ui.viewmodel.AccountSettingsViewModel.Pages
+import dev.icerock.moko.media.Bitmap
+import dev.icerock.moko.media.compose.BindMediaPickerEffect
+import dev.icerock.moko.media.compose.rememberMediaPickerControllerFactory
+import dev.icerock.moko.media.picker.CanceledException
+import dev.icerock.moko.media.picker.MediaSource
+import dev.icerock.moko.permissions.DeniedException
 import kotlinx.coroutines.launch
 
 internal class AccountSettingsView : Screen {
@@ -87,76 +85,17 @@ internal class AccountSettingsView : Screen {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 private fun AccountSettingsLayout(
     accountSettingsViewModel: AccountSettingsViewModel,
-    navigator: Navigator,
-    modifier: Modifier = Modifier
+    navigator: Navigator
 ) {
-//    val editProfileBottomSheetState = rememberModalBottomSheetState(
-//        ModalBottomSheetValue.Hidden,
-//    )
-//    val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
-//        BackPressModalBottomSheetLayout(
-//            sheetState = editProfileBottomSheetState,
-//            sheetContent = {
-//                // TODO: TYSU
-//               Scaffold(
-//                   topBar = {
-//                       TopAppBar(
-//                           title = { },
-//                           backgroundColor = AppTheme.colors.primary,
-//                           navigationIcon = {
-//                               IconButton(
-//                                   onClick = {
-//                                       scope.launch {
-//                                           editProfileBottomSheetState.hide()
-//                                       }
-//                                   }
-//                               ) {
-//                                   Icon(
-//                                       imageVector = Icons.Filled.ArrowBack,
-//                                       contentDescription = "Back",
-//                                       tint = AppTheme.colors.onSecondary
-//                                   )
-//                               }
-//                           }
-//                       )
-//                   },
-//                   backgroundColor = AppTheme.colors.secondary
-//               ) {
-//                   Column(
-//                       verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-//                       modifier = modifier
-//                           .fillMaxSize()
-//                           .padding(AppTheme.dimensions.appPadding)
-//                   ) {
-//                       H1Text(text = "Change Display Name")
-//                       H1Text(text = "Edit Profile Picture")
-//                       H1Text(text = "Edit Venmo Information")
-//                   }
-//               }
-//
-//
-//            },
-//            content = content
-//        )
-//    }
-
-    var currentPage: AccountSettingsViewModel.Pages by remember {
-        mutableStateOf(AccountSettingsViewModel.Pages.MAIN_SETTINGS_PAGE)
-    }
-
-    fun changePage(destination: AccountSettingsViewModel.Pages) {
-        currentPage = destination
-    }
+    var currentPage: Pages by remember { mutableStateOf(Pages.MAIN_SETTINGS_PAGE) }
 
     AnimatedContent(
         targetState = currentPage,
         transitionSpec = {
-            // Compare the incoming number with the previous number.
-            if (targetState > initialState) {
+            if (targetState.pageNumber > initialState.pageNumber) {
                 (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
                     slideOutHorizontally { height -> -height } + fadeOut())
             } else {
@@ -166,27 +105,43 @@ private fun AccountSettingsLayout(
                 SizeTransform(clip = false)
             )
         }
-    ) { targetCount ->
-        when(targetCount) {
-            AccountSettingsViewModel.Pages.MAIN_SETTINGS_PAGE -> MainSettingsPage(
+    ) { page ->
+        when(page) {
+            Pages.MAIN_SETTINGS_PAGE -> MainSettingsPage(
                 accountSettingsViewModel = accountSettingsViewModel,
-                changePageEditProfilePage = {
-                    changePage(AccountSettingsViewModel.Pages.EDIT_PROFILE_PAGE)
-                },
+                changePageEditProfilePage = { currentPage = Pages.EDIT_PROFILE_PAGE },
                 logOutOnClick = {
                     accountSettingsViewModel.logOut {
                         navigator.popUntilRoot()
                     }
                 }
             )
-            AccountSettingsViewModel.Pages.EDIT_PROFILE_PAGE -> EditProfilePage(
-                //go back to main settings page
-                changePageEditDisplayName = {
-                    changePage(AccountSettingsViewModel.Pages.EDIT_DISPLAY_NAME_PAGE)
+            Pages.EDIT_PROFILE_PAGE -> EditProfilePage(
+                user = accountSettingsViewModel.userObject,
+                onBackPress = { currentPage = Pages.MAIN_SETTINGS_PAGE },
+                updateProfilePicture = { pfpBitmap ->
+                    accountSettingsViewModel.editProfilePicture(pfpBitmap)
+                },
+                changePageEditDisplayName = { currentPage = Pages.EDIT_DISPLAY_NAME_PAGE },
+                changePageEditVenmoUsername = { currentPage = Pages.EDIT_VENMO_USERNAME_PAGE }
+            )
+            Pages.EDIT_DISPLAY_NAME_PAGE -> EditDisplayNamePage(
+                displayName = accountSettingsViewModel.userObject.displayName,
+                onBackPress = { currentPage = Pages.EDIT_PROFILE_PAGE },
+                editDisplayName = { displayName ->
+                    accountSettingsViewModel.editUser {
+                        this.displayName = displayName
+                    }
                 }
             )
-            AccountSettingsViewModel.Pages.EDIT_DISPLAY_NAME_PAGE -> EditDisplayNamePage(
-
+            Pages.EDIT_VENMO_USERNAME_PAGE -> EditVenmoUsernamePage(
+                venmoUsername = accountSettingsViewModel.userObject.venmoUsername ?: "",
+                onBackPress = { currentPage = Pages.EDIT_PROFILE_PAGE },
+                editVenmoUserName = { venmoUsername ->
+                    accountSettingsViewModel.editUser {
+                        this.venmoUsername = venmoUsername
+                    }
+                }
             )
         }
     }
@@ -194,6 +149,7 @@ private fun AccountSettingsLayout(
 
 @Composable
 private fun MainSettingsPage(
+    // TODO: Remove ViewModel as argument
     accountSettingsViewModel: AccountSettingsViewModel,
     changePageEditProfilePage: () -> Unit,
     logOutOnClick: () -> Unit
@@ -217,7 +173,12 @@ private fun MainSettingsPage(
             )
         }
         item {
-            SettingHeader(text = "Group Notifications")
+            Caption(
+                text = "Group Notifications",
+                modifier = Modifier
+                    .padding(bottom = AppTheme.dimensions.paddingMedium)
+                    .fillMaxWidth(0.95f)
+            )
             NotificationSettings(
                 groupNotificationEntries = groupNotificationEntries,
                 toggleGroupNotification = { notificationName ->
@@ -231,7 +192,8 @@ private fun MainSettingsPage(
         item {
             H1DenyTextButton(
                 text = "Log Out",
-                onClick = logOutOnClick
+                onClick = logOutOnClick,
+                scale = 0.9f
             )
         }
     }
@@ -305,18 +267,8 @@ private fun NotificationSettings(
 }
 
 @Composable
-private fun SettingHeader(
-    text: String,
-    textSize: TextUnit = TextUnit.Unspecified,
-    modifier: Modifier = Modifier.padding(bottom = AppTheme.dimensions.paddingMedium)
-) {
-    Caption(text = text, fontSize = textSize, modifier = modifier.fillMaxWidth(0.95f))
-}
-
-@Composable
 private fun SettingSlider(
     text: String,
-    textSize: TextUnit = 18.sp,
     toggled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
@@ -325,34 +277,174 @@ private fun SettingSlider(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        H1Text(text = text, fontSize = textSize)
+        H1Text(text = text)
         Switch(
             checked = toggled,
             onCheckedChange = onToggle,
-            colors = SwitchDefaults.colors(checkedThumbColor = AppTheme.colors.confirm)
+            colors = SwitchDefaults.colors(checkedThumbColor = AppTheme.colors.confirm),
+            modifier = Modifier.scale(0.8f)
         )
     }
 }
 
 @Composable
-private fun EditProfilePage(changePageEditDisplayName: () -> Unit) {
-    Column(
-        modifier = Modifier
-        .fillMaxSize()
-        .padding(AppTheme.dimensions.appPadding)
-    ) {
-        H1Text(
-            text = "Edit Display Name",
-            modifier = Modifier.clickable(onClick = changePageEditDisplayName)
-        )
+private fun EditProfilePage(
+    user: User,
+    onBackPress: () -> Unit,
+    updateProfilePicture: (Bitmap) -> Unit,
+    changePageEditDisplayName: () -> Unit,
+    changePageEditVenmoUsername: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val mediaFactory = rememberMediaPickerControllerFactory()
+    val picker = remember(mediaFactory) { mediaFactory.createMediaPickerController() }
+    BindMediaPickerEffect(picker)
+
+    val settingsMap: Map<String, Pair<String, () -> Unit>> = mapOf(
+        "Display Name" to Pair(user.displayName, changePageEditDisplayName),
+        "Venmo Name" to Pair(user.venmoUsername ?: "Not Set", changePageEditVenmoUsername)
+    )
+
+    BackPressScaffold(
+        title = "Edit Profile",
+        onBackPress = onBackPress
+    ) { padding ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(AppTheme.dimensions.appPadding)
+        ) {
+            Box(modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingExtraLarge)) {
+                ProfileIcon(
+                    user = user,
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            try {
+                                updateProfilePicture(picker.pickImage(MediaSource.GALLERY))
+                            } catch (exc: DeniedException) {
+                                println("denied - $exc")
+                            } catch (exc: CanceledException) {
+                                println("cancelled - $exc")
+                            }
+                        }
+                    }
+                )
+            }
+            Caption(
+                text = "Basic Info",
+                fontSize = 14.sp,
+                modifier = Modifier.fillMaxWidth(0.95f)
+            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(AppTheme.shapes.extraLarge)
+                    .background(AppTheme.colors.secondary)
+                    .padding(AppTheme.dimensions.cardPadding)
+            ) {
+                settingsMap.forEach { (settingName, settingValue) ->
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(onClick = settingValue.second)
+                    ) {
+                        Column {
+                            Caption(text = settingName)
+                            H1Text(text = settingValue.first)
+                        }
+                        H1Text(text = ">")
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun EditDisplayNamePage() {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ){
-        H1Text(text = "my ass hurts")
+private fun EditDisplayNamePage(
+    displayName: String,
+    onBackPress: () -> Unit,
+    editDisplayName: (String) -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    var name: String by remember { mutableStateOf(displayName) }
+
+    BackPressScaffold(onBackPress = onBackPress) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppTheme.dimensions.appPadding)
+        ) {
+            H1Text(text = "Edit your first and last name")
+            Caption(text = "This is name that is displayed on your transactions")
+            InvisibleTextField(
+                value = name,
+                onValueChange = { name = it },
+                placeholder = "Display Name",
+                modifier = Modifier.focusRequester(focusRequester)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            H1ConfirmTextButton(
+                text = "Save",
+                onClick = {
+                    editDisplayName(name)
+                    onBackPress()
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditVenmoUsernamePage(
+    venmoUsername: String,
+    onBackPress: () -> Unit,
+    editVenmoUserName: (String) -> Unit
+) {
+    var username: String by remember { mutableStateOf(venmoUsername) }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    BackPressScaffold(onBackPress = onBackPress) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppTheme.dimensions.appPadding)
+        ) {
+            H1Text(text = "Edit your Venmo username")
+            Caption(text = "This is what others will be using to settle")
+            InvisibleTextField(
+                value = username,
+                onValueChange = { username = it },
+                placeholder = "Venmo Username",
+                modifier = Modifier.focusRequester(focusRequester)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            H1ConfirmTextButton(
+                text = "Save",
+                onClick = {
+                    editVenmoUserName(username)
+                    onBackPress()
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
     }
 }

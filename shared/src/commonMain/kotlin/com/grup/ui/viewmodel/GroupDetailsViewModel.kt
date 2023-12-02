@@ -1,8 +1,10 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.grup.exceptions.APIException
+import com.grup.models.Action
+import com.grup.models.DebtAction
 import com.grup.models.SettleAction
-import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
 import com.grup.ui.models.TransactionActivity
 import kotlinx.coroutines.flow.Flow
@@ -21,19 +23,10 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
             }
         }.asState()
 
-    // DebtActions belonging to the selectedGroup, mapped to TransactionActivity
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
         .map { debtActions ->
             debtActions.filter { debtAction ->
                 debtAction.group.id == selectedGroup?.id
-            }
-        }
-    private val debtActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
-        _debtActionsFlow.map { debtActions ->
-            debtActions.filter { debtAction ->
-                debtAction.totalAmount > 0
-            }.map { debtAction ->
-                TransactionActivity.CreateDebtAction(debtAction)
             }
         }
 
@@ -44,21 +37,45 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
                 settleAction.group.id == selectedGroup?.id
             }
         }
+
     // Incoming SettleActions to be displayed, oldest first
-    val incomingSettleActions: StateFlow<List<SettleAction>> =
-        _settleActionsFlow.map { settleActions ->
-            settleActions.filter { settleAction ->
-                settleAction.transactionRecords.any { transactionRecord ->
-                    transactionRecord.userInfo.user.id == userObject.id &&
-                            !transactionRecord.isAccepted
+    val incomingActions: StateFlow<List<Action>> =
+        combine(
+            _debtActionsFlow.map { debtActions ->
+                debtActions.filter { debtAction ->
+                    debtAction.transactionRecords.any { transactionRecord ->
+                        transactionRecord.userInfo.user.id == userObject.id &&
+                                !transactionRecord.isAccepted
+                    }
                 }
-            }.sortedBy { it.date }
-        }.asState()
+            },
+            _settleActionsFlow.map { settleActions ->
+                settleActions.filter { settleAction ->
+                    settleAction.transactionRecords.any { transactionRecord ->
+                        transactionRecord.userInfo.user.id == userObject.id &&
+                                !transactionRecord.isAccepted
+                    }
+                }
+            }
+        ) { actions: Array<List<Action>> ->
+            actions.flatMap { it }.sortedBy { it.date }
+        }.asInitialEmptyState()
+
+
+    // DebtActions belonging to the selectedGroup, mapped to TransactionActivity
+    private val debtActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
+        _debtActionsFlow.map { debtActions ->
+            debtActions.filter { debtAction ->
+                !incomingActions.value.any { it.id == debtAction.id }
+            }.map { debtAction ->
+                TransactionActivity.CreateDebtAction(debtAction)
+            }
+        }
 
     private val settleActionsAsTransactionActivity: Flow<List<TransactionActivity>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                !incomingSettleActions.value.contains(settleAction)
+                !incomingActions.value.any { it.id == settleAction.id }
             }.map { settleAction ->
                 TransactionActivity.CreateSettleAction(settleAction)
             }
@@ -75,11 +92,24 @@ internal class GroupDetailsViewModel : LoggedInViewModel() {
             }
         }.asInitialEmptyState()
 
-    // SettleAction
-    fun acceptSettleAction(
-        settleAction: SettleAction,
-        transactionRecord: TransactionRecord
+    // DebtAction
+    fun acceptAction(
+        action: Action,
+        onSuccess: () -> Unit,
+        onError: (String?) -> Unit
     ) = screenModelScope.launch {
-        apiServer.acceptSettleAction(settleAction, transactionRecord)
+        try {
+            action.transactionRecords.find {
+                it.userInfo.user.id == userObject.id
+            }?.let { transactionRecord ->
+                when (action) {
+                    is DebtAction -> apiServer.acceptDebtAction(action, transactionRecord)
+                    is SettleAction -> apiServer.acceptSettleAction(action, transactionRecord)
+                }
+            } ?: throw object : APIException("") { }
+            onSuccess()
+        } catch (e: APIException) {
+            onError(e.message)
+        }
     }
 }

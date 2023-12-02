@@ -201,11 +201,7 @@ private fun DebugLoginLayout(
                     ) {
                         LoadingSpinner()
                     } else {
-                        H1Text(
-                            text = "Sign Up",
-                            color = AppTheme.colors.onSecondary,
-                            fontSize = 18.sp
-                        )
+                        H1Text(text = "Sign Up", color = AppTheme.colors.onSecondary)
                     }
                 }
 
@@ -232,11 +228,7 @@ private fun DebugLoginLayout(
                     ) {
                         LoadingSpinner()
                     } else {
-                        H1Text(
-                            text = "Login",
-                            color = AppTheme.colors.onSecondary,
-                            fontSize = 18.sp
-                        )
+                        H1Text(text = "Login", color = AppTheme.colors.onSecondary)
                     }
                 }
             }
