@@ -432,13 +432,15 @@ internal fun BackPressScaffold(
 @Composable
 internal fun SimpleLazyListPage(
     pageName: String,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp),
+    contentPadding: PaddingValues = PaddingValues(AppTheme.dimensions.appPadding),
     content: LazyListScope.() -> Unit
 ) {
     Scaffold(backgroundColor = AppTheme.colors.primary) { padding ->
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+            verticalArrangement = verticalArrangement,
             horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
+            contentPadding = contentPadding,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -686,7 +688,7 @@ internal fun KeyPadBottomSheet(
     content: @Composable () -> Unit
 ) {
     var moneyAmount: String by remember { mutableStateOf("0") }
-    LaunchedEffect(initialMoneyAmount) {
+    LaunchedEffect(state.isVisible) {
         moneyAmount = if (initialMoneyAmount % 1 == 0.0)
             initialMoneyAmount.roundToInt().toString()
         else
@@ -741,28 +743,26 @@ internal fun KeyPadScreenLayout(
                 .padding(padding)
                 .padding(AppTheme.dimensions.appPadding)
         ) {
-            Column(
-                verticalArrangement = Arrangement.SpaceAround,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.weight(1f)
             ) {
-                KeyPadMoneyAmount(moneyAmount = moneyAmount, fontSize = moneyAmountFontSize)
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .height(65.dp)
-                        .padding(horizontal = AppTheme.dimensions.paddingSmall)
+                Column(
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(0.7f)
                 ) {
+                    KeyPadMoneyAmount(moneyAmount = moneyAmount, fontSize = moneyAmountFontSize)
                     message?.let { message ->
+                        Spacer(modifier = Modifier.weight(1f))
                         TransparentTextField(
                             value = message,
                             placeholder = "What is this for?",
                             onValueChange = {
                                 onMessageChange!!(it.take(50))
                             },
-                            fontSize = 24.sp
+                            fontSize = 24.sp,
+                            modifier = Modifier.height(IntrinsicSize.Max)
                         )
                     }
                 }
@@ -948,16 +948,6 @@ internal fun LazyListScope.recentActivityList(
     groupActivity: List<TransactionActivity>,
     transactionActivityOnClick: (TransactionActivity) -> Unit = {}
 ) {
-//    private fun displayMultipleUsers(displayNames: List<String>): String {
-//        return when(displayNames.size) {
-//            1 -> displayNames[0]
-//            2 -> "${displayNames[0]} and + ${displayNames[1]}"
-//            3 -> "${displayNames[0]}, ${displayNames[1]}, and ${displayNames[2]}"
-//            else ->
-//                "${displayNames[0]}, ${displayNames[1]}, ${displayNames[2]}, " +
-//                        "and ${displayNames.size - 3} others"
-//        }
-//    }
     item {
         H1Header(
             text = "Recent Transactions",

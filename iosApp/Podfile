@@ -1,14 +1,27 @@
+def google_utilites
+  pod 'GoogleUtilities/AppDelegateSwizzler'
+  pod 'GoogleUtilities/Environment'
+  pod 'GoogleUtilities/ISASwizzler'
+  pod 'GoogleUtilities/Logger'
+  pod 'GoogleUtilities/MethodSwizzler'
+  pod 'GoogleUtilities/NSData+zlib'
+  pod 'GoogleUtilities/Network'
+  pod 'GoogleUtilities/Reachability'
+  pod 'GoogleUtilities/UserDefaults'
+  pod 'GTMSessionFetcher'
+end
+
 target 'Grupit' do
   use_frameworks!
   platform :ios, '14.1'
   pod 'shared', :path => '../shared'
   
   # Google
+  google_utilites
   pod 'GoogleSignIn'
   
   # Firebase
   pod 'FirebaseCore'
-  pod 'FirebaseAuth'
 end
 
 post_install do |installer|

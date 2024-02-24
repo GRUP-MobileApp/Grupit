@@ -7,6 +7,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIApplication
 import platform.UIKit.UIWindow
 
+@OptIn(ExperimentalForeignApi::class)
 actual class GoogleSignInManager: SignInManager() {
     private lateinit var signInCallback: (String) -> Unit
     override fun signIn() {

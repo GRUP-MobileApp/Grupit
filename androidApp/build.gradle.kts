@@ -62,12 +62,7 @@ dependencies {
     //noinspection GradleDependency
     implementation("androidx.core:core-ktx:1.10.1")
 
-    // Jetpack Compose
-    implementation("androidx.compose.ui:ui:$composeVersion")
-    //noinspection GradleDependency
-    implementation("androidx.activity:activity-compose:1.7.2")
-    //noinspection GradleDependency
-    implementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    implementation("androidx.activity:activity-compose:1.8.2")
 
     // Koin
     implementation("io.insert-koin:koin-android:$koinVersion")

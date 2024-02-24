@@ -127,8 +127,9 @@ private fun GroupsLayout(
                         .clip(AppTheme.shapes.large)
                         .background(AppTheme.colors.secondary)
                         .clickable {
-                            groupsViewModel.selectGroup(group)
-                            navigator.push(GroupDetailsView())
+                            groupsViewModel.selectGroup(group.id) {
+                                navigator.push(GroupDetailsView(group.id))
+                            }
                         }
                         .padding(AppTheme.dimensions.rowCardPadding)
                 ) {

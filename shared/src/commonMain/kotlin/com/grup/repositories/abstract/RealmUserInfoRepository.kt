@@ -17,7 +17,7 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
     protected abstract val realm: Realm
 
     override suspend fun createUserInfo(user: User, group: Group): RealmUserInfo? {
-        // TODO: Check that you only have <= 3 userInfos at a time
+        // TODO: Check that you only have <= 8 userInfos at a time
         return realm.write {
             copyNestedObjectToRealm(
                 RealmUserInfo().apply {

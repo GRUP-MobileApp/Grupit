@@ -1,35 +1,34 @@
 package com.grup.ui.compose.views
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.getScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
+import com.grup.models.Action
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.AcceptRejectRow
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.SimpleLazyListPage
 import com.grup.ui.compose.UserRowCard
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoDate
 import com.grup.ui.compose.isoTime
+import com.grup.ui.compose.views.tabs.GroupsTab
 import com.grup.ui.models.Notification
 import com.grup.ui.viewmodel.NotificationsViewModel
 
@@ -37,19 +36,24 @@ internal class NotificationsView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
+        val notificationsViewModel = getScreenModel<NotificationsViewModel>()
+        val tabNavigator = LocalTabNavigator.current
+
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            val notificationsViewModel = getScreenModel<NotificationsViewModel>()
-            val navigator = LocalNavigator.currentOrThrow
-
             notificationsViewModel.logGroupNotificationsDate()
             CompositionLocalProvider(
                 LocalContentColor provides AppTheme.colors.onSecondary
             ) {
                 NotificationsLayout(
                     notificationsViewModel = notificationsViewModel,
-                    navigator = navigator
+                    actionOnClick = { action ->
+                        GroupsTab(action.group.id, action.id).let { tab ->
+                            MainView.tabs[0] = tab
+                            tabNavigator.current = tab
+                        }
+                    }
                 )
             }
         }
@@ -60,30 +64,57 @@ internal class NotificationsView : Screen {
 @Composable
 private fun NotificationsLayout(
     notificationsViewModel: NotificationsViewModel,
-    navigator: Navigator
+    actionOnClick: (Action) -> Unit
 ) {
     val notifications: List<Notification> by
         notificationsViewModel.notifications.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
-        modifier = Modifier
-            .fillMaxWidth()
+    SimpleLazyListPage(
+        pageName = "Notifications",
+        contentPadding = PaddingValues(vertical = AppTheme.dimensions.appPadding),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium)
     ) {
-        item {
-            H1Text(
-                text = "Notifications",
-                color = AppTheme.colors.onSecondary,
-                modifier = Modifier.fillMaxWidth(0.95f)
-            )
-        }
-        items(
-            notifications
-        ) { notification ->
-            val sideContent: (@Composable ColumnScope.() -> Unit)? =
-                when (notification) {
+        items(notifications) { notification ->
+            UserRowCard(
+                modifier = Modifier
+                    .run {
+                        when(notification) {
+                            is Notification.IncomingDebtAction -> {
+                                clickable { actionOnClick(notification.debtAction) }
+                            }
+                            is Notification.IncomingSettleAction -> {
+                                clickable { actionOnClick(notification.settleAction) }
+                            }
+                            is Notification.DebteeAcceptSettleAction -> {
+                                clickable { actionOnClick(notification.settleAction) }
+                            }
+                            is Notification.DebtorAcceptOutgoingDebtAction -> {
+                                clickable { actionOnClick(notification.debtAction) }
+                            }
+                            else -> { this }
+                        }
+                    }.padding(
+                        horizontal = AppTheme.dimensions.appPadding,
+                        vertical = AppTheme.dimensions.paddingMedium
+                    ),
+                user = notification.user,
+                iconSize = 60.dp,
+                mainContent = {
+                    H1Text(
+                        text = notification.group.groupName,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    H1Text(
+                        text = notification.displayText(),
+                        fontSize = AppTheme.typography.smallFont
+                    )
+                    Caption(
+                        text = "${isoDate(notification.date)} at ${isoTime(notification.date)}",
+                        fontSize = AppTheme.typography.tinyFont,
+                        modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingSmall)
+                    )
+                },
+                sideContent = when (notification) {
                     is Notification.IncomingDebtAction -> {
                         {
                             AcceptRejectRow(
@@ -138,25 +169,6 @@ private fun NotificationsLayout(
                     }
                     else -> null
                 }
-            UserRowCard(
-                user = notification.user,
-                iconSize = 60.dp,
-                mainContent = {
-                    H1Text(
-                        text = notification.group.groupName,
-                        fontWeight = FontWeight.Medium,
-                    )
-                    H1Text(
-                        text = notification.displayText(),
-                        fontSize = AppTheme.typography.smallFont
-                    )
-                    Caption(
-                        text = "${isoDate(notification.date)} at ${isoTime(notification.date)}",
-                        fontSize = AppTheme.typography.tinyFont,
-                        modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingSmall)
-                    )
-                },
-                sideContent = sideContent
             )
         }
     }

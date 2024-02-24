@@ -65,7 +65,6 @@ internal class AccountSettingsViewModel : LoggedInViewModel(), KoinComponent {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun logOut(onSuccess: () -> Unit) = GlobalScope.launch {
-        selectedGroup = null
         authManager.getSignInManagerFromProvider(apiServer.authProvider)?.signOut()
         apiServer.logOut()
         onSuccess()

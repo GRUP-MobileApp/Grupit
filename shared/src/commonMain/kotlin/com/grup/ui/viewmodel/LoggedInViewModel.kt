@@ -3,7 +3,6 @@ package com.grup.ui.viewmodel
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.APIServer
-import com.grup.models.Group
 import com.grup.models.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +17,8 @@ internal abstract class LoggedInViewModel : KoinComponent, ScreenModel {
     private companion object {
         private const val STOP_TIMEOUT_MILLIS: Long = 5000
 
-        private val _selectedGroupMutable: MutableStateFlow<Group?> = MutableStateFlow(null)
+        private val _selectedGroupIdMutable: MutableStateFlow<String?> =
+            MutableStateFlow(null)
     }
 
     protected val apiServer: APIServer by inject()
@@ -26,19 +26,17 @@ internal abstract class LoggedInViewModel : KoinComponent, ScreenModel {
     protected open val userObject: User
         get() = apiServer.user
 
-    var selectedGroup: Group?
-        get() = _selectedGroupMutable.value
-        set(value) { _selectedGroupMutable.value = value }
+    protected var selectedGroupId: String?
+        get() = _selectedGroupIdMutable.value
+        set(value) { _selectedGroupIdMutable.value = value }
 
     protected fun <T> Flow<T>.asState() =
-        this.let { flow ->
-            runBlocking { flow.first() }.let { initialValue ->
-                flow.stateIn(
-                    screenModelScope,
-                    SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                    initialValue
-                )
-            }
+        runBlocking { this@asState.first() }.let { initialValue ->
+            this.stateIn(
+                screenModelScope,
+                SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue
+            )
         }
 
     protected fun <T> Flow<List<T>>.asInitialEmptyState() =

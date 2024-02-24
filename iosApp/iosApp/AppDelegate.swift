@@ -27,19 +27,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        FirebaseApp.configure()
-        
         Messaging.messaging().delegate = self
         
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(
             options: [.alert, .sound, .badge],
-            completionHandler: { (granted, error) in
-                if granted {
-                    application.registerForRemoteNotifications()
-                }
-            }
+            completionHandler: { _, _ in }
         )
+        application.registerForRemoteNotifications()
         
         return true
     }
@@ -60,9 +55,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         _ application: UIApplication,
         didReceiveRemoteNotification userInfo: [AnyHashable: Any]
     ) async -> UIBackgroundFetchResult {
-        print("received notif")
+        Messaging.messaging().appDidReceiveMessage(userInfo)
         if (NotificationPermissions.shared.isNotificationTypeToggled(notificationName: userInfo["type"] as! String)) {
-            print("notif is allowed")
             let content = UNMutableNotificationContent()
             content.title = userInfo["title"] as! String
             content.body = userInfo["body"] as! String
@@ -79,7 +73,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
                 // TODO: Catch exception
             }
         }
-
+        
+        print(userInfo)
         return UIBackgroundFetchResult.newData
     }
     

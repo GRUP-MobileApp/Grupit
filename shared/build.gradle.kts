@@ -1,4 +1,3 @@
-val awsVersion: String by project
 val ktorVersion: String by project
 val koinVersion: String by project
 val realmVersion: String by project
@@ -14,7 +13,7 @@ val keystorePassword: String by project
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.21"
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
@@ -62,8 +61,6 @@ kotlin {
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
 
-                // UI
-
                 // Compose
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -87,8 +84,6 @@ kotlin {
 
                 // Kamel
                 implementation("media.kamel:kamel-image:0.7.1")
-
-                // Backend
 
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
@@ -123,38 +118,26 @@ kotlin {
         val androidMain by getting {
             dependsOn(commonMain)
             dependencies {
-                // UI
-
-                // Jetpack Compose
-                implementation("androidx.compose.ui:ui:$composeVersion")
-                //noinspection GradleDependency
-                implementation("androidx.activity:activity-compose:1.7.2")
+                implementation("androidx.activity:activity-compose:1.8.2")
 
                 // Lifecycle
                 implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-
-                // Backend
+                // GoogleSignIn
+                implementation ("com.google.android.gms:play-services-auth:20.7.0")
 
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
 
-                // Google Play Services
-                implementation ("com.google.android.gms:play-services-auth:20.7.0")
-
-                // AWS
-                implementation("aws.sdk.kotlin:s3:$awsVersion")
-
                 // Import the Firebase BoM
-                implementation(platform("com.google.firebase:firebase-bom:$firebaseBOMVersion"))
+                implementation(project.dependencies.platform("com.google.firebase:firebase-bom:$firebaseBOMVersion"))
 
                 // Firebase Auth
                 implementation("com.google.firebase:firebase-auth-ktx")
 
                 // Firebase Cloud Messaging
                 implementation("com.google.firebase:firebase-messaging-ktx")
-
             }
         }
         val iosX64Main by getting

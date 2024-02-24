@@ -1,14 +1,11 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.screenModelScope
-import com.grup.exceptions.APIException
+import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.Group
 import com.grup.models.User
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 internal class GroupsViewModel : LoggedInViewModel() {
     public override val userObject: User
@@ -22,9 +19,14 @@ internal class GroupsViewModel : LoggedInViewModel() {
         groups.sortedBy { group ->
             userInfos.find { it.group.id == group.id }?.joinDate
         }
-    }.asInitialEmptyState()
+    }.asState()
 
-    fun selectGroup(group: Group) {
-        selectedGroup = group
+    fun selectGroup(groupId: String, onSuccess: () -> Unit) {
+        if (groups.value.any { it.id == groupId }) {
+            selectedGroupId = groupId
+            onSuccess()
+        } else {
+            throw UserNotInGroupException()
+        }
     }
 }

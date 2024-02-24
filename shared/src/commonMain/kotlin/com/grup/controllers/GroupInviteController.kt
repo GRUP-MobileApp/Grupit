@@ -28,8 +28,8 @@ internal class GroupInviteController : KoinComponent {
         val groupUserInfos: List<UserInfo> = userInfoService.findUserInfosByGroupId(group.id)
 
         if (groupUserInfos.any { it.user.id == foundInvitee.id }) {
-            throw EntityAlreadyExistsException("$inviteeUsername is already in Group " +
-                    group.groupName
+            throw EntityAlreadyExistsException(
+                "$inviteeUsername is already in Group ${group.groupName}"
             )
         }
         return groupInviteService.createGroupInvite(inviter, foundInvitee, group)

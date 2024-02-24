@@ -12,7 +12,7 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
-        classpath("com.android.tools.build:gradle:8.1.2")
+        classpath("com.android.tools.build:gradle:8.2.0")
         classpath("io.realm.kotlin:gradle-plugin:$realmVersion")
         classpath("dev.icerock.moko:resources-generator:$mokoResourcesVersion")
 

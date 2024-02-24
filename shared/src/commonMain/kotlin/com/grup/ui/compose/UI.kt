@@ -2,8 +2,6 @@ package com.grup.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.text.toLowerCase
-import com.grup.other.AWS_IMAGES_BUCKET_NAME
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDateTime
 
@@ -24,7 +22,6 @@ internal fun Double.asPureMoneyAmount(): String =
     this.asCurrencySymbolAndMoneyAmount().second
 
 // Date
-
 fun isoDate(date: String) = LocalDateTime.parse(date).date.let { localDate ->
     "${localDate.month.name.substring(0, 3).let { it.first() + it.substring(1).lowercase() }} " +
             "${localDate.dayOfMonth}"
@@ -39,11 +36,6 @@ fun isoTime(date: String) = LocalDateTime.parse(date).time.let { localTime ->
         }
     }
 }
-
-// Image
-fun getProfilePictureURI(userId: String) =
-    "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/pfp_$userId.png"
-
 
 @Composable
 internal expect fun <T> StateFlow<T>.collectAsStateWithLifecycle(): State<T>

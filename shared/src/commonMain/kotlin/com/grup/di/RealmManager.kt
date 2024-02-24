@@ -50,7 +50,7 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
 
     override val authProvider: AuthManager.AuthProvider
         get() = app.currentUser?.let { user ->
-            when (user.provider) {
+            when (user.identities.first().provider) {
                 AuthenticationProvider.GOOGLE -> AuthManager.AuthProvider.Google
                 AuthenticationProvider.APPLE -> AuthManager.AuthProvider.Apple
                 else -> AuthManager.AuthProvider.None

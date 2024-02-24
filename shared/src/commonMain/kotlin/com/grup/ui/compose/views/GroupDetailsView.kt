@@ -27,14 +27,15 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.*
-import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.models.TransactionActivity
 import com.grup.ui.viewmodel.GroupDetailsViewModel
 import kotlinx.coroutines.launch
 
-internal class GroupDetailsView : Screen {
+internal class GroupDetailsView(
+    private val actionId: String? = null
+) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
@@ -45,6 +46,7 @@ internal class GroupDetailsView : Screen {
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
             GroupDetailsLayout(
+                initialActionId = actionId,
                 groupDetailsViewModel = groupDetailsViewModel,
                 navigator = navigator
             )
@@ -55,6 +57,7 @@ internal class GroupDetailsView : Screen {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun GroupDetailsLayout(
+    initialActionId: String? = null,
     groupDetailsViewModel: GroupDetailsViewModel,
     navigator: Navigator
 ) {
@@ -65,7 +68,7 @@ private fun GroupDetailsLayout(
     )
     val lazyListState = rememberLazyListState()
 
-    val selectedGroup: Group = groupDetailsViewModel.selectedGroup!!
+    val selectedGroup: Group by groupDetailsViewModel.selectedGroup.collectAsStateWithLifecycle()
     val myUserInfo: UserInfo? by groupDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
         groupDetailsViewModel.groupActivity.collectAsStateWithLifecycle()
@@ -77,6 +80,10 @@ private fun GroupDetailsLayout(
     val selectAction: (Action) -> Unit = { action ->
         selectedAction = action
         scope.launch { actionDetailsBottomSheetState.show() }
+    }
+
+    LaunchedEffect(true) {
+        initialActionId?.let { groupDetailsViewModel.findActionById(it, selectAction) }
     }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
@@ -199,7 +206,12 @@ private fun GroupBalanceCard(
                 .padding(AppTheme.dimensions.cardPadding)
         ) {
             H1Text(text = "Your Balance")
-            MoneyAmount(moneyAmount = myUserInfo.userBalance)
+            MoneyAmount(
+                moneyAmount = myUserInfo.userBalance,
+                color = if (myUserInfo.userBalance >= 0) AppTheme.colors.confirm
+                        else AppTheme.colors.deny,
+                fontWeight = FontWeight.SemiBold
+            )
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
@@ -364,7 +376,7 @@ private fun TransactionRecordRowCard(
                     if (transactionRecord.isAccepted)
                         "Accepted on ${isoDate(transactionRecord.dateAccepted)}"
                     else
-                        "Pending"
+                        transactionRecord.dateAccepted
             )
         },
         sideContent = {

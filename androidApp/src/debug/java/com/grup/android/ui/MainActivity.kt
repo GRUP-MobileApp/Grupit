@@ -3,7 +3,6 @@ package com.grup.android.ui
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.grup.android.ExceptionHandler
 import com.grup.di.initAuthManager
 import com.grup.di.initNotificationManager
 import com.grup.platform.notification.NotificationManager

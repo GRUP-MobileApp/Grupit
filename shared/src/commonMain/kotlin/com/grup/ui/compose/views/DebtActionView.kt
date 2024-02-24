@@ -31,7 +31,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
-import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.viewmodel.TransactionViewModel
@@ -85,11 +84,12 @@ private fun DebtActionLayout(
             0 -> DebtActionKeypadPage(
                 debtActionAmount = debtActionAmount,
                 onDebtActionAmountChange = { newMoneyAmount ->
-                    debtActionAmount = if (newMoneyAmount.toDouble() > 999999999) {
-                        999999999.toString().trimEnd('0')
-                    } else {
-                        newMoneyAmount
-                    }
+                    debtActionAmount =
+                        if (newMoneyAmount.toDouble() > 999999999) {
+                            999999999.toString()
+                        } else {
+                            newMoneyAmount
+                        }
                 },
                 message = message,
                 onMessageChange = { message = it },
@@ -183,11 +183,10 @@ private fun DebtActionDetailsPage(
                 KeyPadBottomSheet(
                     state = debtAmountBottomSheetState,
                     initialMoneyAmount = rawSplitStrategyDebtAmounts[userInfo] ?: 0.0,
-                    isEnabled = { debtAmount ->
-                        debtAmount <= splitStrategyDebtAmounts.values.sum()
-                    },
+                    maxMoneyAmount = debtActionAmount,
                     onClick = { debtAmount ->
-                        rawSplitStrategyDebtAmounts[userInfo] = debtAmount
+                        rawSplitStrategyDebtAmounts[userInfo] =
+                            if (debtAmount > 0.0) debtAmount else null
                     },
                     onBackPress = {
                         scope.launch { debtAmountBottomSheetState.hide() }

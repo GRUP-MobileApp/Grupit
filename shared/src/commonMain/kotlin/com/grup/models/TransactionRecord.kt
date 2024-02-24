@@ -6,8 +6,8 @@ import com.grup.other.getCurrentTime
 
 abstract class TransactionRecord {
     companion object {
-        const val PENDING = "PENDING"
-        const val REJECTED = "REJECTED"
+        const val PENDING = "Pending"
+        const val REJECTED = "Declined"
 
         data class DataTransactionRecord(
             override val userInfo: UserInfo,

@@ -195,9 +195,7 @@ private fun WelcomeLayout(
                         venmoUsername = null,
                         profilePictureBitmap = pfpBitmap,
                         onSuccess = { navigator.pop() },
-                        onFailure = {
-                            println("Failed to register, error: $it")
-                        }
+                        onFailure = { }
                     )
                 }
             )

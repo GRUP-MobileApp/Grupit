@@ -165,7 +165,10 @@ private fun MainSettingsPage(
         }
     }
 
-    SimpleLazyListPage(pageName = "Account Settings") {
+    SimpleLazyListPage(
+        pageName = "Account Settings",
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
+    ) {
         item {
             ProfileSettings(
                 user = accountSettingsViewModel.userObject,
@@ -302,7 +305,7 @@ private fun EditProfilePage(
 
     val settingsMap: Map<String, Pair<String, () -> Unit>> = mapOf(
         "Display Name" to Pair(user.displayName, changePageEditDisplayName),
-        "Venmo Name" to Pair(user.venmoUsername ?: "Not Set", changePageEditVenmoUsername)
+        "Venmo Name" to Pair(user.venmoUsername, changePageEditVenmoUsername)
     )
 
     BackPressScaffold(

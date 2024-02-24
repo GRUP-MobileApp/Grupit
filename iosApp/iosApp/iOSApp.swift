@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseCore
 import FirebaseMessaging
 import shared
 
@@ -7,8 +8,9 @@ struct iOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     init() {
-        ModuleKt.doInitKoin()
+        FirebaseApp.configure()
         
+        ModuleKt.doInitKoin()
         ModuleKt.doInitAuthManager(
             authManager: AuthManager(
                 googleSignInManager: GoogleSignInManager(),
@@ -17,7 +19,7 @@ struct iOSApp: App {
         )
         ModuleKt.doInitNotificationManager(
             notificationManager: NotificationManager(
-                messaging: Messaging.messaging()
+                getMessaging: { Messaging.messaging() }
             )
         )
     }

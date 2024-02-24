@@ -14,7 +14,7 @@ object AccountSettings {
 
 object NotificationPermissions : ViewableAccountSettingsService() {
     fun isNotificationTypeToggled(notificationName: String): Boolean {
-        return AccountSettings.GroupNotificationType.values().find {
+        return AccountSettings.GroupNotificationType.entries.find {
             it.type == notificationName
         }?.let { notification ->
             NotificationPermissions.isNotificationTypeToggled(notification)

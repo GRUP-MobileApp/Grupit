@@ -14,7 +14,7 @@ internal class TransactionViewModel : LoggedInViewModel() {
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
         .map { userInfos ->
             userInfos.filter { userInfo ->
-                userInfo.group.id == selectedGroup?.id
+                userInfo.group.id == selectedGroupId
             }
         }
     val userInfos: StateFlow<List<UserInfo>> = _userInfosFlow.map { userInfos ->

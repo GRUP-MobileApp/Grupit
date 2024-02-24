@@ -39,7 +39,10 @@ internal class UserService : KoinComponent {
     }
 
     suspend fun updateProfilePicture(user: User, profilePicture: ByteArray) {
-        imagesRepository.uploadProfilePicture(user, profilePicture).let { profilePictureURL ->
+        if (user.profilePictureURL.isNotBlank()) {
+            imagesRepository.deleteProfilePicture(user.profilePictureURL)
+        }
+        imagesRepository.uploadProfilePicture(user.id, profilePicture).let { profilePictureURL ->
             userRepository.updateUser(user) {
                 this.profilePictureURL = profilePictureURL
             }

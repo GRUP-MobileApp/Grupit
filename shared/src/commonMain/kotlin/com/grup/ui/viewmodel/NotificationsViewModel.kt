@@ -1,6 +1,7 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.grup.models.Action
 import com.grup.models.DebtAction
 import com.grup.models.GroupInvite
 import com.grup.models.SettleAction

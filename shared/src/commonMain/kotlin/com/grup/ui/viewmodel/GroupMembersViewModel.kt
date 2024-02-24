@@ -2,9 +2,11 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.APIException
+import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -15,7 +17,7 @@ internal class GroupMembersViewModel : LoggedInViewModel() {
     val userInfos: StateFlow<List<UserInfo>> =
         _userInfosFlow.map { userInfos ->
             userInfos.filter { userInfo ->
-                userInfo.group.id == selectedGroup?.id
+                userInfo.group.id == selectedGroupId
             }.sortedBy { userInfo ->
                 if (userInfo.user.id == userObject.id) "" else userInfo.user.displayName
             }
@@ -36,10 +38,13 @@ internal class GroupMembersViewModel : LoggedInViewModel() {
     }
 
     fun inviteUserToGroup(username: String) {
-        selectedGroup?.let { group ->
+        selectedGroupId?.let { groupId ->
             _inviteResult.value = InviteResult.Pending
             screenModelScope.launch {
                 try {
+                    val group = apiServer.getAllGroupsAsFlow().first().find { group ->
+                        group.id == groupId
+                    } ?: throw UserNotInGroupException()
                     apiServer.inviteUserToGroup(username, group)
                     _inviteResult.value = InviteResult.Sent
                 } catch (e: APIException) {
