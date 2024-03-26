@@ -6,6 +6,7 @@ import com.grup.interfaces.IGroupRepository
 import com.grup.models.Group
 import com.grup.models.User
 import com.grup.models.realm.RealmGroup
+import com.grup.models.realm.RealmUser
 import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
@@ -21,10 +22,12 @@ internal abstract class RealmGroupRepository : IGroupRepository {
         user: User,
         groupName: String
     ): RealmGroup? = with(transaction as RealmManager.RealmWriteTransaction) {
-        val group: RealmGroup = RealmGroup().apply {
-            this.groupName = groupName
-        }
-        copyToRealm(group, UpdatePolicy.ERROR)
+        copyToRealm(
+            RealmGroup(user = user as RealmUser).apply {
+                this.groupName = groupName
+            },
+            UpdatePolicy.ERROR
+        )
     }
 
     override fun findGroupById(groupId: String): RealmGroup? {

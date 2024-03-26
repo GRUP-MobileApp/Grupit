@@ -96,6 +96,9 @@ internal open class RealmManager protected constructor(
                         realm.query<RealmUserInfo>("userId == $0", realmUser.id),
                         "MyUserInfos")
                     add(
+                        realm.query<RealmGroup>()
+                    )
+                    add(
                         realm.query<RealmGroupInvite>("inviterId == $0", realmUser.id),
                         "OutgoingGroupInvites"
                     )
