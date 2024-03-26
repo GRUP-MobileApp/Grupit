@@ -23,31 +23,31 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
-import com.grup.ui.viewmodel.TransactionViewModel
+import com.grup.ui.viewmodel.DebtActionViewModel
 import kotlinx.coroutines.launch
 
-internal class DebtActionView : Screen {
+internal class DebtActionView(private val groupId: String) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val transactionViewModel = getScreenModel<TransactionViewModel>()
         val navigator = LocalNavigator.currentOrThrow
+        val debtActionViewModel = rememberScreenModel { DebtActionViewModel(groupId) }
 
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
             DebtActionLayout(
-                transactionViewModel = transactionViewModel,
+                debtActionViewModel = debtActionViewModel,
                 navigator = navigator
             )
         }
@@ -56,12 +56,12 @@ internal class DebtActionView : Screen {
 
 @Composable
 private fun DebtActionLayout(
-    transactionViewModel: TransactionViewModel,
+    debtActionViewModel: DebtActionViewModel,
     navigator: Navigator
 ) {
     var currentPage: Int by remember { mutableStateOf(0) }
 
-    val userInfos: List<UserInfo> by transactionViewModel.userInfos.collectAsStateWithLifecycle()
+    val userInfos: List<UserInfo> by debtActionViewModel.userInfos.collectAsStateWithLifecycle()
 
     var debtActionAmount: String by remember { mutableStateOf("0") }
     var message: String by remember { mutableStateOf("") }
@@ -97,11 +97,11 @@ private fun DebtActionLayout(
                 changePageDebtActionDetails = { currentPage = 1 }
             )
             1 -> DebtActionDetailsPage(
-                userInfos = userInfos,
+                userInfos = userInfos.filter { it.user.id != debtActionViewModel.userObject.id },
                 debtActionAmount = debtActionAmount.toDouble(),
                 onBackPress = { currentPage = 0 },
                 createDebtAction = { debtActionAmounts ->
-                    transactionViewModel.createDebtAction(debtActionAmounts, message)
+                    debtActionViewModel.createDebtAction(debtActionAmounts, message)
                     navigator.pop()
                 }
             )
@@ -126,7 +126,7 @@ private fun DebtActionKeypadPage(
         onMessageChange = { onMessageChange(it) },
         confirmButton = {
             H1ConfirmTextButton(
-                text = "Request",
+                text = "Debt",
                 enabled = debtActionAmount.toDouble() > 0 && message.isNotBlank(),
                 onClick = changePageDebtActionDetails
             )
@@ -150,8 +150,8 @@ private fun DebtActionDetailsPage(
     )
     val scope = rememberCoroutineScope()
 
-    var splitStrategy: TransactionViewModel.SplitStrategy by remember {
-        mutableStateOf(TransactionViewModel.SplitStrategy.EvenSplit)
+    var splitStrategy: DebtActionViewModel.SplitStrategy by remember {
+        mutableStateOf(DebtActionViewModel.SplitStrategy.EvenSplit)
     }
 
     val rawSplitStrategyDebtAmounts:
@@ -281,8 +281,8 @@ private fun DebtActionDetailsPage(
 
 @Composable
 private fun DebtActionSettings(
-    splitStrategy: TransactionViewModel.SplitStrategy,
-    onSplitStrategyChange: (TransactionViewModel.SplitStrategy) -> Unit,
+    splitStrategy: DebtActionViewModel.SplitStrategy,
+    onSplitStrategyChange: (DebtActionViewModel.SplitStrategy) -> Unit,
     addDebtorsOnClick: () -> Unit
 ) {
     Row(
@@ -299,13 +299,13 @@ private fun DebtActionSettings(
                     .clickable {
                         // TODO: Make actual split strategy selection screen
                         when(splitStrategy) {
-                            is TransactionViewModel.SplitStrategy.EvenSplit -> {
+                            is DebtActionViewModel.SplitStrategy.EvenSplit -> {
                                 onSplitStrategyChange(
-                                    TransactionViewModel.SplitStrategy.UnevenSplit
+                                    DebtActionViewModel.SplitStrategy.UnevenSplit
                                 )
                             }
-                            is TransactionViewModel.SplitStrategy.UnevenSplit -> {
-                                onSplitStrategyChange(TransactionViewModel.SplitStrategy.EvenSplit)
+                            is DebtActionViewModel.SplitStrategy.UnevenSplit -> {
+                                onSplitStrategyChange(DebtActionViewModel.SplitStrategy.EvenSplit)
                             }
                             else -> {}
                         }
@@ -332,7 +332,7 @@ private fun AddDebtorBottomSheet(
     var selectedUsers: Set<UserInfo> by remember { mutableStateOf(emptySet()) }
     var usernameSearchQuery: String by remember { mutableStateOf("") }
 
-    BackPressModalBottomSheetLayout(
+    ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(

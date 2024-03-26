@@ -3,7 +3,10 @@ package com.grup.ui.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 // Money
 internal expect fun getCurrencySymbol(): String
@@ -22,20 +25,24 @@ internal fun Double.asPureMoneyAmount(): String =
     this.asCurrencySymbolAndMoneyAmount().second
 
 // Date
-fun isoDate(date: String) = LocalDateTime.parse(date).date.let { localDate ->
-    "${localDate.month.name.substring(0, 3).let { it.first() + it.substring(1).lowercase() }} " +
-            "${localDate.dayOfMonth}"
-}
-fun isoFullDate(date: String) = "${isoDate(date)} ${LocalDateTime.parse(date).year}"
+private fun Instant.toLocalDT() = this.toLocalDateTime(TimeZone.currentSystemDefault())
 
-fun isoTime(date: String) = LocalDateTime.parse(date).time.let { localTime ->
-    localTime.hour.let { hour ->
-        localTime.minute.let { minute ->
-            "${hour % 12}:${if (minute < 10) 0 else ""}${minute} " +
-                    if (hour / 12 > 0) "AM" else "PM"
+fun isoDate(date: Instant) = date.toLocalDT().let { localDate ->
+        localDate.month.name.substring(0, 3).let {
+            it.first() + it.substring(1).lowercase()
+        } + " ${localDate.dayOfMonth}"
+    }
+fun isoFullDate(date: Instant) = "${isoDate(date)} ${date.toLocalDT().year}"
+
+fun isoTime(date: Instant) =
+    date.toLocalDT().time.let { localTime ->
+        localTime.hour.let { hour ->
+            localTime.minute.let { minute ->
+                "${hour % 12}:${if (minute < 10) 0 else ""}${minute} " +
+                        if (hour / 12 > 0) "AM" else "PM"
+            }
         }
     }
-}
 
 @Composable
 internal expect fun <T> StateFlow<T>.collectAsStateWithLifecycle(): State<T>

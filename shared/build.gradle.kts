@@ -1,19 +1,19 @@
 val ktorVersion: String by project
 val koinVersion: String by project
 val realmVersion: String by project
+val napierVersion: String by project
 val composeVersion: String by project
 val voyagerVersion: String by project
 val lifecycleVersion: String by project
 val firebaseBOMVersion: String by project
 val mokoResourcesVersion: String by project
 val kotlinExtensionVersion: String by project
-val napierVersion = "2.4.0"
 
 val keystorePassword: String by project
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.22"
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
@@ -53,13 +53,13 @@ kotlin {
         xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
     }
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
-                // Kotlin Libraries
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-
                 // Logger
                 implementation("io.github.aakira:napier:$napierVersion")
+
+                // Kotlin Libraries
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
                 // Compose
                 implementation(compose.runtime)
@@ -105,7 +105,7 @@ kotlin {
                 implementation("com.russhwolf:multiplatform-settings-coroutines:1.0.0")
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation(kotlin("test-common"))
@@ -115,8 +115,8 @@ kotlin {
                 implementation("io.insert-koin:koin-test:$koinVersion")
             }
         }
-        val androidMain by getting {
-            dependsOn(commonMain)
+        androidMain {
+            dependsOn(getByName("commonMain"))
             dependencies {
                 implementation("androidx.activity:activity-compose:1.8.2")
 
@@ -125,7 +125,7 @@ kotlin {
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
                 // GoogleSignIn
-                implementation ("com.google.android.gms:play-services-auth:20.7.0")
+                implementation ("com.google.android.gms:play-services-auth:21.0.0")
 
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
@@ -140,28 +140,20 @@ kotlin {
                 implementation("com.google.firebase:firebase-messaging-ktx")
             }
         }
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-
+        iosMain {
+            dependsOn(getByName("commonMain"))
+            getByName("iosX64Main").dependsOn(this)
+            getByName("iosArm64Main").dependsOn(this)
+            getByName("iosSimulatorArm64Main").dependsOn(this)
             dependencies {
                 implementation("io.ktor:ktor-client-darwin:$ktorVersion")
             }
         }
-        val iosX64Test by getting
-        val iosArm64Test by getting
-        val iosSimulatorArm64Test by getting
-        val iosTest by creating {
-            dependsOn(commonTest)
-            iosX64Test.dependsOn(this)
-            iosArm64Test.dependsOn(this)
-            iosSimulatorArm64Test.dependsOn(this)
-
+        iosTest {
+            dependsOn(getByName("commonTest"))
+            getByName("iosX64Test").dependsOn(this)
+            getByName("iosArm64Test").dependsOn(this)
+            getByName("iosSimulatorArm64Test").dependsOn(this)
             dependencies {
                 implementation("io.ktor:ktor-client-darwin:$ktorVersion")
             }
@@ -172,7 +164,7 @@ kotlin {
 android {
     signingConfigs {
         create("release") {
-            storeFile = file("../androidApp/signedkey")
+            storeFile = file("../androidApp/signedKey")
             storePassword = keystorePassword
             keyAlias = "upload"
             keyPassword = keystorePassword

@@ -18,7 +18,7 @@ plugins {
 android {
     signingConfigs {
         create("release") {
-            storeFile = file("signedkey")
+            storeFile = file("signedKey")
             storePassword = keystorePassword
             keyAlias = "upload"
             keyPassword = keystorePassword
@@ -68,8 +68,8 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Google Play Services
-    implementation ("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.android.gms:play-services-base:18.2.0")
+    implementation ("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.android.gms:play-services-base:18.3.0")
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
 

@@ -14,43 +14,60 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.models.SettleAction
 import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.KeyPadScreenLayout
 import com.grup.ui.compose.asPureMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
-import com.grup.ui.viewmodel.SettleActionViewModel
+import com.grup.ui.viewmodel.SettleActionTransactionViewModel
+import kotlin.math.abs
+import kotlin.math.min
 
-internal class SettleActionView(private val groupId: String) : Screen {
+internal class SettleActionTransactionView(
+    private val groupId: String,
+    private val settleActionId: String
+) : Screen {
     override val key: ScreenKey = uniqueScreenKey
+
     @Composable
     override fun Content() {
-        val settleActionViewModel = rememberScreenModel { SettleActionViewModel(groupId) }
+        val settleActionTransactionViewModel =
+            rememberScreenModel { SettleActionTransactionViewModel(groupId, settleActionId) }
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            SettleActionLayout(settleActionViewModel = settleActionViewModel, navigator = navigator)
+            SettleActionLayout(
+                settleActionTransactionViewModel = settleActionTransactionViewModel,
+                navigator = navigator
+            )
         }
     }
 }
 
 @Composable
 private fun SettleActionLayout(
-    settleActionViewModel: SettleActionViewModel,
+    settleActionTransactionViewModel: SettleActionTransactionViewModel,
     navigator: Navigator
 ) {
-    var settleActionAmount: String by remember { mutableStateOf("0") }
+    var settleActionTransactionAmount: String by remember { mutableStateOf("0") }
 
-    val myUserInfo: UserInfo by settleActionViewModel.myUserInfo.collectAsStateWithLifecycle()
+    val myUserInfo: UserInfo by
+            settleActionTransactionViewModel.myUserInfo.collectAsStateWithLifecycle()
+    val settleAction: SettleAction by
+            settleActionTransactionViewModel.settleAction.collectAsStateWithLifecycle()
+
+    val maxTransactionAmount: Double =
+        min(abs(min(myUserInfo.userBalance, 0.0)), settleAction.remainingAmount)
 
     KeyPadScreenLayout(
-        moneyAmount = settleActionAmount,
+        moneyAmount = settleActionTransactionAmount,
         onMoneyAmountChange = { moneyAmount ->
-            settleActionAmount = if (moneyAmount.toDouble() > myUserInfo.userBalance) {
-                myUserInfo.userBalance.asPureMoneyAmount()
+            settleActionTransactionAmount = if (moneyAmount.toDouble() > maxTransactionAmount) {
+                maxTransactionAmount.asPureMoneyAmount()
             } else {
                 moneyAmount
             }
@@ -60,10 +77,10 @@ private fun SettleActionLayout(
             H1ConfirmTextButton(
                 text = "Settle",
                 onClick = {
-                    settleActionViewModel.createSettleAction(
-                        settleActionAmount.toDouble(),
+                    settleActionTransactionViewModel.createSettleActionTransaction(
+                        amount = settleActionTransactionAmount.toDouble(),
                         onSuccess = {
-                            navigator.pop()
+                            navigator.popUntil { it is GroupDetailsView }
                         },
                         onError = { }
                     )

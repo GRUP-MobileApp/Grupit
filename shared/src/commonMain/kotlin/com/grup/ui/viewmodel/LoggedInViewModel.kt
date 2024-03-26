@@ -16,19 +16,12 @@ import org.koin.core.component.inject
 internal abstract class LoggedInViewModel : KoinComponent, ScreenModel {
     private companion object {
         private const val STOP_TIMEOUT_MILLIS: Long = 5000
-
-        private val _selectedGroupIdMutable: MutableStateFlow<String?> =
-            MutableStateFlow(null)
     }
 
     protected val apiServer: APIServer by inject()
 
     protected open val userObject: User
         get() = apiServer.user
-
-    protected var selectedGroupId: String?
-        get() = _selectedGroupIdMutable.value
-        set(value) { _selectedGroupIdMutable.value = value }
 
     protected fun <T> Flow<T>.asState() =
         runBlocking { this@asState.first() }.let { initialValue ->

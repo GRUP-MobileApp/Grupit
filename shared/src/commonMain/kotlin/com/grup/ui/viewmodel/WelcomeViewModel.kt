@@ -2,7 +2,6 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.APIException
-import com.grup.models.User
 import com.grup.platform.image.cropCenterSquareImage
 import com.grup.ui.compose.validateName
 import com.grup.ui.compose.validateUsername
@@ -46,7 +45,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
             username = username,
             onValid = {
                 currentJob = screenModelScope.launch {
-                    if (!apiServer.validUsername(username)) {
+                    if (apiServer.usernameExists(username)) {
                         _usernameValidity.value = NameValidity.Invalid("Username taken")
                     } else {
                         _usernameValidity.value = NameValidity.Valid
@@ -117,7 +116,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         venmoUsername: String?,
         profilePictureBitmap: Bitmap?,
         onSuccess: () -> Unit,
-        onFailure: (String?) -> Unit
+        onError: (String?) -> Unit
     ) = screenModelScope.launch {
         try {
             apiServer.registerUser(
@@ -128,7 +127,7 @@ internal class WelcomeViewModel : LoggedInViewModel() {
             )
             onSuccess()
         } catch (e: APIException) {
-            onFailure(e.message)
+            onError(e.message)
         }
     }
 }

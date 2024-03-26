@@ -14,28 +14,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
-import com.grup.ui.*
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
 import com.grup.ui.viewmodel.GroupMembersViewModel
 import kotlinx.coroutines.launch
 
-internal class GroupMembersView : Screen {
+internal class GroupMembersView(private val groupId: String) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            val groupMembersViewModel = getScreenModel<GroupMembersViewModel>()
+            val groupMembersViewModel = rememberScreenModel { GroupMembersViewModel(groupId) }
             val navigator = LocalNavigator.currentOrThrow
             GroupMembersLayout(
                 groupMembersViewModel = groupMembersViewModel,
@@ -163,7 +162,7 @@ private fun GroupMemberInfoBottomSheet(
     state: ModalBottomSheetState,
     content: @Composable () -> Unit
 ) {
-    BackPressModalBottomSheetLayout(
+    ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
@@ -212,7 +211,7 @@ private fun AddToGroupBottomSheetLayout(
             Color.Transparent
         }
 
-    BackPressModalBottomSheetLayout(
+    ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(

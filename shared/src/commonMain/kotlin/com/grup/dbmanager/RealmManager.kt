@@ -1,28 +1,36 @@
-package com.grup.di
+package com.grup.dbmanager
 
-import com.grup.exceptions.MissingFieldException
 import com.grup.exceptions.login.NotLoggedInException
-import com.grup.interfaces.DBManager
+import com.grup.dbmanager.realm.SyncResetStrategy
+import com.grup.di.realmModules
+import com.grup.models.BaseEntity
+import com.grup.models.TransactionRecord
+import com.grup.other.NestedRealmObject
 import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmGroup
 import com.grup.models.realm.RealmGroupInvite
 import com.grup.models.realm.RealmSettleAction
 import com.grup.models.realm.RealmTransactionRecord
+import com.grup.models.realm.RealmTransactionRecord.Companion.toRealmTransactionRecord
 import com.grup.models.realm.RealmUser
 import com.grup.models.realm.RealmUserInfo
+import com.grup.other.getLatest
 import com.grup.other.APP_ID
 import com.grup.other.TEST_APP_ID
 import com.grup.other.idSerialName
 import com.grup.platform.signin.AuthManager
 import com.grup.platform.notification.NotificationManager
+import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
+import io.realm.kotlin.mongodb.AppConfiguration
 import io.realm.kotlin.mongodb.AuthenticationProvider
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.mongodb.sync.asQuery
 import io.realm.kotlin.mongodb.syncSession
+import io.realm.kotlin.types.BaseRealmObject
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -37,12 +45,24 @@ import org.koin.core.context.unloadKoinModules
 import kotlin.jvm.JvmStatic
 import kotlin.time.Duration.Companion.seconds
 
-internal open class RealmManager(private val isDebug: Boolean = false) : DBManager, KoinComponent {
+internal open class RealmManager protected constructor(
+    private val isDebug: Boolean = false
+) : DatabaseManager(), KoinComponent {
     protected companion object {
         @JvmStatic
-        protected val releaseApp: App = App.create(APP_ID)
+        protected val releaseApp: App = App.create(
+            AppConfiguration.Builder(APP_ID)
+                .baseUrl("https://services.cloud.mongodb.com")
+                .enableSessionMultiplexing(true)
+                .build()
+        )
         @JvmStatic
-        protected val debugApp: App = App.create(TEST_APP_ID)
+        protected val debugApp: App = App.create(
+            AppConfiguration.Builder(TEST_APP_ID)
+                .baseUrl("https://services.cloud.mongodb.com")
+                .enableSessionMultiplexing(true)
+                .build()
+        )
     }
 
     private val app: App
@@ -58,10 +78,6 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
         } ?: throw NotLoggedInException("Not logged into Realm")
 
     private val notificationManager: NotificationManager by inject()
-
-    override suspend fun <T> startDBTransaction(transaction: () -> T) =
-        realm.write { transaction() }
-
 
     private val realm: Realm = app.currentUser?.let { realmUser ->
         Realm.open(
@@ -95,44 +111,18 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
         )
     } ?: throw NotLoggedInException()
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private val userSubscriptionsJob: Job = GlobalScope.launch(
-        Dispatchers.Main,
-        CoroutineStart.LAZY
-    ) {
-        val userInfosFlow: Flow<List<RealmUserInfo>> =
-            realm.query<RealmUserInfo>().asFlow().map { it.list }
-        val groupInvitesFlow: Flow<List<RealmGroupInvite>> =
-            realm.subscriptions.findByName("IncomingGroupInvites")!!
-                .asQuery<RealmGroupInvite>().asFlow().map { it.list }
-
-        val userIdsFromUserInfos: Flow<List<String>> = userInfosFlow.map { userInfos ->
-            userInfos.map { it._userId ?: throw MissingFieldException() }
-        }
-        val userIdsFromGroupInvitesInviters: Flow<List<String>> =
-            groupInvitesFlow.map { groupInvites ->
-                groupInvites.map { it._inviterId ?: throw MissingFieldException() }
-            }
-
-        var prevSubscribedUserIds: Set<String> = emptySet()
-        combine(
-            userIdsFromUserInfos,
-            userIdsFromGroupInvitesInviters
-        ) { allUserIds: Array<List<String>> ->
-            allUserIds.flatMap { it }.toSet()
-        }.collect { newUserIds: Set<String> ->
-            realm.subscriptions.update {
-                newUserIds.minus(prevSubscribedUserIds).forEach { userId ->
-                    add(realm.query<RealmUser>("$idSerialName == $0", userId),
-                        "${userId}_User")
-                }
-                prevSubscribedUserIds.minus(newUserIds).forEach { userId ->
-                    remove("${userId}_User")
-                }
-            }
-            prevSubscribedUserIds = newUserIds
+    inner class RealmWriteTransaction(private val mutableRealm: MutableRealm) :
+        DatabaseWriteTransaction(), MutableRealm by mutableRealm {
+        override fun <T : BaseEntity> findObject(obj: T): T? = when(obj) {
+            is BaseRealmObject -> getLatest(obj)
+            else -> null
         }
     }
+
+    override suspend fun <T> write(transaction: DatabaseWriteTransaction.() -> T): T = realm.write {
+        transaction(RealmWriteTransaction(this))
+    }
+
 
     @OptIn(DelicateCoroutinesApi::class)
     private val groupSubscriptionsJob: Job = GlobalScope.launch(
@@ -145,7 +135,7 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
 
         // GroupIds
         val groupIdsFromUserInfos: Flow<List<String>> = userInfosFlow.map { userInfos ->
-            userInfos.map { it._groupId ?: throw MissingFieldException() }
+            userInfos.map { it.groupId }
         }
 
         var prevSubscribedGroupIds: Set<String> = emptySet()
@@ -187,6 +177,45 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
     }
 
     @OptIn(DelicateCoroutinesApi::class)
+    private val userSubscriptionsJob: Job = GlobalScope.launch(
+        Dispatchers.Main,
+        CoroutineStart.LAZY
+    ) {
+        val userInfosFlow: Flow<List<RealmUserInfo>> =
+            realm.query<RealmUserInfo>().asFlow().map { it.list }
+        val groupInvitesFlow: Flow<List<RealmGroupInvite>> =
+            realm.subscriptions.findByName("IncomingGroupInvites")!!
+                .asQuery<RealmGroupInvite>().asFlow().map { it.list }
+
+        val userIdsFromUserInfos: Flow<List<String>> = userInfosFlow.map { userInfos ->
+            userInfos.map { it.userId }
+        }
+        val userIdsFromGroupInvitesInviters: Flow<List<String>> =
+            groupInvitesFlow.map { groupInvites ->
+                groupInvites.map { it.inviterId }
+            }
+
+        var prevSubscribedUserIds: Set<String> = emptySet()
+        combine(
+            userIdsFromUserInfos,
+            userIdsFromGroupInvitesInviters
+        ) { allUserIds: Array<List<String>> ->
+            allUserIds.flatMap { it }.toSet()
+        }.collect { newUserIds: Set<String> ->
+            realm.subscriptions.update {
+                newUserIds.minus(prevSubscribedUserIds).forEach { userId ->
+                    add(realm.query<RealmUser>("$idSerialName == $0", userId),
+                        "${userId}_User")
+                }
+                prevSubscribedUserIds.minus(newUserIds).forEach { userId ->
+                    remove("${userId}_User")
+                }
+            }
+            prevSubscribedUserIds = newUserIds
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
     private val groupOnlySubscriptionJob: Job = GlobalScope.launch(
         Dispatchers.Main,
         CoroutineStart.LAZY
@@ -198,7 +227,7 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
         // GroupIds
         val groupIdsFromIncomingGroupInvite: Flow<List<String>> =
             incomingGroupInvites.map { groupInvites ->
-                groupInvites.map { it._groupId ?: throw MissingFieldException() }
+                groupInvites.map { it.groupId }
             }
 
         var prevSubscribedGroupIds: Set<String> = emptySet()
@@ -226,10 +255,10 @@ internal open class RealmManager(private val isDebug: Boolean = false) : DBManag
         app.currentUser?.let { realmUser ->
             notificationManager.subscribePersonalNotifications(realmUser.id)
         } ?: throw NotLoggedInException()
-        realm.subscriptions.waitForSynchronization(5.seconds)
-        realm.syncSession.downloadAllServerChanges(5.seconds)
-        userSubscriptionsJob.start()
         groupSubscriptionsJob.start()
+        userSubscriptionsJob.start()
+        realm.subscriptions.waitForSynchronization(0.5.seconds)
+        realm.syncSession.downloadAllServerChanges(0.5.seconds)
         groupOnlySubscriptionJob.start()
         loadKoinModules(realmModules(realm, isDebug))
     }

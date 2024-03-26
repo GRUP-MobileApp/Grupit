@@ -25,14 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.models.Group
 import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.Caption
@@ -49,7 +48,7 @@ internal class GroupsView: Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val groupsViewModel = getScreenModel<GroupsViewModel>()
+        val groupsViewModel = rememberScreenModel { GroupsViewModel() }
 
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
@@ -64,7 +63,6 @@ private fun GroupsLayout(
     groupsViewModel: GroupsViewModel,
     navigator: Navigator
 ) {
-    val groups: List<Group> by groupsViewModel.groups.collectAsStateWithLifecycle()
     val userInfos: List<UserInfo> by groupsViewModel.userInfosFlow.collectAsStateWithLifecycle()
 
     val myUserInfos: List<UserInfo> = userInfos.filter { userInfo ->
@@ -118,7 +116,7 @@ private fun GroupsLayout(
                         .fillMaxWidth()
                 )
             }
-            items(groups) { group ->
+            items(myUserInfos.map { it.group }) { group ->
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -127,9 +125,7 @@ private fun GroupsLayout(
                         .clip(AppTheme.shapes.large)
                         .background(AppTheme.colors.secondary)
                         .clickable {
-                            groupsViewModel.selectGroup(group.id) {
-                                navigator.push(GroupDetailsView(group.id))
-                            }
+                            navigator.push(GroupDetailsView(group.id))
                         }
                         .padding(AppTheme.dimensions.rowCardPadding)
                 ) {

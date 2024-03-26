@@ -9,13 +9,13 @@ internal class CreateGroupViewModel : LoggedInViewModel() {
     fun createGroup(
         groupName: String,
         onSuccess: () -> Unit,
-        onFailure: (String?) -> Unit
+        onError: (String?) -> Unit
     ) = screenModelScope.launch {
         try {
             apiServer.createGroup(groupName)
             onSuccess()
         } catch (e: APIException) {
-            onFailure(e.message)
+            onError(e.message)
         }
     }
 }

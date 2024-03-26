@@ -21,10 +21,10 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -49,7 +49,7 @@ internal class WelcomeView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val welcomeViewModel= getScreenModel<WelcomeViewModel>()
+        val welcomeViewModel= rememberScreenModel { WelcomeViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -192,10 +192,10 @@ private fun WelcomeLayout(
                     welcomeViewModel.registerUserObject(
                         username = username,
                         displayName = "$firstName $lastName".trim(),
-                        venmoUsername = null,
+                        venmoUsername = venmoUsername,
                         profilePictureBitmap = pfpBitmap,
                         onSuccess = { navigator.pop() },
-                        onFailure = { }
+                        onError = { }
                     )
                 }
             )

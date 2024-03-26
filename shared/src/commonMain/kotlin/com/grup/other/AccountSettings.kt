@@ -1,6 +1,6 @@
 package com.grup.other
 
-import com.grup.service.ViewableAccountSettingsService
+import com.grup.service.AccountSettingsService
 
 object AccountSettings {
     enum class GroupNotificationType(val type: String) {
@@ -12,7 +12,7 @@ object AccountSettings {
     }
 }
 
-object NotificationPermissions : ViewableAccountSettingsService() {
+object NotificationPermissions : AccountSettingsService() {
     fun isNotificationTypeToggled(notificationName: String): Boolean {
         return AccountSettings.GroupNotificationType.entries.find {
             it.type == notificationName

@@ -1,9 +1,11 @@
 package com.grup.interfaces
 
 import com.grup.models.User
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 
 internal interface IUserRepository : IRepository {
-    suspend fun createMyUser(
+    fun createMyUser(
+        transaction: DatabaseWriteTransaction,
         username: String,
         displayName: String,
         venmoUsername: String? = null
@@ -12,5 +14,5 @@ internal interface IUserRepository : IRepository {
     fun findMyUser(): User?
     suspend fun findUserByUsername(username: String): User?
 
-    suspend fun updateUser(user: User, block: User.() -> Unit): User
+    fun updateUser(transaction: DatabaseWriteTransaction, user: User, block: User.() -> Unit): User
 }

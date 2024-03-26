@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,13 +36,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -52,7 +50,7 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
-import com.grup.ui.compose.H1DenyTextButton
+import com.grup.ui.compose.H1ErrorTextButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.InvisibleTextField
 import com.grup.ui.compose.ProfileIcon
@@ -71,7 +69,7 @@ internal class AccountSettingsView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val accountSettingsViewModel = getScreenModel<AccountSettingsViewModel>()
+        val accountSettingsViewModel = rememberScreenModel { AccountSettingsViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
         CompositionLocalProvider(
@@ -193,7 +191,7 @@ private fun MainSettingsPage(
             )
         }
         item {
-            H1DenyTextButton(
+            H1ErrorTextButton(
                 text = "Log Out",
                 onClick = logOutOnClick,
                 scale = 0.9f

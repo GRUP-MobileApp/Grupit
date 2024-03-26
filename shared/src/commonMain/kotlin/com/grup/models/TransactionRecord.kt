@@ -1,39 +1,47 @@
 package com.grup.models
 
-import com.grup.models.realm.RealmTransactionRecord
-import com.grup.models.realm.RealmUserInfo
 import com.grup.other.getCurrentTime
+import kotlinx.datetime.Instant
 
-abstract class TransactionRecord {
+abstract class TransactionRecord internal constructor() : BaseEntity() {
+    override var _id: String = ""
+
+    sealed class Status {
+        internal companion object {
+            const val PENDING = "PENDING"
+            const val REJECTED = "REJECTED"
+            const val ACCEPTED = "ACCEPTED"
+        }
+
+        abstract val status: String
+
+        data object Pending : Status() {
+            override val status: String
+                get() = PENDING
+        }
+        data object Rejected : Status() {
+            override val status: String
+                get() = REJECTED
+        }
+
+        data class Accepted(val date: Instant = getCurrentTime()) : Status() {
+            override val status: String
+                get() = ACCEPTED
+        }
+    }
+
     companion object {
-        const val PENDING = "Pending"
-        const val REJECTED = "Declined"
-
         data class DataTransactionRecord(
             override val userInfo: UserInfo,
             override var balanceChange: Double,
         ) : TransactionRecord() {
-            override val dateCreated: String = getCurrentTime()
-            override var dateAccepted: String = PENDING
+            override val dateCreated: Instant = getCurrentTime()
+            override var status: Status = Status.Pending
         }
     }
 
     abstract val userInfo: UserInfo
     abstract var balanceChange: Double
-    abstract val dateCreated: String
-    abstract var dateAccepted: String
-
-    val isAccepted: Boolean
-        get() = !(dateAccepted == PENDING || dateAccepted == REJECTED)
-
-    val isPending: Boolean
-        get() = dateAccepted == PENDING
-
-    internal fun toRealmTransactionRecord(): RealmTransactionRecord =
-        RealmTransactionRecord().apply {
-            _userInfo = this@TransactionRecord.userInfo as RealmUserInfo
-            _balanceChange = this@TransactionRecord.balanceChange
-            _dateCreated = this@TransactionRecord.dateCreated
-            _dateAccepted = this@TransactionRecord.dateAccepted
-        }
+    abstract val dateCreated: Instant
+    abstract var status: Status
 }

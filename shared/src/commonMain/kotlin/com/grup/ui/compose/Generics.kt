@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.TextFieldDefaults.indicatorLine
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.*
 import com.grup.models.Group
+import com.grup.models.TransactionRecord
 import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.platform.signin.GoogleSignInManager
@@ -289,6 +291,38 @@ internal fun H1DenyTextButton(
     onClick: () -> Unit
 ) {
     TextButton(
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = AppTheme.colors.deny,
+            disabledBackgroundColor = AppTheme.colors.caption
+        ),
+        modifier = modifier
+            .width(width.times(scale))
+            .height(height.times(scale)),
+        shape = AppTheme.shapes.circleShape,
+        enabled = enabled,
+        onClick = onClick
+    ) {
+        H1Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize.times(scale),
+            color = AppTheme.colors.onSecondary,
+        )
+    }
+}
+
+@Composable
+internal fun H1ErrorTextButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    scale: Float = 1f,
+    width: Dp = 140.dp,
+    height: Dp = 42.dp,
+    fontSize: TextUnit = AppTheme.typography.mediumFont,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    TextButton(
         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.secondary),
         modifier = modifier
             .width(width.times(scale))
@@ -301,7 +335,7 @@ internal fun H1DenyTextButton(
             text = text,
             fontWeight = FontWeight.Bold,
             fontSize = fontSize.times(scale),
-            color = AppTheme.colors.deny,
+            color = AppTheme.colors.error,
         )
     }
 }
@@ -415,7 +449,7 @@ internal fun BackPressScaffold(
                 navigationIcon = {
                     IconButton(onClick = onBackPress) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                         )
                     }
@@ -483,6 +517,37 @@ internal fun IconRowCard(
             sideContent()
         }
     }
+}
+
+@Composable
+internal fun TransactionRecordRowCard(
+    modifier: Modifier = Modifier,
+    transactionRecord: TransactionRecord,
+    moneyAmountTextColor: Color
+) {
+    UserRowCard(
+        user = transactionRecord.userInfo.user,
+        iconSize = 50.dp,
+        mainContent = {
+            H1Text(text = transactionRecord.userInfo.user.displayName)
+            Caption(
+                text = with(transactionRecord.status) {
+                    if (this is TransactionRecord.Status.Accepted)
+                        "Accepted on ${isoDate(date)}"
+                    else
+                        status
+                }
+            )
+        },
+        sideContent = {
+            MoneyAmount(
+                moneyAmount = transactionRecord.balanceChange,
+                fontSize = 24.sp,
+                color = moneyAmountTextColor
+            )
+        },
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -695,7 +760,7 @@ internal fun KeyPadBottomSheet(
             initialMoneyAmount.asPureMoneyAmount()
     }
 
-    BackPressModalBottomSheetLayout(
+    ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             KeyPadScreenLayout(
@@ -944,90 +1009,6 @@ internal fun UserInfoAmountsList(
     }
 }
 
-internal fun LazyListScope.recentActivityList(
-    groupActivity: List<TransactionActivity>,
-    transactionActivityOnClick: (TransactionActivity) -> Unit = {}
-) {
-    item {
-        H1Header(
-            text = "Recent Transactions",
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-    }
-    groupActivity.groupBy {
-        isoFullDate(it.date)
-    }.let { groupActivityByDate ->
-        groupActivityByDate.keys.forEach { date ->
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = AppTheme.dimensions.appPadding)
-                ) {
-                    Caption(text = date)
-                }
-            }
-            items(groupActivityByDate[date]!!) { transactionActivity ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = AppTheme.dimensions.appPadding)
-                        .clip(AppTheme.shapes.large)
-                        .background(AppTheme.colors.secondary)
-                        .clickable { transactionActivityOnClick(transactionActivity) }
-                        .padding(AppTheme.dimensions.rowCardPadding)
-                ) {
-                    TransactionActivityRowCard(transactionActivity = transactionActivity)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-internal fun RecentActivityList(
-    modifier: Modifier = Modifier,
-    groupActivity: List<TransactionActivity>
-) {
-    val groupActivityByDate: Map<String, List<TransactionActivity>> =
-        groupActivity.groupBy { isoFullDate(it.date) }
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        H1Header(text = "Recent Transactions", fontWeight = FontWeight.Medium)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(AppTheme.shapes.listShape)
-                .background(AppTheme.colors.secondary)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(AppTheme.dimensions.cardPadding)
-            ) {
-                groupActivityByDate.keys.forEach { date ->
-                    Caption(text = date)
-                    Column(
-                        verticalArrangement = Arrangement
-                            .spacedBy(AppTheme.dimensions.spacingSmall),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        groupActivityByDate[date]!!.forEach { transactionActivity ->
-                            H1Text(text = transactionActivity.displayText())
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 @Composable
 internal fun UsernameSearchBar(
     modifier: Modifier = Modifier,
@@ -1115,7 +1096,7 @@ internal fun TransparentTextField(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-internal fun BackPressModalBottomSheetLayout(
+internal fun ModalBottomSheetLayout(
     sheetContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier.fillMaxSize(),
     sheetState: ModalBottomSheetState,
@@ -1126,7 +1107,7 @@ internal fun BackPressModalBottomSheetLayout(
     scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
     content: @Composable () -> Unit
 ) {
-    ModalBottomSheetLayout(
+    androidx.compose.material.ModalBottomSheetLayout(
         sheetContent = sheetContent,
         modifier = modifier,
         sheetState = sheetState,

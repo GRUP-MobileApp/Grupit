@@ -12,8 +12,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -29,7 +29,7 @@ internal class StartView(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val startViewModel = getScreenModel<StartViewModel>()
+        val startViewModel = rememberScreenModel { StartViewModel() }
 
         LaunchedEffect(true) {
             startViewModel.silentSignIn(isDebug = isDebug)

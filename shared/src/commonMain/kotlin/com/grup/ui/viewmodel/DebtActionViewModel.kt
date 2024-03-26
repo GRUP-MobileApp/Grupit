@@ -1,32 +1,30 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.grup.exceptions.APIException
-import com.grup.models.TransactionRecord.Companion.DataTransactionRecord
+import com.grup.exceptions.UserNotInGroupException
+import com.grup.models.TransactionRecord
+import com.grup.models.User
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-internal class TransactionViewModel : LoggedInViewModel() {
-    // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
-    // change during lifecycle.
+internal class DebtActionViewModel(private val selectedGroupId: String) : LoggedInViewModel() {
+    public override val userObject: User
+        get() = super.userObject
+
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
         .map { userInfos ->
             userInfos.filter { userInfo ->
                 userInfo.group.id == selectedGroupId
             }
         }
-    val userInfos: StateFlow<List<UserInfo>> = _userInfosFlow.map { userInfos ->
-        userInfos.filter { userInfo ->
-            userInfo.user.id != userObject.id
-        }
-    }.asState()
+    val userInfos: StateFlow<List<UserInfo>> = _userInfosFlow.asState()
 
     private val myUserInfo: StateFlow<UserInfo> = _userInfosFlow.map { userInfos ->
         userInfos.find { userInfo ->
             userInfo.user.id == userObject.id
-        }!! // TODO: Remove double bang
+        } ?: throw UserNotInGroupException()
     }.asState()
 
 
@@ -118,30 +116,13 @@ internal class TransactionViewModel : LoggedInViewModel() {
     fun createDebtAction(
         debtActionAmounts: Map<UserInfo, Double>,
         message: String
-    ) = apiServer.createDebtAction(
-        myUserInfo.value,
-        message,
-        debtActionAmounts.map { (userInfo, balanceChange) ->
-            DataTransactionRecord(userInfo, balanceChange)
-        }
-    )
-
-    // SettleAction
-    fun createSettleAction(
-        settleActionAmounts: Map<UserInfo, Double>,
-        onSuccess: () -> Unit,
-        onFailure: (String?) -> Unit
     ) = screenModelScope.launch {
-        try {
-            apiServer.createSettleAction(
-                myUserInfo.value,
-                settleActionAmounts.map { (userInfo, balanceChange) ->
-                    DataTransactionRecord(userInfo, balanceChange)
-                }
-            )
-            onSuccess()
-        } catch (e: APIException) {
-            onFailure(e.message)
-        }
+        apiServer.createDebtAction(
+            myUserInfo.value,
+            debtActionAmounts.map { (userInfo, balanceChange) ->
+                TransactionRecord.Companion.DataTransactionRecord(userInfo, balanceChange)
+            },
+            message
+        )
     }
 }

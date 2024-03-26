@@ -2,36 +2,60 @@ package com.grup.models.realm
 
 import com.grup.exceptions.MissingFieldException
 import com.grup.models.UserInfo
+import com.grup.other.NestedRealmObject
 import com.grup.other.createId
-import com.grup.other.getCurrentTime
+import com.grup.other.getLatest
+import com.grup.other.toInstant
+import io.realm.kotlin.MutableRealm
+import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PersistedName
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.datetime.Instant
 
 @PersistedName("UserInfo")
-internal class RealmUserInfo : UserInfo(), RealmObject {
+internal class RealmUserInfo() : UserInfo(), RealmObject, NestedRealmObject {
+    constructor(user: RealmUser, group: RealmGroup): this() {
+        _user = user
+        _userId = user.id
+        _group = group
+        _groupId = group.id
+    }
+
     @PrimaryKey override var _id: String = createId()
 
     override val user: RealmUser
         get() = _user ?: throw MissingFieldException("UserInfo with id $_id missing User")
     override val group: RealmGroup
-        get() = _group ?: throw MissingFieldException("UserInfo with id $_id missing groupId")
+        get() = _group ?: throw MissingFieldException("UserInfo with id $_id missing Group")
     override var userBalance: Double
         get() = _userBalance
         set(value) { _userBalance = value }
-    override val joinDate: String
-        get() = _joinDate
+    override val joinDate: Instant
+        get() = _joinDate.toInstant()
+
+    internal val userId: String
+        get() = _userId ?: throw MissingFieldException("UserInfo with id $_id missing userId")
+    internal val groupId: String
+        get() = _groupId ?: throw MissingFieldException("UserInfo with id $_id missing groupId")
 
     @PersistedName("userId")
-    var _userId: String? = null
+    private var _userId: String? = null
     @PersistedName("user")
-    var _user: RealmUser? = null
+    private var _user: RealmUser? = null
     @PersistedName("groupId")
-    var _groupId: String? = null
+    private var _groupId: String? = null
     @PersistedName("group")
-    var _group: RealmGroup? = null
+    private var _group: RealmGroup? = null
     @PersistedName("userBalance")
-    var _userBalance: Double = 0.0
+    private var _userBalance: Double = 0.0
     @PersistedName("joinDate")
-    var _joinDate: String = getCurrentTime()
+    private var _joinDate: RealmInstant = RealmInstant.now()
+
+    override fun getLatestFields(mutableRealm: MutableRealm) {
+        with(mutableRealm) {
+            _user = getLatest(user)
+            _group = getLatest(group)
+        }
+    }
 }

@@ -14,7 +14,6 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.http.Url
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.contentType
 import org.koin.core.component.KoinComponent

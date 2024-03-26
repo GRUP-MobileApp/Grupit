@@ -1,19 +1,11 @@
 package com.grup
 
-import com.grup.controllers.AccountSettingsController
-import com.grup.controllers.DebtActionController
-import com.grup.controllers.GroupController
-import com.grup.controllers.GroupInviteController
-import com.grup.controllers.SettleActionController
-import com.grup.controllers.UserController
-import com.grup.controllers.UserInfoController
-import com.grup.di.DebugRealmManager
-import com.grup.di.ReleaseRealmManager
+import com.grup.dbmanager.realm.DebugRealmManager
+import com.grup.dbmanager.realm.ReleaseRealmManager
 import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
-import com.grup.interfaces.DBManager
+import com.grup.dbmanager.DatabaseManager
 import com.grup.models.DebtAction
-import com.grup.models.Group
 import com.grup.models.GroupInvite
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
@@ -21,23 +13,30 @@ import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.other.AccountSettings
 import com.grup.platform.signin.AuthManager
+import com.grup.service.AccountSettingsService
+import com.grup.service.DebtActionService
+import com.grup.service.GroupInviteService
+import com.grup.service.GroupService
+import com.grup.service.SettleActionService
+import com.grup.service.UserInfoService
+import com.grup.service.UserService
 import kotlin.coroutines.cancellation.CancellationException
 
 class APIServer private constructor(
-    private val dbManager: DBManager
+    private val dbManager: DatabaseManager
 ) {
-    private val userController: UserController = UserController()
-    private val groupController: GroupController = GroupController()
-    private val userInfoController: UserInfoController = UserInfoController()
-    private val groupInviteController: GroupInviteController = GroupInviteController()
-    private val debtActionController: DebtActionController = DebtActionController()
-    private val settleActionController: SettleActionController = SettleActionController()
+    private val userService: UserService = UserService(dbManager)
+    private val groupService: GroupService = GroupService(dbManager)
+    private val userInfoService: UserInfoService = UserInfoService(dbManager)
+    private val groupInviteService: GroupInviteService = GroupInviteService(dbManager)
+    private val debtActionService: DebtActionService = DebtActionService(dbManager)
+    private val settleActionService: SettleActionService = SettleActionService(dbManager)
 
-    private val accountSettingsController: AccountSettingsController = AccountSettingsController()
+    private val accountSettingsService: AccountSettingsService = AccountSettingsService()
 
     // User
     val user: User
-        get() = userController.getMyUser()
+        get() = userService.getMyUser()
             ?: throw UserObjectNotFoundException()
     val authProvider: AuthManager.AuthProvider
         get() = dbManager.authProvider
@@ -46,64 +45,65 @@ class APIServer private constructor(
         displayName: String,
         venmoUsername: String?,
         profilePicture: ByteArray
-    ) = userController.createUser(username, displayName, venmoUsername, profilePicture)
-    suspend fun validUsername(username: String) = !userController.usernameExists(username)
-    suspend fun updateUser(block: User.() -> Unit) = userController.updateUser(user, block)
+    ) = userService.createMyUser(username, displayName, venmoUsername, profilePicture)
+    suspend fun usernameExists(username: String) = userService.getUserByUsername(username) != null
+    suspend fun updateUser(block: User.() -> Unit) = userService.updateUser(user, block)
     suspend fun updateProfilePicture(profilePicture: ByteArray) =
-        userController.updateProfilePicture(user, profilePicture)
-    suspend fun updateLatestTime() = userController.updateLatestTime(user)
+        userService.updateProfilePicture(user, profilePicture)
+    suspend fun updateLatestTime() = userService.updateLatestTime(user)
 
     // Group
-    suspend fun createGroup(groupName: String) = groupController.createGroup(user, groupName)
-    fun getAllGroupsAsFlow() = groupController.getAllGroupsAsFlow()
+    suspend fun createGroup(groupName: String) = groupService.createGroup(user, groupName)
 
     // UserInfo
-    fun getMyUserInfosAsFlow() = userInfoController.getMyUserInfosAsFlow()
-    fun getAllUserInfosAsFlow() = userInfoController.getAllUserInfosAsFlow()
+    fun getMyUserInfosAsFlow() = userInfoService.getMyUserInfosAsFlow()
+    fun getAllUserInfosAsFlow() = userInfoService.getAllUserInfosAsFlow()
 
     // GroupInvite
-    suspend fun inviteUserToGroup(username: String, group: Group) =
-        groupInviteController.createGroupInvite(user, username, group)
+    suspend fun inviteUserToGroup(inviterUserInfo: UserInfo, inviteeUsername: String) =
+        groupInviteService.createGroupInvite(inviterUserInfo, inviteeUsername)
     suspend fun acceptGroupInvite(groupInvite: GroupInvite) =
-        groupInviteController.acceptGroupInvite(groupInvite, user)
+        groupInviteService.acceptGroupInvite(groupInvite, user)
     suspend fun rejectGroupInvite(groupInvite: GroupInvite) =
-        groupInviteController.rejectGroupInvite(groupInvite)
+        groupInviteService.rejectGroupInvite(groupInvite)
     fun getAllGroupInvitesAsFlow() =
-        groupInviteController.getAllGroupInvitesAsFlow()
+        groupInviteService.getAllGroupInvitesAsFlow()
 
     // DebtAction
-    fun createDebtAction(
+    suspend fun createDebtAction(
         debtee: UserInfo,
+        transactionRecords: List<TransactionRecord>,
         message: String,
-        transactionRecords: List<TransactionRecord>
-    ) = debtActionController.createDebtAction(transactionRecords, debtee, message)
-    suspend fun acceptDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        debtActionController.acceptDebtAction(debtAction, myTransactionRecord)
-    suspend fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        debtActionController.rejectDebtAction(debtAction, myTransactionRecord)
-    fun getAllDebtActionsAsFlow() =
-        debtActionController.getAllDebtActionsAsFlow()
+    ) = debtActionService.createDebtAction(debtee, transactionRecords, message)
+    suspend fun acceptDebtAction(debtAction: DebtAction, transactionRecord: TransactionRecord) =
+        debtActionService.acceptDebtAction(debtAction, transactionRecord)
+    suspend fun rejectDebtAction(debtAction: DebtAction, transactionRecord: TransactionRecord) =
+        debtActionService.rejectDebtAction(debtAction, transactionRecord)
+    fun getAllDebtActionsAsFlow() = debtActionService.getAllDebtActionsAsFlow()
 
     // SettleAction
-    suspend fun createSettleAction(debtor: UserInfo, transactionRecords: List<TransactionRecord>) =
-        settleActionController.createSettleAction(debtor, transactionRecords)
-    suspend fun acceptSettleAction(
+    suspend fun createSettleAction(debtee: UserInfo, settleActionAmount: Double) =
+        settleActionService.createSettleAction(debtee, settleActionAmount)
+    suspend fun createSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = settleActionController.acceptSettleAction(settleAction, transactionRecord)
-    suspend fun rejectSettleAction(
+    ) = settleActionService.createSettleActionTransaction(settleAction, transactionRecord)
+    suspend fun acceptSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = settleActionController.rejectSettleAction(settleAction, transactionRecord)
-    fun getAllSettleActionsAsFlow() =
-        settleActionController.getAllSettleActionsAsFlow()
+    ) = settleActionService.acceptSettleActionTransaction(settleAction, transactionRecord)
+    suspend fun rejectSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = settleActionService.rejectSettleActionTransaction(settleAction, transactionRecord)
+    fun getAllSettleActionsAsFlow() = settleActionService.getAllSettleActionsAsFlow()
 
     // Account Settings
     fun getGroupNotificationType(notificationType: AccountSettings.GroupNotificationType) =
-        accountSettingsController.getGroupNotificationType(notificationType)
+        accountSettingsService.getGroupNotificationType(notificationType)
 
     fun toggleGroupNotificationType(notificationType: AccountSettings.GroupNotificationType) =
-        accountSettingsController.toggleGroupNotificationType(notificationType)
+        accountSettingsService.toggleGroupNotificationType(notificationType)
 
 
     companion object Login {

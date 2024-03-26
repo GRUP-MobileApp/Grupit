@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-internal class GroupMembersViewModel : LoggedInViewModel() {
+internal class GroupMembersViewModel(private val selectedGroupId: String) : LoggedInViewModel() {
     // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
     // change during lifecycle.
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
@@ -38,18 +38,15 @@ internal class GroupMembersViewModel : LoggedInViewModel() {
     }
 
     fun inviteUserToGroup(username: String) {
-        selectedGroupId?.let { groupId ->
-            _inviteResult.value = InviteResult.Pending
-            screenModelScope.launch {
-                try {
-                    val group = apiServer.getAllGroupsAsFlow().first().find { group ->
-                        group.id == groupId
-                    } ?: throw UserNotInGroupException()
-                    apiServer.inviteUserToGroup(username, group)
+        _inviteResult.value = InviteResult.Pending
+        screenModelScope.launch {
+            try {
+                userInfos.value.find { it.user.id == userObject.id }?.let { myUserInfo ->
+                    apiServer.inviteUserToGroup(myUserInfo, username)
                     _inviteResult.value = InviteResult.Sent
-                } catch (e: APIException) {
-                    _inviteResult.value = InviteResult.Error(e)
-                }
+                } ?: throw UserNotInGroupException()
+            } catch (e: APIException) {
+                _inviteResult.value = InviteResult.Error(e)
             }
         }
     }

@@ -25,14 +25,6 @@ import com.grup.repositories.TestGroupRepository
 import com.grup.repositories.TestSettleActionRepository
 import com.grup.repositories.TestUserInfoRepository
 import com.grup.repositories.TestUserRepository
-import com.grup.service.AccountSettingsService
-import com.grup.service.DebtActionService
-import com.grup.service.GroupInviteService
-import com.grup.service.GroupService
-import com.grup.service.SettleActionService
-import com.grup.service.UserInfoService
-import com.grup.service.UserService
-import com.grup.service.ValidationService
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 import com.grup.ui.viewmodel.CreateGroupViewModel
 import com.grup.ui.viewmodel.GroupDetailsViewModel
@@ -41,23 +33,12 @@ import com.grup.ui.viewmodel.GroupsViewModel
 import com.grup.ui.viewmodel.LoginViewModel
 import com.grup.ui.viewmodel.NotificationsViewModel
 import com.grup.ui.viewmodel.StartViewModel
-import com.grup.ui.viewmodel.TransactionViewModel
+import com.grup.ui.viewmodel.DebtActionViewModel
 import com.grup.ui.viewmodel.WelcomeViewModel
 import io.realm.kotlin.Realm
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-
-internal val servicesModule = module {
-    single { UserService() }
-    single { GroupService() }
-    single { UserInfoService() }
-    single { GroupInviteService() }
-    single { DebtActionService() }
-    single { SettleActionService() }
-    single { AccountSettingsService() }
-    single { ValidationService() }
-}
 
 internal val releaseRealmRepositoriesModule = module {
     single<IUserRepository> { SyncedUserRepository() }
@@ -95,22 +76,8 @@ internal val testRealmRepositoriesModule = module {
     single<ISettingsDataStore> { SettingsDataStore() }
 }
 
-internal val viewModelsModule = module {
-    factory { GroupsViewModel() }
-    factory { GroupDetailsViewModel() }
-    factory { GroupMembersViewModel() }
-    factory { CreateGroupViewModel() }
-    factory { NotificationsViewModel() }
-    factory { TransactionViewModel() }
-    factory { AccountSettingsViewModel() }
-    factory { StartViewModel() }
-    factory { LoginViewModel() }
-    factory { WelcomeViewModel() }
-}
-
 internal fun realmModules(realm: Realm, isDebug: Boolean = false) = module {
     includes(
-        servicesModule,
         if (isDebug) debugRealmRepositoriesModule else releaseRealmRepositoriesModule,
         module {
             single { realm }
@@ -123,9 +90,7 @@ fun initKoin() {
         modules(
             module {
                 single { httpClient }
-            },
-            viewModelsModule,
-            servicesModule
+            }
         )
     }
 }

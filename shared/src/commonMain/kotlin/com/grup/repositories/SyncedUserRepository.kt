@@ -1,9 +1,10 @@
 package com.grup.repositories
 
+import com.grup.dbmanager.RealmManager
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.models.realm.RealmUser
 import com.grup.other.MONGODB_API_ENDPOINT
 import com.grup.other.TEST_MONGODB_API_ENDPOINT
-import com.grup.other.copyNestedObjectToRealm
 import com.grup.repositories.abstract.RealmUserRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -12,6 +13,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.realm.kotlin.Realm
+import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
@@ -23,26 +25,19 @@ internal class SyncedUserRepository(
     override val realm: Realm by inject()
     private val client: HttpClient by inject()
 
-    private val myUserId: String
-        get() = realm.syncSession.user.id
-
-    override suspend fun createMyUser(
+    override fun createMyUser(
+        transaction: DatabaseWriteTransaction,
         username: String,
         displayName: String,
         venmoUsername: String?
-    ): RealmUser {
-        return realm.write {
-            copyNestedObjectToRealm(
-                RealmUser(myUserId).apply {
-                    this._username = username
-                    this._displayName = displayName
-                    this._venmoUsername = venmoUsername
-                }
-            )
-        }.also {
-            realm.syncSession.uploadAllLocalChanges()
-            realm.syncSession.downloadAllServerChanges()
-        }
+    ): RealmUser = with(transaction as RealmManager.RealmWriteTransaction) {
+        copyToRealm(
+            RealmUser(realm.syncSession.user, username).apply {
+                this.displayName = displayName
+                this.venmoUsername = venmoUsername ?: "None"
+            },
+            UpdatePolicy.ERROR
+        )
     }
 
     override suspend fun findUserByUsername(username: String): RealmUser? {
@@ -50,7 +45,6 @@ internal class SyncedUserRepository(
         val response: HttpResponse = client.get(
             (if (isDebug) TEST_MONGODB_API_ENDPOINT else MONGODB_API_ENDPOINT) +
                     "/user/findUserByUsername"
-
         ) {
             contentType(ContentType.Application.Json)
             url {

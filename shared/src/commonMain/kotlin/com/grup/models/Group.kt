@@ -1,5 +1,5 @@
 package com.grup.models
 
-abstract class Group : BaseEntity() {
-    abstract val groupName: String
+abstract class Group internal constructor() : BaseEntity() {
+    abstract var groupName: String
 }

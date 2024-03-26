@@ -27,8 +27,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        // Connect to FCM
         Messaging.messaging().delegate = self
         
+        // Connect to APNs
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(
             options: [.alert, .sound, .badge],

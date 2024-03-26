@@ -1,8 +1,9 @@
-package com.grup.di
+package com.grup.dbmanager.realm
 
 import com.grup.exceptions.EntityAlreadyExistsException
 import com.grup.exceptions.login.InvalidEmailPasswordException
-import com.grup.interfaces.DBManager
+import com.grup.dbmanager.DatabaseManager
+import com.grup.dbmanager.RealmManager
 import io.realm.kotlin.mongodb.Credentials
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
@@ -10,13 +11,13 @@ import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 
 internal class DebugRealmManager private constructor(): RealmManager(true) {
     companion object {
-        suspend fun silentSignIn(): DBManager? {
+        suspend fun silentSignIn(): DatabaseManager? {
             return debugApp.currentUser?.let {
                 DebugRealmManager().apply { open() }
             }
         }
 
-        suspend fun loginEmailPassword(email: String, password: String): DBManager {
+        suspend fun loginEmailPassword(email: String, password: String): DatabaseManager {
             try {
                 return loginRealmManager(Credentials.emailPassword(email, password))
             } catch (e: InvalidCredentialsException) {
@@ -24,7 +25,7 @@ internal class DebugRealmManager private constructor(): RealmManager(true) {
             }
         }
 
-        suspend fun registerEmailPassword(email: String, password: String): DBManager {
+        suspend fun registerEmailPassword(email: String, password: String): DatabaseManager {
             try {
                 debugApp.emailPasswordAuth.registerUser(email, password)
             } catch (e: UserAlreadyExistsException) {
@@ -35,7 +36,7 @@ internal class DebugRealmManager private constructor(): RealmManager(true) {
             return loginEmailPassword(email, password)
         }
 
-        private suspend fun loginRealmManager(credentials: Credentials): DBManager {
+        private suspend fun loginRealmManager(credentials: Credentials): DatabaseManager {
             debugApp.login(credentials)
             return DebugRealmManager().apply { open() }
         }

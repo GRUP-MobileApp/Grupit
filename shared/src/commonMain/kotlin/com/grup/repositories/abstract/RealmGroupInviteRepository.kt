@@ -1,42 +1,48 @@
 package com.grup.repositories.abstract
 
+import com.grup.dbmanager.RealmManager
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.interfaces.IGroupInviteRepository
-import com.grup.models.Group
 import com.grup.models.GroupInvite
 import com.grup.models.User
-import com.grup.models.realm.RealmGroup
+import com.grup.models.UserInfo
 import com.grup.models.realm.RealmGroupInvite
 import com.grup.models.realm.RealmUser
-import com.grup.other.copyNestedObjectToRealm
+import com.grup.models.realm.RealmUserInfo
+import com.grup.other.getLatest
 import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.Realm
+import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
 
 internal abstract class RealmGroupInviteRepository : IGroupInviteRepository {
     protected abstract val realm: Realm
 
-    override fun createGroupInvite(inviter: User, invitee: User, group: Group): RealmGroupInvite? {
-        return realm.writeBlocking {
-            copyNestedObjectToRealm(
-                RealmGroupInvite().apply {
-                    this._inviter = inviter as RealmUser
-                    this._group = group as RealmGroup
-                    this._inviterId = inviter.id
-                    this._inviteeId = invitee.id
-                    this._groupId = group.id
-                }
-            )
-        }
+    override fun createGroupInvite(
+        transaction: DatabaseWriteTransaction,
+        inviterUserInfo: UserInfo,
+        invitee: User
+    ): GroupInvite? = with(transaction as RealmManager.RealmWriteTransaction) {
+        copyToRealm(
+            getLatest(
+                RealmGroupInvite(
+                    inviterUserInfo = inviterUserInfo as RealmUserInfo,
+                    invitee = invitee as RealmUser
+                )
+            ),
+            UpdatePolicy.ERROR
+        )
     }
 
     override fun findAllGroupInvitesAsFlow(): Flow<List<RealmGroupInvite>> {
         return realm.query<RealmGroupInvite>().toResolvedListFlow()
     }
 
-    override suspend fun deleteGroupInvite(groupInvite: GroupInvite) {
-        return realm.write {
-            delete(findLatest(groupInvite as RealmGroupInvite)!!)
-        }
+    override fun deleteGroupInvite(
+        transaction: DatabaseWriteTransaction,
+        groupInvite: GroupInvite
+    ) = with(transaction as RealmManager.RealmWriteTransaction) {
+        delete(findLatest(groupInvite as RealmGroupInvite)!!)
     }
 }

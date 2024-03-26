@@ -1,5 +1,6 @@
-package com.grup.di
+package com.grup.dbmanager.realm
 
+import com.grup.dbmanager.RealmManager
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.TypedRealm
 import io.realm.kotlin.mongodb.exceptions.ClientResetRequiredException

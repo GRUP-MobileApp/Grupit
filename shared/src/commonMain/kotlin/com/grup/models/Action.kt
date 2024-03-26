@@ -1,17 +1,11 @@
 package com.grup.models
 
+import kotlinx.datetime.Instant
+
 sealed class Action : BaseEntity() {
     abstract val userInfo: UserInfo
-    abstract val group: Group
     abstract val transactionRecords: List<TransactionRecord>
-    abstract val date: String
+    abstract val date: Instant
 
-    val totalAmount
-        get() = transactionRecords.filter { transactionRecord ->
-            transactionRecord.dateAccepted != TransactionRecord.REJECTED
-        }.sumOf { it.balanceChange }
-    val acceptedAmount
-        get() = transactionRecords.filter { transactionRecord ->
-            transactionRecord.isAccepted
-        }.sumOf { it.balanceChange }
+    abstract val amount: Double
 }

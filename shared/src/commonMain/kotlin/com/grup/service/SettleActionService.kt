@@ -1,53 +1,64 @@
 package com.grup.service
 
-import com.grup.exceptions.InvalidTransactionRecordException
-import com.grup.exceptions.NegativeBalanceException
+import com.grup.exceptions.InvalidUserBalanceException
 import com.grup.exceptions.NotCreatedException
+import com.grup.dbmanager.DatabaseManager
 import com.grup.interfaces.ISettleActionRepository
+import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
-import com.grup.other.getCurrentTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class SettleActionService : KoinComponent {
+internal class SettleActionService(private val dbManager: DatabaseManager) : KoinComponent {
+    private val userInfoRepository: IUserInfoRepository by inject()
     private val settleActionRepository: ISettleActionRepository by inject()
 
     suspend fun createSettleAction(
-        debtor: UserInfo,
-        transactionRecords: List<TransactionRecord>
-    ): SettleAction {
-        if (transactionRecords.isEmpty()) {
-            throw InvalidTransactionRecordException("Empty transaction records")
+        debtee: UserInfo,
+        settleActionAmount: Double
+    ): SettleAction = dbManager.write {
+        if (debtee.userBalance - settleActionAmount < 0) {
+            throw InvalidUserBalanceException("SettleAction results in negative balance")
         }
-        transactionRecords.sumOf { it.balanceChange }.let { settleAmount ->
-            if (debtor.userBalance + settleAmount > 0) {
-                throw NegativeBalanceException("SettleAction for $settleAmount results in " +
-                        "overpayment")
-            }
-
+        userInfoRepository.updateUserInfo(this, debtee) { userInfo ->
+            userInfo.userBalance -= settleActionAmount
         }
-        return settleActionRepository.createSettleAction(debtor, transactionRecords)
-            ?: throw NotCreatedException("Error creating SettleAction for Group with id" +
-                    " ${debtor.group.id}")
+        settleActionRepository.createSettleAction(this, debtee, settleActionAmount)
+            ?: throw NotCreatedException("Error creating SettleAction for user with id" +
+                    " ${debtee.user.id}")
     }
 
-    suspend fun acceptSettleAction(
+
+    suspend fun createSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) {
-        settleActionRepository.updateSettleAction(settleAction) {
-            this.transactionRecords.find {
-                it.userInfo.id == transactionRecord.userInfo.id
-            }?.dateAccepted = getCurrentTime()
+    ) = dbManager.write {
+        settleActionRepository.updateSettleAction(this, settleAction) {
+            transactionRecords.add(
+                TransactionRecord.Companion.DataTransactionRecord(
+                    findObject(transactionRecord.userInfo)!!, transactionRecord.balanceChange
+                )
+            )
         }
     }
-    suspend fun rejectSettleAction(settleAction: SettleAction, transactionRecord: TransactionRecord) {
-        settleActionRepository.updateSettleAction(settleAction) {
-            this.transactionRecords.find {
-                it.userInfo.id == transactionRecord.userInfo.id
-            }?.dateAccepted = TransactionRecord.REJECTED
+
+    suspend fun acceptSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = dbManager.write {
+        settleActionRepository.updateSettleAction(this, settleAction) {
+            transactionRecord.status = TransactionRecord.Status.Accepted()
+        }
+    }
+    suspend fun rejectSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = dbManager.write {
+        settleActionRepository.updateSettleAction(this, settleAction) {
+            transactionRecords[transactionRecords.indexOf(transactionRecord)].status =
+                TransactionRecord.Status.Rejected
         }
     }
 

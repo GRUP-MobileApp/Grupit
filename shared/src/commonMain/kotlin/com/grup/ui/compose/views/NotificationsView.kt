@@ -10,15 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.grup.models.Action
+import com.grup.models.DebtAction
+import com.grup.models.SettleAction
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.AcceptRejectRow
 import com.grup.ui.compose.Caption
@@ -36,7 +37,7 @@ internal class NotificationsView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val notificationsViewModel = getScreenModel<NotificationsViewModel>()
+        val notificationsViewModel = rememberScreenModel { NotificationsViewModel() }
         val tabNavigator = LocalTabNavigator.current
 
         CompositionLocalProvider(
@@ -49,7 +50,16 @@ internal class NotificationsView : Screen {
                 NotificationsLayout(
                     notificationsViewModel = notificationsViewModel,
                     actionOnClick = { action ->
-                        GroupsTab(action.group.id, action.id).let { tab ->
+                        GroupsTab(
+                            action.userInfo.group.id,
+                            Pair(
+                                when(action) {
+                                    is DebtAction -> "DEBT"
+                                    is SettleAction -> "SETTLE"
+                                },
+                                action.id
+                            )
+                        ).let { tab ->
                             MainView.tabs[0] = tab
                             tabNavigator.current = tab
                         }
@@ -82,14 +92,17 @@ private fun NotificationsLayout(
                             is Notification.IncomingDebtAction -> {
                                 clickable { actionOnClick(notification.debtAction) }
                             }
-                            is Notification.IncomingSettleAction -> {
-                                clickable { actionOnClick(notification.settleAction) }
-                            }
-                            is Notification.DebteeAcceptSettleAction -> {
-                                clickable { actionOnClick(notification.settleAction) }
-                            }
                             is Notification.DebtorAcceptOutgoingDebtAction -> {
                                 clickable { actionOnClick(notification.debtAction) }
+                            }
+                            is Notification.NewSettleAction -> {
+                                clickable { actionOnClick(notification.settleAction) }
+                            }
+                            is Notification.IncomingSettleActionTransaction -> {
+                                clickable { actionOnClick(notification.settleAction) }
+                            }
+                            is Notification.DebteeAcceptOutgoingSettleActionTransaction -> {
+                                clickable { actionOnClick(notification.settleAction) }
                             }
                             else -> { this }
                         }
@@ -133,17 +146,17 @@ private fun NotificationsLayout(
                             )
                         }
                     }
-                    is Notification.IncomingSettleAction -> {
+                    is Notification.IncomingSettleActionTransaction -> {
                         {
                             AcceptRejectRow(
                                 acceptOnClick = {
-                                    notificationsViewModel.acceptSettleAction(
+                                    notificationsViewModel.acceptSettleActionTransaction(
                                         notification.settleAction,
                                         notification.transactionRecord
                                     )
                                 },
                                 rejectOnClick = {
-                                    notificationsViewModel.rejectSettleAction(
+                                    notificationsViewModel.rejectSettleActionTransaction(
                                         notification.settleAction,
                                         notification.transactionRecord
                                     )
