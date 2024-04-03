@@ -6,7 +6,6 @@ import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -37,12 +36,12 @@ internal class GroupMembersViewModel(private val selectedGroupId: String) : Logg
         _inviteResult.value = InviteResult.None
     }
 
-    fun inviteUserToGroup(username: String) {
+    fun createGroupInvite(username: String) {
         _inviteResult.value = InviteResult.Pending
         screenModelScope.launch {
             try {
                 userInfos.value.find { it.user.id == userObject.id }?.let { myUserInfo ->
-                    apiServer.inviteUserToGroup(myUserInfo, username)
+                    apiServer.createGroupInvite(myUserInfo, username)
                     _inviteResult.value = InviteResult.Sent
                 } ?: throw UserNotInGroupException()
             } catch (e: APIException) {

@@ -79,7 +79,7 @@ private fun GroupMembersLayout(
             state = addToGroupBottomSheetState,
             inviteResult = inviteResult,
             inviteUsernameToGroupOnClick = {
-                groupMembersViewModel.inviteUserToGroup(addToGroupUsernameSearchQuery)
+                groupMembersViewModel.createGroupInvite(addToGroupUsernameSearchQuery)
             }
         ) {
             selectedUserInfo?.let { selectedUserInfo ->

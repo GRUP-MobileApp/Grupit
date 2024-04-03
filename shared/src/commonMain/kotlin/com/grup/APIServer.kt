@@ -60,7 +60,7 @@ class APIServer private constructor(
     fun getAllUserInfosAsFlow() = userInfoService.getAllUserInfosAsFlow()
 
     // GroupInvite
-    suspend fun inviteUserToGroup(inviterUserInfo: UserInfo, inviteeUsername: String) =
+    suspend fun createGroupInvite(inviterUserInfo: UserInfo, inviteeUsername: String) =
         groupInviteService.createGroupInvite(inviterUserInfo, inviteeUsername)
     suspend fun acceptGroupInvite(groupInvite: GroupInvite) =
         groupInviteService.acceptGroupInvite(groupInvite, user)

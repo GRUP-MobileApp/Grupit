@@ -2,6 +2,7 @@ package com.grup.models.realm
 
 import com.grup.exceptions.MissingFieldException
 import com.grup.models.User
+import com.grup.other.DateTimeToRealmInstantDeserializer
 import com.grup.other.createId
 import com.grup.other.toInstant
 import com.grup.other.toRealmInstant
@@ -49,6 +50,7 @@ internal class RealmUser() : User(), RealmObject {
     private var _venmoUsername: String? = null
     @PersistedName("profilePictureURL") @SerialName("profilePictureURL")
     private var _profilePictureURL: String? = null
-    @PersistedName("latestViewDate") @SerialName("latestViewDate")
+    @PersistedName("latestViewDate")
+    @SerialName("latestViewDate") @Serializable(with = DateTimeToRealmInstantDeserializer::class)
     private var _latestViewDate: RealmInstant = RealmInstant.now()
 }
