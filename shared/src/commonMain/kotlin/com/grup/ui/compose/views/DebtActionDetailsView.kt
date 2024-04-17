@@ -1,8 +1,8 @@
 package com.grup.ui.compose.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +16,9 @@ import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +40,7 @@ import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.TransactionRecordRowCard
 import com.grup.ui.compose.UserRowCard
+import com.grup.ui.compose.asMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoDate
 import com.grup.ui.compose.isoTime
@@ -71,83 +75,170 @@ private fun DebtActionDetailsLayout(
     fun isMyTransactionRecord(transactionRecord: TransactionRecord): Boolean =
         transactionRecord.userInfo.user.id == debtActionDetailsViewModel.userObject.id
 
-    BackPressScaffold(
-        onBackPress = { navigator.pop() }
-    ) { padding ->
-        Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(AppTheme.dimensions.appPadding)
-        ) {
-            UserRowCard(
-                user = debtAction.userInfo.user,
-                mainContent = {
+    val (pendingTransactionRecords, completedTransactionRecords) =
+        debtAction.transactionRecords.partition { it.status is TransactionRecord.Status.Pending }
+
+    var selectedTransactionType: String by remember {
+        mutableStateOf(if (pendingTransactionRecords.isNotEmpty()) "Pending" else "Completed")
+    }
+
+    BackPressScaffold(onBackPress = { navigator.pop() }) { padding ->
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .padding(padding)
+            ) {
+                item {
+                    with(debtAction) {
+                        UserRowCard(
+                            user = userInfo.user,
+                            mainContent = {
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(horizontalAlignment = Alignment.Start) {
+                                        Caption(text = "Debt Request")
+                                        Caption(text = "@${userInfo.user.venmoUsername}")
+                                        H1Text(
+                                            text = userInfo.user.displayName,
+                                            fontSize = 28.sp
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Caption(
+                                            text = "${isoDate(date)} at ${isoTime(date)}",
+                                            fontSize = AppTheme.typography.tinyFont
+                                        )
+                                        Caption(
+                                            text = platform.name,
+                                            fontSize = AppTheme.typography.tinyFont
+                                        )
+                                    }
+                                }
+                            },
+                            iconSize = 80.dp
+                        )
+                    }
+                }
+                item { MoneyAmount(moneyAmount = debtAction.amount, fontSize = 60.sp) }
+                item {
+                    H1Text(
+                        text = "\"${debtAction.message}\"",
+                        modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingMedium)
+                    )
+                }
+                item {
                     Row(
+                        verticalAlignment = Alignment.Bottom,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Caption(text = "Debt Request")
-                        Caption(
-                            text = "${isoDate(debtAction.date)} at ${isoTime(debtAction.date)}",
-                            fontSize = AppTheme.typography.tinyFont
-                        )
-                    }
-                    H1Text(text = debtAction.userInfo.user.displayName, fontSize = 28.sp)
-                },
-                iconSize = 80.dp
-            )
-            MoneyAmount(moneyAmount = debtAction.amount, fontSize = 60.sp)
-            H1Text(
-                text = "\"${debtAction.message}\"",
-                modifier = Modifier.padding(vertical = AppTheme.dimensions.spacingMedium)
-            )
-            H1Header(text = "Transactions", modifier = Modifier.align(Alignment.Start))
+                        if (pendingTransactionRecords.isNotEmpty()) {
+                            H1Header(
+                                text = "Pending",
+                                fontSize =
+                                    if (selectedTransactionType == "Pending")
+                                        AppTheme.typography.headerFont.times(1.2f)
+                                    else
+                                        AppTheme.typography.headerFont,
+                                modifier = Modifier.clickable {
+                                    selectedTransactionType = "Pending"
+                                }
+                            )
 
-            if (debtAction.transactionRecords.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(AppTheme.shapes.extraLarge)
-                        .background(AppTheme.colors.secondary)
-                ) {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.cardPadding),
-                        contentPadding = PaddingValues(
-                            horizontal = AppTheme.dimensions.rowCardPadding,
-                            vertical = AppTheme.dimensions.cardPadding
-                        )
-                    ) {
-                        items(
-                            debtAction.transactionRecords.sortedBy {
-                                it.userInfo.user.id == debtActionDetailsViewModel.userObject.id
-                            }
-                        ) { transactionRecord ->
-                            TransactionRecordRowCard(
-                                transactionRecord = transactionRecord,
-                                moneyAmountTextColor = AppTheme.colors.deny
+                        }
+                        if (completedTransactionRecords.isNotEmpty()) {
+                            H1Header(
+                                text = "Completed",
+                                fontSize =
+                                    if (selectedTransactionType == "Completed")
+                                        AppTheme.typography.headerFont.times(1.2f)
+                                    else
+                                        AppTheme.typography.headerFont,
+                                modifier = Modifier.clickable {
+                                    selectedTransactionType = "Completed"
+                                }
                             )
                         }
                     }
                 }
-                if (debtAction.transactionRecords.any { isMyTransactionRecord(it) }) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    H1DenyTextButton(
-                        text = "Accept",
-                        onClick = {
-                            debtActionDetailsViewModel.acceptDebtAction(
-                                onSuccess = {
-                                    navigator.popUntil {
-                                        it is GroupDetailsView
-                                    }
-                                },
-                                onError = { }
-                            )
+
+                items(
+                    if (selectedTransactionType == "Pending") {
+                        pendingTransactionRecords
+                    } else {
+                        completedTransactionRecords
+                    }.sortedWith (
+                        compareBy<TransactionRecord> {
+                            it.userInfo.user.id == debtActionDetailsViewModel.userObject.id
+                        }.thenBy {
+                            it.status !is TransactionRecord.Status.Rejected
                         }
                     )
+                ) { transactionRecord ->
+                    TransactionRecordRowCard(
+                        transactionRecord = transactionRecord,
+                        moneyAmountTextColor = when(transactionRecord.status) {
+                            is TransactionRecord.Status.Accepted -> AppTheme.colors.confirm
+                            is TransactionRecord.Status.Rejected -> AppTheme.colors.deny
+                            else ->
+                                if (
+                                    transactionRecord.userInfo.user.id ==
+                                    debtActionDetailsViewModel.userObject.id
+                                ) AppTheme.colors.deny
+                                else AppTheme.colors.onSecondary
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                            .clip(AppTheme.shapes.large)
+                            .background(AppTheme.colors.secondary)
+                            .padding(AppTheme.dimensions.rowCardPadding)
+                    )
                 }
+
+                item {
+                    if (selectedTransactionType == "Pending") {
+                        H1Text(
+                            text = "Total Pending: " +
+                                    pendingTransactionRecords.sumOf {
+                                        it.balanceChange
+                                    }.asMoneyAmount()
+                        )
+                    } else {
+                        H1Text(
+                            text = "Total Accepted: " +
+                                    completedTransactionRecords.filter {
+                                        it.status is TransactionRecord.Status.Accepted
+                                    }.sumOf { it.balanceChange }.asMoneyAmount()
+                        )
+                    }
+                }
+            }
+            if (
+                debtAction.transactionRecords.find {
+                    isMyTransactionRecord(it)
+                }?.status is TransactionRecord.Status.Pending
+            ) {
+                H1DenyTextButton(
+                    text = "Accept",
+                    onClick = {
+                        debtActionDetailsViewModel.acceptDebtAction(
+                            onSuccess = {
+                                navigator.popUntil {
+                                    it is GroupDetailsView
+                                }
+                            },
+                            onError = { }
+                        )
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                        .padding(bottom = AppTheme.dimensions.appPadding)
+                )
             }
         }
     }

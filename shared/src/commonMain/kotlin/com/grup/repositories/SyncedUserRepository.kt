@@ -2,6 +2,7 @@ package com.grup.repositories
 
 import com.grup.dbmanager.RealmManager
 import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
+import com.grup.models.User
 import com.grup.models.realm.RealmUser
 import com.grup.other.MONGODB_API_ENDPOINT
 import com.grup.other.TEST_MONGODB_API_ENDPOINT
@@ -14,7 +15,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.mongodb.subscriptions
+import io.realm.kotlin.mongodb.sync.asQuery
 import io.realm.kotlin.mongodb.syncSession
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -40,6 +44,11 @@ internal class SyncedUserRepository(
         )
     }
 
+    override fun findMyUser(): RealmUser? {
+        return realm.subscriptions.findByName("MyUser")!!.asQuery<RealmUser>().first().find()
+            ?: runBlocking { findMyUser(realm.syncSession.user.id) }
+    }
+
     override suspend fun findUserByUsername(username: String): RealmUser? {
         var responseUser: RealmUser? = null
         val response: HttpResponse = client.get(
@@ -49,6 +58,28 @@ internal class SyncedUserRepository(
             contentType(ContentType.Application.Json)
             url {
                 parameters.append("username", username)
+            }
+        }
+        if (response.status.value in 200..299) {
+            responseUser = try {
+                Json.decodeFromString(response.bodyAsText())
+            } catch (e: Exception) {
+                println("RealmUser decode error: ${e.message}")
+                null
+            }
+        }
+        return responseUser
+    }
+
+    private suspend fun findMyUser(userId: String): RealmUser? {
+        var responseUser: RealmUser? = null
+        val response: HttpResponse = client.get(
+            (if (isDebug) TEST_MONGODB_API_ENDPOINT else MONGODB_API_ENDPOINT) +
+                    "/user/findUserById"
+        ) {
+            contentType(ContentType.Application.Json)
+            url {
+                parameters.append("id", userId)
             }
         }
         if (response.status.value in 200..299) {

@@ -6,7 +6,7 @@ abstract class SettleAction internal constructor() : Action() {
     abstract override val transactionRecords: MutableList<TransactionRecord>
 
     abstract override val amount: Double
-    val acceptedAmount: Double
+    private val acceptedAmount: Double
         get() = transactionRecords.filter {
             it.status is TransactionRecord.Status.Accepted
         }.sumOf { it.balanceChange }

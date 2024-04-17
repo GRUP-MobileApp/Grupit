@@ -12,6 +12,7 @@ internal interface IUserRepository : IRepository {
     ): User?
 
     fun findMyUser(): User?
+
     suspend fun findUserByUsername(username: String): User?
 
     fun updateUser(transaction: DatabaseWriteTransaction, user: User, block: User.() -> Unit): User

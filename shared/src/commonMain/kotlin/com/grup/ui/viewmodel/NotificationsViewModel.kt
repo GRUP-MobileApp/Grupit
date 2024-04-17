@@ -46,30 +46,30 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val newSettleActionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                !settleAction.isCompleted
+                settleAction.userInfo.user.id != userObject.id && !settleAction.isCompleted
             }.map { settleAction ->
                 Notification.NewSettleAction(settleAction)
             }
         }
     private val incomingSettleActionTransactionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
-            settleActions.mapNotNull { settleAction ->
-                settleAction.transactionRecords.find { transactionRecord ->
-                    transactionRecord.userInfo.user.id == userObject.id
-                            && transactionRecord.status !is TransactionRecord.Status.Accepted
-                }?.let { transactionRecord ->
+            settleActions.filter { settleAction ->
+                settleAction.userInfo.user.id == userObject.id
+            }.flatMap { settleAction ->
+                settleAction.transactionRecords.filter { transactionRecord ->
+                    transactionRecord.status !is TransactionRecord.Status.Accepted
+                }.map { transactionRecord ->
                     Notification.IncomingSettleActionTransaction(settleAction, transactionRecord)
                 }
             }
         }
     private val outgoingTransactionsOnSettleActionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
-            settleActions.filter { settleAction ->
-                settleAction.userInfo.user.id == userObject.id
-            }.flatMap { settleAction ->
-                settleAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.status is TransactionRecord.Status.Accepted
-                }.map { transactionRecord ->
+            settleActions.mapNotNull { settleAction ->
+                settleAction.transactionRecords.find { transactionRecord ->
+                    transactionRecord.userInfo.user.id == userObject.id
+                            && transactionRecord.status is TransactionRecord.Status.Accepted
+                }?.let { transactionRecord ->
                     Notification.DebteeAcceptOutgoingSettleActionTransaction(
                         settleAction,
                         transactionRecord

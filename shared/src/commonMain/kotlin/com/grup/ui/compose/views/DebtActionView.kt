@@ -30,6 +30,7 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.models.DebtAction
 import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.*
@@ -101,8 +102,15 @@ private fun DebtActionLayout(
                 debtActionAmount = debtActionAmount.toDouble(),
                 onBackPress = { currentPage = 0 },
                 createDebtAction = { debtActionAmounts ->
-                    debtActionViewModel.createDebtAction(debtActionAmounts, message)
-                    navigator.pop()
+                    debtActionViewModel.createDebtAction(debtActionAmounts, message) {
+                        navigator.pop()
+                    }
+                },
+                createDebtActionWithVenmo = { debtActionAmounts ->
+                    debtActionViewModel.createDebtActionVenmo(debtActionAmounts, message) {
+                        navigator.pop()
+                        navigator.push(DebtActionDetailsView(it.id))
+                    }
                 }
             )
         }
@@ -126,7 +134,7 @@ private fun DebtActionKeypadPage(
         onMessageChange = { onMessageChange(it) },
         confirmButton = {
             H1ConfirmTextButton(
-                text = "Debt",
+                text = "Next",
                 enabled = debtActionAmount.toDouble() > 0 && message.isNotBlank(),
                 onClick = changePageDebtActionDetails
             )
@@ -141,7 +149,8 @@ private fun DebtActionDetailsPage(
     userInfos: List<UserInfo>,
     debtActionAmount: Double,
     onBackPress: () -> Unit,
-    createDebtAction: (Map<UserInfo, Double>) -> Unit
+    createDebtAction: (Map<UserInfo, Double>) -> Unit,
+    createDebtActionWithVenmo: (Map<UserInfo, Double>) -> Unit
 ) {
     val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val debtAmountBottomSheetState = rememberModalBottomSheetState(
@@ -257,21 +266,41 @@ private fun DebtActionDetailsPage(
                             },
                             modifier = Modifier.weight(1f)
                         )
-                        H1ConfirmTextButton(
-                            text = "Create",
-                            enabled = splitStrategy.isValid(
-                                debtActionAmount,
-                                splitStrategyDebtAmounts
-                            ),
-                            onClick = {
-                                createDebtAction(
-                                    splitStrategy.splitToMoneyAmounts(
-                                        debtActionAmount,
-                                        splitStrategyDebtAmounts
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            H1ConfirmTextButton(
+                                text = "Request",
+                                enabled = splitStrategy.isValid(
+                                    debtActionAmount,
+                                    splitStrategyDebtAmounts
+                                ),
+                                onClick = {
+                                    createDebtAction(
+                                        splitStrategy.splitToMoneyAmounts(
+                                            debtActionAmount,
+                                            splitStrategyDebtAmounts
+                                        )
                                     )
-                                )
-                            }
-                        )
+                                }
+                            )
+                            LaunchVenmoButton(
+                                userAmounts = emptyMap(),
+                                enabled = splitStrategy.isValid(
+                                    debtActionAmount,
+                                    splitStrategyDebtAmounts
+                                ),
+                                onClick = {
+                                    createDebtActionWithVenmo(
+                                        splitStrategy.splitToMoneyAmounts(
+                                            debtActionAmount,
+                                            splitStrategyDebtAmounts
+                                        )
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }

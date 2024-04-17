@@ -530,14 +530,18 @@ internal fun TransactionRecordRowCard(
         iconSize = 50.dp,
         mainContent = {
             H1Text(text = transactionRecord.userInfo.user.displayName)
-            Caption(
-                text = with(transactionRecord.status) {
-                    if (this is TransactionRecord.Status.Accepted)
-                        "Accepted on ${isoDate(date)}"
-                    else
-                        status
-                }
-            )
+            Caption(text = "@${transactionRecord.userInfo.user.venmoUsername}")
+            if (transactionRecord.status !is TransactionRecord.Status.Pending) {
+                Caption(
+                    text = with(transactionRecord.status) {
+                        status +
+                        if (this is TransactionRecord.Status.Accepted)
+                            " on ${isoDate(date)}"
+                        else
+                            ""
+                    }
+                )
+            }
         },
         sideContent = {
             MoneyAmount(
@@ -546,7 +550,7 @@ internal fun TransactionRecordRowCard(
                 color = moneyAmountTextColor
             )
         },
-        modifier = modifier
+        modifier = modifier.height(AppTheme.dimensions.itemRowCardHeight)
     )
 }
 
@@ -921,6 +925,7 @@ internal fun KeyPad(
                         modifier = Modifier
                             .width(80.dp)
                             .height(50.dp)
+                            .clip(AppTheme.shapes.circleShape)
                             .background(AppTheme.colors.primary)
                             .clickable {
                                 when(key) {
@@ -989,6 +994,10 @@ internal fun UserInfoAmountsList(
             items(userInfoMoneyAmounts.toList()) { (userInfo, moneyAmount) ->
                 UserRowCard(
                     user = userInfo.user,
+                    mainContent = {
+                        H1Text(text = userInfo.user.displayName)
+                        Caption(text = userInfo.user.venmoUsername)
+                    },
                     sideContent = {
                         MoneyAmount(
                             moneyAmount = moneyAmount,

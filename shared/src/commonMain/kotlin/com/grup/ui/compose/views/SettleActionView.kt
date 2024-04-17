@@ -59,6 +59,7 @@ private fun SettleActionLayout(
         confirmButton = {
             H1ConfirmTextButton(
                 text = "Settle",
+                enabled = settleActionAmount.toDouble() != 0.0,
                 onClick = {
                     settleActionViewModel.createSettleAction(
                         settleActionAmount.toDouble(),

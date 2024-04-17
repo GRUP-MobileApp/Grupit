@@ -8,9 +8,9 @@ abstract class TransactionRecord internal constructor() : BaseEntity() {
 
     sealed class Status {
         internal companion object {
-            const val PENDING = "PENDING"
-            const val REJECTED = "REJECTED"
-            const val ACCEPTED = "ACCEPTED"
+            const val PENDING = "Pending"
+            const val REJECTED = "Rejected"
+            const val ACCEPTED = "Accepted"
         }
 
         abstract val status: String

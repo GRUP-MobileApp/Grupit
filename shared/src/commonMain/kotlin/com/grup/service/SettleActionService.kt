@@ -3,6 +3,7 @@ package com.grup.service
 import com.grup.exceptions.InvalidUserBalanceException
 import com.grup.exceptions.NotCreatedException
 import com.grup.dbmanager.DatabaseManager
+import com.grup.exceptions.InvalidTransactionRecordException
 import com.grup.interfaces.ISettleActionRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.SettleAction
@@ -30,17 +31,24 @@ internal class SettleActionService(private val dbManager: DatabaseManager) : Koi
                     " ${debtee.user.id}")
     }
 
-
     suspend fun createSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
-    ) = dbManager.write {
-        settleActionRepository.updateSettleAction(this, settleAction) {
-            transactionRecords.add(
-                TransactionRecord.Companion.DataTransactionRecord(
-                    findObject(transactionRecord.userInfo)!!, transactionRecord.balanceChange
+    ) {
+        if (settleAction.remainingAmount < transactionRecord.balanceChange) {
+            throw InvalidTransactionRecordException("Can't settle for more than remaining amount")
+        }
+        if (transactionRecord.userInfo.userBalance + transactionRecord.balanceChange > 0) {
+            throw InvalidTransactionRecordException("Settle Transaction results in overpayment")
+        }
+        return dbManager.write {
+            settleActionRepository.updateSettleAction(this, settleAction) {
+                transactionRecords.add(
+                    TransactionRecord.Companion.DataTransactionRecord(
+                        findObject(transactionRecord.userInfo)!!, transactionRecord.balanceChange
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -49,7 +57,9 @@ internal class SettleActionService(private val dbManager: DatabaseManager) : Koi
         transactionRecord: TransactionRecord
     ) = dbManager.write {
         settleActionRepository.updateSettleAction(this, settleAction) {
-            transactionRecord.status = TransactionRecord.Status.Accepted()
+            findObject(transactionRecord)?.apply {
+                status = TransactionRecord.Status.Accepted()
+            } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
         }
     }
     suspend fun rejectSettleActionTransaction(
@@ -57,8 +67,9 @@ internal class SettleActionService(private val dbManager: DatabaseManager) : Koi
         transactionRecord: TransactionRecord
     ) = dbManager.write {
         settleActionRepository.updateSettleAction(this, settleAction) {
-            transactionRecords[transactionRecords.indexOf(transactionRecord)].status =
-                TransactionRecord.Status.Rejected
+            findObject(transactionRecord)?.apply {
+                status = TransactionRecord.Status.Accepted()
+            } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
         }
     }
 

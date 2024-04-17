@@ -2,6 +2,8 @@ package com.grup.platform.image
 
 import android.graphics.Bitmap
 import android.media.ThumbnailUtils
+import com.braintreepayments.api.BraintreeClient
+import com.braintreepayments.api.VenmoRequest
 import java.io.ByteArrayOutputStream
 import kotlin.math.min
 

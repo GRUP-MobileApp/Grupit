@@ -11,7 +11,8 @@ internal interface IDebtActionRepository : IRepository {
         transaction: DatabaseWriteTransaction,
         debtee: UserInfo,
         transactionRecords: List<TransactionRecord>,
-        message: String
+        message: String,
+        platform: DebtAction.Platform
     ): DebtAction?
 
     fun updateDebtAction(

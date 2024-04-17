@@ -8,6 +8,7 @@ import com.grup.models.realm.RealmUser
 import com.grup.other.getLatest
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.sync.asQuery
 
@@ -31,8 +32,13 @@ internal abstract class RealmUserRepository : IUserRepository {
         )
     }
 
-    override fun findMyUser(): RealmUser? {
-        return realm.subscriptions.findByName("MyUser")!!.asQuery<RealmUser>().first().find()
+
+    override fun findMyUser(): User? {
+        return realm.query<RealmUser>().first().find()
+    }
+
+    override suspend fun findUserByUsername(username: String): RealmUser? {
+        return realm.query<RealmUser>("username = $0", username).first().find()
     }
 
     override fun updateUser(

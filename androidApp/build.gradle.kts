@@ -67,6 +67,10 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-android:$koinVersion")
 
+
+    // BrainTree
+    implementation("com.braintreepayments.api:venmo:4.43.0")
+
     // Google Play Services
     implementation ("com.google.android.gms:play-services-auth:21.0.0")
     implementation("com.google.android.gms:play-services-base:18.3.0")

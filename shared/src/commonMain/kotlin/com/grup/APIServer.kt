@@ -74,7 +74,8 @@ class APIServer private constructor(
         debtee: UserInfo,
         transactionRecords: List<TransactionRecord>,
         message: String,
-    ) = debtActionService.createDebtAction(debtee, transactionRecords, message)
+        platform: DebtAction.Platform
+    ) = debtActionService.createDebtAction(debtee, transactionRecords, message, platform)
     suspend fun acceptDebtAction(debtAction: DebtAction, transactionRecord: TransactionRecord) =
         debtActionService.acceptDebtAction(debtAction, transactionRecord)
     suspend fun rejectDebtAction(debtAction: DebtAction, transactionRecord: TransactionRecord) =

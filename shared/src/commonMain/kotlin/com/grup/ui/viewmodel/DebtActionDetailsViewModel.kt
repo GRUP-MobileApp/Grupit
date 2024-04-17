@@ -31,7 +31,7 @@ internal class DebtActionDetailsViewModel(private val debtActionId: String) : Lo
                 onSuccess()
             }
         } catch (e: APIException) {
-            onError(e.message)
+            println(e.message)
         }
     }
 }

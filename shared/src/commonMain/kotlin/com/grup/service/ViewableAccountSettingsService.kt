@@ -9,7 +9,7 @@ open class ViewableAccountSettingsService : KoinComponent {
     private val settingsDataStore: ISettingsDataStore by inject()
     fun isNotificationTypeToggled(notification: AccountSettings.GroupNotificationType): Boolean {
         return settingsDataStore.getBoolean(
-            notification.type
+            notification.name
         ) ?: true
     }
 }

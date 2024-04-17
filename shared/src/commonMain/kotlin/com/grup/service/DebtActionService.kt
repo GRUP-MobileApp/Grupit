@@ -19,13 +19,19 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
     suspend fun createDebtAction(
         debtee: UserInfo,
         transactionRecords: List<TransactionRecord>,
-        message: String
+        message: String,
+        platform: DebtAction.Platform
     ): DebtAction = dbManager.write {
         if (transactionRecords.isEmpty()) {
             throw InvalidTransactionRecordException("Empty transaction records")
         }
-        debtActionRepository.createDebtAction(this, debtee, transactionRecords, message)
-            ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
+        debtActionRepository.createDebtAction(
+            this,
+            debtee,
+            transactionRecords,
+            message,
+            platform
+        ) ?: throw NotCreatedException("Error creating DebtAction for Group with id" +
                 " ${debtee.group.id}")
     }
 
@@ -34,24 +40,30 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
         transactionRecord: TransactionRecord,
         allowNegative: Boolean = false
     ) = dbManager.write {
-        val debtorUserInfo: UserInfo = transactionRecord.userInfo
-        val debteeUserInfo: UserInfo = debtAction.userInfo
-        if (!allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange < 0) {
-            throw InvalidUserBalanceException("TransactionRecord between debtor with id " +
-                    "${debtorUserInfo.user.id} and debtee with id " +
-                    "${debteeUserInfo.user.id} in DebtAction with id " +
-                    "${debtAction.id} results in negative balance")
-        }
+        if (debtAction.platform == DebtAction.Platform.Grupit) {
+            val debtorUserInfo: UserInfo = transactionRecord.userInfo
+            val debteeUserInfo: UserInfo = debtAction.userInfo
+            if (!allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange < 0) {
+                throw InvalidUserBalanceException(
+                    "TransactionRecord between debtor with id " +
+                            "${debtorUserInfo.user.id} and debtee with id " +
+                            "${debteeUserInfo.user.id} in DebtAction with id " +
+                            "${debtAction.id} results in negative balance"
+                )
+            }
 
-        userInfoRepository.updateUserInfo(this, debtorUserInfo) { userInfo ->
-            userInfo.userBalance -= transactionRecord.balanceChange
-        }
-        userInfoRepository.updateUserInfo(this, debteeUserInfo) { userInfo ->
-            userInfo.userBalance += transactionRecord.balanceChange
+            userInfoRepository.updateUserInfo(this, debtorUserInfo) { userInfo ->
+                userInfo.userBalance -= transactionRecord.balanceChange
+            }
+            userInfoRepository.updateUserInfo(this, debteeUserInfo) { userInfo ->
+                userInfo.userBalance += transactionRecord.balanceChange
+            }
         }
 
         debtActionRepository.updateDebtAction(this, debtAction) {
-            transactionRecord.status = TransactionRecord.Status.Accepted()
+            findObject(transactionRecord)?.apply {
+                status = TransactionRecord.Status.Accepted()
+            } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
         }
     }
 
@@ -60,7 +72,9 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
         transactionRecord: TransactionRecord
     ) = dbManager.write {
         debtActionRepository.updateDebtAction(this, debtAction) {
-            transactionRecord.status = TransactionRecord.Status.Rejected
+            findObject(transactionRecord)?.apply {
+                status = TransactionRecord.Status.Rejected
+            } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
         }
     }
 

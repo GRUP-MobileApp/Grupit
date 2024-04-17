@@ -1,23 +1,17 @@
 package com.grup.other
 
-import com.grup.service.AccountSettingsService
+import com.grup.service.ViewableAccountSettingsService
 
 object AccountSettings {
-    enum class GroupNotificationType(val type: String) {
-        NEW_DEBT_ACTION("NewDebtAction"),
-        NEW_GROUP_INVITE("NewGroupInvite"),
-        NEW_SETTLE_ACTION("NewSettleAction"),
-        ACCEPT_DEBT_ACTION("AcceptDebtAction"),
-        ACCEPT_SETTLE_ACTION("AcceptSettleAction"),
+    enum class GroupNotificationType {
+        NewDebtAction, NewGroupInvite, NewSettleAction, NewSettleActionTransaction,
+        AcceptDebtAction, AcceptSettleActionTransaction
     }
 }
 
-object NotificationPermissions : AccountSettingsService() {
-    fun isNotificationTypeToggled(notificationName: String): Boolean {
-        return AccountSettings.GroupNotificationType.entries.find {
-            it.type == notificationName
-        }?.let { notification ->
-            NotificationPermissions.isNotificationTypeToggled(notification)
-        } == true
-    }
+object NotificationPermissions : ViewableAccountSettingsService() {
+    fun isNotificationTypeToggled(notificationName: String): Boolean =
+        NotificationPermissions.isNotificationTypeToggled(
+            AccountSettings.GroupNotificationType.valueOf(notificationName)
+        )
 }

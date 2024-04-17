@@ -24,15 +24,18 @@ internal class AccountSettingsViewModel : LoggedInViewModel(), KoinComponent {
     companion object {
         val groupNotificationEntries: Map<String, Array<AccountSettings.GroupNotificationType>> = mapOf(
             "Incoming money requests" to arrayOf(
-                AccountSettings.GroupNotificationType.NEW_DEBT_ACTION,
-                AccountSettings.GroupNotificationType.NEW_SETTLE_ACTION
+                AccountSettings.GroupNotificationType.NewDebtAction,
+                AccountSettings.GroupNotificationType.NewSettleActionTransaction
             ),
             "Updates to your outgoing requests" to arrayOf(
-                AccountSettings.GroupNotificationType.ACCEPT_DEBT_ACTION,
-                AccountSettings.GroupNotificationType.ACCEPT_SETTLE_ACTION
+                AccountSettings.GroupNotificationType.AcceptDebtAction,
+                AccountSettings.GroupNotificationType.AcceptSettleActionTransaction
+            ),
+            "Group requests" to arrayOf(
+                AccountSettings.GroupNotificationType.NewSettleAction,
             ),
             "Group invites" to arrayOf(
-                AccountSettings.GroupNotificationType.NEW_GROUP_INVITE
+                AccountSettings.GroupNotificationType.NewGroupInvite
             )
         )
     }

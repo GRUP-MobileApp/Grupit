@@ -2,6 +2,7 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.UserNotInGroupException
+import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.models.User
 import com.grup.models.UserInfo
@@ -115,14 +116,31 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
     // DebtAction
     fun createDebtAction(
         debtActionAmounts: Map<UserInfo, Double>,
-        message: String
+        message: String,
+        onSuccess: (DebtAction) -> Unit
     ) = screenModelScope.launch {
         apiServer.createDebtAction(
             myUserInfo.value,
             debtActionAmounts.map { (userInfo, balanceChange) ->
                 TransactionRecord.Companion.DataTransactionRecord(userInfo, balanceChange)
             },
-            message
-        )
+            message,
+            DebtAction.Platform.Grupit
+        ).let(onSuccess)
+    }
+
+    fun createDebtActionVenmo(
+        debtActionAmounts: Map<UserInfo, Double>,
+        message: String,
+        onSuccess: (DebtAction) -> Unit
+    ) = screenModelScope.launch {
+        apiServer.createDebtAction(
+            myUserInfo.value,
+            debtActionAmounts.map { (userInfo, balanceChange) ->
+                TransactionRecord.Companion.DataTransactionRecord(userInfo, balanceChange)
+            },
+            message,
+            DebtAction.Platform.Venmo
+        ).let(onSuccess)
     }
 }

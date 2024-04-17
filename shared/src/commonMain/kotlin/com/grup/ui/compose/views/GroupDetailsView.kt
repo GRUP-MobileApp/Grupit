@@ -33,9 +33,7 @@ import com.grup.ui.compose.*
 import com.grup.ui.models.TransactionActivity
 import com.grup.ui.viewmodel.GroupDetailsViewModel
 
-internal class GroupDetailsView(
-    private val groupId: String,
-) : Screen {
+internal class GroupDetailsView(private val groupId: String, ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
@@ -114,20 +112,17 @@ private fun GroupDetailsLayout(
             )
         },
         backgroundColor = AppTheme.colors.primary,
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) { padding ->
         LazyColumn(
             state = lazyListState,
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
             contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
-            modifier = Modifier
-                .padding(padding)
+            modifier = Modifier.padding(padding)
         ) {
             item {
                 GroupBalanceCard(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     myUserInfo = myUserInfo,
                     navigateDebtActionAmountOnClick = {
                         navigator.push(DebtActionView(groupDetailsViewModel.selectedGroupId))
@@ -141,7 +136,7 @@ private fun GroupDetailsLayout(
             }
             if (activeSettleActions.isNotEmpty()) {
                 item {
-                    H1Text(text = "Active Settle Requests", fontWeight = FontWeight.Medium)
+                    H1Text(text = "Active Settle", fontWeight = FontWeight.Medium)
                 }
                 item {
                     activeSettleActions.partition { settleAction ->
@@ -172,16 +167,13 @@ private fun GroupDetailsLayout(
                 H1Header(
                     text = "Recent Transactions",
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
             groupActivity.groupBy {
                 isoFullDate(it.date)
             }.forEach { (date, transactionActivityByDate) ->
-                item {
-                    Caption(text = date)
-                }
+                item { Caption(text = date) }
                 items(transactionActivityByDate) { transactionActivity ->
                     TransactionActivityRowCard(
                         transactionActivity = transactionActivity,
@@ -266,7 +258,7 @@ private fun ActiveSettleActions(
                 cardSize.times(
                     if (activeSettleActions.size >= 3) 2 else 1
                 ) + AppTheme.dimensions.appPadding
-            )
+            ).fillMaxWidth()
         ) {
             items(myActiveSettleActions) { settleAction ->
                 SettleActionCard(
@@ -310,8 +302,9 @@ private fun SettleActionCard(
             .clickable(onClick = settleActionCardOnClick)
             .padding(AppTheme.dimensions.cardPadding)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)) {
             ProfileIcon(user = settleAction.userInfo.user, iconSize = 50.dp)
+            Caption(text = "@${settleAction.userInfo.user.venmoUsername}")
             MoneyAmount(moneyAmount = settleAction.remainingAmount, fontSize = 24.sp)
         }
     }

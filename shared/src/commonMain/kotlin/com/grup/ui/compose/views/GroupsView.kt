@@ -117,8 +117,12 @@ private fun GroupsLayout(
                 )
             }
             items(myUserInfos.map { it.group }) { group ->
-                Box(
-                    contentAlignment = Alignment.Center,
+                GroupRowCard(
+                    group = group,
+                    userBalance = myUserInfos.find { userInfo ->
+                        userInfo.group.id == group.id
+                    }?.userBalance ?: 0.0,
+                    membersCount = userInfos.count { it.group.id == group.id },
                     modifier = Modifier
                         .height(AppTheme.dimensions.bigItemRowCardHeight)
                         .fillMaxWidth()
@@ -128,15 +132,7 @@ private fun GroupsLayout(
                             navigator.push(GroupDetailsView(group.id))
                         }
                         .padding(AppTheme.dimensions.rowCardPadding)
-                ) {
-                    GroupRowCard(
-                        group = group,
-                        userBalance = myUserInfos.find { userInfo ->
-                            userInfo.group.id == group.id
-                        }?.userBalance ?: 0.0,
-                        membersCount = userInfos.count { it.group.id == group.id }
-                    )
-                }
+                )
             }
         }
     }

@@ -22,14 +22,16 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
         transaction: DatabaseWriteTransaction,
         debtee: UserInfo,
         transactionRecords: List<TransactionRecord>,
-        message: String
+        message: String,
+        platform: DebtAction.Platform
     ): RealmDebtAction? = with(transaction as RealmManager.RealmWriteTransaction) {
         copyToRealm(
             getLatest(
                 RealmDebtAction(
                     userInfo = debtee as RealmUserInfo,
                     message = message,
-                    transactionRecords = transactionRecords
+                    transactionRecords = transactionRecords,
+                    platform = platform
                 )
             ),
             UpdatePolicy.ERROR

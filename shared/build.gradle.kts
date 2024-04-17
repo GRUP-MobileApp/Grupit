@@ -13,7 +13,7 @@ val keystorePassword: String by project
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("plugin.serialization") version "1.9.23"
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
@@ -87,7 +87,7 @@ kotlin {
 
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 
                 // Realm Sync
                 implementation("io.realm.kotlin:library-sync:$realmVersion")
@@ -125,7 +125,10 @@ kotlin {
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
                 // GoogleSignIn
-                implementation ("com.google.android.gms:play-services-auth:21.0.0")
+                implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+                // BrainTree
+                implementation("com.braintreepayments.api:venmo:4.43.0")
 
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
@@ -138,6 +141,12 @@ kotlin {
 
                 // Firebase Cloud Messaging
                 implementation("com.google.firebase:firebase-messaging-ktx")
+            }
+        }
+        androidNativeTest {
+            dependsOn(getByName("commonMain"))
+            dependencies {
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
             }
         }
         iosMain {
