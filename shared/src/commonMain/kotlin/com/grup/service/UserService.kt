@@ -1,8 +1,8 @@
 package com.grup.service
 
+import com.grup.dbmanager.DatabaseManager
 import com.grup.exceptions.EmptyArgumentException
 import com.grup.exceptions.NotCreatedException
-import com.grup.dbmanager.DatabaseManager
 import com.grup.interfaces.IImagesRepository
 import com.grup.interfaces.IUserRepository
 import com.grup.models.User

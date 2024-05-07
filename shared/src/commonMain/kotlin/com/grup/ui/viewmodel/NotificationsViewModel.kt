@@ -5,7 +5,6 @@ import com.grup.models.DebtAction
 import com.grup.models.GroupInvite
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
-import com.grup.models.UserInfo
 import com.grup.ui.models.Notification
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

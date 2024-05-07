@@ -117,17 +117,21 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         profilePictureBitmap: Bitmap?,
         onSuccess: () -> Unit,
         onError: (String?) -> Unit
-    ) = screenModelScope.launch {
-        try {
-            apiServer.registerUser(
-                username,
-                displayName,
-                venmoUsername,
-                profilePictureBitmap?.let { cropCenterSquareImage(it) } ?: byteArrayOf()
-            )
-            onSuccess()
-        } catch (e: APIException) {
-            onError(e.message)
+    ) {
+        if (currentJob?.isCompleted != false) {
+            currentJob = screenModelScope.launch {
+                try {
+                    apiServer.registerUser(
+                        username,
+                        displayName,
+                        venmoUsername,
+                        profilePictureBitmap?.let { cropCenterSquareImage(it) } ?: byteArrayOf()
+                    )
+                    onSuccess()
+                } catch (e: APIException) {
+                    onError(e.message)
+                }
+            }
         }
     }
 }

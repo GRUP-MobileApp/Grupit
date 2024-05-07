@@ -1,8 +1,8 @@
 package com.grup.service
 
+import com.grup.dbmanager.DatabaseManager
 import com.grup.exceptions.NotCreatedException
 import com.grup.exceptions.NotFoundException
-import com.grup.dbmanager.DatabaseManager
 import com.grup.interfaces.IGroupInviteRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.interfaces.IUserRepository

@@ -1,44 +1,40 @@
 package com.grup.ui.compose
 
 import android.content.Intent
+import android.content.pm.PackageManager.NameNotFoundException
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
+import io.ktor.http.encodeURLPath
 
 @Composable
-actual fun LaunchVenmoButton(
+internal actual fun VenmoButton(
     modifier: Modifier,
-    userAmounts: Map<String, Double>,
-    scale: Float,
-    width: Dp,
-    height: Dp,
-    fontSize: TextUnit,
-    enabled: Boolean,
-    onClick: () -> Unit
+    venmoUsername: String,
+    amount: Double,
+    note: String,
+    isRequest: Boolean
 ) {
     val context = LocalContext.current
-    val intent = Intent(
+    val venmoIntent = Intent(
         Intent.ACTION_VIEW,
         Uri.parse(
-            "venmo://paycharge?txn=pay&recipients=vkuan&amount=10&note=Note"
+            "https://venmo.com/$venmoUsername?txn=${if (isRequest) "charge" else "pay"}" +
+                    "&note=$note&amount=$amount"
         )
     )
-    H1ConfirmTextButton(
-        text = "Venmo",
-        scale = scale,
-        width = width,
-        height = height,
-        fontSize = fontSize,
-        enabled = enabled
-    ) {
-        if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
-        } else {
-            // TODO: Navigate to app store Venmo
+    val playStoreIntent = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse("https://play.google.com/store/apps/details?id=com.venmo")
+    )
+
+    VenmoIcon {
+        try {
+            context.packageManager.getPackageInfo("com.venmo", 0)
+            context.startActivity(venmoIntent)
+        } catch (e: NameNotFoundException) {
+            context.startActivity(playStoreIntent)
         }
-        onClick()
     }
 }

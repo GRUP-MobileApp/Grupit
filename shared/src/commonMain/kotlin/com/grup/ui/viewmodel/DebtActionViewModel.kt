@@ -6,6 +6,7 @@ import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.models.User
 import com.grup.models.UserInfo
+import com.grup.ui.compose.roundTwoDecimalPlaces
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -33,83 +34,104 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
         companion object {
             val strategies = listOf(EvenSplit, UnevenSplit, PercentageSplit)
         }
+
         abstract val name: String
         open val editable: Boolean = true
-        open val showMoneyAmount: Boolean = false
 
-        abstract fun generateSplit(
+        abstract fun generateSplitStrategyAmounts(
             totalMoneyAmount: Double,
             rawSplitStrategyAmounts: Map<UserInfo, Double?>
         ): Map<UserInfo, Double>
 
-        abstract fun splitToMoneyAmounts(
+        abstract fun generateMoneyAmounts(
             totalMoneyAmount: Double,
-            splitStrategyAmounts: Map<UserInfo, Double>
+            rawSplitStrategyAmounts: Map<UserInfo, Double?>
         ): Map<UserInfo, Double>
 
-        open fun isValid(
+        fun isValid(
             totalMoneyAmount: Double,
-            rawSplitStrategyAmounts: Map<UserInfo, Double>
-        ): Boolean =
-            rawSplitStrategyAmounts.values.sum() == totalMoneyAmount
+            rawSplitStrategyAmounts: Map<UserInfo, Double?>
+        ): Boolean = generateMoneyAmounts(
+            totalMoneyAmount,
+            rawSplitStrategyAmounts
+        ).values.sum() == totalMoneyAmount
+
+        protected fun Map<UserInfo, Double>.distributeRemainder(
+            totalMoneyAmount: Double,
+            keys: Set<UserInfo>,
+            increment: Double
+        ): Map<UserInfo, Double> = this.toMutableMap().apply {
+                val keyIterator = keys.iterator()
+                while (keyIterator.hasNext() && this.values.sum() < totalMoneyAmount) {
+                    this[keyIterator.next()]?.let {
+                        this[keyIterator.next()] = it + increment
+                    }
+                }
+            }
 
         data object EvenSplit : SplitStrategy() {
             override val name: String = "Even Split"
             override val editable: Boolean = false
-            override fun generateSplit(
+
+            override fun generateSplitStrategyAmounts(
                 totalMoneyAmount: Double,
                 rawSplitStrategyAmounts: Map<UserInfo, Double?>
             ): Map<UserInfo, Double> = rawSplitStrategyAmounts.keys.associateWith {
-                totalMoneyAmount / rawSplitStrategyAmounts.size
-            }
+                (totalMoneyAmount / rawSplitStrategyAmounts.size).roundTwoDecimalPlaces()
+            }.distributeRemainder(totalMoneyAmount, rawSplitStrategyAmounts.keys, 0.01)
 
-            override fun splitToMoneyAmounts(
+            override fun generateMoneyAmounts(
                 totalMoneyAmount: Double,
-                splitStrategyAmounts: Map<UserInfo, Double>
-            ): Map<UserInfo, Double> = splitStrategyAmounts
+                rawSplitStrategyAmounts: Map<UserInfo, Double?>
+            ): Map<UserInfo, Double> =
+                generateSplitStrategyAmounts(totalMoneyAmount, rawSplitStrategyAmounts)
         }
 
-        data object UnevenSplit : SplitStrategy() {
+        data object UnevenSplit: SplitStrategy() {
             override val name: String = "Uneven Split"
-
-            override fun generateSplit(
+            override fun generateSplitStrategyAmounts(
                 totalMoneyAmount: Double,
                 rawSplitStrategyAmounts: Map<UserInfo, Double?>
             ): Map<UserInfo, Double> = rawSplitStrategyAmounts.mapValues { entry ->
-                entry.value ?: rawSplitStrategyAmounts.values.let { values ->
-                    (totalMoneyAmount - values.filterNotNull().sum()) / values.count { it == null }
-                }
-            }
+                    entry.value ?: rawSplitStrategyAmounts.values.let { values ->
+                        (totalMoneyAmount - values.filterNotNull().sum()) /
+                                values.count { it == null }
+                    }.roundTwoDecimalPlaces()
+                }.distributeRemainder(
+                    totalMoneyAmount,
+                    rawSplitStrategyAmounts.filter { (_, amount) ->
+                        amount == null
+                    }.keys,
+                    0.01
+                )
 
-            override fun splitToMoneyAmounts(
+            override fun generateMoneyAmounts(
                 totalMoneyAmount: Double,
-                splitStrategyAmounts: Map<UserInfo, Double>
-            ): Map<UserInfo, Double> = splitStrategyAmounts
+                rawSplitStrategyAmounts: Map<UserInfo, Double?>
+            ): Map<UserInfo, Double> =
+                generateSplitStrategyAmounts(totalMoneyAmount, rawSplitStrategyAmounts)
         }
 
-        data object PercentageSplit : SplitStrategy() {
+        data object PercentageSplit: SplitStrategy() {
             override val name: String = "Percentage Split"
-            override val showMoneyAmount: Boolean = true
 
-            override fun generateSplit(
+            override fun generateSplitStrategyAmounts(
                 totalMoneyAmount: Double,
                 rawSplitStrategyAmounts: Map<UserInfo, Double?>
-            ): Map<UserInfo, Double> = rawSplitStrategyAmounts.mapValues { entry ->
-                entry.value ?: rawSplitStrategyAmounts.values.let { values ->
+            ): Map<UserInfo, Double> = rawSplitStrategyAmounts.mapValues { (_, percent) ->
+                percent ?: rawSplitStrategyAmounts.values.let { values ->
                     (100 - values.filterNotNull().sum()) / values.count { it == null }
                 }
             }
 
-            override fun splitToMoneyAmounts(
+            override fun generateMoneyAmounts(
                 totalMoneyAmount: Double,
-                splitStrategyAmounts: Map<UserInfo, Double>
-            ): Map<UserInfo, Double> = splitStrategyAmounts
-
-            override fun isValid(
-                totalMoneyAmount: Double,
-                rawSplitStrategyAmounts: Map<UserInfo, Double>
-            ): Boolean =
-                rawSplitStrategyAmounts.values.sum() == 100.0
+                rawSplitStrategyAmounts: Map<UserInfo, Double?>
+            ): Map<UserInfo, Double> =
+                generateSplitStrategyAmounts(totalMoneyAmount, rawSplitStrategyAmounts)
+                    .mapValues { (_, percent) ->
+                        totalMoneyAmount * percent / 100.0
+                    }
         }
     }
 

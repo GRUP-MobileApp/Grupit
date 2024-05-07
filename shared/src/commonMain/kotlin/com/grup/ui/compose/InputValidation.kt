@@ -8,7 +8,7 @@ fun validateUsername(username: String, onValid: () -> Unit, onError: (String) ->
         onError("Username cannot be blank")
     } else if (!username.matches(usernameRegex)) {
         onError("Only alphanumeric characters, \' . \', \' - \', and \' _ \' are allowed")
-    } else if (username.length > 14) {
+    } else if (username.length > 12) {
         onError("Max 12 characters")
     } else if (username.length < 5) {
         onError("Username must be at least 5 characters")
@@ -27,7 +27,7 @@ fun validateName(
         onError("Name cannot be blank")
     } else if (!name.matches(nameRegex)) {
         onError("Contains invalid characters")
-    } else if (name.length > 14) {
+    } else if (name.length > 12) {
         onError("Max 12 characters")
     } else {
         onValid()

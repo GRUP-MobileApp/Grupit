@@ -4,8 +4,12 @@ import dev.icerock.moko.media.Bitmap
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
-import platform.CoreGraphics.*
-import platform.UIKit.*
+import platform.CoreGraphics.CGImageCreateWithImageInRect
+import platform.CoreGraphics.CGImageGetHeight
+import platform.CoreGraphics.CGImageGetWidth
+import platform.CoreGraphics.CGRectMake
+import platform.UIKit.UIImage
+import platform.UIKit.UIImagePNGRepresentation
 import platform.posix.memcpy
 
 @OptIn(ExperimentalForeignApi::class)

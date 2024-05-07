@@ -29,7 +29,7 @@ android {
         applicationId = "com.grup.android"
         minSdk = 21
         targetSdk = 34
-        versionCode = 2
+        versionCode = 3
         versionName = "1.1"
         signingConfig = signingConfigs.getByName("release")
     }
@@ -67,13 +67,9 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-android:$koinVersion")
 
-
-    // BrainTree
-    implementation("com.braintreepayments.api:venmo:4.43.0")
-
     // Google Play Services
-    implementation ("com.google.android.gms:play-services-auth:21.0.0")
-    implementation("com.google.android.gms:play-services-base:18.3.0")
+    implementation ("com.google.android.gms:play-services-auth:21.1.0")
+    implementation("com.google.android.gms:play-services-base:18.4.0")
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
 

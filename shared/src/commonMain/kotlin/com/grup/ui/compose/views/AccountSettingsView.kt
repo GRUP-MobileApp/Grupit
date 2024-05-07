@@ -12,14 +12,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -51,10 +54,11 @@ import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1ErrorTextButton
+import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
-import com.grup.ui.compose.InvisibleTextField
+import com.grup.ui.compose.IndicatorTextField
 import com.grup.ui.compose.ProfileIcon
-import com.grup.ui.compose.SimpleLazyListPage
+import com.grup.ui.compose.SmallIcon
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 import com.grup.ui.viewmodel.AccountSettingsViewModel.Pages
 import dev.icerock.moko.media.Bitmap
@@ -133,7 +137,7 @@ private fun AccountSettingsLayout(
                 }
             )
             Pages.EDIT_VENMO_USERNAME_PAGE -> EditVenmoUsernamePage(
-                venmoUsername = accountSettingsViewModel.userObject.venmoUsername ?: "",
+                venmoUsername = accountSettingsViewModel.userObject.venmoUsername,
                 onBackPress = { currentPage = Pages.EDIT_PROFILE_PAGE },
                 editVenmoUserName = { venmoUsername ->
                     accountSettingsViewModel.editUser {
@@ -163,10 +167,20 @@ private fun MainSettingsPage(
         }
     }
 
-    SimpleLazyListPage(
-        pageName = "Account Settings",
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge)
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
+        modifier = Modifier
+            .fillMaxSize()
     ) {
+        item {
+            H1Header(
+                text = "Account Settings",
+                color = AppTheme.colors.onSecondary,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         item {
             ProfileSettings(
                 user = accountSettingsViewModel.userObject,
@@ -216,10 +230,7 @@ private fun ProfileSettings(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(AppTheme.dimensions.cardPadding)
         ) {
-            ProfileIcon(
-                user = user,
-                iconSize = 50.dp
-            )
+            ProfileIcon(user = user)
             Column(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
             ) {
@@ -246,7 +257,7 @@ private fun NotificationSettings(
             .fillMaxWidth()
             .clip(AppTheme.shapes.extraLarge)
             .background(AppTheme.colors.secondary)
-            .padding(vertical = AppTheme.dimensions.tinySpace)
+            .padding(vertical = AppTheme.dimensions.spacingSmall)
             .padding(horizontal = AppTheme.dimensions.cardPadding)
     ) {
         Column(
@@ -340,13 +351,13 @@ private fun EditProfilePage(
                 modifier = Modifier.fillMaxWidth(0.95f)
             )
             Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(AppTheme.shapes.extraLarge)
                     .background(AppTheme.colors.secondary)
-                    .padding(AppTheme.dimensions.cardPadding)
+                    .padding(vertical = AppTheme.dimensions.cardPadding)
             ) {
                 settingsMap.forEach { (settingName, settingValue) ->
                     Row(
@@ -355,12 +366,24 @@ private fun EditProfilePage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(onClick = settingValue.second)
+                            .padding(
+                                horizontal = AppTheme.dimensions.cardPadding,
+                                vertical = AppTheme.dimensions.spacingSmall
+                            )
                     ) {
-                        Column {
+                        Column(
+                            verticalArrangement =
+                                Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)
+                        ) {
                             Caption(text = settingName)
                             H1Text(text = settingValue.first)
                         }
-                        H1Text(text = ">")
+                        SmallIcon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Edit",
+                            tint = AppTheme.colors.confirm,
+                            iconSize = AppTheme.dimensions.tinyIconSize
+                        )
                     }
                 }
             }
@@ -390,7 +413,7 @@ private fun EditDisplayNamePage(
         ) {
             H1Text(text = "Edit your first and last name")
             Caption(text = "This is name that is displayed on your transactions")
-            InvisibleTextField(
+            IndicatorTextField(
                 value = name,
                 onValueChange = { name = it },
                 placeholder = "Display Name",
@@ -431,10 +454,11 @@ private fun EditVenmoUsernamePage(
         ) {
             H1Text(text = "Edit your Venmo username")
             Caption(text = "This is what others will be using to settle")
-            InvisibleTextField(
+            IndicatorTextField(
                 value = username,
                 onValueChange = { username = it },
                 placeholder = "Venmo Username",
+                indicatorColor = AppTheme.colors.confirm,
                 modifier = Modifier.focusRequester(focusRequester)
             )
             Spacer(modifier = Modifier.weight(1f))

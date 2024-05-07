@@ -26,7 +26,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.H1ConfirmTextButton
-import com.grup.ui.compose.InvisibleTextField
+import com.grup.ui.compose.IndicatorTextField
 import com.grup.ui.viewmodel.CreateGroupViewModel
 
 internal class CreateGroupView : Screen {
@@ -62,7 +62,7 @@ private fun CreateGroupLayout(
                 .padding(padding)
                 .padding(AppTheme.dimensions.appPadding)
         ) {
-            InvisibleTextField(
+            IndicatorTextField(
                 placeholder = "Name",
                 value = groupName,
                 onValueChange = { groupName = it },

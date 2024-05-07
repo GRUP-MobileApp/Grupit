@@ -5,6 +5,7 @@ import com.grup.models.DebtAction
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
+import com.grup.other.FirstTimeSettings
 import com.grup.ui.models.TransactionActivity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +13,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 internal class GroupDetailsViewModel(val selectedGroupId: String) : LoggedInViewModel() {
+    var hasViewedTutorial: Boolean
+        get() = FirstTimeSettings.hasViewedTutorial
+        set(value) { FirstTimeSettings.hasViewedTutorial = value }
+
     // Hot flow containing User's UserInfos
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
     val myUserInfo: StateFlow<UserInfo> =

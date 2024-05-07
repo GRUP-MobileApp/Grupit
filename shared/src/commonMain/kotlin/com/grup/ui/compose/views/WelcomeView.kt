@@ -1,24 +1,43 @@
 package com.grup.ui.compose.views
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -32,7 +51,8 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
-import com.grup.ui.compose.InvisibleTextField
+import com.grup.ui.compose.IndicatorTextField
+import com.grup.ui.compose.PagerArrowRow
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.viewmodel.WelcomeViewModel
 import dev.icerock.moko.media.Bitmap
@@ -170,11 +190,11 @@ private fun WelcomeLayout(
                 .fillMaxSize()
                 .padding(bottom = AppTheme.dimensions.paddingExtraLarge)
         ) {
-            ArrowRow(
+            PagerArrowRow(
                 pagerState = pagerState,
-                allowNext = { page ->
+                onClickNext = { page ->
                     when (page) {
-                        1 ->
+                        1 -> if (
                             usernameValidity is WelcomeViewModel.NameValidity.Valid &&
                             firstNameValidity is WelcomeViewModel.NameValidity.Valid &&
                             (
@@ -185,18 +205,19 @@ private fun WelcomeLayout(
                                 venmoUsernameValidity is WelcomeViewModel.NameValidity.Valid ||
                                 venmoUsernameValidity is WelcomeViewModel.NameValidity.None
                             )
-                        else -> true
+                        ) {
+                            scope.launch { pagerState.scrollToPage(page + 1) }
+                        }
+                        pagerState.pageCount - 1 -> welcomeViewModel.registerUserObject(
+                            username = username,
+                            displayName = "$firstName $lastName".trim(),
+                            venmoUsername = venmoUsername,
+                            profilePictureBitmap = pfpBitmap,
+                            onSuccess = { navigator.pop() },
+                            onError = { }
+                        )
+                        else -> scope.launch { pagerState.scrollToPage(page + 1) }
                     }
-                },
-                onLastNext = {
-                    welcomeViewModel.registerUserObject(
-                        username = username,
-                        displayName = "$firstName $lastName".trim(),
-                        venmoUsername = venmoUsername,
-                        profilePictureBitmap = pfpBitmap,
-                        onSuccess = { navigator.pop() },
-                        onError = { }
-                    )
                 }
             )
         }
@@ -225,7 +246,7 @@ private fun WelcomePage() {
             )
             H1Text(
                 text = "Grupit records your person-to-person debts in a group and simplifies it " +
-                        "into one overall balance.",
+                        "into one overall balance."
             )
         }
     }
@@ -412,14 +433,14 @@ private fun ProfileTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String? = null,
+    placeholder: String = "",
     valueValidity: WelcomeViewModel.NameValidity,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
         modifier = modifier
     ) {
-        InvisibleTextField(
+        IndicatorTextField(
             value = value,
             onValueChange = onValueChange,
             placeholder = placeholder,
@@ -435,68 +456,5 @@ private fun ProfileTextField(
                 else -> ""
             }
         )
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ArrowRow(
-    pagerState: PagerState,
-    allowNext: (Int) -> Boolean,
-    onLastNext: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val scope = rememberCoroutineScope()
-
-    val isFinalPage: Boolean = pagerState.currentPage == pagerState.pageCount - 1
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.Bottom,
-            modifier = modifier.fillMaxWidth(0.9f)
-        ) {
-            if (pagerState.currentPage != 0) {
-                H1Text(
-                    text = "< Back",
-                    modifier = Modifier.clickable {
-                        scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                        }
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            H1Text(
-                text = if (isFinalPage) "Finish >"
-                       else "Next >",
-                modifier = Modifier.clickable {
-                    if (isFinalPage) {
-                        onLastNext()
-                    } else if (allowNext(pagerState.currentPage)) {
-                        scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        }
-                    }
-                }
-            )
-        }
-        Row {
-            repeat(pagerState.pageCount) { iteration ->
-                Box(
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .clip(AppTheme.shapes.circleShape)
-                        .background(
-                            if (pagerState.currentPage == iteration) Color.DarkGray
-                            else Color.LightGray
-                        )
-                        .size(8.dp)
-                )
-            }
-        }
     }
 }

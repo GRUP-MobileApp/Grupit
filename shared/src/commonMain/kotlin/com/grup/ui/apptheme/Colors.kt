@@ -7,16 +7,16 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 internal val dark_grey = Color(0xFF1F1F1F)
-internal val grey = Color(0xFF292929)
+internal val grey = Color(0xFF2B2B2B)
 internal val light_grey = Color(0xFF3D3D3D)
 internal val white = Color(0xFFFFFFFF)
 internal val off_white = Color(0xBBF5F5F4)
-internal val green = Color(0xFF65B540)
-internal val red = Color(0xFFEF1A1A)
 internal val red_error = Color(0xFFFF0033)
 
 internal val light_blue = Color(0xFF00C7F2)
-internal val light_vermillion = Color(0xFFFF7355)
+internal val light_vermilion = Color(0xFFFF7355)
+
+internal val venmo = Color(0xFF008CFF)
 
 internal class AppColors(
     primary: Color,
@@ -82,7 +82,7 @@ internal fun appColors(
     onPrimary: Color = off_white,
     onSecondary: Color = white,
     confirm: Color = light_blue,
-    deny: Color = light_vermillion,
+    deny: Color = light_vermilion,
     caption: Color = light_grey,
     error: Color = red_error
 ): AppColors = AppColors(

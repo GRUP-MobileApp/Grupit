@@ -8,23 +8,24 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
-import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabDisposable
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.views.tabs.AccountSettingsTab
 import com.grup.ui.compose.views.tabs.GroupsTab
 import com.grup.ui.compose.views.tabs.NotificationsTab
 
 internal class MainView : Screen {
     internal companion object {
-        val tabs = mutableListOf(GroupsTab(), NotificationsTab, AccountSettingsTab)
+        val tabs = mutableStateListOf(GroupsTab(), NotificationsTab, AccountSettingsTab)
     }
 
     override val key: ScreenKey = uniqueScreenKey
@@ -41,7 +42,7 @@ internal class MainView : Screen {
                     BottomNavigation(
                         backgroundColor = AppTheme.colors.secondary
                     ) {
-                        tabs.forEach { TabNavigationItem(it) }
+                        tabs.indices.forEach { TabNavigationItem(it) }
                     }
                 }
             ) { padding ->
@@ -53,10 +54,12 @@ internal class MainView : Screen {
     }
 
     @Composable
-    private fun RowScope.TabNavigationItem(tab: Tab) {
+    private fun RowScope.TabNavigationItem(index: Int) {
         val tabNavigator = LocalTabNavigator.current
+        val tab = tabs[index]
 
         BottomNavigationItem(
+            label = { H1Text(text = tab.options.title, fontSize = AppTheme.typography.tinyFont) },
             selected = tabNavigator.current.key == tab.key,
             onClick = {
                 if (tabNavigator.current is GroupsTab && tab is GroupsTab) {

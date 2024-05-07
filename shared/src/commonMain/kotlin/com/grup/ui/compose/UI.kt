@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -23,6 +22,9 @@ internal fun Double.asCurrencySymbolAndMoneyAmount(): Pair<String, String> =
 
 internal fun Double.asPureMoneyAmount(): String =
     this.asCurrencySymbolAndMoneyAmount().second
+
+internal fun Double.roundTwoDecimalPlaces(): Double =
+    (this * 100).toInt() / 100.0
 
 // Date
 private fun Instant.toLocalDT() = this.toLocalDateTime(TimeZone.currentSystemDefault())

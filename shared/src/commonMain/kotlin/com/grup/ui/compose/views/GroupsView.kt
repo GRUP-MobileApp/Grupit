@@ -3,14 +3,13 @@ package com.grup.ui.compose.views
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Scaffold
@@ -23,8 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -103,7 +102,7 @@ private fun GroupsLayout(
                         moneyAmount = overallBalance,
                         color = if (overallBalance >= 0) AppTheme.colors.confirm
                         else AppTheme.colors.deny,
-                        fontSize = 50.sp,
+                        fontSize = AppTheme.typography.bigMoneyAmountFont,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -116,20 +115,24 @@ private fun GroupsLayout(
                         .fillMaxWidth()
                 )
             }
-            items(myUserInfos.map { it.group }) { group ->
+            itemsIndexed(myUserInfos) { index, userInfo ->
                 GroupRowCard(
-                    group = group,
-                    userBalance = myUserInfos.find { userInfo ->
-                        userInfo.group.id == group.id
-                    }?.userBalance ?: 0.0,
-                    membersCount = userInfos.count { it.group.id == group.id },
+                    userInfo = userInfo,
+                    membersCount = userInfos.count { it.group.id == userInfo.group.id },
+                    color = when(index % 4) {
+                        0 -> Color(0xFFC855FF)
+                        1 -> Color(0xFFF22B00)
+                        2 -> Color(0xFF8CFF55)
+                        3 -> Color(0xFFFFC855)
+                        else -> Color.Transparent
+                    },
                     modifier = Modifier
                         .height(AppTheme.dimensions.bigItemRowCardHeight)
                         .fillMaxWidth()
                         .clip(AppTheme.shapes.large)
                         .background(AppTheme.colors.secondary)
                         .clickable {
-                            navigator.push(GroupDetailsView(group.id))
+                            navigator.push(GroupDetailsView(userInfo.group.id))
                         }
                         .padding(AppTheme.dimensions.rowCardPadding)
                 )

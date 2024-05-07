@@ -35,7 +35,7 @@ internal class SettleActionTransactionViewModel(
             apiServer.createSettleActionTransaction(
                 settleAction.value,
                 TransactionRecord.Companion.DataTransactionRecord(myUserInfo.value, amount)
-            ) ?: throw object : APIException("") { }
+            )
             onSuccess()
         } catch (e: APIException) {
             onError(e.message)

@@ -2,7 +2,6 @@ package com.grup.service
 
 import com.grup.interfaces.ISettingsDataStore
 import com.grup.other.AccountSettings
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 open class AccountSettingsService : ViewableAccountSettingsService() {

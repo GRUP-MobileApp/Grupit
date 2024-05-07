@@ -25,16 +25,6 @@ import com.grup.repositories.TestGroupRepository
 import com.grup.repositories.TestSettleActionRepository
 import com.grup.repositories.TestUserInfoRepository
 import com.grup.repositories.TestUserRepository
-import com.grup.ui.viewmodel.AccountSettingsViewModel
-import com.grup.ui.viewmodel.CreateGroupViewModel
-import com.grup.ui.viewmodel.GroupDetailsViewModel
-import com.grup.ui.viewmodel.GroupMembersViewModel
-import com.grup.ui.viewmodel.GroupsViewModel
-import com.grup.ui.viewmodel.LoginViewModel
-import com.grup.ui.viewmodel.NotificationsViewModel
-import com.grup.ui.viewmodel.StartViewModel
-import com.grup.ui.viewmodel.DebtActionViewModel
-import com.grup.ui.viewmodel.WelcomeViewModel
 import io.realm.kotlin.Realm
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin

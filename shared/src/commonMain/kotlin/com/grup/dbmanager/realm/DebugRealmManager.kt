@@ -1,9 +1,9 @@
 package com.grup.dbmanager.realm
 
-import com.grup.exceptions.EntityAlreadyExistsException
-import com.grup.exceptions.login.InvalidEmailPasswordException
 import com.grup.dbmanager.DatabaseManager
 import com.grup.dbmanager.RealmManager
+import com.grup.exceptions.EntityAlreadyExistsException
+import com.grup.exceptions.login.InvalidEmailPasswordException
 import io.realm.kotlin.mongodb.Credentials
 import io.realm.kotlin.mongodb.exceptions.BadRequestException
 import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException

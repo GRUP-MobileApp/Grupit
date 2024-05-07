@@ -1,7 +1,7 @@
 package com.grup.service
 
-import com.grup.exceptions.NotCreatedException
 import com.grup.dbmanager.DatabaseManager
+import com.grup.exceptions.NotCreatedException
 import com.grup.interfaces.IGroupRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.Group

@@ -1,38 +1,79 @@
 package com.grup.ui.compose
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TextFieldDefaults.indicatorLine
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.grup.models.Group
 import com.grup.models.TransactionRecord
 import com.grup.models.User
@@ -47,7 +88,7 @@ import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
-import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
@@ -59,6 +100,7 @@ internal fun H1Text(
     fontSize: TextUnit = AppTheme.typography.mediumFont,
     fontWeight: FontWeight? = null,
     maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Ellipsis
 ) {
     Text(
         text = text,
@@ -67,6 +109,7 @@ internal fun H1Text(
         fontSize = fontSize,
         fontWeight = fontWeight,
         maxLines = maxLines,
+        overflow = overflow,
         modifier = modifier
     )
 }
@@ -151,52 +194,52 @@ internal fun AutoSizingH1Text(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-internal fun InvisibleTextField(
+internal fun IndicatorTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String? = null,
-    fontSize: TextUnit = AppTheme.typography.mediumFont,
+    placeholder: String = "",
+    fontSize: TextUnit = AppTheme.typography.textFieldFont,
     indicatorColor: Color = AppTheme.colors.primary,
     interactionSource: InteractionSource = remember { MutableInteractionSource() },
 ) {
-    val colors: TextFieldColors = TextFieldDefaults.textFieldColors(
-        backgroundColor = AppTheme.colors.primary,
-        focusedIndicatorColor = indicatorColor,
-        unfocusedIndicatorColor = indicatorColor,
-    )
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
-            .width(IntrinsicSize.Min)
             .indicatorLine(
                 enabled = true,
                 isError = false,
                 interactionSource = interactionSource,
-                colors = colors
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = AppTheme.colors.primary,
+                    focusedIndicatorColor = indicatorColor,
+                    unfocusedIndicatorColor = indicatorColor,
+                )
             ),
-        decorationBox = @Composable { innerTextField ->
-            TextFieldDefaults.TextFieldDecorationBox(
-                value = value,
-                visualTransformation = VisualTransformation.None,
-                innerTextField = innerTextField,
-                placeholder = placeholder?.let {
-                    {
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier
+                    .run {
+                        if (placeholder.isEmpty() || value.isNotEmpty())
+                            width(IntrinsicSize.Min)
+                        else this
+                    }
+                    .background(AppTheme.colors.primary)
+            ) {
+                Box(modifier = Modifier.padding(AppTheme.dimensions.paddingMedium)) {
+                    if (value.isEmpty() && placeholder.isNotEmpty()) {
                         H1Text(
-                            text = it,
+                            text = placeholder,
                             fontSize = fontSize,
                             color = AppTheme.colors.onPrimary,
                             maxLines = 1,
+                            overflow = TextOverflow.Visible
                         )
                     }
-                },
-                singleLine = true,
-                enabled = true,
-                interactionSource = interactionSource,
-                colors = colors,
-                contentPadding = PaddingValues(AppTheme.dimensions.paddingSmall)
-            )
+                    innerTextField()
+                }
+            }
         },
         textStyle = TextStyle(
             color = AppTheme.colors.onSecondary,
@@ -213,7 +256,9 @@ internal fun Caption(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = AppTheme.colors.onPrimary,
-    fontSize: TextUnit = AppTheme.typography.smallFont
+    fontSize: TextUnit = AppTheme.typography.smallFont,
+    maxLines: Int = 1,
+    overflow: TextOverflow = TextOverflow.Ellipsis
 ) {
     Text(
         text = text,
@@ -221,12 +266,14 @@ internal fun Caption(
         color = color,
         style = AppTheme.typography.caption,
         fontSize = fontSize,
-        maxLines = 1
+        maxLines = maxLines,
+        overflow = overflow
     )
 }
 
 @Composable
 internal fun SmallIcon(
+    modifier: Modifier = Modifier,
     imageVector: ImageVector,
     contentDescription: String,
     iconSize: Dp = AppTheme.dimensions.smallIconSize,
@@ -236,7 +283,10 @@ internal fun SmallIcon(
         imageVector = imageVector,
         contentDescription = contentDescription,
         tint = tint,
-        modifier = Modifier.size(iconSize)
+        modifier = Modifier
+            .size(iconSize)
+            .clip(AppTheme.shapes.circleShape)
+            .then(modifier)
     )
 }
 
@@ -255,12 +305,13 @@ internal fun H1ConfirmTextButton(
     width: Dp = 140.dp,
     height: Dp = 42.dp,
     fontSize: TextUnit = AppTheme.typography.mediumFont,
+    color: Color = AppTheme.colors.confirm,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     TextButton(
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = AppTheme.colors.confirm,
+            backgroundColor = color,
             disabledBackgroundColor = AppTheme.colors.caption
         ),
         modifier = modifier
@@ -345,9 +396,9 @@ internal fun AcceptRejectRow(
     acceptOnClick: () -> Unit,
     rejectOnClick: () -> Unit
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxHeight()
     ) {
         AcceptCheckButton(acceptOnClick)
@@ -369,7 +420,7 @@ internal fun AcceptCheckButton(onClick: () -> Unit) {
             imageVector = Icons.Default.Check,
             contentDescription = "Accept",
             tint = AppTheme.colors.confirm,
-            iconSize = AppTheme.dimensions.smallButtonSize
+            iconSize = AppTheme.dimensions.tinyIconSize
         )
     }
 }
@@ -388,7 +439,7 @@ internal fun RejectButton(onClick: () -> Unit) {
             imageVector = Icons.Default.Close,
             contentDescription = "Reject",
             tint = AppTheme.colors.deny,
-            iconSize = AppTheme.dimensions.smallButtonSize
+            iconSize = AppTheme.dimensions.tinyIconSize
         )
     }
 }
@@ -397,22 +448,34 @@ internal fun RejectButton(onClick: () -> Unit) {
 internal fun ProfileIcon(
     modifier: Modifier = Modifier,
     user: User,
-    iconSize: Dp = 70.dp
+    iconSize: Dp = AppTheme.dimensions.iconSize
 ) {
-    val painterResource: Resource<Painter> =
-        asyncPainterResource(user.profilePictureURL) {
-            // CoroutineContext to be used while loading the image.
-            coroutineContext = Job() + Dispatchers.IO
-        }
-    KamelImage(
-        resource = painterResource,
-        contentDescription = "Profile Picture",
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .clip(AppTheme.shapes.circleShape)
-            .size(iconSize)
-            .then(modifier)
-    )
+    if (user.profilePictureURL == "None") {
+        Image(
+            imageVector = Icons.Default.Person,
+            contentDescription = "Profile Picture",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .clip(AppTheme.shapes.circleShape)
+                .size(iconSize)
+                .then(modifier)
+        )
+    } else {
+        val painterResource: Resource<Painter> =
+            asyncPainterResource(user.profilePictureURL) {
+                // CoroutineContext to be used while loading the image.
+                coroutineContext = Job() + Dispatchers.IO
+            }
+        KamelImage(
+            resource = painterResource,
+            contentDescription = "Profile Picture",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .clip(AppTheme.shapes.circleShape)
+                .size(iconSize)
+                .then(modifier)
+        )
+    }
 }
 
 @Composable
@@ -424,8 +487,10 @@ internal fun GroupIcon(
     Image(
         imageVector = Icons.Default.Person,
         contentDescription = group.groupName,
-        modifier = modifier
+        modifier = Modifier
             .size(iconSize)
+            .clip(AppTheme.shapes.small)
+            .then(modifier)
     )
 }
 
@@ -463,30 +528,58 @@ internal fun BackPressScaffold(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun SimpleLazyListPage(
-    pageName: String,
-    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp),
-    contentPadding: PaddingValues = PaddingValues(AppTheme.dimensions.appPadding),
-    content: LazyListScope.() -> Unit
+internal fun PagerArrowRow(
+    pagerState: PagerState,
+    onClickNext: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Scaffold(backgroundColor = AppTheme.colors.primary) { padding ->
-        LazyColumn(
-            verticalArrangement = verticalArrangement,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = contentPadding,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+    val scope = rememberCoroutineScope()
+
+    val isFinalPage: Boolean = pagerState.currentPage == pagerState.pageCount - 1
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.Bottom,
+            modifier = modifier.fillMaxWidth(0.9f)
         ) {
-            item {
-                H1Header(
-                    text = pageName,
-                    color = AppTheme.colors.onSecondary,
-                    modifier = Modifier.fillMaxWidth(0.95f)
+            if (pagerState.currentPage != 0) {
+                H1Text(
+                    text = "< Back",
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                        }
+                    }
                 )
             }
-            content()
+            Spacer(modifier = Modifier.weight(1f))
+            H1Text(
+                text = if (isFinalPage) "Finish >"
+                else "Next >",
+                modifier = Modifier.clickable {
+                    onClickNext(pagerState.currentPage)
+                }
+            )
+        }
+        Row {
+            repeat(pagerState.pageCount) { iteration ->
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(AppTheme.shapes.circleShape)
+                        .background(
+                            if (pagerState.currentPage == iteration) Color.DarkGray
+                            else Color.LightGray
+                        )
+                        .size(8.dp)
+                )
+            }
         }
     }
 }
@@ -494,13 +587,13 @@ internal fun SimpleLazyListPage(
 @Composable
 internal fun IconRowCard(
     modifier: Modifier = Modifier,
-    mainContent: @Composable () -> Unit,
+    mainContent: @Composable RowScope.() -> Unit,
     sideContent: (@Composable () -> Unit)? = {},
     iconContent: @Composable () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
@@ -508,14 +601,13 @@ internal fun IconRowCard(
         Row(
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.rowCardPadding),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f, false)
+            modifier = Modifier.weight(1f)
         ) {
             iconContent()
             mainContent()
         }
-        if (sideContent != null) {
-            sideContent()
-        }
+        Spacer(modifier = Modifier.width(AppTheme.dimensions.spacing))
+        sideContent?.let { it() }
     }
 }
 
@@ -527,7 +619,6 @@ internal fun TransactionRecordRowCard(
 ) {
     UserRowCard(
         user = transactionRecord.userInfo.user,
-        iconSize = 50.dp,
         mainContent = {
             H1Text(text = transactionRecord.userInfo.user.displayName)
             Caption(text = "@${transactionRecord.userInfo.user.venmoUsername}")
@@ -546,7 +637,6 @@ internal fun TransactionRecordRowCard(
         sideContent = {
             MoneyAmount(
                 moneyAmount = transactionRecord.balanceChange,
-                fontSize = 24.sp,
                 color = moneyAmountTextColor
             )
         },
@@ -561,8 +651,7 @@ internal fun UserInfoRowCard(
     coloredMoneyAmount: Boolean = true,
     mainContent: @Composable ColumnScope.() -> Unit = {
         H1Text(text = userInfo.user.displayName)
-    },
-    iconSize: Dp = 50.dp,
+    }
 ) {
     UserRowCard(
         user = userInfo.user,
@@ -570,7 +659,6 @@ internal fun UserInfoRowCard(
         sideContent = {
             MoneyAmount(
                 moneyAmount = userInfo.userBalance,
-                fontSize = 24.sp,
                 color = if (coloredMoneyAmount) {
                     if (userInfo.userBalance >= 0) AppTheme.colors.confirm else AppTheme.colors.deny
                 } else {
@@ -578,7 +666,6 @@ internal fun UserInfoRowCard(
                 }
             )
         },
-        iconSize = iconSize,
         modifier = modifier
     )
 }
@@ -591,7 +678,7 @@ internal fun UserRowCard(
         H1Text(text = user.displayName)
     },
     sideContent: (@Composable ColumnScope.() -> Unit)? = null,
-    iconSize: Dp = 50.dp,
+    iconSize: Dp = AppTheme.dimensions.iconSize,
     iconContent: @Composable () -> Unit = {
         ProfileIcon(
             user = user,
@@ -602,9 +689,8 @@ internal fun UserRowCard(
     IconRowCard(
         mainContent = {
             Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier.fillMaxHeight()
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+                horizontalAlignment = Alignment.Start
             ) {
                 mainContent()
             }
@@ -613,6 +699,7 @@ internal fun UserRowCard(
             {
                 Column(
                     verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.End,
                     modifier = Modifier.fillMaxHeight()
                 ) {
                     content()
@@ -635,8 +722,7 @@ internal fun TransactionActivityRowCard(
             Caption(
                 text =
                 "${transactionActivity.activityName} at ${isoTime(transactionActivity.date)}",
-                fontSize = AppTheme.typography.tinyFont,
-                modifier = Modifier.padding(bottom = AppTheme.dimensions.spacingSmall)
+                fontSize = AppTheme.typography.tinyFont
             )
             H1Text(text = transactionActivity.userInfo.user.displayName)
             H1Text(
@@ -649,7 +735,7 @@ internal fun TransactionActivityRowCard(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxHeight()
             ) {
-                MoneyAmount(moneyAmount = transactionActivity.amount, fontSize = 20.sp)
+                MoneyAmount(moneyAmount = transactionActivity.amount)
             }
         },
         modifier = modifier.height(AppTheme.dimensions.itemRowCardHeight)
@@ -659,18 +745,17 @@ internal fun TransactionActivityRowCard(
 @Composable
 internal fun GroupRowCard(
     modifier: Modifier = Modifier,
-    group: Group,
-    userBalance: Double,
+    userInfo: UserInfo,
+    color: Color,
     membersCount: Int
 ) {
     IconRowCard(
         mainContent = {
             Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier.fillMaxHeight()
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+                horizontalAlignment = Alignment.Start
             ) {
-                H1Text(text = group.groupName)
+                H1Text(text = userInfo.group.groupName)
                 Caption(
                     text = "$membersCount " + when(membersCount) {
                         1 -> {
@@ -689,14 +774,13 @@ internal fun GroupRowCard(
                 modifier = Modifier.fillMaxHeight()
             ) {
                 MoneyAmount(
-                    moneyAmount = userBalance,
-                    color = if (userBalance >= 0) AppTheme.colors.confirm
-                            else AppTheme.colors.deny,
-                    fontSize = 24.sp
+                    moneyAmount = userInfo.userBalance,
+                    color = if (userInfo.userBalance >= 0) AppTheme.colors.confirm
+                            else AppTheme.colors.deny
                 )
             }
         },
-        iconContent = { GroupIcon(group = group) },
+        iconContent = { GroupIcon(group = userInfo.group, modifier = Modifier.background(color)) },
         modifier = modifier
     )
 }
@@ -705,7 +789,7 @@ internal fun GroupRowCard(
 internal fun MoneyAmount(
     modifier: Modifier = Modifier,
     moneyAmount: Double,
-    fontSize: TextUnit = 30.sp,
+    fontSize: TextUnit = AppTheme.typography.moneyAmountFont,
     fontWeight: FontWeight? = null,
     color: Color = Color.Unspecified
 ) {
@@ -745,55 +829,6 @@ internal fun MoneyAmount(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-internal fun KeyPadBottomSheet(
-    state: ModalBottomSheetState,
-    initialMoneyAmount: Double,
-    maxMoneyAmount: Double = Double.MAX_VALUE,
-    isEnabled: (Double) -> Boolean = { true },
-    onClick: (Double) -> Unit,
-    onBackPress: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    var moneyAmount: String by remember { mutableStateOf("0") }
-    LaunchedEffect(state.isVisible) {
-        moneyAmount = if (initialMoneyAmount % 1 == 0.0)
-            initialMoneyAmount.roundToInt().toString()
-        else
-            initialMoneyAmount.asPureMoneyAmount()
-    }
-
-    ModalBottomSheetLayout(
-        sheetState = state,
-        sheetContent = {
-            KeyPadScreenLayout(
-                moneyAmount = moneyAmount,
-                onMoneyAmountChange = { newActionAmount ->
-                    moneyAmount = if (newActionAmount.toDouble() > maxMoneyAmount) {
-                        maxMoneyAmount.toString().trimEnd('0')
-                    } else {
-                        newActionAmount
-                    }
-                },
-                confirmButton = {
-                    val actualMoneyAmount = moneyAmount.toDouble()
-                    H1ConfirmTextButton(
-                        text = "Confirm",
-                        enabled = isEnabled(actualMoneyAmount),
-                        onClick = {
-                            onClick(actualMoneyAmount)
-                            onBackPress()
-                        }
-                    )
-                },
-                onBackPress = onBackPress
-            )
-        },
-        content = content
-    )
-}
-
 @Composable
 internal fun KeyPadScreenLayout(
     moneyAmount: String,
@@ -802,53 +837,32 @@ internal fun KeyPadScreenLayout(
     onMessageChange: ((String) -> Unit)? = null,
     confirmButton: @Composable () -> Unit,
     moneyAmountFontSize: TextUnit = 98.sp,
-    onBackPress: () -> Unit,
+    onBackPress: () -> Unit
 ) {
     BackPressScaffold(onBackPress = onBackPress) { padding ->
         Column(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraLarge),
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(AppTheme.dimensions.appPadding)
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth().fillMaxHeight(0.7f)
-                ) {
-                    KeyPadMoneyAmount(moneyAmount = moneyAmount, fontSize = moneyAmountFontSize)
-                    message?.let { message ->
-                        Spacer(modifier = Modifier.weight(1f))
-                        TransparentTextField(
-                            value = message,
-                            placeholder = "What is this for?",
-                            onValueChange = {
-                                onMessageChange!!(it.take(50))
-                            },
-                            fontSize = 24.sp,
-                            modifier = Modifier.height(IntrinsicSize.Max)
-                        )
-                    }
-                }
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(1f)) {
+                KeyPadMoneyAmount(moneyAmount = moneyAmount, fontSize = moneyAmountFontSize)
             }
-            KeyPad(
-                modifier = Modifier.padding(top = AppTheme.dimensions.spacing),
-                moneyAmount = moneyAmount,
-                onMoneyAmountChange = onMoneyAmountChange
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = AppTheme.dimensions.cardPadding)
-            ) {
-                confirmButton()
+            message?.let { message ->
+                TransparentTextField(
+                    value = message,
+                    placeholder = "What is this for?",
+                    onValueChange = {
+                        onMessageChange!!(it.take(50))
+                    },
+                    modifier = Modifier.height(IntrinsicSize.Max)
+                )
             }
+            KeyPad(moneyAmount = moneyAmount, onMoneyAmountChange = onMoneyAmountChange)
+            confirmButton()
         }
     }
 }
@@ -979,41 +993,32 @@ internal fun UserInfoAmountsList(
     userInfoAmountOnClick: (UserInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .fillMaxWidth()
     ) {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            items(userInfoMoneyAmounts.toList()) { (userInfo, moneyAmount) ->
-                UserRowCard(
-                    user = userInfo.user,
-                    mainContent = {
-                        H1Text(text = userInfo.user.displayName)
-                        Caption(text = userInfo.user.venmoUsername)
-                    },
-                    sideContent = {
-                        MoneyAmount(
-                            moneyAmount = moneyAmount,
-                            color =
-                            if (userInfoHasSetAmount(userInfo))
-                                AppTheme.colors.onSecondary
-                            else
-                                AppTheme.colors.caption,
-                            fontSize = 26.sp,
-                            modifier = Modifier.clickable {
-                                userInfoAmountOnClick(userInfo)
-                            }
-                        )
-                    }
-                )
-            }
+        items(userInfoMoneyAmounts.toList()) { (userInfo, moneyAmount) ->
+            UserRowCard(
+                user = userInfo.user,
+                mainContent = {
+                    H1Text(text = userInfo.user.displayName)
+                    Caption(text = userInfo.user.venmoUsername)
+                },
+                sideContent = {
+                    MoneyAmount(
+                        moneyAmount = moneyAmount,
+                        color =
+                        if (userInfoHasSetAmount(userInfo))
+                            AppTheme.colors.onSecondary
+                        else
+                            AppTheme.colors.caption,
+                        modifier = Modifier.clickable {
+                            userInfoAmountOnClick(userInfo)
+                        }
+                    )
+                }
+            )
         }
     }
 }
@@ -1034,7 +1039,7 @@ internal fun UsernameSearchBar(
             singleLine = true,
             shape = RoundedCornerShape(10.dp),
             trailingIcon = {
-                Icon(
+                androidx.compose.material.Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "SearchIcon"
                 )
@@ -1055,76 +1060,66 @@ internal fun UsernameSearchBar(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun TransparentTextField(
     modifier: Modifier = Modifier,
     value: String,
     placeholder: String = "",
     onValueChange: (String) -> Unit,
-    fontSize: TextUnit = TextUnit.Unspecified,
+    fontSize: TextUnit = AppTheme.typography.textFieldFont,
     textColor: Color = AppTheme.colors.onSecondary,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    var isFocused: Boolean by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-    Box(
-        contentAlignment = Alignment.Center,
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = TextStyle(color = textColor, fontSize = fontSize),
+        singleLine = true,
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier
+                    .run {
+                        if (placeholder.isEmpty() || value.isNotEmpty())
+                            width(IntrinsicSize.Min)
+                        else this
+                    }
+                    .background(AppTheme.colors.primary)
+            ) {
+                Box(modifier = Modifier.padding(AppTheme.dimensions.paddingLarge)) {
+                    if (value.isEmpty() && placeholder.isNotEmpty()) {
+                        Caption(
+                            text = placeholder,
+                            fontSize = fontSize,
+                            overflow = TextOverflow.Visible
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        },
+        keyboardOptions = keyboardOptions,
         modifier = modifier
-    ) {
-        if (value.isBlank() && placeholder.isNotBlank() && !isFocused) {
-            Caption(
-                text = placeholder,
-                fontSize = fontSize,
-                modifier = Modifier.clickable { focusRequester.requestFocus() }
-            )
-        }
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            textStyle = TextStyle(color = textColor, fontSize = fontSize),
-            singleLine = true,
-            decorationBox = { innerTextField ->
-                TextFieldDefaults.TextFieldDecorationBox(
-                    value = value,
-                    innerTextField = innerTextField,
-                    enabled = true,
-                    singleLine = true,
-                    visualTransformation = VisualTransformation.None,
-                    interactionSource  = remember { MutableInteractionSource() }
-                )
-            },
-            keyboardOptions = keyboardOptions,
-            modifier = Modifier
-                .width(IntrinsicSize.Min)
-                .focusRequester(focusRequester)
-                .onFocusChanged { isFocused = it.isFocused }
-        )
-    }
+    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ModalBottomSheetLayout(
-    sheetContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier.fillMaxSize(),
     sheetState: ModalBottomSheetState,
     sheetShape: Shape = MaterialTheme.shapes.large,
-    sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
     sheetBackgroundColor: Color = AppTheme.colors.primary,
     sheetContentColor: Color = AppTheme.colors.onSecondary,
-    scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
+    sheetContent: @Composable ColumnScope.() -> Unit,
     content: @Composable () -> Unit
 ) {
     androidx.compose.material.ModalBottomSheetLayout(
-        sheetContent = sheetContent,
         modifier = modifier,
         sheetState = sheetState,
         sheetShape = sheetShape,
-        sheetElevation = sheetElevation,
         sheetBackgroundColor = sheetBackgroundColor,
         sheetContentColor = sheetContentColor,
-        scrimColor = scrimColor,
+        sheetContent = sheetContent,
         content = content
     )
 }

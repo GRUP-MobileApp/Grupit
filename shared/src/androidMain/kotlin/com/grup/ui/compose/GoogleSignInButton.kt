@@ -42,6 +42,10 @@ internal actual fun GoogleSignInButton(
             }
         }
 
+    LaunchedEffect(true) {
+        googleSignInManager.setGoogleLauncher(googleSignInLauncher)
+    }
+
     Button(
         onClick = {
             if (loginResult !is LoginViewModel.LoginResult.PendingLogin) {

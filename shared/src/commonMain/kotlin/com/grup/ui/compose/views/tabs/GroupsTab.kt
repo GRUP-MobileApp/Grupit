@@ -12,14 +12,13 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import cafe.adriel.voyager.transitions.SlideTransition
-import com.grup.ui.compose.views.DebtActionDetailsView
+import com.grup.ui.compose.views.ActionDetailsView
 import com.grup.ui.compose.views.GroupDetailsView
 import com.grup.ui.compose.views.GroupsView
-import com.grup.ui.compose.views.SettleActionDetailsView
 
 internal class GroupsTab(
     private val groupId: String? = null,
-    private val action: Pair<String, String>? = null
+    private val actionId: String? = null
 ) : Tab {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -42,12 +41,7 @@ internal class GroupsTab(
             mutableListOf<Screen>(GroupsView()).apply {
                 groupId?.let { groupId ->
                     add(GroupDetailsView(groupId))
-                    action?.let { (actionType, actionId) ->
-                        when(actionType) {
-                            "DEBT" -> add(DebtActionDetailsView(actionId))
-                            "SETTLE" -> add(SettleActionDetailsView(groupId, actionId))
-                        }
-                    }
+                    actionId?.let { add(ActionDetailsView(it)) }
                 }
             }
         ) { navigator ->

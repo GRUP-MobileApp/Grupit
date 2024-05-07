@@ -2,18 +2,39 @@ package com.grup.ui.compose.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -23,7 +44,16 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.*
+import com.grup.ui.compose.BackPressScaffold
+import com.grup.ui.compose.Caption
+import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.LoadingSpinner
+import com.grup.ui.compose.ModalBottomSheetLayout
+import com.grup.ui.compose.SmallIcon
+import com.grup.ui.compose.UserInfoRowCard
+import com.grup.ui.compose.UsernameSearchBar
+import com.grup.ui.compose.collectAsStateWithLifecycle
+import com.grup.ui.compose.isoFullDate
 import com.grup.ui.viewmodel.GroupMembersViewModel
 import kotlinx.coroutines.launch
 
@@ -97,60 +127,52 @@ private fun GroupMembersLayout(
         BackPressScaffold(
             title = "Members",
             onBackPress = { navigator.pop() },
-            actions = {
-                AddToGroupButton(addToGroupOnClick = openAddToGroupBottomSheet)
-            }
+            actions = { AddToGroupButton(addToGroupOnClick = openAddToGroupBottomSheet) }
         ) { padding ->
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+            LazyColumn (
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(vertical = AppTheme.dimensions.cardPadding),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .padding(AppTheme.dimensions.appPadding)
                     .clip(AppTheme.shapes.large)
                     .background(AppTheme.colors.secondary)
-                    .padding(AppTheme.dimensions.cardPadding)
             ) {
-                UsernameSearchBar(
-                    usernameSearchQuery = usernameSearchQuery,
-                    onQueryChange = { username ->
-                        usernameSearchQuery = username
-                        groupMembersViewModel.resetInviteResult()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                )
-                UsersList(
-                    userInfos = userInfos.filter { userInfo ->
+                item {
+                    UsernameSearchBar(
+                        usernameSearchQuery = usernameSearchQuery,
+                        onQueryChange = { username ->
+                            usernameSearchQuery = username
+                            groupMembersViewModel.resetInviteResult()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = AppTheme.dimensions.cardPadding)
+                    )
+                    Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
+                }
+                items(
+                    userInfos.filter { userInfo ->
                         userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
-                    },
-                    userInfoOnClick = { userInfoOnClick(it) }
-                )
+                    }
+                ) { userInfo ->
+                    UserInfoRowCard(
+                        userInfo = userInfo,
+                        mainContent = {
+                            H1Text(text = userInfo.user.displayName)
+                            Caption(text = "@${userInfo.user.venmoUsername}")
+                        },
+                        modifier = Modifier
+                            .clickable { userInfoOnClick(userInfo) }
+                            .padding(
+                                horizontal = AppTheme.dimensions.cardPadding,
+                                vertical = AppTheme.dimensions.spacingSmall
+                            )
+                    )
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun UsersList(
-    userInfos: List<UserInfo>,
-    userInfoOnClick: (UserInfo) -> Unit
-) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        itemsIndexed(userInfos) { _, userInfo ->
-            UserInfoRowCard(
-                userInfo = userInfo,
-                mainContent = {
-                    H1Text(text = userInfo.user.displayName)
-                    Caption(text = "@${userInfo.user.venmoUsername}")
-                },
-                modifier = Modifier.clickable { userInfoOnClick(userInfo) }
-            )
         }
     }
 }
@@ -165,16 +187,19 @@ private fun GroupMemberInfoBottomSheet(
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(AppTheme.dimensions.appPadding)
             ) {
-                UserInfoRowCard(
-                    userInfo = selectedUserInfo,
-                    iconSize = 64.dp
-                )
+                with(selectedUserInfo) {
+                    UserInfoRowCard(userInfo = this) {
+                        H1Text(text = user.displayName)
+                        Caption(text = "@${user.venmoUsername}")
+                        Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
+                        Caption(text = "Joined on ${isoFullDate(user.latestViewDate)}")
+                    }
+                }
             }
         },
         content = content
@@ -233,9 +258,9 @@ private fun AddToGroupBottomSheetLayout(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (inviteResult is GroupMembersViewModel.InviteResult.Error) {
-                        Text(text = inviteResult.exception.message!!)
+                        H1Text(text = inviteResult.exception.message!!)
                     } else if (inviteResult is GroupMembersViewModel.InviteResult.Sent) {
-                        Text(text = "Sent!")
+                        H1Text(text = "Sent!")
                     }
                 }
                 Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
@@ -247,7 +272,7 @@ private fun AddToGroupBottomSheetLayout(
                     if (inviteResult is GroupMembersViewModel.InviteResult.Pending) {
                         LoadingSpinner()
                     } else {
-                        Text(text = "Add to group", color = textColor)
+                        H1Text(text = "Add to group", color = textColor)
                     }
                 }
             }

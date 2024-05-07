@@ -1,7 +1,7 @@
 package com.grup.service
 
-import com.grup.exceptions.InvalidUserBalanceException
 import com.grup.dbmanager.DatabaseManager
+import com.grup.exceptions.InvalidUserBalanceException
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.DebtAction
 import com.grup.models.Group

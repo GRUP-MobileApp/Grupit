@@ -1,9 +1,9 @@
 package com.grup.service
 
+import com.grup.dbmanager.DatabaseManager
 import com.grup.exceptions.InvalidTransactionRecordException
 import com.grup.exceptions.InvalidUserBalanceException
 import com.grup.exceptions.NotCreatedException
-import com.grup.dbmanager.DatabaseManager
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.DebtAction

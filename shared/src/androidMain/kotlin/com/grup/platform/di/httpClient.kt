@@ -7,7 +7,7 @@ import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-actual val httpClient: HttpClient = HttpClient(OkHttp) {
+internal actual val httpClient: HttpClient = HttpClient(OkHttp) {
     install(ContentNegotiation) {
         json(
             Json {

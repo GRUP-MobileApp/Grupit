@@ -125,10 +125,7 @@ kotlin {
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
                 // GoogleSignIn
-                implementation("com.google.android.gms:play-services-auth:21.0.0")
-
-                // BrainTree
-                implementation("com.braintreepayments.api:venmo:4.43.0")
+                implementation("com.google.android.gms:play-services-auth:21.1.0")
 
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")

@@ -9,18 +9,48 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -30,12 +60,29 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.grup.models.DebtAction
 import com.grup.models.UserInfo
+import com.grup.other.Platform
+import com.grup.other.platform
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.*
+import com.grup.ui.apptheme.venmo
+import com.grup.ui.compose.BackPressScaffold
+import com.grup.ui.compose.Caption
+import com.grup.ui.compose.H1ConfirmTextButton
+import com.grup.ui.compose.H1Text
+import com.grup.ui.compose.KeyPadScreenLayout
+import com.grup.ui.compose.ModalBottomSheetLayout
+import com.grup.ui.compose.MoneyAmount
+import com.grup.ui.compose.SmallIcon
+import com.grup.ui.compose.UserInfoAmountsList
+import com.grup.ui.compose.UserRowCard
+import com.grup.ui.compose.UsernameSearchBar
+import com.grup.ui.compose.VenmoButton
+import com.grup.ui.compose.asMoneyAmount
+import com.grup.ui.compose.asPureMoneyAmount
+import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.viewmodel.DebtActionViewModel
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 internal class DebtActionView(private val groupId: String) : Screen {
     override val key: ScreenKey = uniqueScreenKey
@@ -55,17 +102,34 @@ internal class DebtActionView(private val groupId: String) : Screen {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DebtActionLayout(
     debtActionViewModel: DebtActionViewModel,
     navigator: Navigator
 ) {
+    val scope = rememberCoroutineScope()
+    val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
     var currentPage: Int by remember { mutableStateOf(0) }
 
     val userInfos: List<UserInfo> by debtActionViewModel.userInfos.collectAsStateWithLifecycle()
 
-    var debtActionAmount: String by remember { mutableStateOf("0") }
+    var debtActionAmount: Double by remember { mutableStateOf(0.0) }
     var message: String by remember { mutableStateOf("") }
+
+    var keyPadUserInfo: UserInfo? by remember { mutableStateOf(null) }
+
+    var splitStrategy: DebtActionViewModel.SplitStrategy by remember {
+        mutableStateOf(DebtActionViewModel.SplitStrategy.EvenSplit)
+    }
+    val rawSplitStrategyAmounts:
+        SnapshotStateMap<UserInfo, Double?> = remember { mutableStateMapOf() }
+    val debtActionAmounts: Map<UserInfo, Double> =
+        splitStrategy.generateSplitStrategyAmounts(
+            debtActionAmount,
+            rawSplitStrategyAmounts
+        )
 
     AnimatedContent(
         targetState = currentPage,
@@ -83,34 +147,142 @@ private fun DebtActionLayout(
     ) { page ->
         when(page) {
             0 -> DebtActionKeypadPage(
-                debtActionAmount = debtActionAmount,
-                onDebtActionAmountChange = { newMoneyAmount ->
-                    debtActionAmount =
-                        if (newMoneyAmount.toDouble() > 999999999) {
-                            999999999.toString()
-                        } else {
-                            newMoneyAmount
-                        }
-                },
+                initialMoneyAmount = debtActionAmount,
                 message = message,
                 onMessageChange = { message = it },
                 onBackPress = { navigator.pop() },
-                changePageDebtActionDetails = { currentPage = 1 }
+                changePageDebtActionDetails = { newDebtActionAmount ->
+                    if (newDebtActionAmount != debtActionAmount) {
+                        rawSplitStrategyAmounts.clear()
+                    }
+                    debtActionAmount = newDebtActionAmount
+                    currentPage = 2
+                }
             )
-            1 -> DebtActionDetailsPage(
-                userInfos = userInfos.filter { it.user.id != debtActionViewModel.userObject.id },
-                debtActionAmount = debtActionAmount.toDouble(),
-                onBackPress = { currentPage = 0 },
-                createDebtAction = { debtActionAmounts ->
-                    debtActionViewModel.createDebtAction(debtActionAmounts, message) {
-                        navigator.pop()
-                    }
+            1 -> EditDebtorMoneyAmountKeypadPage(
+                initialMoneyAmount = rawSplitStrategyAmounts[keyPadUserInfo!!] ?: 0.0,
+                debtActionMoneyAmount = debtActionAmount,
+                onClick = { debtAmount ->
+                    rawSplitStrategyAmounts[keyPadUserInfo!!] =
+                        if (debtAmount > 0.0) debtAmount else null
                 },
-                createDebtActionWithVenmo = { debtActionAmounts ->
-                    debtActionViewModel.createDebtActionVenmo(debtActionAmounts, message) {
-                        navigator.pop()
-                        navigator.push(DebtActionDetailsView(it.id))
+                onBackPress = { currentPage = 2 }
+            )
+            2 -> AddDebtorBottomSheet(
+                userInfos = userInfos.filter { it.user.id != debtActionViewModel.userObject.id },
+                addDebtorsOnClick = { selectedUsers ->
+                    rawSplitStrategyAmounts.keys.minus(selectedUsers).forEach { userInfo ->
+                        rawSplitStrategyAmounts.remove(userInfo)
                     }
+                    selectedUsers.minus(rawSplitStrategyAmounts.keys).forEach { userInfo ->
+                        rawSplitStrategyAmounts[userInfo] = null
+                    }
+                    scope.launch { addDebtorBottomSheetState.hide() }
+                },
+                state = addDebtorBottomSheetState
+            ) {
+                BackPressScaffold(onBackPress = { currentPage = 0 }) { padding ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(AppTheme.colors.primary)
+                            .padding(padding)
+                            .padding(AppTheme.dimensions.appPadding)
+                    ) {
+                        MoneyAmount(
+                            moneyAmount = debtActionAmount,
+                            fontSize = AppTheme.typography.keypadMoneyAmountFont
+                        )
+                        Column(
+                            verticalArrangement = Arrangement
+                                .spacedBy(AppTheme.dimensions.spacing),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f)
+                                .clip(AppTheme.shapes.large)
+                                .background(AppTheme.colors.secondary)
+                                .padding(horizontal = AppTheme.dimensions.cardPadding)
+                                .padding(vertical = AppTheme.dimensions.cardPadding.times(0.7f))
+                        ) {
+                            DebtActionSettings(
+                                splitStrategy = splitStrategy,
+                                onSplitStrategyChange = { splitStrategy = it },
+                                addDebtorsOnClick = {
+                                    scope.launch { addDebtorBottomSheetState.show() }
+                                }
+                            )
+                            UserInfoAmountsList(
+                                userInfoMoneyAmounts = debtActionAmounts,
+                                userInfoHasSetAmount = { userInfo ->
+                                    if (!splitStrategy.editable) {
+                                        true
+                                    } else {
+                                        rawSplitStrategyAmounts[userInfo] != null
+                                    }
+                                },
+                                userInfoAmountOnClick = { userInfo ->
+                                    if (splitStrategy.editable) {
+                                        keyPadUserInfo = userInfo
+                                        currentPage = 1
+                                    }
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        H1Text(text = "Request with", fontWeight = FontWeight.SemiBold)
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            H1ConfirmTextButton(
+                                text = "Grupit",
+                                enabled = splitStrategy.isValid(
+                                    debtActionAmount,
+                                    debtActionAmounts
+                                ),
+                                onClick = {
+                                    debtActionViewModel.createDebtAction(
+                                        splitStrategy.generateMoneyAmounts(
+                                            debtActionAmount,
+                                            debtActionAmounts
+                                        ),
+                                        message
+                                    ) { navigator.pop() }
+                                }
+                            )
+                            H1ConfirmTextButton(
+                                text = "Venmo",
+                                enabled = splitStrategy.isValid(
+                                    debtActionAmount,
+                                    debtActionAmounts
+                                ),
+                                color = venmo,
+                                onClick = { currentPage = 3 }
+                            )
+                        }
+                    }
+                }
+            }
+            3 -> DebtActionVenmoConfirmationPage(
+                debtActionAmount = debtActionAmount,
+                userInfo = userInfos.find { it.user.id == debtActionViewModel.userObject.id }!!,
+                debtActionAmounts = splitStrategy.generateMoneyAmounts(
+                    debtActionAmount,
+                    debtActionAmounts
+                ),
+                message = message,
+                onBackPress = { currentPage = 2 },
+                createDebtActionWithVenmo = {
+                    debtActionViewModel.createDebtActionVenmo(
+                        splitStrategy.generateMoneyAmounts(
+                            debtActionAmount,
+                            debtActionAmounts
+                        ),
+                        message
+                    ) { navigator.pop() }
                 }
             )
         }
@@ -120,192 +292,78 @@ private fun DebtActionLayout(
 
 @Composable
 private fun DebtActionKeypadPage(
-    debtActionAmount: String,
-    onDebtActionAmountChange: (String) -> Unit,
+    initialMoneyAmount: Double,
     message: String,
     onMessageChange: (String) -> Unit,
     onBackPress: () -> Unit,
-    changePageDebtActionDetails: () -> Unit
+    changePageDebtActionDetails: (Double) -> Unit
 ) {
+    var debtActionAmount: String by remember { mutableStateOf("0") }
+    LaunchedEffect(initialMoneyAmount) {
+        debtActionAmount = if (initialMoneyAmount % 1 == 0.0)
+            initialMoneyAmount.roundToInt().toString()
+        else
+            initialMoneyAmount.asPureMoneyAmount()
+    }
+
     KeyPadScreenLayout(
         moneyAmount = debtActionAmount,
-        onMoneyAmountChange = { onDebtActionAmountChange(it) },
+        onMoneyAmountChange = { newMoneyAmount ->
+            debtActionAmount =
+                if (newMoneyAmount.toDouble() > 999999999) {
+                    999999999.toString()
+                } else {
+                    newMoneyAmount
+                }
+        },
         message = message,
         onMessageChange = { onMessageChange(it) },
         confirmButton = {
             H1ConfirmTextButton(
                 text = "Next",
                 enabled = debtActionAmount.toDouble() > 0 && message.isNotBlank(),
-                onClick = changePageDebtActionDetails
+                onClick = { changePageDebtActionDetails(debtActionAmount.toDouble()) }
             )
         },
         onBackPress = onBackPress
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun DebtActionDetailsPage(
-    userInfos: List<UserInfo>,
-    debtActionAmount: Double,
-    onBackPress: () -> Unit,
-    createDebtAction: (Map<UserInfo, Double>) -> Unit,
-    createDebtActionWithVenmo: (Map<UserInfo, Double>) -> Unit
+private fun EditDebtorMoneyAmountKeypadPage(
+    initialMoneyAmount: Double,
+    debtActionMoneyAmount: Double,
+    onClick: (Double) -> Unit,
+    onBackPress: () -> Unit
 ) {
-    val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val debtAmountBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
-    val scope = rememberCoroutineScope()
-
-    var splitStrategy: DebtActionViewModel.SplitStrategy by remember {
-        mutableStateOf(DebtActionViewModel.SplitStrategy.EvenSplit)
+    var moneyAmount: String by remember { mutableStateOf("0") }
+    LaunchedEffect(initialMoneyAmount) {
+        moneyAmount = if (initialMoneyAmount % 1 == 0.0)
+            initialMoneyAmount.roundToInt().toString()
+        else
+            initialMoneyAmount.asPureMoneyAmount()
     }
 
-    val rawSplitStrategyDebtAmounts:
-            SnapshotStateMap<UserInfo, Double?> = remember { mutableStateMapOf() }
-    val splitStrategyDebtAmounts: Map<UserInfo, Double> =
-        splitStrategy.generateSplit(debtActionAmount, rawSplitStrategyDebtAmounts)
-
-    var keyPadUserInfo: UserInfo? by remember { mutableStateOf(null) }
-
-    LaunchedEffect(debtActionAmount) {
-        rawSplitStrategyDebtAmounts.clear()
-    }
-
-    val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
-        AddDebtorBottomSheet(
-            userInfos = userInfos,
-            addDebtorsOnClick = { selectedUsers ->
-                rawSplitStrategyDebtAmounts.keys.minus(selectedUsers).forEach { userInfo ->
-                    rawSplitStrategyDebtAmounts.remove(userInfo)
-                }
-                selectedUsers.minus(rawSplitStrategyDebtAmounts.keys).forEach { userInfo ->
-                    rawSplitStrategyDebtAmounts[userInfo] = null
-                }
-                scope.launch { addDebtorBottomSheetState.hide() }
-            },
-            state = addDebtorBottomSheetState
-        ) {
-            keyPadUserInfo?.let { userInfo ->
-                KeyPadBottomSheet(
-                    state = debtAmountBottomSheetState,
-                    initialMoneyAmount = rawSplitStrategyDebtAmounts[userInfo] ?: 0.0,
-                    maxMoneyAmount = debtActionAmount,
-                    onClick = { debtAmount ->
-                        rawSplitStrategyDebtAmounts[userInfo] =
-                            if (debtAmount > 0.0) debtAmount else null
-                    },
-                    onBackPress = {
-                        scope.launch { debtAmountBottomSheetState.hide() }
-                    },
-                    content = content
-                )
-            } ?: content()
-        }
-    }
-
-    modalSheets {
-        BackPressScaffold(onBackPress = onBackPress) { padding ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(AppTheme.colors.primary)
-                    .padding(padding)
-                    .padding(AppTheme.dimensions.appPadding)
-            ) {
-                MoneyAmount(
-                    moneyAmount = debtActionAmount,
-                    fontSize = 100.sp
-                )
-                Box(
-                    contentAlignment = Alignment.TopCenter,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(AppTheme.shapes.large)
-                        .background(AppTheme.colors.secondary)
-                        .padding(bottom = AppTheme.dimensions.cardPadding)
-                        .padding(horizontal = AppTheme.dimensions.cardPadding)
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement
-                            .spacedBy(AppTheme.dimensions.spacing),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        DebtActionSettings(
-                            splitStrategy = splitStrategy,
-                            onSplitStrategyChange = { newSplitStrategy ->
-                                if (splitStrategy::class != newSplitStrategy::class) {
-                                    splitStrategy = newSplitStrategy
-                                    rawSplitStrategyDebtAmounts
-                                        .mapValuesTo(rawSplitStrategyDebtAmounts) { null }
-                                }
-                            },
-                            addDebtorsOnClick = {
-                                scope.launch { addDebtorBottomSheetState.show() }
-                            }
-                        )
-                        UserInfoAmountsList(
-                            userInfoMoneyAmounts = splitStrategyDebtAmounts,
-                            userInfoHasSetAmount = { userInfo ->
-                                if (!splitStrategy.editable) {
-                                    true
-                                } else {
-                                    rawSplitStrategyDebtAmounts[userInfo] != null
-                                }
-                            },
-                            userInfoAmountOnClick = { userInfo ->
-                                if (splitStrategy.editable) {
-                                    keyPadUserInfo = userInfo
-                                    scope.launch { debtAmountBottomSheetState.show() }
-                                }
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            H1ConfirmTextButton(
-                                text = "Request",
-                                enabled = splitStrategy.isValid(
-                                    debtActionAmount,
-                                    splitStrategyDebtAmounts
-                                ),
-                                onClick = {
-                                    createDebtAction(
-                                        splitStrategy.splitToMoneyAmounts(
-                                            debtActionAmount,
-                                            splitStrategyDebtAmounts
-                                        )
-                                    )
-                                }
-                            )
-                            LaunchVenmoButton(
-                                userAmounts = emptyMap(),
-                                enabled = splitStrategy.isValid(
-                                    debtActionAmount,
-                                    splitStrategyDebtAmounts
-                                ),
-                                onClick = {
-                                    createDebtActionWithVenmo(
-                                        splitStrategy.splitToMoneyAmounts(
-                                            debtActionAmount,
-                                            splitStrategyDebtAmounts
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
+    KeyPadScreenLayout(
+        moneyAmount = moneyAmount,
+        onMoneyAmountChange = { newActionAmount ->
+            moneyAmount = if (newActionAmount.toDouble() > debtActionMoneyAmount) {
+                debtActionMoneyAmount.toString().trimEnd('0')
+            } else {
+                newActionAmount
             }
-        }
-    }
+        },
+        confirmButton = {
+            H1ConfirmTextButton(
+                text = "Confirm",
+                onClick = {
+                    onClick(moneyAmount.toDouble())
+                    onBackPress()
+                }
+            )
+        },
+        onBackPress = onBackPress
+    )
 }
 
 @Composable
@@ -315,37 +373,39 @@ private fun DebtActionSettings(
     addDebtorsOnClick: () -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            H1Text(text = "by ")
-            Box(
-                modifier = Modifier
-                    .clip(AppTheme.shapes.medium)
-                    .background(AppTheme.colors.primary)
-                    .clickable {
-                        // TODO: Make actual split strategy selection screen
-                        when(splitStrategy) {
-                            is DebtActionViewModel.SplitStrategy.EvenSplit -> {
-                                onSplitStrategyChange(
-                                    DebtActionViewModel.SplitStrategy.UnevenSplit
-                                )
-                            }
-                            is DebtActionViewModel.SplitStrategy.UnevenSplit -> {
-                                onSplitStrategyChange(DebtActionViewModel.SplitStrategy.EvenSplit)
-                            }
-                            else -> {}
+        H1Text(text = "by ")
+        Box(
+            modifier = Modifier
+                .clip(AppTheme.shapes.medium)
+                .background(AppTheme.colors.primary)
+                .clickable {
+                    // TODO: Make actual split strategy selection screen
+                    when(splitStrategy) {
+                        is DebtActionViewModel.SplitStrategy.EvenSplit -> {
+                            onSplitStrategyChange(
+                                DebtActionViewModel.SplitStrategy.UnevenSplit
+                            )
                         }
+                        is DebtActionViewModel.SplitStrategy.UnevenSplit -> {
+                            onSplitStrategyChange(DebtActionViewModel.SplitStrategy.EvenSplit)
+                        }
+                        else -> {}
                     }
-                    .padding(AppTheme.dimensions.spacingSmall)
-            ) {
-                H1Text(text = splitStrategy.name)
-            }
-            H1Text(text = " between:")
+                }
+                .padding(AppTheme.dimensions.spacingSmall)
+        ) {
+            H1Text(text = splitStrategy.name)
         }
-        AddDebtorButton(addDebtorsOnClick = addDebtorsOnClick)
+        H1Text(text = " between:")
+        Spacer(modifier = Modifier.weight(1f))
+        SmallIcon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add a debtor",
+            modifier = Modifier.clickable(onClick = addDebtorsOnClick)
+        )
     }
 }
 
@@ -457,13 +517,127 @@ private fun SelectDebtorsChecklist(
 }
 
 @Composable
-private fun AddDebtorButton(
-    addDebtorsOnClick: () -> Unit
+private fun DebtActionVenmoConfirmationPage(
+    debtActionAmount: Double,
+    userInfo: UserInfo,
+    debtActionAmounts: Map<UserInfo, Double>,
+    message: String,
+    onBackPress: () -> Unit,
+    createDebtActionWithVenmo: (Map<UserInfo, Double>) -> Unit
 ) {
-    IconButton(onClick = addDebtorsOnClick) {
-        SmallIcon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "Add a debtor"
-        )
+    BackPressScaffold(onBackPress = onBackPress) { padding ->
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(padding)
+            ) {
+                item {
+                    UserRowCard(
+                        user = userInfo.user,
+                        mainContent = {
+                            H1Text(
+                                text = userInfo.user.displayName,
+                                fontSize = AppTheme.typography.extraLargeFont,
+                                maxLines = 2
+                            )
+                            Caption(text = "@${userInfo.user.venmoUsername}")
+                        },
+                        sideContent = {
+                            Caption(
+                                text = "Debt Request",
+                                fontSize = AppTheme.typography.tinyFont
+                            )
+                            Spacer(
+                                modifier = Modifier
+                                    .height(AppTheme.dimensions.spacingExtraSmall)
+                            )
+                            Caption(
+                                text = "Venmo",
+                                fontSize = AppTheme.typography.tinyFont
+                            )
+                        },
+                        iconSize = AppTheme.dimensions.largeIconSize
+                    )
+                }
+                item {
+                    MoneyAmount(
+                        moneyAmount = debtActionAmount,
+                        fontSize = AppTheme.typography.bigMoneyAmountFont
+                    )
+                }
+                item {
+                    H1Text(
+                        text = "\"$message\"",
+                        fontSize = AppTheme.typography.largeFont,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .padding(vertical = AppTheme.dimensions.spacingMedium)
+                    )
+                }
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        H1Text(
+                            text = "Transactions",
+                            fontSize = AppTheme.typography.mediumFont
+                        )
+//                        if (platform == Platform.Android) {
+//                            VenmoButton(
+//                                venmoUsername = userInfo.user.venmoUsername,
+//                                amount = debtActionAmount,
+//                                note = message,
+//                                isRequest = true
+//                            )
+//                        }
+                    }
+                }
+                items(debtActionAmounts.toList()) { (userInfo, balanceChange) ->
+                    UserRowCard(
+                        user = userInfo.user,
+                        mainContent = {
+                            H1Text(text = userInfo.user.displayName)
+                            Caption(text = "@${userInfo.user.venmoUsername}")
+                        },
+                        sideContent = {
+                            Row(
+                                horizontalArrangement =
+                                    Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                VenmoButton(
+                                    venmoUsername = userInfo.user.venmoUsername,
+                                    amount = balanceChange,
+                                    note = message,
+                                    isRequest = true
+                                )
+                                MoneyAmount(
+                                    moneyAmount = balanceChange,
+                                    color = AppTheme.colors.onSecondary
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(AppTheme.dimensions.itemRowCardHeight)
+                    )
+                }
+            }
+            H1ConfirmTextButton(
+                text = "Request",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = AppTheme.dimensions.appPadding)
+            ) {
+                createDebtActionWithVenmo(debtActionAmounts)
+            }
+        }
     }
 }

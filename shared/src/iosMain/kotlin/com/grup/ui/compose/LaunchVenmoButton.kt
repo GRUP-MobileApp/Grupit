@@ -2,37 +2,29 @@ package com.grup.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
+import io.ktor.http.encodeURLPath
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 
 @Composable
-actual fun LaunchVenmoButton(
+internal actual fun VenmoButton(
     modifier: Modifier,
-    userAmounts: Map<String, Double>,
-    scale: Float,
-    width: Dp,
-    height: Dp,
-    fontSize: TextUnit,
-    enabled: Boolean,
-    onClick: () -> Unit
+    venmoUsername: String,
+    amount: Double,
+    note: String,
+    isRequest: Boolean
 ) {
-    val venmoUrl = NSURL(string = "venmo://paycharge?txn=pay&recipients=vkuan&amount=10&note=Note")
+    val venmoUrl = NSURL(
+        string = "https://venmo.com/$venmoUsername?txn=${if (isRequest) "charge" else "pay"}" +
+                "&note=$note&amount=$amount"
+    )
 
-    H1ConfirmTextButton(
-        text = "Venmo",
-        scale = scale,
-        width = width,
-        height = height,
-        fontSize = fontSize,
-        enabled = enabled
-    ) {
+    VenmoIcon {
         with(UIApplication.sharedApplication) {
             openURL(
-                if (canOpenURL(venmoUrl)) venmoUrl else NSURL(string = "http://venmo.com/")
+                if (canOpenURL(NSURL(string = "venmo://app"))) venmoUrl
+                else NSURL(string = "https://apps.apple.com/app/venmo/id351727428")
             )
         }
-        onClick()
     }
 }

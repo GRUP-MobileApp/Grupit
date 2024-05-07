@@ -3,16 +3,16 @@ package com.grup.ui.compose.views
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -23,13 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.models.Action
+import com.grup.models.DebtAction
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
@@ -37,7 +37,6 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
-import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.TransactionRecordRowCard
@@ -46,23 +45,20 @@ import com.grup.ui.compose.asMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoDate
 import com.grup.ui.compose.isoTime
-import com.grup.ui.viewmodel.SettleActionDetailsViewModel
+import com.grup.ui.viewmodel.ActionDetailsViewModel
 
-internal class SettleActionDetailsView(
-    private val groupId: String,
-    private val settleActionId: String
-) : Screen {
+internal class ActionDetailsView(private val actionId: String) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val settleActionDetailsViewModel =
-            rememberScreenModel { SettleActionDetailsViewModel(groupId, settleActionId) }
+        val actionDetailsViewModel =
+            rememberScreenModel { ActionDetailsViewModel(actionId) }
 
         CompositionLocalProvider(
             LocalContentColor provides AppTheme.colors.onSecondary
         ) {
-            SettleActionDetailsLayout(
-                settleActionDetailsViewModel = settleActionDetailsViewModel,
+            ActionDetailsLayout(
+                actionDetailsViewModel = actionDetailsViewModel,
                 navigator = navigator
             )
         }
@@ -70,25 +66,24 @@ internal class SettleActionDetailsView(
 }
 
 @Composable
-private fun SettleActionDetailsLayout(
-    settleActionDetailsViewModel: SettleActionDetailsViewModel,
+private fun ActionDetailsLayout(
+    actionDetailsViewModel: ActionDetailsViewModel,
     navigator: Navigator
 ) {
-    val settleAction: SettleAction by
-            settleActionDetailsViewModel.settleAction.collectAsStateWithLifecycle()
+    val action: Action by actionDetailsViewModel.action.collectAsStateWithLifecycle()
 
     val myUserInfo: UserInfo by
-            settleActionDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
+        actionDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
+
+    fun isMyTransactionRecord(transactionRecord: TransactionRecord): Boolean =
+        transactionRecord.userInfo.user.id == actionDetailsViewModel.userObject.id
 
     val (pendingTransactionRecords, completedTransactionRecords) =
-        settleAction.transactionRecords.partition { it.status is TransactionRecord.Status.Pending }
+        action.transactionRecords.partition { it.status is TransactionRecord.Status.Pending }
 
     var selectedTransactionType: String by remember {
         mutableStateOf(if (pendingTransactionRecords.isNotEmpty()) "Pending" else "Completed")
     }
-
-    fun isMyTransactionRecord(transactionRecord: TransactionRecord): Boolean =
-        transactionRecord.userInfo.user.id == settleActionDetailsViewModel.userObject.id
 
     BackPressScaffold(onBackPress = { navigator.pop() }) { padding ->
         Column(modifier = Modifier.fillMaxSize()) {
@@ -102,39 +97,71 @@ private fun SettleActionDetailsLayout(
                     .padding(padding)
             ) {
                 item {
-                    with(settleAction) {
+                    with(action) {
                         UserRowCard(
                             user = userInfo.user,
                             mainContent = {
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Caption(text = "Settle Request")
+                                H1Text(
+                                    text = userInfo.user.displayName,
+                                    fontSize = AppTheme.typography.extraLargeFont,
+                                    maxLines = 2
+                                )
+                                Caption(text = "@${userInfo.user.venmoUsername}")
+                            },
+                            sideContent = {
+                                Caption(
+                                    text = when(action) {
+                                        is DebtAction -> "Debt Request"
+                                        is SettleAction -> "Settle Request"
+                                    },
+                                    fontSize = AppTheme.typography.tinyFont
+                                )
+                                Spacer(
+                                    modifier = Modifier
+                                        .height(AppTheme.dimensions.spacingExtraSmall)
+                                )
+                                Caption(
+                                    text = "${isoDate(date)} at ${isoTime(date)}",
+                                    fontSize = AppTheme.typography.tinyFont
+                                )
+                                (action as? DebtAction)?.let { debtAction ->
+                                    Spacer(
+                                        modifier = Modifier
+                                            .height(AppTheme.dimensions.spacingExtraSmall)
+                                    )
                                     Caption(
-                                        text = "${isoDate(date)} at ${isoTime(date)}",
+                                        text = debtAction.platform.name,
                                         fontSize = AppTheme.typography.tinyFont
                                     )
                                 }
-                                Caption(text = "@${userInfo.user.venmoUsername}")
-                                H1Text(
-                                    text = userInfo.user.displayName,
-                                    fontSize = 28.sp
-                                )
                             },
-                            iconSize = 80.dp
+                            iconSize = AppTheme.dimensions.largeIconSize
                         )
                     }
                 }
                 item {
                     MoneyAmount(
-                        moneyAmount = with(settleAction) {
-                            if (isCompleted) amount
-                            else if (remainingAmount > 0) remainingAmount
-                            else pendingAmount
+                        moneyAmount = when(action) {
+                            is DebtAction -> action.amount
+                            is SettleAction -> with(action as SettleAction) {
+                                if (isCompleted) amount
+                                else if (remainingAmount > 0) remainingAmount
+                                else pendingAmount
+                            }
                         },
-                        fontSize = 60.sp
+                        fontSize = AppTheme.typography.bigMoneyAmountFont
                     )
+                }
+                (action as? DebtAction)?.let { debtAction ->
+                    item {
+                        H1Text(
+                            text = "\"${debtAction.message}\"",
+                            fontSize = AppTheme.typography.largeFont,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .padding(vertical = AppTheme.dimensions.spacingMedium)
+                        )
+                    }
                 }
                 item {
                     Row(
@@ -143,13 +170,13 @@ private fun SettleActionDetailsLayout(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         if (pendingTransactionRecords.isNotEmpty()) {
-                            H1Header(
+                            H1Text(
                                 text = "Pending",
                                 fontSize =
                                     if (selectedTransactionType == "Pending")
-                                        AppTheme.typography.headerFont.times(1.2f)
+                                        AppTheme.typography.mediumFont.times(1.2f)
                                     else
-                                        AppTheme.typography.headerFont,
+                                        AppTheme.typography.mediumFont,
                                 modifier = Modifier.clickable {
                                     selectedTransactionType = "Pending"
                                 }
@@ -157,13 +184,13 @@ private fun SettleActionDetailsLayout(
 
                         }
                         if (completedTransactionRecords.isNotEmpty()) {
-                            H1Header(
+                            H1Text(
                                 text = "Completed",
                                 fontSize =
                                     if (selectedTransactionType == "Completed")
-                                        AppTheme.typography.headerFont.times(1.2f)
+                                        AppTheme.typography.mediumFont.times(1.2f)
                                     else
-                                        AppTheme.typography.headerFont,
+                                        AppTheme.typography.mediumFont,
                                 modifier = Modifier.clickable {
                                     selectedTransactionType = "Completed"
                                 }
@@ -177,7 +204,13 @@ private fun SettleActionDetailsLayout(
                         pendingTransactionRecords
                     } else {
                         completedTransactionRecords
-                    }.sortedBy { isMyTransactionRecord(it) }
+                    }.sortedWith (
+                        compareBy<TransactionRecord> {
+                            it.userInfo.user.id == actionDetailsViewModel.userObject.id
+                        }.thenBy {
+                            it.status !is TransactionRecord.Status.Rejected
+                        }
+                    )
                 ) { transactionRecord ->
                     TransactionRecordRowCard(
                         transactionRecord = transactionRecord,
@@ -211,23 +244,48 @@ private fun SettleActionDetailsLayout(
                     }
                 }
             }
-            if (
-                settleAction.userInfo.user.id != myUserInfo.user.id &&
-                myUserInfo.userBalance < 0
-            ) {
-                H1ConfirmTextButton(
-                    text = "Settle",
-                    onClick = {
-                        navigator.push(
-                            SettleActionTransactionView(
-                                settleActionDetailsViewModel.groupId,
-                                settleActionDetailsViewModel.settleActionId
-                            )
+            when(action) {
+                is DebtAction -> with(action as DebtAction) {
+                    if (
+                        transactionRecords.find {
+                            isMyTransactionRecord(it)
+                        }?.status is TransactionRecord.Status.Pending
+                    ) {
+                        H1ConfirmTextButton(
+                            text = "Accept",
+                            onClick = {
+                                actionDetailsViewModel.acceptDebtAction(
+                                    debtAction = this,
+                                    onSuccess = {
+                                        navigator.popUntil {
+                                            it is GroupDetailsView
+                                        }
+                                    },
+                                    onError = { }
+                                )
+                            },
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .padding(bottom = AppTheme.dimensions.appPadding)
                         )
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                        .padding(bottom = AppTheme.dimensions.appPadding)
-                )
+                    }
+                }
+                is SettleAction -> with(action as SettleAction) {
+                    if (
+                        userInfo.user.id != myUserInfo.user.id &&
+                        myUserInfo.userBalance < 0
+                    ) {
+                        H1ConfirmTextButton(
+                            text = "Settle",
+                            onClick = {
+                                navigator.push(
+                                    SettleActionTransactionView(userInfo.group.id, id)
+                                )
+                            },
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .padding(bottom = AppTheme.dimensions.appPadding)
+                        )
+                    }
+                }
             }
         }
     }

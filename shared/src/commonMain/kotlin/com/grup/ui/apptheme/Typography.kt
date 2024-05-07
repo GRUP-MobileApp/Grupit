@@ -23,9 +23,18 @@ internal class AppTypography {
             fontWeight = FontWeight.Normal
         )
     val tinyFont: TextUnit = 11.sp
-    val smallFont: TextUnit = 14.sp
-    val mediumFont: TextUnit = 18.sp
+    val smallFont: TextUnit = 13.sp
+    val mediumFont: TextUnit = 16.sp
+    val largeFont: TextUnit = 22.sp
+    val extraLargeFont: TextUnit = 28.sp
     val headerFont: TextUnit = 20.sp
+    val largeHeaderFont: TextUnit = 32.sp
+
+    val textFieldFont: TextUnit = 20.sp
+
+    val moneyAmountFont: TextUnit = 20.sp
+    val bigMoneyAmountFont: TextUnit = 60.sp
+    val keypadMoneyAmountFont: TextUnit = 100.sp
 }
 
 internal val LocalTypography = staticCompositionLocalOf { AppTypography() }
