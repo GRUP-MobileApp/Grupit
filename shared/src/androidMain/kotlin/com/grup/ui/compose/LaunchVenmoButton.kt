@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import io.ktor.http.encodeURLPath
 
 @Composable
 internal actual fun VenmoButton(

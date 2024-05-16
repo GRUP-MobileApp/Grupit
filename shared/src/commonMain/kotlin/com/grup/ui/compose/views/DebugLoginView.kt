@@ -15,11 +15,9 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,17 +50,13 @@ internal class DebugLoginView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val loginViewModel = rememberScreenModel { LoginViewModel() }
+        val loginViewModel = rememberScreenModel { LoginViewModel(true) }
         val navigator = LocalNavigator.currentOrThrow
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            DebugLoginLayout(
-                loginViewModel = loginViewModel,
-                navigator = navigator
-            )
-        }
+        DebugLoginLayout(
+            loginViewModel = loginViewModel,
+            navigator = navigator
+        )
     }
 }
 

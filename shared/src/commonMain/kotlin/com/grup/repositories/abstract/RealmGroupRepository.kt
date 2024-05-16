@@ -1,7 +1,7 @@
 package com.grup.repositories.abstract
 
-import com.grup.dbmanager.RealmManager
 import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
+import com.grup.dbmanager.RealmManager
 import com.grup.interfaces.IGroupRepository
 import com.grup.models.Group
 import com.grup.models.User
@@ -11,8 +11,6 @@ import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.mongodb.subscriptions
-import kotlinx.coroutines.runBlocking
 
 internal abstract class RealmGroupRepository : IGroupRepository {
     protected abstract val realm: Realm

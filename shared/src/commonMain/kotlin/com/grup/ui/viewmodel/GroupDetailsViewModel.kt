@@ -1,21 +1,21 @@
 package com.grup.ui.viewmodel
 
+import com.grup.device.DeviceManager
 import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.DebtAction
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
-import com.grup.other.FirstTimeSettings
 import com.grup.ui.models.TransactionActivity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-internal class GroupDetailsViewModel(val selectedGroupId: String) : LoggedInViewModel() {
-    var hasViewedTutorial: Boolean
-        get() = FirstTimeSettings.hasViewedTutorial
-        set(value) { FirstTimeSettings.hasViewedTutorial = value }
+internal class GroupDetailsViewModel(
+    val selectedGroupId: String
+): LoggedInViewModel() {
+    var hasViewedTutorial: Boolean by DeviceManager.settingsManager::hasViewedTutorial
 
     // Hot flow containing User's UserInfos
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
@@ -45,7 +45,8 @@ internal class GroupDetailsViewModel(val selectedGroupId: String) : LoggedInView
     val activeSettleActions: StateFlow<List<SettleAction>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                !settleAction.isCompleted && settleAction.remainingAmount > 0
+                !settleAction.isCompleted &&
+                (settleAction.remainingAmount > 0 || settleAction.userInfo.user.id == userObject.id)
             }.sortedWith(
                 compareByDescending<SettleAction> { settleAction ->
                     settleAction.userInfo.user.id == userObject.id

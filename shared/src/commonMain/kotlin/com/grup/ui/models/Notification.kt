@@ -57,8 +57,15 @@ internal sealed class Notification {
             get() = transactionRecord.userInfo.user
 
         override fun displayText(): String =
-            "${transactionRecord.userInfo.user.displayName} has accepted a debt of " +
-                    "${transactionRecord.balanceChange.asMoneyAmount()} from you"
+            "${transactionRecord.userInfo.user.displayName} has " +
+                    when(transactionRecord.status) {
+                        is TransactionRecord.Status.Accepted -> "accepted"
+                        TransactionRecord.Status.Rejected -> "rejected"
+                        TransactionRecord.Status.Pending -> throw PendingTransactionRecordException(
+                            "TransactionRecord still pending for DebtAction with id ${debtAction.id}"
+                        )
+                    } +
+                    " a debt of ${transactionRecord.balanceChange.asMoneyAmount()} from you"
     }
 
     data class NewSettleAction(val settleAction: SettleAction) : Notification() {
@@ -76,7 +83,7 @@ internal sealed class Notification {
             get() = settleAction.userInfo.user
 
         override fun displayText(): String =
-            "${user.displayName} is requesting " +
+            "${user.displayName} is settling for " +
                     "${settleAction.amount.asMoneyAmount()} in ${group.groupName}"
     }
 
@@ -119,7 +126,15 @@ internal sealed class Notification {
             get() = transactionRecord.userInfo.user
 
         override fun displayText(): String =
-            "${user.displayName} accepted your settlement for " +
+            "${user.displayName} " +
+                    when(transactionRecord.status) {
+                        is TransactionRecord.Status.Accepted -> "accepted"
+                        TransactionRecord.Status.Rejected -> "rejected"
+                        TransactionRecord.Status.Pending -> throw PendingTransactionRecordException(
+                            "TransactionRecord still pending for SettleAction with id " +
+                                    settleAction.id
+                        )
+                    } + " your settlement for " +
                     transactionRecord.balanceChange.asMoneyAmount()
     }
 

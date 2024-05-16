@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +22,10 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.grup.models.Action
+import com.grup.models.DebtAction
+import com.grup.models.SettleAction
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.AcceptRejectRow
+import com.grup.ui.compose.AcceptRejectButtons
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
@@ -44,29 +44,27 @@ internal class NotificationsView : Screen {
         val notificationsViewModel = rememberScreenModel { NotificationsViewModel() }
         val tabNavigator = LocalTabNavigator.current
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            notificationsViewModel.logGroupNotificationsDate()
-            CompositionLocalProvider(
-                LocalContentColor provides AppTheme.colors.onSecondary
-            ) {
-                NotificationsLayout(
-                    notificationsViewModel = notificationsViewModel,
-                    actionOnClick = { action ->
-                        GroupsTab(
-                            action.userInfo.group.id,
-                            action.id
-                        ).let { tab ->
-                            MainView.tabs[0] = tab
-                            tabNavigator.current = tab
-                        }
-                    }
-                )
-            }
-        }
-    }
+        notificationsViewModel.logGroupNotificationsDate()
 
+        NotificationsLayout(
+            notificationsViewModel = notificationsViewModel,
+            actionOnClick = { action ->
+                GroupsTab(
+                    action.userInfo.group.id,
+                    Pair(
+                        when(action) {
+                            is DebtAction -> "DebtAction"
+                            is SettleAction -> "SettleAction"
+                        },
+                        action.id
+                    )
+                ).let { tab ->
+                    MainView.tabs[0] = tab
+                    tabNavigator.current = tab
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -117,7 +115,6 @@ private fun NotificationsLayout(
                         vertical = AppTheme.dimensions.paddingMedium
                     ),
                 user = notification.user,
-                iconSize = 60.dp,
                 mainContent = {
                     H1Text(
                         text = notification.group.groupName,
@@ -135,45 +132,9 @@ private fun NotificationsLayout(
                     )
                 },
                 sideContent = when (notification) {
-                    is Notification.IncomingDebtAction -> {
-                        {
-                            AcceptRejectRow(
-                                acceptOnClick = {
-                                    notificationsViewModel.acceptDebtAction(
-                                        notification.debtAction,
-                                        notification.transactionRecord
-                                    )
-                                },
-                                rejectOnClick = {
-                                    notificationsViewModel.rejectDebtAction(
-                                        notification.debtAction,
-                                        notification.transactionRecord
-                                    )
-                                }
-                            )
-                        }
-                    }
-                    is Notification.IncomingSettleActionTransaction -> {
-                        {
-                            AcceptRejectRow(
-                                acceptOnClick = {
-                                    notificationsViewModel.acceptSettleActionTransaction(
-                                        notification.settleAction,
-                                        notification.transactionRecord
-                                    )
-                                },
-                                rejectOnClick = {
-                                    notificationsViewModel.rejectSettleActionTransaction(
-                                        notification.settleAction,
-                                        notification.transactionRecord
-                                    )
-                                }
-                            )
-                        }
-                    }
                     is Notification.IncomingGroupInvite -> {
                         {
-                            AcceptRejectRow(
+                            AcceptRejectButtons(
                                 acceptOnClick = {
                                     notificationsViewModel.acceptGroupInvite(
                                         notification.groupInvite

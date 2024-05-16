@@ -1,25 +1,21 @@
 package com.grup.dbmanager
 
-import com.grup.exceptions.login.NotLoggedInException
-import com.grup.dbmanager.realm.SyncResetStrategy
+import com.grup.device.DeviceManager
 import com.grup.di.realmModules
+import com.grup.exceptions.login.NotLoggedInException
 import com.grup.models.BaseEntity
-import com.grup.models.TransactionRecord
-import com.grup.other.NestedRealmObject
 import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmGroup
 import com.grup.models.realm.RealmGroupInvite
 import com.grup.models.realm.RealmSettleAction
 import com.grup.models.realm.RealmTransactionRecord
-import com.grup.models.realm.RealmTransactionRecord.Companion.toRealmTransactionRecord
 import com.grup.models.realm.RealmUser
 import com.grup.models.realm.RealmUserInfo
-import com.grup.other.getLatest
 import com.grup.other.APP_ID
 import com.grup.other.TEST_APP_ID
+import com.grup.other.getLatest
 import com.grup.other.idSerialName
 import com.grup.platform.signin.AuthManager
-import com.grup.platform.notification.NotificationManager
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
@@ -36,7 +32,9 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -77,7 +75,7 @@ internal open class RealmManager protected constructor(
             }
         } ?: throw NotLoggedInException("Not logged into Realm")
 
-    private val notificationManager: NotificationManager by inject()
+    private val deviceManager: DeviceManager by inject()
 
     private val realm: Realm = app.currentUser?.let { realmUser ->
         Realm.open(
@@ -109,7 +107,6 @@ internal open class RealmManager protected constructor(
                 }
                 .name("syncedRealm")
                 .schemaVersion(0)
-                .syncClientResetStrategy(SyncResetStrategy(this))
                 .build()
         )
     } ?: throw NotLoggedInException()
@@ -165,14 +162,14 @@ internal open class RealmManager protected constructor(
                         realm.query<RealmSettleAction>("groupId == $0", groupId),
                         "${groupId}_SettleAction"
                     )
-                    notificationManager.subscribeGroupNotifications(groupId)
+                    deviceManager.notificationManager.subscribeGroupNotifications(groupId)
                 }
                 prevSubscribedGroupIds.minus(newGroupIds).forEach { groupId ->
                     remove("${groupId}_Group")
                     remove("${groupId}_UserInfo")
                     remove("${groupId}_DebtAction")
                     remove("${groupId}_SettleAction")
-                    notificationManager.unsubscribeGroupNotifications(groupId)
+                    deviceManager.notificationManager.unsubscribeGroupNotifications(groupId)
                 }
             }
             prevSubscribedGroupIds = newGroupIds
@@ -256,7 +253,8 @@ internal open class RealmManager protected constructor(
 
     suspend fun open() {
         app.currentUser?.let { realmUser ->
-            notificationManager.subscribePersonalNotifications(realmUser.id)
+            deviceManager.notificationManager.subscribePersonalNotifications(realmUser.id)
+            DeviceManager.settingsManager.userId = realmUser.id
         } ?: throw NotLoggedInException()
         groupSubscriptionsJob.start()
         userSubscriptionsJob.start()
@@ -271,7 +269,7 @@ internal open class RealmManager protected constructor(
         userSubscriptionsJob.cancel()
         groupSubscriptionsJob.cancel()
         groupOnlySubscriptionJob.cancel()
-        notificationManager.unsubscribeAllNotifications()
+        deviceManager.notificationManager.unsubscribeAllNotifications()
         unloadKoinModules(realmModules(realm, isDebug))
     }
 

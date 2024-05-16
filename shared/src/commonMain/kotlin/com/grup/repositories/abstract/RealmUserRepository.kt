@@ -1,7 +1,7 @@
 package com.grup.repositories.abstract
 
-import com.grup.dbmanager.RealmManager
 import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
+import com.grup.dbmanager.RealmManager
 import com.grup.interfaces.IUserRepository
 import com.grup.models.User
 import com.grup.models.realm.RealmUser
@@ -9,8 +9,6 @@ import com.grup.other.getLatest
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.mongodb.subscriptions
-import io.realm.kotlin.mongodb.sync.asQuery
 
 internal abstract class RealmUserRepository : IUserRepository {
     protected abstract val realm: Realm

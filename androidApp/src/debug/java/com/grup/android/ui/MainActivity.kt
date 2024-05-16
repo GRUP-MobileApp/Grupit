@@ -3,8 +3,8 @@ package com.grup.android.ui
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.grup.di.initAuthManager
-import com.grup.di.initNotificationManager
+import com.grup.device.DeviceManager
+import com.grup.di.initDeviceManager
 import com.grup.platform.notification.NotificationManager
 import com.grup.platform.signin.AuthManager
 import com.grup.ui.compose.Application
@@ -15,8 +15,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 //        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
-        initAuthManager(authManager = AuthManager())
-        initNotificationManager(notificationManager = NotificationManager())
+        initDeviceManager(
+            DeviceManager(
+                authManager = AuthManager(),
+                notificationManager = NotificationManager()
+            )
+        )
 
         setContent {
             Application(isDebug = true)

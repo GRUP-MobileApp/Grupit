@@ -12,7 +12,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
-class StartViewModel : ScreenModel, KoinComponent {
+class StartViewModel(private val isDebug: Boolean = false) : ScreenModel, KoinComponent {
     sealed class SilentSignInResult {
         data class SignedIn(val authProvider: AuthManager.AuthProvider) : SilentSignInResult()
         data class SignedInWelcomeSlideshow(
@@ -26,7 +26,7 @@ class StartViewModel : ScreenModel, KoinComponent {
     private val _silentSignInResult = MutableStateFlow<SilentSignInResult>(SilentSignInResult.None)
     val silentSignInResult: StateFlow<SilentSignInResult> = _silentSignInResult
 
-    fun silentSignIn(isDebug: Boolean = false) = screenModelScope.launch {
+    fun silentSignIn() = screenModelScope.launch {
         try {
             if (isDebug) {
                 APIServer.debugSilentSignIn()

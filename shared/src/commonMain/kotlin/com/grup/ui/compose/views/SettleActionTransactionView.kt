@@ -2,18 +2,14 @@ package com.grup.ui.compose.views
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,8 +26,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.SettleAction
 import com.grup.models.UserInfo
-import com.grup.other.Platform
-import com.grup.other.platform
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
@@ -48,26 +42,19 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.min
 
-internal class SettleActionTransactionView(
-    private val groupId: String,
-    private val settleActionId: String
-) : Screen {
+internal class SettleActionTransactionView(private val actionId: String) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val settleActionTransactionViewModel =
-            rememberScreenModel { SettleActionTransactionViewModel(groupId, settleActionId) }
+            rememberScreenModel { SettleActionTransactionViewModel(actionId) }
         val navigator = LocalNavigator.currentOrThrow
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            SettleActionLayout(
-                settleActionTransactionViewModel = settleActionTransactionViewModel,
-                navigator = navigator
-            )
-        }
+        SettleActionLayout(
+            settleActionTransactionViewModel = settleActionTransactionViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -81,7 +68,8 @@ private fun SettleActionLayout(
     val venmoConfirmationBottomSheetState =
         rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
-    var settleActionTransactionAmount: String by remember { mutableStateOf("0") }
+    var settleActionTransactionStringAmount: String by remember { mutableStateOf("0") }
+    val settleActionTransactionAmount: Double = settleActionTransactionStringAmount.toDouble()
 
     val myUserInfo: UserInfo by
             settleActionTransactionViewModel.myUserInfo.collectAsStateWithLifecycle()
@@ -148,18 +136,20 @@ private fun SettleActionLayout(
         }
     ) {
         KeyPadScreenLayout(
-            moneyAmount = settleActionTransactionAmount,
+            moneyAmount = settleActionTransactionStringAmount,
             onMoneyAmountChange = { moneyAmount ->
-                settleActionTransactionAmount = if (moneyAmount.toDouble() > maxTransactionAmount) {
-                    maxTransactionAmount.asPureMoneyAmount()
-                } else {
-                    moneyAmount
-                }
+                settleActionTransactionStringAmount =
+                    if (moneyAmount.toDouble() > maxTransactionAmount) {
+                        maxTransactionAmount.asPureMoneyAmount()
+                    } else {
+                        moneyAmount
+                    }
             },
             onBackPress = { navigator.pop() },
             confirmButton = {
                 H1ConfirmTextButton(
                     text = "Settle",
+                    enabled = settleActionTransactionAmount > 0,
                     onClick = { scope.launch { venmoConfirmationBottomSheetState.show() } }
                 )
             }

@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +21,7 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.grup.platform.signin.AuthManager
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.GoogleSignInButton
 import com.grup.ui.compose.H1Text
@@ -36,14 +35,10 @@ internal class ReleaseLoginView : Screen {
         val loginViewModel = rememberScreenModel { LoginViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            ReleaseLoginLayout(
-                loginViewModel = loginViewModel,
-                navigator = navigator
-            )
-        }
+        ReleaseLoginLayout(
+            loginViewModel = loginViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -84,13 +79,10 @@ private fun ReleaseLoginLayout(
 
             Spacer(modifier = Modifier.height(50.dp))
 
-            loginViewModel.authManager.googleSignInManager?.let { googleSignInManager ->
+            if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Google)) {
                 GoogleSignInButton(
                     loginResult = loginResult,
-                    googleSignInManager = googleSignInManager,
-                    signInCallback = { token ->
-                        loginViewModel.loginGoogleAccount(token)
-                    }
+                    signIn = { loginViewModel.loginGoogleAccount() }
                 )
             }
         }

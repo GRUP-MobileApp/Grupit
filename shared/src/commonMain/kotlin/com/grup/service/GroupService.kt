@@ -13,7 +13,11 @@ internal class GroupService(private val dbManager: DatabaseManager) : KoinCompon
     private val groupRepository: IGroupRepository by inject()
     private val userInfoRepository: IUserInfoRepository by inject()
 
+    private val validationService: ValidationService = ValidationService()
+
     suspend fun createGroup(user: User, groupName: String): Group = dbManager.write {
+        validationService.validateGroupName(groupName)
+
         groupRepository.createGroup(this, user, groupName)?.also { group ->
             userInfoRepository.createUserInfo(this, user, group)
         } ?: throw NotCreatedException("Error creating group $groupName")

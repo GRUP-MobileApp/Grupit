@@ -11,13 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,11 +47,7 @@ internal class GroupsView: Screen {
         val navigator = LocalNavigator.currentOrThrow
         val groupsViewModel = rememberScreenModel { GroupsViewModel() }
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            GroupsLayout(groupsViewModel = groupsViewModel, navigator = navigator)
-        }
+        GroupsLayout(groupsViewModel = groupsViewModel, navigator = navigator)
     }
 }
 

@@ -15,29 +15,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -51,8 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -61,23 +49,22 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
-import com.grup.other.Platform
-import com.grup.other.platform
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.apptheme.venmo
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
+import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.KeyPadScreenLayout
 import com.grup.ui.compose.ModalBottomSheetLayout
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.SmallIcon
 import com.grup.ui.compose.UserInfoAmountsList
+import com.grup.ui.compose.UserInfoRowCard
 import com.grup.ui.compose.UserRowCard
 import com.grup.ui.compose.UsernameSearchBar
 import com.grup.ui.compose.VenmoButton
-import com.grup.ui.compose.asMoneyAmount
 import com.grup.ui.compose.asPureMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.viewmodel.DebtActionViewModel
@@ -91,14 +78,10 @@ internal class DebtActionView(private val groupId: String) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val debtActionViewModel = rememberScreenModel { DebtActionViewModel(groupId) }
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            DebtActionLayout(
-                debtActionViewModel = debtActionViewModel,
-                navigator = navigator
-            )
-        }
+        DebtActionLayout(
+            debtActionViewModel = debtActionViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -348,7 +331,7 @@ private fun EditDebtorMoneyAmountKeypadPage(
         moneyAmount = moneyAmount,
         onMoneyAmountChange = { newActionAmount ->
             moneyAmount = if (newActionAmount.toDouble() > debtActionMoneyAmount) {
-                debtActionMoneyAmount.toString().trimEnd('0')
+                debtActionMoneyAmount.asPureMoneyAmount()
             } else {
                 newActionAmount
             }
@@ -425,14 +408,12 @@ private fun AddDebtorBottomSheet(
         sheetState = state,
         sheetContent = {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.8f)
-                    .padding(AppTheme.dimensions.paddingMedium)
+                    .padding(AppTheme.dimensions.appPadding)
             ) {
-                H1Text(text = "Add Debtors", color = textColor, fontSize = 50.sp)
+                H1Header(text = "Select Debtors", color = textColor)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
@@ -443,33 +424,21 @@ private fun AddDebtorBottomSheet(
                         onQueryChange = { usernameSearchQuery = it },
                         modifier = Modifier.weight(1f)
                     )
-                    Button(
-                        onClick = { addDebtorsOnClick(selectedUsers) },
-                        shape = AppTheme.shapes.circleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = AppTheme.colors.confirm
-                        ),
-                        modifier = Modifier
-                            .width(100.dp)
-                            .height(50.dp)
-                    ) {
-                        Text(
-                            text = "Add",
-                            color = AppTheme.colors.onSecondary
-                        )
-                    }
+                    H1ConfirmTextButton(
+                        text = "Select",
+                        width = AppTheme.dimensions.textButtonWidth.times(0.7f)
+                    ) { addDebtorsOnClick(selectedUsers) }
                 }
-                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
                 SelectDebtorsChecklist(
                     userInfos = userInfos.filter { userInfo ->
                         userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
                     },
                     selectedUsers = selectedUsers,
-                    onCheckedChange = { userInfo, isSelected ->
-                        selectedUsers = if (isSelected) {
-                            selectedUsers + userInfo
+                    onCheckedChange = { userInfo ->
+                        if (selectedUsers.contains(userInfo)) {
+                            selectedUsers -= userInfo
                         } else {
-                            selectedUsers - userInfo
+                            selectedUsers += userInfo
                         }
                     }
                 )
@@ -483,35 +452,29 @@ private fun AddDebtorBottomSheet(
 private fun SelectDebtorsChecklist(
     userInfos: List<UserInfo>,
     selectedUsers: Set<UserInfo>,
-    onCheckedChange: (UserInfo, Boolean) -> Unit
+    onCheckedChange: (UserInfo) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.appPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         items(userInfos) { userInfo ->
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                UserRowCard(
-                    user = userInfo.user,
-                    mainContent = {
-                        H1Text(text = userInfo.user.displayName)
-                        Caption(text = "Balance: ${userInfo.userBalance.asMoneyAmount()}")
-                    },
-                    sideContent = {
-                        Checkbox(
-                            checked = selectedUsers.contains(userInfo),
-                            onCheckedChange = { isChecked -> onCheckedChange(userInfo, isChecked) },
-                            colors = CheckboxDefaults.colors(
-                                uncheckedColor = AppTheme.colors.onSecondary
-                            )
-                        )
-                    }
-                )
-            }
+            val isSelected = selectedUsers.contains(userInfo)
+            UserInfoRowCard(
+                userInfo = userInfo,
+                coloredMoneyAmount = !isSelected,
+                modifier = Modifier
+                    .clip(AppTheme.shapes.large)
+                    .background(
+                        if (isSelected) AppTheme.colors.confirm
+                        else AppTheme.colors.primary
+                    )
+                    .clickable { onCheckedChange(userInfo) }
+                    .padding(AppTheme.dimensions.rowCardPadding)
+                    .height(AppTheme.dimensions.itemRowCardHeight)
+            )
         }
     }
 }

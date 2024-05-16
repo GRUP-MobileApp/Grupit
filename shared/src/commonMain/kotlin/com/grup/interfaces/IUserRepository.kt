@@ -1,7 +1,7 @@
 package com.grup.interfaces
 
-import com.grup.models.User
 import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
+import com.grup.models.User
 
 internal interface IUserRepository : IRepository {
     fun createMyUser(

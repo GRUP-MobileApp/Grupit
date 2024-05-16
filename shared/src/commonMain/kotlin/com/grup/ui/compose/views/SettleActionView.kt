@@ -1,8 +1,6 @@
 package com.grup.ui.compose.views
 
-import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,7 +13,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.UserInfo
-import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.KeyPadScreenLayout
 import com.grup.ui.compose.asPureMoneyAmount
@@ -29,11 +26,7 @@ internal class SettleActionView(private val groupId: String) : Screen {
         val settleActionViewModel = rememberScreenModel { SettleActionViewModel(groupId) }
         val navigator = LocalNavigator.currentOrThrow
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            SettleActionLayout(settleActionViewModel = settleActionViewModel, navigator = navigator)
-        }
+        SettleActionLayout(settleActionViewModel = settleActionViewModel, navigator = navigator)
     }
 }
 

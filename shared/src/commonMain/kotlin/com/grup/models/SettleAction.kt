@@ -5,8 +5,8 @@ import kotlin.math.max
 abstract class SettleAction internal constructor() : Action() {
     abstract override val transactionRecords: MutableList<TransactionRecord>
 
-    abstract override val amount: Double
-    private val acceptedAmount: Double
+    abstract override var amount: Double
+    val acceptedAmount: Double
         get() = transactionRecords.filter {
             it.status is TransactionRecord.Status.Accepted
         }.sumOf { it.balanceChange }

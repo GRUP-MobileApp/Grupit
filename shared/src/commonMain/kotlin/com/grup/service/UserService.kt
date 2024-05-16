@@ -14,6 +14,8 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
     private val userRepository: IUserRepository by inject()
     private val imagesRepository: IImagesRepository by inject()
 
+    private val validationService: ValidationService = ValidationService()
+
     suspend fun createMyUser(
         username: String,
         displayName: String,
@@ -40,7 +42,16 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
     }
 
     suspend fun updateUser(user: User, block: User.() -> Unit): User = dbManager.write {
-        userRepository.updateUser(this, user, block)
+        userRepository.updateUser(this, user) {
+            apply(block)
+            displayName.split(" ", limit = 2).let {
+                validationService.validateName(it[0])
+                if (it.size == 2) {
+                    validationService.validateName(it[1])
+                }
+            }
+            validationService.validateVenmoUsername(venmoUsername)
+        }
     }
 
     suspend fun updateLatestTime(user: User) = updateUser(user) {
@@ -48,9 +59,10 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
     }
 
     suspend fun updateProfilePicture(user: User, profilePicture: ByteArray) {
-        if (user.profilePictureURL.isNotBlank()) {
-            imagesRepository.deleteProfilePicture(user.profilePictureURL)
+        user.profilePictureURL?.let {
+            imagesRepository.deleteProfilePicture(it)
         }
+
         imagesRepository.uploadProfilePicture(user.id, profilePicture).let { pfpURL ->
             dbManager.write {
                 userRepository.updateUser(this, user) {

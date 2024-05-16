@@ -1,5 +1,6 @@
 package com.grup.repositories.abstract
 
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.dbmanager.RealmManager
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.Group
@@ -8,7 +9,6 @@ import com.grup.models.UserInfo
 import com.grup.models.realm.RealmGroup
 import com.grup.models.realm.RealmUser
 import com.grup.models.realm.RealmUserInfo
-import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.other.getLatest
 import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.Realm
@@ -44,7 +44,7 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
     override fun updateUserInfo(
         transaction: DatabaseWriteTransaction,
         userInfo: UserInfo,
-        block: (UserInfo) -> Unit,
+        block: UserInfo.() -> Unit,
     ): RealmUserInfo? = with(transaction as RealmManager.RealmWriteTransaction) {
         findLatest(userInfo as RealmUserInfo)!!.apply(block)
     }

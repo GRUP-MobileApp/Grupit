@@ -8,7 +8,7 @@ import platform.AuthenticationServices.ASAuthorizationScopeFullName
 actual class AppleSignInManager : SignInManager() {
     private val appleIDProvider: ASAuthorizationAppleIDProvider = ASAuthorizationAppleIDProvider()
 
-    override fun signIn() {
+    override suspend fun signIn(block: (String) -> Unit) {
         val request = appleIDProvider.createRequest()
         request.setRequestedScopes(listOf(ASAuthorizationScopeFullName, ASAuthorizationScopeEmail))
 
@@ -17,7 +17,7 @@ actual class AppleSignInManager : SignInManager() {
         TODO("Finish")
     }
 
-    override fun signOut() {
+    override suspend fun signOut() {
         TODO("Not yet implemented")
     }
 

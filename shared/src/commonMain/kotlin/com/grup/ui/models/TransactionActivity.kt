@@ -47,9 +47,9 @@ internal sealed class TransactionActivity {
         override val amount: Double
             get() = settleAction.amount
         override val activityName: String
-            get() = "Completed Settle"
+            get() = "Settle Request"
 
         override fun displayText() =
-            "${userInfo.user.displayName} completed a settlement for $amount"
+            "${userInfo.user.displayName} completed a settlement"
     }
 }

@@ -3,15 +3,13 @@ package com.grup.android.ui
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.grup.android.ExceptionHandler
-import com.grup.android.GOOGLE_WEB_CLIENT_ID
-import com.grup.di.initAuthManager
-import com.grup.di.initNotificationManager
+import com.grup.device.DeviceManager
+import com.grup.di.initDeviceManager
 import com.grup.platform.notification.NotificationManager
 import com.grup.platform.signin.AuthManager
 import com.grup.platform.signin.GoogleSignInManager
@@ -31,28 +29,20 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     appUpdateManager.startUpdateFlowForResult(
                         appUpdateInfo,
-                        AppUpdateType.IMMEDIATE,
                         this,
+                        AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE),
                         0
                     )
                 }
             }
         }
 
-        initAuthManager(
-            AuthManager(
-                googleSignInManager = GoogleSignInManager(
-                    googleSignInClient = GoogleSignIn.getClient(
-                        this,
-                        GoogleSignInOptions
-                            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(GOOGLE_WEB_CLIENT_ID)
-                            .build()
-                    )
-                )
+        initDeviceManager(
+            DeviceManager(
+                authManager = AuthManager(googleSignInManager = GoogleSignInManager(this)),
+                notificationManager = NotificationManager()
             )
         )
-        initNotificationManager(notificationManager = NotificationManager())
 
         setContent {
             Application()

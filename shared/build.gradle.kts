@@ -1,6 +1,7 @@
 val ktorVersion: String by project
 val koinVersion: String by project
 val realmVersion: String by project
+val kamelVersion: String by project
 val napierVersion: String by project
 val composeVersion: String by project
 val voyagerVersion: String by project
@@ -8,6 +9,7 @@ val lifecycleVersion: String by project
 val firebaseBOMVersion: String by project
 val mokoResourcesVersion: String by project
 val kotlinExtensionVersion: String by project
+val activityComposeVersion: String by project
 
 val keystorePassword: String by project
 
@@ -45,7 +47,6 @@ kotlin {
         extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
 
         pod("FirebaseMessaging")
-        pod("FirebaseAuth")
         pod("GoogleSignIn")
 
         // Maps custom Xcode configuration to NativeBuildType
@@ -59,7 +60,7 @@ kotlin {
                 implementation("io.github.aakira:napier:$napierVersion")
 
                 // Kotlin Libraries
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
 
                 // Compose
                 implementation(compose.runtime)
@@ -83,11 +84,12 @@ kotlin {
                 implementation("dev.icerock.moko:permissions-compose:0.16.0")
 
                 // Kamel
-                implementation("media.kamel:kamel-image:0.7.1")
+                implementation("media.kamel:kamel-image:$kamelVersion")
+                implementation("media.kamel:kamel-core:$kamelVersion")
 
                 // Realm
                 implementation("io.realm.kotlin:library-base:$realmVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
                 // Realm Sync
                 implementation("io.realm.kotlin:library-sync:$realmVersion")
@@ -101,8 +103,8 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
                 // Multiplatform Settings
-                implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
-                implementation("com.russhwolf:multiplatform-settings-coroutines:1.0.0")
+                implementation("com.russhwolf:multiplatform-settings-no-arg:1.1.1")
+                implementation("com.russhwolf:multiplatform-settings-coroutines:1.1.1")
             }
         }
         commonTest {
@@ -118,14 +120,11 @@ kotlin {
         androidMain {
             dependsOn(getByName("commonMain"))
             dependencies {
-                implementation("androidx.activity:activity-compose:1.8.2")
+                implementation("androidx.activity:activity-compose:$activityComposeVersion")
 
                 // Lifecycle
                 implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-
-                // GoogleSignIn
-                implementation("com.google.android.gms:play-services-auth:21.1.0")
 
                 // Ktor Client
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
@@ -134,7 +133,9 @@ kotlin {
                 implementation(project.dependencies.platform("com.google.firebase:firebase-bom:$firebaseBOMVersion"))
 
                 // Firebase Auth
-                implementation("com.google.firebase:firebase-auth-ktx")
+                implementation("androidx.credentials:credentials:1.2.2")
+                implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
+                implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
 
                 // Firebase Cloud Messaging
                 implementation("com.google.firebase:firebase-messaging-ktx")

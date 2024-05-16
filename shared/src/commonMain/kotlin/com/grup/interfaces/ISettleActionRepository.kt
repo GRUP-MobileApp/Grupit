@@ -1,8 +1,8 @@
 package com.grup.interfaces
 
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.models.SettleAction
 import com.grup.models.UserInfo
-import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import kotlinx.coroutines.flow.Flow
 
 internal interface ISettleActionRepository : IRepository {
@@ -12,7 +12,6 @@ internal interface ISettleActionRepository : IRepository {
         settleActionAmount: Double
     ): SettleAction?
 
-    // TODO: Can't update transactionRecords RealmList inside SettleAction.() -> Unit block
     fun updateSettleAction(
         transaction: DatabaseWriteTransaction,
         settleAction: SettleAction,
@@ -20,4 +19,9 @@ internal interface ISettleActionRepository : IRepository {
     ): SettleAction?
 
     fun findAllSettleActionsAsFlow(): Flow<List<SettleAction>>
+
+    fun deleteSettleAction(
+        transaction: DatabaseWriteTransaction,
+        settleAction: SettleAction
+    ): SettleAction?
 }

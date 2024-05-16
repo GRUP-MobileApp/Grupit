@@ -35,8 +35,8 @@ internal class RealmUser() : User(), RealmObject {
     override var venmoUsername: String
         get() = _venmoUsername ?: "None"
         set(value) { _venmoUsername = value }
-    override var profilePictureURL: String
-        get() = _profilePictureURL ?: "None"
+    override var profilePictureURL: String?
+        get() = _profilePictureURL
         set(value) { _profilePictureURL = value }
     override var latestViewDate: Instant
         get() = _latestViewDate.toInstant()

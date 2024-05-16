@@ -11,15 +11,16 @@ struct iOSApp: App {
         FirebaseApp.configure()
         
         ModuleKt.doInitKoin()
-        ModuleKt.doInitAuthManager(
-            authManager: AuthManager(
-                googleSignInManager: GoogleSignInManager(),
-                appleSignInManager: nil
-            )
-        )
-        ModuleKt.doInitNotificationManager(
-            notificationManager: NotificationManager(
-                getMessaging: { Messaging.messaging() }
+        
+        ModuleKt.doInitDeviceManager(
+            deviceManager: DeviceManager(
+                authManager: AuthManager(
+                    googleSignInManager: GoogleSignInManager(),
+                    appleSignInManager: nil
+                ),
+                notificationManager: NotificationManager(
+                    getMessaging: { Messaging.messaging() }
+                )
             )
         )
     }

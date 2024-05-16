@@ -19,13 +19,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -56,8 +54,8 @@ import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1ErrorTextButton
 import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
-import com.grup.ui.compose.IndicatorTextField
 import com.grup.ui.compose.ProfileIcon
+import com.grup.ui.compose.ProfileTextField
 import com.grup.ui.compose.SmallIcon
 import com.grup.ui.viewmodel.AccountSettingsViewModel
 import com.grup.ui.viewmodel.AccountSettingsViewModel.Pages
@@ -76,14 +74,10 @@ internal class AccountSettingsView : Screen {
         val accountSettingsViewModel = rememberScreenModel { AccountSettingsViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            AccountSettingsLayout(
-                accountSettingsViewModel = accountSettingsViewModel,
-                navigator = navigator
-            )
-        }
+        AccountSettingsLayout(
+            accountSettingsViewModel = accountSettingsViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -93,6 +87,13 @@ private fun AccountSettingsLayout(
     navigator: Navigator
 ) {
     var currentPage: Pages by remember { mutableStateOf(Pages.MAIN_SETTINGS_PAGE) }
+
+    var error: String? by remember { mutableStateOf(null) }
+
+    val returnEditProfilePage: () -> Unit = {
+        currentPage = Pages.EDIT_PROFILE_PAGE
+        error = null
+    }
 
     AnimatedContent(
         targetState = currentPage,
@@ -129,20 +130,24 @@ private fun AccountSettingsLayout(
             )
             Pages.EDIT_DISPLAY_NAME_PAGE -> EditDisplayNamePage(
                 displayName = accountSettingsViewModel.userObject.displayName,
-                onBackPress = { currentPage = Pages.EDIT_PROFILE_PAGE },
+                error = error,
+                onBackPress = returnEditProfilePage,
                 editDisplayName = { displayName ->
-                    accountSettingsViewModel.editUser {
-                        this.displayName = displayName
-                    }
+                    accountSettingsViewModel.editUser(
+                        onSuccess = returnEditProfilePage,
+                        onError = { error = it }
+                    ) { this.displayName = displayName }
                 }
             )
             Pages.EDIT_VENMO_USERNAME_PAGE -> EditVenmoUsernamePage(
                 venmoUsername = accountSettingsViewModel.userObject.venmoUsername,
-                onBackPress = { currentPage = Pages.EDIT_PROFILE_PAGE },
+                error = error,
+                onBackPress = returnEditProfilePage,
                 editVenmoUserName = { venmoUsername ->
-                    accountSettingsViewModel.editUser {
-                        this.venmoUsername = venmoUsername
-                    }
+                    accountSettingsViewModel.editUser(
+                        onSuccess = returnEditProfilePage,
+                        onError = { error = it }
+                    ) { this.venmoUsername = venmoUsername }
                 }
             )
         }
@@ -151,7 +156,6 @@ private fun AccountSettingsLayout(
 
 @Composable
 private fun MainSettingsPage(
-    // TODO: Remove ViewModel as argument
     accountSettingsViewModel: AccountSettingsViewModel,
     changePageEditProfilePage: () -> Unit,
     logOutOnClick: () -> Unit
@@ -394,6 +398,7 @@ private fun EditProfilePage(
 @Composable
 private fun EditDisplayNamePage(
     displayName: String,
+    error: String? = null,
     onBackPress: () -> Unit,
     editDisplayName: (String) -> Unit
 ) {
@@ -413,19 +418,17 @@ private fun EditDisplayNamePage(
         ) {
             H1Text(text = "Edit your first and last name")
             Caption(text = "This is name that is displayed on your transactions")
-            IndicatorTextField(
+            ProfileTextField(
                 value = name,
                 onValueChange = { name = it },
                 placeholder = "Display Name",
+                error = error,
                 modifier = Modifier.focusRequester(focusRequester)
             )
             Spacer(modifier = Modifier.weight(1f))
             H1ConfirmTextButton(
                 text = "Save",
-                onClick = {
-                    editDisplayName(name)
-                    onBackPress()
-                },
+                onClick = { editDisplayName(name) },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
@@ -435,6 +438,7 @@ private fun EditDisplayNamePage(
 @Composable
 private fun EditVenmoUsernamePage(
     venmoUsername: String,
+    error: String? = null,
     onBackPress: () -> Unit,
     editVenmoUserName: (String) -> Unit
 ) {
@@ -454,20 +458,17 @@ private fun EditVenmoUsernamePage(
         ) {
             H1Text(text = "Edit your Venmo username")
             Caption(text = "This is what others will be using to settle")
-            IndicatorTextField(
+            ProfileTextField(
                 value = username,
                 onValueChange = { username = it },
                 placeholder = "Venmo Username",
-                indicatorColor = AppTheme.colors.confirm,
+                error = error,
                 modifier = Modifier.focusRequester(focusRequester)
             )
             Spacer(modifier = Modifier.weight(1f))
             H1ConfirmTextButton(
                 text = "Save",
-                onClick = {
-                    editVenmoUserName(username)
-                    onBackPress()
-                },
+                onClick = { editVenmoUserName(username) },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }

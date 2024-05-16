@@ -2,7 +2,6 @@ package com.grup.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import io.ktor.http.encodeURLPath
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 

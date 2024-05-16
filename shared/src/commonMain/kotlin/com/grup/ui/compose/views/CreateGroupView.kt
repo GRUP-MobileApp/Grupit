@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,24 +24,20 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.H1ConfirmTextButton
-import com.grup.ui.compose.IndicatorTextField
+import com.grup.ui.compose.ProfileTextField
 import com.grup.ui.viewmodel.CreateGroupViewModel
 
 internal class CreateGroupView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            val createGroupViewModel = rememberScreenModel { CreateGroupViewModel() }
-            val navigator = LocalNavigator.currentOrThrow
+        val createGroupViewModel = rememberScreenModel { CreateGroupViewModel() }
+        val navigator = LocalNavigator.currentOrThrow
 
-            CreateGroupLayout(
-                createGroupViewModel = createGroupViewModel,
-                navigator = navigator
-            )
-        }
+        CreateGroupLayout(
+            createGroupViewModel = createGroupViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -54,6 +48,8 @@ private fun CreateGroupLayout(
 ) {
     var groupName: String by remember { mutableStateOf("") }
 
+    var error: String? by remember { mutableStateOf(null) }
+
     BackPressScaffold(onBackPress = { navigator.pop() }, title = "New Group") { padding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
@@ -62,13 +58,11 @@ private fun CreateGroupLayout(
                 .padding(padding)
                 .padding(AppTheme.dimensions.appPadding)
         ) {
-            IndicatorTextField(
-                placeholder = "Name",
+            ProfileTextField(
+                placeholder = "Group Name",
                 value = groupName,
                 onValueChange = { groupName = it },
-                modifier = Modifier
-                    .padding(5.dp)
-                    .clip(shape = AppTheme.shapes.medium)
+                error = error
             )
             Spacer(modifier = Modifier.weight(1f))
             H1ConfirmTextButton(
@@ -76,10 +70,8 @@ private fun CreateGroupLayout(
                 onClick = {
                     createGroupViewModel.createGroup(
                         groupName = groupName,
-                        onSuccess = {
-                            navigator.pop()
-                        },
-                        onError = { }
+                        onSuccess = { navigator.pop() },
+                        onError = { error = it }
                     )
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)

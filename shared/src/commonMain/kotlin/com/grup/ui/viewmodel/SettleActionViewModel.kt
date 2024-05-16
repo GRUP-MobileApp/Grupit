@@ -21,7 +21,7 @@ internal class SettleActionViewModel(private val selectedGroupId: String) : Logg
         amount: Double,
         onSuccess: () -> Unit,
         onError: (String?) -> Unit
-    ) = screenModelScope.launch {
+    ) = launchJob {
         try {
             apiServer.createSettleAction(
                 _myUserInfosFlow.map { userInfos ->

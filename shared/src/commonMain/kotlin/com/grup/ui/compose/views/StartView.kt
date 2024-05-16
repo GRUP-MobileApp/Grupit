@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,27 +21,21 @@ import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.viewmodel.StartViewModel
 import dev.icerock.moko.resources.compose.painterResource
 
-internal class StartView(
-    private val isDebug: Boolean
-) : Screen {
+internal class StartView(private val isDebug: Boolean) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val startViewModel = rememberScreenModel { StartViewModel() }
+        val startViewModel = rememberScreenModel { StartViewModel(isDebug) }
 
         LaunchedEffect(true) {
-            startViewModel.silentSignIn(isDebug = isDebug)
+            startViewModel.silentSignIn()
         }
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            StartLayout(
-                startViewModel = startViewModel,
-                navigator = navigator,
-                isDebug = isDebug
-            )
-        }
+        StartLayout(
+            startViewModel = startViewModel,
+            navigator = navigator,
+            isDebug = isDebug
+        )
     }
 }
 

@@ -14,9 +14,6 @@
     "ios": "14.1"
   },
   "dependencies": {
-    "FirebaseAuth": [
-
-    ],
     "FirebaseMessaging": [
 
     ],

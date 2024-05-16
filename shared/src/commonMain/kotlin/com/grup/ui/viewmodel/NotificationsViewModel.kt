@@ -1,9 +1,6 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.screenModelScope
-import com.grup.models.DebtAction
 import com.grup.models.GroupInvite
-import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.ui.models.Notification
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 internal class NotificationsViewModel : LoggedInViewModel() {
     // Hot flow containing all DebtActions across all groups that the user is a part of
@@ -104,39 +100,15 @@ internal class NotificationsViewModel : LoggedInViewModel() {
 
     private var notificationsCount: MutableStateFlow<Int> = MutableStateFlow(0)
 
-    fun logGroupNotificationsDate() = screenModelScope.launch {
+    fun logGroupNotificationsDate() = launchJob {
         apiServer.updateLatestTime()
     }
 
-    // DebtAction
-    fun acceptDebtAction(debtAction: DebtAction, transactionRecord: TransactionRecord) =
-        screenModelScope.launch {
-            apiServer.acceptDebtAction(debtAction, transactionRecord)
-        }
-    fun rejectDebtAction(debtAction: DebtAction, myTransactionRecord: TransactionRecord) =
-        screenModelScope.launch {
-            apiServer.rejectDebtAction(debtAction, myTransactionRecord)
-        }
-
-    // SettleAction
-    fun acceptSettleActionTransaction(
-        settleAction: SettleAction,
-        transactionRecord: TransactionRecord
-    ) = screenModelScope.launch {
-        apiServer.acceptSettleActionTransaction(settleAction, transactionRecord)
-    }
-    fun rejectSettleActionTransaction(
-        settleAction: SettleAction,
-        transactionRecord: TransactionRecord
-    ) = screenModelScope.launch {
-        apiServer.rejectSettleActionTransaction(settleAction, transactionRecord)
-    }
-
     // Group Invite
-    fun acceptGroupInvite(groupInvite: GroupInvite) = screenModelScope.launch {
+    fun acceptGroupInvite(groupInvite: GroupInvite) = launchJob {
         apiServer.acceptGroupInvite(groupInvite)
     }
-    fun rejectGroupInvite(groupInvite: GroupInvite) = screenModelScope.launch {
+    fun rejectGroupInvite(groupInvite: GroupInvite) = launchJob {
         apiServer.rejectGroupInvite(groupInvite)
     }
 }

@@ -1,8 +1,7 @@
 package com.grup.repositories
 
-import com.grup.dbmanager.RealmManager
 import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
-import com.grup.models.User
+import com.grup.dbmanager.RealmManager
 import com.grup.models.realm.RealmUser
 import com.grup.other.MONGODB_API_ENDPOINT
 import com.grup.other.TEST_MONGODB_API_ENDPOINT

@@ -1,12 +1,12 @@
 package com.grup.repositories.abstract
 
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.dbmanager.RealmManager
 import com.grup.interfaces.ISettleActionRepository
 import com.grup.models.SettleAction
 import com.grup.models.UserInfo
 import com.grup.models.realm.RealmSettleAction
 import com.grup.models.realm.RealmUserInfo
-import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.other.getLatest
 import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.Realm
@@ -42,4 +42,11 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
 
     override fun findAllSettleActionsAsFlow(): Flow<List<RealmSettleAction>> =
         realm.query<RealmSettleAction>().toResolvedListFlow()
+
+    override fun deleteSettleAction(
+        transaction: DatabaseWriteTransaction,
+        settleAction: SettleAction
+    ): SettleAction? = with(transaction as RealmManager.RealmWriteTransaction) {
+        findObject(settleAction as RealmSettleAction)?.also { delete(it) }
+    }
 }

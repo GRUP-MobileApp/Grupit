@@ -41,7 +41,7 @@ fun isoTime(date: Instant) =
         localTime.hour.let { hour ->
             localTime.minute.let { minute ->
                 "${hour % 12}:${if (minute < 10) 0 else ""}${minute} " +
-                        if (hour / 12 > 0) "AM" else "PM"
+                        if (hour < 12) "AM" else "PM"
             }
         }
     }

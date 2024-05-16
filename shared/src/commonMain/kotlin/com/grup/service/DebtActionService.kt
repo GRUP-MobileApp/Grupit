@@ -2,8 +2,8 @@ package com.grup.service
 
 import com.grup.dbmanager.DatabaseManager
 import com.grup.exceptions.InvalidTransactionRecordException
-import com.grup.exceptions.InvalidUserBalanceException
 import com.grup.exceptions.NotCreatedException
+import com.grup.exceptions.NotFoundException
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.models.DebtAction
@@ -25,6 +25,7 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
         if (transactionRecords.isEmpty()) {
             throw InvalidTransactionRecordException("Empty transaction records")
         }
+
         debtActionRepository.createDebtAction(
             this,
             debtee,
@@ -37,26 +38,22 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
 
     suspend fun acceptDebtAction(
         debtAction: DebtAction,
-        transactionRecord: TransactionRecord,
-        allowNegative: Boolean = false
+        transactionRecord: TransactionRecord
     ) = dbManager.write {
+        if (transactionRecord.status !is TransactionRecord.Status.Pending) {
+            throw InvalidTransactionRecordException("Transaction record not pending anymore")
+        }
+
+        // Only update balances if DebtAction is for Grupit
         if (debtAction.platform == DebtAction.Platform.Grupit) {
             val debtorUserInfo: UserInfo = transactionRecord.userInfo
             val debteeUserInfo: UserInfo = debtAction.userInfo
-            if (!allowNegative && debtorUserInfo.userBalance - transactionRecord.balanceChange < 0) {
-                throw InvalidUserBalanceException(
-                    "TransactionRecord between debtor with id " +
-                            "${debtorUserInfo.user.id} and debtee with id " +
-                            "${debteeUserInfo.user.id} in DebtAction with id " +
-                            "${debtAction.id} results in negative balance"
-                )
-            }
 
-            userInfoRepository.updateUserInfo(this, debtorUserInfo) { userInfo ->
-                userInfo.userBalance -= transactionRecord.balanceChange
+            userInfoRepository.updateUserInfo(this, debtorUserInfo) {
+                userBalance -= transactionRecord.balanceChange
             }
-            userInfoRepository.updateUserInfo(this, debteeUserInfo) { userInfo ->
-                userInfo.userBalance += transactionRecord.balanceChange
+            userInfoRepository.updateUserInfo(this, debteeUserInfo) {
+                userBalance += transactionRecord.balanceChange
             }
         }
 
@@ -64,18 +61,22 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
             findObject(transactionRecord)?.apply {
                 status = TransactionRecord.Status.Accepted()
             } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
-        }
+        } ?: throw NotFoundException("Debt Action doesn't exist")
     }
 
     suspend fun rejectDebtAction(
         debtAction: DebtAction,
         transactionRecord: TransactionRecord
     ) = dbManager.write {
+        if (transactionRecord.status !is TransactionRecord.Status.Pending) {
+            throw InvalidTransactionRecordException("Transaction record not pending anymore")
+        }
+
         debtActionRepository.updateDebtAction(this, debtAction) {
             findObject(transactionRecord)?.apply {
                 status = TransactionRecord.Status.Rejected
             } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
-        }
+        } ?: throw NotFoundException("Debt Action doesn't exist")
     }
 
     fun getAllDebtActionsAsFlow() = debtActionRepository.findAllDebtActionsAsFlow()

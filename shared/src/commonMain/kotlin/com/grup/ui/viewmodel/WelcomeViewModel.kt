@@ -1,26 +1,22 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.APIException
+import com.grup.exceptions.ValidationException
 import com.grup.platform.image.cropCenterSquareImage
-import com.grup.ui.compose.validateName
-import com.grup.ui.compose.validateUsername
-import com.grup.ui.compose.validateVenmoUsername
+import com.grup.service.ValidationService
 import dev.icerock.moko.media.Bitmap
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 internal class WelcomeViewModel : LoggedInViewModel() {
+    private val validationService: ValidationService = ValidationService()
+
     sealed class NameValidity {
         data object Valid : NameValidity()
         data class Invalid(val error: String) : NameValidity()
         data object Pending : NameValidity()
         data object None : NameValidity()
     }
-
-    private var currentJob: Job? = null
 
     private val _usernameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
     val usernameValidity: StateFlow<NameValidity> = _usernameValidity
@@ -37,77 +33,62 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     fun checkUsername(username: String) {
         if (username.isEmpty()) {
             _usernameValidity.value = NameValidity.None
-            return
-        }
-        _usernameValidity.value = NameValidity.Pending
-        currentJob?.cancel()
-        validateUsername(
-            username = username,
-            onValid = {
-                currentJob = screenModelScope.launch {
+        } else {
+            _usernameValidity.value = NameValidity.Pending
+            try {
+                validationService.validateUsername(username)
+                launchJob(allowCancel = true) {
                     if (apiServer.usernameExists(username)) {
                         _usernameValidity.value = NameValidity.Invalid("Username taken")
                     } else {
                         _usernameValidity.value = NameValidity.Valid
                     }
                 }
-            },
-            onError = { error ->
-                _usernameValidity.value = NameValidity.Invalid(error)
+            } catch (e: ValidationException) {
+                _usernameValidity.value = NameValidity.Invalid(e.message ?: "")
             }
-        )
+        }
     }
 
     fun checkFirstNameValidity(firstName: String) {
         if (firstName.isEmpty()) {
             _firstNameValidity.value = NameValidity.None
-            return
-        }
-        _firstNameValidity.value = NameValidity.Pending
-        validateName(
-            name = firstName,
-            onValid = {
+        } else {
+            _firstNameValidity.value = NameValidity.Pending
+            try {
+                validationService.validateName(firstName)
                 _firstNameValidity.value = NameValidity.Valid
-            },
-            onError = { error ->
-                _firstNameValidity.value = NameValidity.Invalid(error)
+            } catch (e: ValidationException) {
+                _firstNameValidity.value = NameValidity.Invalid(e.message ?: "")
             }
-        )
+        }
     }
     fun checkLastNameValidity(lastName: String) {
         if (lastName.isEmpty()) {
             _lastNameValidity.value = NameValidity.None
-            return
-        }
-        _lastNameValidity.value = NameValidity.Pending
-        validateName(
-            name = lastName,
-            isBlank = true,
-            onValid = {
+        } else {
+            _lastNameValidity.value = NameValidity.Pending
+            try {
+                validationService.validateName(name = lastName, allowBlank = true)
                 _lastNameValidity.value = NameValidity.Valid
-            },
-            onError = { error ->
-                _lastNameValidity.value = NameValidity.Invalid(error)
+            } catch (e: ValidationException) {
+                _lastNameValidity.value = NameValidity.Invalid(e.message ?: "")
             }
-        )
+        }
     }
 
     fun checkVenmoUsernameValidity(venmoUsername: String) {
         if (venmoUsername.isEmpty()) {
             _venmoUsernameValidity.value = NameValidity.None
-            return
-        }
-        _venmoUsernameValidity.value = NameValidity.Pending
-        validateVenmoUsername(
-            venmoUsername = venmoUsername,
-            isBlank = true,
-            onValid = {
+        } else {
+            _venmoUsernameValidity.value = NameValidity.Pending
+            try {
+                validationService.validateVenmoUsername(venmoUsername = venmoUsername)
                 _venmoUsernameValidity.value = NameValidity.Valid
-            },
-            onError = { error ->
-                _venmoUsernameValidity.value = NameValidity.Invalid(error)
+            } catch (e: ValidationException) {
+                _venmoUsernameValidity.value = NameValidity.Invalid(e.message ?: "")
             }
-        )
+        }
     }
 
     fun registerUserObject(
@@ -117,21 +98,17 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         profilePictureBitmap: Bitmap?,
         onSuccess: () -> Unit,
         onError: (String?) -> Unit
-    ) {
-        if (currentJob?.isCompleted != false) {
-            currentJob = screenModelScope.launch {
-                try {
-                    apiServer.registerUser(
-                        username,
-                        displayName,
-                        venmoUsername,
-                        profilePictureBitmap?.let { cropCenterSquareImage(it) } ?: byteArrayOf()
-                    )
-                    onSuccess()
-                } catch (e: APIException) {
-                    onError(e.message)
-                }
-            }
+    ) = launchJob {
+        try {
+            apiServer.registerUser(
+                username,
+                displayName,
+                venmoUsername,
+                profilePictureBitmap?.let { cropCenterSquareImage(it) } ?: byteArrayOf()
+            )
+            onSuccess()
+        } catch (e: APIException) {
+            onError(e.message)
         }
     }
 }

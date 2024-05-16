@@ -1,18 +1,15 @@
 package com.grup.di
 
+import com.grup.device.DeviceManager
 import com.grup.interfaces.IDebtActionRepository
 import com.grup.interfaces.IGroupInviteRepository
 import com.grup.interfaces.IGroupRepository
 import com.grup.interfaces.IImagesRepository
-import com.grup.interfaces.ISettingsDataStore
 import com.grup.interfaces.ISettleActionRepository
 import com.grup.interfaces.IUserInfoRepository
 import com.grup.interfaces.IUserRepository
 import com.grup.platform.di.httpClient
-import com.grup.platform.notification.NotificationManager
-import com.grup.platform.signin.AuthManager
 import com.grup.repositories.AWSImagesRepository
-import com.grup.repositories.SettingsDataStore
 import com.grup.repositories.SyncedDebtActionRepository
 import com.grup.repositories.SyncedGroupInviteRepository
 import com.grup.repositories.SyncedGroupRepository
@@ -39,7 +36,6 @@ internal val releaseRealmRepositoriesModule = module {
     single<ISettleActionRepository> { SyncedSettleActionRepository() }
 
     single<IImagesRepository> { AWSImagesRepository() }
-    single<ISettingsDataStore> { SettingsDataStore() }
 }
 
 internal val debugRealmRepositoriesModule = module {
@@ -51,7 +47,6 @@ internal val debugRealmRepositoriesModule = module {
     single<ISettleActionRepository> { SyncedSettleActionRepository() }
 
     single<IImagesRepository> { AWSImagesRepository() }
-    single<ISettingsDataStore> { SettingsDataStore() }
 }
 
 internal val testRealmRepositoriesModule = module {
@@ -63,7 +58,6 @@ internal val testRealmRepositoriesModule = module {
     single<ISettleActionRepository> { TestSettleActionRepository() }
 
     single<IImagesRepository> { AWSImagesRepository() }
-    single<ISettingsDataStore> { SettingsDataStore() }
 }
 
 internal fun realmModules(realm: Realm, isDebug: Boolean = false) = module {
@@ -85,18 +79,10 @@ fun initKoin() {
     }
 }
 
-fun initAuthManager(authManager: AuthManager) {
+fun initDeviceManager(deviceManager: DeviceManager) {
     loadKoinModules(
         module {
-            single { authManager }
-        }
-    )
-}
-
-fun initNotificationManager(notificationManager: NotificationManager) {
-    loadKoinModules(
-        module {
-            single { notificationManager }
+            single { deviceManager }
         }
     )
 }

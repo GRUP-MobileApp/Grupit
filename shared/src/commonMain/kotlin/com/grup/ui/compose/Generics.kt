@@ -1,5 +1,9 @@
 package com.grup.ui.compose
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -43,10 +48,9 @@ import androidx.compose.material.TextFieldDefaults.indicatorLine
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,13 +59,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -71,20 +79,23 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.grup.library.MR
 import com.grup.models.Group
-import com.grup.models.TransactionRecord
 import com.grup.models.User
 import com.grup.models.UserInfo
-import com.grup.platform.signin.GoogleSignInManager
+import com.grup.platform.signin.AuthManager
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.models.TransactionActivity
 import com.grup.ui.viewmodel.LoginViewModel
+import dev.icerock.moko.resources.compose.painterResource
 import io.kamel.core.Resource
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
@@ -219,26 +230,23 @@ internal fun IndicatorTextField(
             ),
         decorationBox = { innerTextField ->
             Box(
-                modifier = Modifier
-                    .run {
+                modifier =
+                    Modifier.run {
                         if (placeholder.isEmpty() || value.isNotEmpty())
                             width(IntrinsicSize.Min)
                         else this
                     }
-                    .background(AppTheme.colors.primary)
             ) {
-                Box(modifier = Modifier.padding(AppTheme.dimensions.paddingMedium)) {
-                    if (value.isEmpty() && placeholder.isNotEmpty()) {
-                        H1Text(
-                            text = placeholder,
-                            fontSize = fontSize,
-                            color = AppTheme.colors.onPrimary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Visible
-                        )
-                    }
-                    innerTextField()
+                if (value.isEmpty() && placeholder.isNotEmpty()) {
+                    H1Text(
+                        text = placeholder,
+                        fontSize = fontSize,
+                        color = AppTheme.colors.onPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Visible
+                    )
                 }
+                innerTextField()
             }
         },
         textStyle = TextStyle(
@@ -249,6 +257,29 @@ internal fun IndicatorTextField(
         singleLine = true,
         cursorBrush = SolidColor(Color.White)
     )
+}
+
+@Composable
+internal fun ProfileTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String = "",
+    error: String? = null,
+    indicatorColor: Color = AppTheme.colors.primary
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)) {
+        IndicatorTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = placeholder,
+            indicatorColor =
+                if (error == null) indicatorColor
+                else AppTheme.colors.error,
+            modifier = modifier
+        )
+        Caption(text = error ?: "")
+    }
 }
 
 @Composable
@@ -291,19 +322,12 @@ internal fun SmallIcon(
 }
 
 @Composable
-internal expect fun GoogleSignInButton(
-    loginResult: LoginViewModel.LoginResult,
-    googleSignInManager: GoogleSignInManager,
-    signInCallback: (String) -> Unit
-)
-
-@Composable
 internal fun H1ConfirmTextButton(
     modifier: Modifier = Modifier,
     text: String,
     scale: Float = 1f,
-    width: Dp = 140.dp,
-    height: Dp = 42.dp,
+    width: Dp = AppTheme.dimensions.textButtonWidth,
+    height: Dp = AppTheme.dimensions.textButtonHeight,
     fontSize: TextUnit = AppTheme.typography.mediumFont,
     color: Color = AppTheme.colors.confirm,
     enabled: Boolean = true,
@@ -335,8 +359,8 @@ internal fun H1DenyTextButton(
     modifier: Modifier = Modifier,
     text: String,
     scale: Float = 1f,
-    width: Dp = 140.dp,
-    height: Dp = 42.dp,
+    width: Dp = AppTheme.dimensions.textButtonWidth,
+    height: Dp = AppTheme.dimensions.textButtonHeight,
     fontSize: TextUnit = AppTheme.typography.mediumFont,
     enabled: Boolean = true,
     onClick: () -> Unit
@@ -367,8 +391,8 @@ internal fun H1ErrorTextButton(
     modifier: Modifier = Modifier,
     text: String,
     scale: Float = 1f,
-    width: Dp = 140.dp,
-    height: Dp = 42.dp,
+    width: Dp = AppTheme.dimensions.textButtonWidth,
+    height: Dp = AppTheme.dimensions.textButtonHeight,
     fontSize: TextUnit = AppTheme.typography.mediumFont,
     enabled: Boolean = true,
     onClick: () -> Unit
@@ -392,55 +416,136 @@ internal fun H1ErrorTextButton(
 }
 
 @Composable
-internal fun AcceptRejectRow(
+internal fun AcceptRejectButtons(
     acceptOnClick: () -> Unit,
     rejectOnClick: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxHeight()
+        modifier = Modifier.fillMaxHeight().width(IntrinsicSize.Min)
     ) {
-        AcceptCheckButton(acceptOnClick)
-        RejectButton(rejectOnClick)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.caption)
+                .clickable(onClick = acceptOnClick)
+                .padding(AppTheme.dimensions.paddingSmall)
+        ) {
+            H1Text(
+                text = "Accept",
+                fontSize = AppTheme.typography.smallFont,
+                color = AppTheme.colors.confirm
+            )
+        }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.large)
+                .background(AppTheme.colors.caption)
+                .clickable(onClick = rejectOnClick)
+                .padding(AppTheme.dimensions.paddingSmall)
+        ) {
+            H1Text(
+                text = "Reject",
+                fontSize = AppTheme.typography.smallFont,
+                color = AppTheme.colors.deny
+            )
+        }
     }
 }
 
 @Composable
-internal fun AcceptCheckButton(onClick: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .clip(AppTheme.shapes.circleShape)
-            .background(AppTheme.colors.caption)
-            .clickable(onClick = onClick)
-            .padding(AppTheme.dimensions.paddingSmall)
+internal fun AcceptRejectRow(
+    modifier: Modifier = Modifier,
+    acceptOnClick: () -> Unit,
+    rejectOnClick: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth().then(modifier)
     ) {
-        SmallIcon(
-            imageVector = Icons.Default.Check,
-            contentDescription = "Accept",
-            tint = AppTheme.colors.confirm,
-            iconSize = AppTheme.dimensions.tinyIconSize
+        H1ConfirmTextButton(
+            text = "Accept",
+            onClick = acceptOnClick
+        )
+        Spacer(modifier = Modifier.width(AppTheme.dimensions.appPadding))
+        H1DenyTextButton(
+            text = "Reject",
+            onClick = rejectOnClick
         )
     }
 }
 
+
+
 @Composable
-internal fun RejectButton(onClick: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
+internal fun GoogleSignInButton(
+    loginResult: LoginViewModel.LoginResult,
+    signIn: () -> Unit
+) {
+    Button(
+        onClick = {
+            if (loginResult !is LoginViewModel.LoginResult.PendingLogin) {
+                signIn()
+            }
+        },
+        shape = RoundedCornerShape(6.dp),
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF4285F4),
+            contentColor = Color.White
+        ),
         modifier = Modifier
-            .clip(AppTheme.shapes.circleShape)
-            .background(AppTheme.colors.caption)
-            .clickable(onClick = onClick)
-            .padding(AppTheme.dimensions.paddingSmall)
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp),
     ) {
-        SmallIcon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Reject",
-            tint = AppTheme.colors.deny,
-            iconSize = AppTheme.dimensions.tinyIconSize
+        if (loginResult.isSuccessOrPendingLoginAuthProvider(AuthManager.AuthProvider.Google)) {
+            LoadingSpinner()
+        } else {
+            Image(
+                painter = painterResource(MR.images.ic_logo_google),
+                contentDescription = "Google Icon"
+            )
+            H1Text(
+                text = "Sign in with Google",
+                modifier = Modifier.padding(6.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun LoadingSpinner() {
+    CircularProgressIndicator()
+}
+
+@Composable
+internal fun Modifier.shimmer() = this.run {
+    composed {
+        var size by remember { mutableStateOf(IntSize.Zero) }
+        val transition = rememberInfiniteTransition()
+        val startOffsetX by transition.animateFloat(
+            initialValue = -2 * size.width.toFloat(),
+            targetValue = 2 * size.width.toFloat(),
+            animationSpec = infiniteRepeatable(
+                animation = tween(1000)
+            )
         )
+
+        background(
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    AppTheme.colors.secondary,
+                    AppTheme.colors.caption,
+                    AppTheme.colors.secondary,
+                ),
+                start = Offset(startOffsetX, 0f),
+                end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())
+            )
+        ).onGloballyPositioned { size = it.size }
     }
 }
 
@@ -450,19 +555,9 @@ internal fun ProfileIcon(
     user: User,
     iconSize: Dp = AppTheme.dimensions.iconSize
 ) {
-    if (user.profilePictureURL == "None") {
-        Image(
-            imageVector = Icons.Default.Person,
-            contentDescription = "Profile Picture",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .clip(AppTheme.shapes.circleShape)
-                .size(iconSize)
-                .then(modifier)
-        )
-    } else {
+    user.profilePictureURL?.let { url ->
         val painterResource: Resource<Painter> =
-            asyncPainterResource(user.profilePictureURL) {
+            asyncPainterResource(data = Url(url)) {
                 // CoroutineContext to be used while loading the image.
                 coroutineContext = Job() + Dispatchers.IO
             }
@@ -470,19 +565,36 @@ internal fun ProfileIcon(
             resource = painterResource,
             contentDescription = "Profile Picture",
             contentScale = ContentScale.Crop,
+            onLoading = {
+                Box(
+                    modifier = Modifier
+                        .clip(AppTheme.shapes.circleShape)
+                        .size(iconSize)
+                        .shimmer()
+                        .then(modifier)
+                )
+            },
             modifier = Modifier
                 .clip(AppTheme.shapes.circleShape)
                 .size(iconSize)
                 .then(modifier)
         )
-    }
+    } ?: Image(
+        imageVector = Icons.Default.Person,
+        contentDescription = "Profile Picture",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .clip(AppTheme.shapes.circleShape)
+            .size(iconSize)
+            .then(modifier)
+    )
 }
 
 @Composable
 internal fun GroupIcon(
     modifier: Modifier = Modifier,
     group: Group,
-    iconSize: Dp = 45.dp
+    iconSize: Dp = AppTheme.dimensions.iconSize
 ) {
     Image(
         imageVector = Icons.Default.Person,
@@ -506,7 +618,7 @@ internal fun BackPressScaffold(
             TopAppBar(
                 title = {
                     title?.let { title ->
-                        H1Header(text = title, color = AppTheme.colors.onSecondary)
+                        H1Header(text = title, fontWeight = FontWeight.SemiBold)
                     }
                 },
                 actions = actions,
@@ -612,45 +724,13 @@ internal fun IconRowCard(
 }
 
 @Composable
-internal fun TransactionRecordRowCard(
-    modifier: Modifier = Modifier,
-    transactionRecord: TransactionRecord,
-    moneyAmountTextColor: Color
-) {
-    UserRowCard(
-        user = transactionRecord.userInfo.user,
-        mainContent = {
-            H1Text(text = transactionRecord.userInfo.user.displayName)
-            Caption(text = "@${transactionRecord.userInfo.user.venmoUsername}")
-            if (transactionRecord.status !is TransactionRecord.Status.Pending) {
-                Caption(
-                    text = with(transactionRecord.status) {
-                        status +
-                        if (this is TransactionRecord.Status.Accepted)
-                            " on ${isoDate(date)}"
-                        else
-                            ""
-                    }
-                )
-            }
-        },
-        sideContent = {
-            MoneyAmount(
-                moneyAmount = transactionRecord.balanceChange,
-                color = moneyAmountTextColor
-            )
-        },
-        modifier = modifier.height(AppTheme.dimensions.itemRowCardHeight)
-    )
-}
-
-@Composable
 internal fun UserInfoRowCard(
     modifier: Modifier = Modifier,
     userInfo: UserInfo,
     coloredMoneyAmount: Boolean = true,
     mainContent: @Composable ColumnScope.() -> Unit = {
         H1Text(text = userInfo.user.displayName)
+        Caption(text = "@${userInfo.user.venmoUsername}")
     }
 ) {
     UserRowCard(
@@ -1031,33 +1111,28 @@ internal fun UsernameSearchBar(
     onQueryChange: (String) -> Unit,
     border: Color = Color.Transparent
 ) {
-    Row(modifier = modifier) {
-        TextField(
-            value = usernameSearchQuery,
-            onValueChange = onQueryChange,
-            label = { Text(text = labelText, color = AppTheme.colors.primary) },
-            singleLine = true,
-            shape = RoundedCornerShape(10.dp),
-            trailingIcon = {
-                androidx.compose.material.Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "SearchIcon"
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(AppTheme.shapes.large)
-                .background(AppTheme.colors.secondary),
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = AppTheme.colors.primary,
-                disabledTextColor = Color.Transparent,
-                backgroundColor = AppTheme.colors.onSecondary,
-                focusedIndicatorColor = border,
-                unfocusedIndicatorColor = border,
-                disabledIndicatorColor = Color.Transparent
-            )
+    TextField(
+        value = usernameSearchQuery,
+        onValueChange = onQueryChange,
+        placeholder = { H1Text(text = labelText, color = AppTheme.colors.secondary) },
+        singleLine = true,
+        textStyle = AppTheme.typography.h1,
+        shape = AppTheme.shapes.medium,
+        trailingIcon = {
+            Icon(imageVector = Icons.Default.Search, contentDescription = "SearchIcon")
+        },
+        modifier = modifier
+            .clip(AppTheme.shapes.large)
+            .background(AppTheme.colors.secondary),
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = AppTheme.colors.primary,
+            disabledTextColor = Color.Transparent,
+            backgroundColor = AppTheme.colors.onSecondary,
+            focusedIndicatorColor = border,
+            unfocusedIndicatorColor = border,
+            disabledIndicatorColor = Color.Transparent
         )
-    }
+    )
 }
 
 @Composable
@@ -1085,16 +1160,14 @@ internal fun TransparentTextField(
                     }
                     .background(AppTheme.colors.primary)
             ) {
-                Box(modifier = Modifier.padding(AppTheme.dimensions.paddingLarge)) {
-                    if (value.isEmpty() && placeholder.isNotEmpty()) {
-                        Caption(
-                            text = placeholder,
-                            fontSize = fontSize,
-                            overflow = TextOverflow.Visible
-                        )
-                    }
-                    innerTextField()
+                if (value.isEmpty() && placeholder.isNotEmpty()) {
+                    Caption(
+                        text = placeholder,
+                        fontSize = fontSize,
+                        overflow = TextOverflow.Visible
+                    )
                 }
+                innerTextField()
             }
         },
         keyboardOptions = keyboardOptions,

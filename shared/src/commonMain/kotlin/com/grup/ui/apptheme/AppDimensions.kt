@@ -18,7 +18,7 @@ internal data class AppDimensions(
     val paddingExtraLarge: Dp = 30.dp,
 
     val spacingExtraSmall: Dp = 2.dp,
-    val spacingSmall: Dp = 5.dp,
+    val spacingSmall: Dp = 4.dp,
     val spacing: Dp = 10.dp,
     val spacingMedium: Dp = 15.dp,
     val spacingLarge: Dp = 20.dp,
@@ -31,6 +31,9 @@ internal data class AppDimensions(
     val smallIconSize: Dp = 30.dp,
     val iconSize: Dp = 50.dp,
     val largeIconSize: Dp = 72.dp,
+
+    val textButtonWidth: Dp = 140.dp,
+    val textButtonHeight: Dp = 42.dp,
 
     val actionCardSize: Dp = 150.dp
 )

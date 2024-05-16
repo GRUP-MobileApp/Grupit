@@ -1,19 +1,17 @@
 package com.grup
 
+import com.grup.dbmanager.DatabaseManager
 import com.grup.dbmanager.realm.DebugRealmManager
 import com.grup.dbmanager.realm.ReleaseRealmManager
 import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
-import com.grup.dbmanager.DatabaseManager
 import com.grup.models.DebtAction
 import com.grup.models.GroupInvite
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.User
 import com.grup.models.UserInfo
-import com.grup.other.AccountSettings
 import com.grup.platform.signin.AuthManager
-import com.grup.service.AccountSettingsService
 import com.grup.service.DebtActionService
 import com.grup.service.GroupInviteService
 import com.grup.service.GroupService
@@ -31,8 +29,6 @@ class APIServer private constructor(
     private val groupInviteService: GroupInviteService = GroupInviteService(dbManager)
     private val debtActionService: DebtActionService = DebtActionService(dbManager)
     private val settleActionService: SettleActionService = SettleActionService(dbManager)
-
-    private val accountSettingsService: AccountSettingsService = AccountSettingsService()
 
     // User
     val user: User
@@ -99,13 +95,8 @@ class APIServer private constructor(
     ) = settleActionService.rejectSettleActionTransaction(settleAction, transactionRecord)
     fun getAllSettleActionsAsFlow() = settleActionService.getAllSettleActionsAsFlow()
 
-    // Account Settings
-    fun getGroupNotificationType(notificationType: AccountSettings.GroupNotificationType) =
-        accountSettingsService.getGroupNotificationType(notificationType)
-
-    fun toggleGroupNotificationType(notificationType: AccountSettings.GroupNotificationType) =
-        accountSettingsService.toggleGroupNotificationType(notificationType)
-
+    suspend fun cancelSettleAction(settleAction: SettleAction) =
+        settleActionService.cancelSettleAction(settleAction)
 
     companion object Login {
         @Throws(LoginException::class, CancellationException::class)

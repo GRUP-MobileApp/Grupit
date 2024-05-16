@@ -58,7 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         didReceiveRemoteNotification userInfo: [AnyHashable: Any]
     ) async -> UIBackgroundFetchResult {
         Messaging.messaging().appDidReceiveMessage(userInfo)
-        if (NotificationPermissions.shared.isNotificationTypeToggled(notificationName: userInfo["type"] as! String)) {
+        if (allowNotification(data: userInfo)) {
             let content = UNMutableNotificationContent()
             content.title = userInfo["title"] as! String
             content.body = userInfo["body"] as! String
@@ -82,5 +82,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
+    }
+}
+
+private func allowNotification(data: [AnyHashable: Any]) -> Bool {
+    let notificationType: String = data["type"] as! String
+    let isToggled: Bool = DeviceManager.Companion.shared.settingsManager.getGroupNotificationType(notificationType: notificationType)
+    
+    return switch(notificationType) {
+        case SettingsManager.AccountSettingsGroupNotificationType.newsettleaction.name:
+            DeviceManager.Companion.shared.settingsManager.userId != (data["userId"] as! String) && isToggled
+        default: isToggled
     }
 }

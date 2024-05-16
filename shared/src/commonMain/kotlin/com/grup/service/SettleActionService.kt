@@ -23,8 +23,10 @@ internal class SettleActionService(private val dbManager: DatabaseManager) : Koi
         if (debtee.userBalance - settleActionAmount < 0) {
             throw InvalidUserBalanceException("SettleAction results in negative balance")
         }
-        userInfoRepository.updateUserInfo(this, debtee) { userInfo ->
-            userInfo.userBalance -= settleActionAmount
+
+        // Speculatively reduce debtee's balance
+        userInfoRepository.updateUserInfo(this, debtee) {
+            userBalance -= settleActionAmount
         }
         settleActionRepository.createSettleAction(this, debtee, settleActionAmount)
             ?: throw NotCreatedException("Error creating SettleAction for user with id" +
@@ -41,6 +43,7 @@ internal class SettleActionService(private val dbManager: DatabaseManager) : Koi
         if (transactionRecord.userInfo.userBalance + transactionRecord.balanceChange > 0) {
             throw InvalidTransactionRecordException("Settle Transaction results in overpayment")
         }
+
         return dbManager.write {
             settleActionRepository.updateSettleAction(this, settleAction) {
                 transactionRecords.add(
@@ -52,20 +55,20 @@ internal class SettleActionService(private val dbManager: DatabaseManager) : Koi
         }
     }
 
+    fun getAllSettleActionsAsFlow() = settleActionRepository.findAllSettleActionsAsFlow()
+
     suspend fun acceptSettleActionTransaction(
         settleAction: SettleAction,
         transactionRecord: TransactionRecord
     ) = dbManager.write {
-        settleActionRepository.updateSettleAction(this, settleAction) {
-            findObject(transactionRecord)?.apply {
-                status = TransactionRecord.Status.Accepted()
-            } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
+        if (transactionRecord.status !is TransactionRecord.Status.Pending) {
+            throw InvalidTransactionRecordException("Transaction record not pending anymore")
         }
-    }
-    suspend fun rejectSettleActionTransaction(
-        settleAction: SettleAction,
-        transactionRecord: TransactionRecord
-    ) = dbManager.write {
+
+        userInfoRepository.updateUserInfo(this, transactionRecord.userInfo) {
+            userBalance += transactionRecord.balanceChange
+        }
+
         settleActionRepository.updateSettleAction(this, settleAction) {
             findObject(transactionRecord)?.apply {
                 status = TransactionRecord.Status.Accepted()
@@ -73,5 +76,39 @@ internal class SettleActionService(private val dbManager: DatabaseManager) : Koi
         }
     }
 
-    fun getAllSettleActionsAsFlow() = settleActionRepository.findAllSettleActionsAsFlow()
+    suspend fun rejectSettleActionTransaction(
+        settleAction: SettleAction,
+        transactionRecord: TransactionRecord
+    ) = dbManager.write {
+        if (transactionRecord.status !is TransactionRecord.Status.Pending) {
+            throw InvalidTransactionRecordException("Transaction record not pending anymore")
+        }
+
+        settleActionRepository.updateSettleAction(this, settleAction) {
+            findObject(transactionRecord)?.apply {
+                status = TransactionRecord.Status.Accepted()
+            } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
+        }
+    }
+
+    suspend fun cancelSettleAction(settleAction: SettleAction) = dbManager.write {
+        // SettleAction should only be cancellable if all transactionRecords are Accepted/Rejected
+        if (settleAction.pendingAmount > 0 || settleAction.isCompleted) {
+            throw InvalidTransactionRecordException("Cannot delete pending or completed settle")
+        }
+
+        userInfoRepository.updateUserInfo(this, settleAction.userInfo) {
+            userBalance += settleAction.remainingAmount
+        }
+
+        // Delete SettleAction if there are no accepted transactions, reduce amount otherwise to
+        // preserve completed transactionRecords
+        if (settleAction.acceptedAmount == 0.0) {
+            settleActionRepository.deleteSettleAction(this, settleAction)
+        } else {
+            settleActionRepository.updateSettleAction(this, settleAction) {
+                amount = acceptedAmount
+            }
+        }
+    }
 }

@@ -12,7 +12,7 @@ import shared
 struct ContentView: View {
     private struct ComposeView: UIViewControllerRepresentable {
         func makeUIViewController(context: Context) -> UIViewController {
-            return ApplicationControllerKt.DebugApplicationController()
+            return ApplicationControllerKt.ReleaseApplicationController()
         }
         
         func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}

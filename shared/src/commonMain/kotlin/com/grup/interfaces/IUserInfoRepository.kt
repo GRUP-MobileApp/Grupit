@@ -1,9 +1,9 @@
 package com.grup.interfaces
 
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.models.Group
 import com.grup.models.User
 import com.grup.models.UserInfo
-import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import kotlinx.coroutines.flow.Flow
 
 internal interface IUserInfoRepository : IRepository {
@@ -19,6 +19,6 @@ internal interface IUserInfoRepository : IRepository {
     fun updateUserInfo(
         transaction: DatabaseWriteTransaction,
         userInfo: UserInfo,
-        block: (UserInfo) -> Unit
+        block: UserInfo.() -> Unit
     ): UserInfo?
 }

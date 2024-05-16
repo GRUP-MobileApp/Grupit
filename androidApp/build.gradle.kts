@@ -4,6 +4,7 @@ val composeVersion: String by project
 val lifecycleVersion: String by project
 val firebaseBOMVersion: String by project
 val kotlinExtensionVersion: String by project
+val activityComposeVersion: String by project
 
 val keystorePassword: String by project
 
@@ -62,13 +63,13 @@ dependencies {
     //noinspection GradleDependency
     implementation("androidx.core:core-ktx:1.10.1")
 
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.activity:activity-compose:$activityComposeVersion")
 
     // Koin
     implementation("io.insert-koin:koin-android:$koinVersion")
 
     // Google Play Services
-    implementation ("com.google.android.gms:play-services-auth:21.1.0")
+    implementation ("com.google.android.gms:play-services-auth:21.1.1")
     implementation("com.google.android.gms:play-services-base:18.4.0")
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")

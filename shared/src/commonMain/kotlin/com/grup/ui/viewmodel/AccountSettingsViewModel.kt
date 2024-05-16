@@ -1,19 +1,19 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.grup.device.DeviceManager
+import com.grup.device.SettingsManager
+import com.grup.exceptions.ValidationException
 import com.grup.models.User
-import com.grup.other.AccountSettings
 import com.grup.platform.image.cropCenterSquareImage
-import com.grup.platform.signin.AuthManager
 import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 
-internal class AccountSettingsViewModel : LoggedInViewModel(), KoinComponent {
+internal class AccountSettingsViewModel : LoggedInViewModel() {
     enum class Pages(val pageNumber: Int) {
         MAIN_SETTINGS_PAGE(0),
         EDIT_PROFILE_PAGE(1),
@@ -22,44 +22,55 @@ internal class AccountSettingsViewModel : LoggedInViewModel(), KoinComponent {
     }
 
     companion object {
-        val groupNotificationEntries: Map<String, Array<AccountSettings.GroupNotificationType>> = mapOf(
+        val groupNotificationEntries:
+                Map<String, Array<SettingsManager.AccountSettings.GroupNotificationType>> = mapOf(
             "Incoming money requests" to arrayOf(
-                AccountSettings.GroupNotificationType.NewDebtAction,
-                AccountSettings.GroupNotificationType.NewSettleActionTransaction
+                SettingsManager.AccountSettings.GroupNotificationType.NewDebtAction,
+                SettingsManager.AccountSettings.GroupNotificationType.NewSettleActionTransaction
             ),
             "Updates to your outgoing requests" to arrayOf(
-                AccountSettings.GroupNotificationType.AcceptDebtAction,
-                AccountSettings.GroupNotificationType.AcceptSettleActionTransaction
+                SettingsManager.AccountSettings.GroupNotificationType.AcceptDebtAction,
+                SettingsManager.AccountSettings.GroupNotificationType.AcceptSettleActionTransaction
             ),
             "Group requests" to arrayOf(
-                AccountSettings.GroupNotificationType.NewSettleAction,
+                SettingsManager.AccountSettings.GroupNotificationType.NewSettleAction,
             ),
             "Group invites" to arrayOf(
-                AccountSettings.GroupNotificationType.NewGroupInvite
+                SettingsManager.AccountSettings.GroupNotificationType.NewGroupInvite
             )
         )
+
     }
 
-    private val authManager: AuthManager by inject()
+    private val deviceManager: DeviceManager by inject()
 
     public override val userObject: User
         get() = super.userObject
 
     fun getGroupNotificationType(
-        vararg notificationTypes: AccountSettings.GroupNotificationType
+        vararg notificationTypes: SettingsManager.AccountSettings.GroupNotificationType
     ): Boolean = notificationTypes.fold(true) { and, notificationType ->
-        and && apiServer.getGroupNotificationType(notificationType)
+        and && DeviceManager.settingsManager.getGroupNotificationType(notificationType.name)
     }
     fun toggleGroupNotificationType(
-        vararg notificationTypes: AccountSettings.GroupNotificationType
+        vararg notificationTypes: SettingsManager.AccountSettings.GroupNotificationType
     ): Boolean = notificationTypes.map { notificationType ->
-        apiServer.toggleGroupNotificationType(notificationType)
+        DeviceManager.settingsManager.toggleGroupNotificationType(notificationType.name)
     }.reduce { acc, isToggled ->
         acc && isToggled
     }
 
-    fun editUser(block: User.() -> Unit) = screenModelScope.launch {
-        apiServer.updateUser(block)
+    fun editUser(
+        onSuccess: () -> Unit,
+        onError: (String?) -> Unit,
+        block: User.() -> Unit,
+    ) = launchJob {
+        try {
+            apiServer.updateUser(block)
+            onSuccess()
+        } catch (e: ValidationException) {
+            onError(e.message)
+        }
     }
 
     fun editProfilePicture(pfpBitmap: Bitmap) = screenModelScope.launch {
@@ -67,8 +78,8 @@ internal class AccountSettingsViewModel : LoggedInViewModel(), KoinComponent {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun logOut(onSuccess: () -> Unit) = GlobalScope.launch {
-        authManager.getSignInManagerFromProvider(apiServer.authProvider)?.signOut()
+    fun logOut(onSuccess: () -> Unit) = launchJob(GlobalScope) {
+        deviceManager.authManager.getSignInManagerFromProvider(apiServer.authProvider)?.signOut()
         apiServer.logOut()
         onSuccess()
     }

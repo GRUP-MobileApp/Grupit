@@ -1,6 +1,5 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
@@ -9,7 +8,6 @@ import com.grup.models.UserInfo
 import com.grup.ui.compose.roundTwoDecimalPlaces
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 internal class DebtActionViewModel(private val selectedGroupId: String) : LoggedInViewModel() {
     public override val userObject: User
@@ -140,7 +138,7 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
         debtActionAmounts: Map<UserInfo, Double>,
         message: String,
         onSuccess: (DebtAction) -> Unit
-    ) = screenModelScope.launch {
+    ) = launchJob {
         apiServer.createDebtAction(
             myUserInfo.value,
             debtActionAmounts.map { (userInfo, balanceChange) ->
@@ -155,7 +153,7 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
         debtActionAmounts: Map<UserInfo, Double>,
         message: String,
         onSuccess: (DebtAction) -> Unit
-    ) = screenModelScope.launch {
+    ) = launchJob {
         apiServer.createDebtAction(
             myUserInfo.value,
             debtActionAmounts.map { (userInfo, balanceChange) ->

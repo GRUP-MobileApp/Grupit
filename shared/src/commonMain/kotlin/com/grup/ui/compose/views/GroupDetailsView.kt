@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -82,14 +81,10 @@ internal class GroupDetailsView(private val groupId: String) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val groupDetailsViewModel = rememberScreenModel { GroupDetailsViewModel(groupId) }
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            GroupDetailsLayout(
-                groupDetailsViewModel = groupDetailsViewModel,
-                navigator = navigator
-            )
-        }
+        GroupDetailsLayout(
+            groupDetailsViewModel = groupDetailsViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -124,7 +119,12 @@ private fun GroupDetailsLayout(
 
     val selectedGroup: Group = myUserInfo.group
     val selectAction: (Action) -> Unit = { action ->
-        navigator.push(ActionDetailsView(action.id))
+        navigator.push(
+            when(action) {
+                is DebtAction -> DebtActionDetailsView(action.id)
+                is SettleAction -> SettleActionDetailsView(action.id)
+            }
+        )
     }
 
     TutorialBottomSheet(
@@ -268,7 +268,7 @@ private fun GroupBalanceCard(
                     onClick = navigateDebtActionAmountOnClick,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(AppTheme.dimensions.cardPadding))
+                Spacer(modifier = Modifier.width(AppTheme.dimensions.appPadding))
                 H1DenyTextButton(
                     text = "Settle",
                     enabled = myUserInfo.userBalance > 0,

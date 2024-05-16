@@ -1,7 +1,7 @@
 package com.grup.repositories.abstract
 
-import com.grup.dbmanager.RealmManager
 import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
+import com.grup.dbmanager.RealmManager
 import com.grup.interfaces.IGroupInviteRepository
 import com.grup.models.GroupInvite
 import com.grup.models.User

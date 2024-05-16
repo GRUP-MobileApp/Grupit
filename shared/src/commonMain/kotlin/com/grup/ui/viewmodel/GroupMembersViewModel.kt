@@ -1,13 +1,11 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.exceptions.APIException
 import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 internal class GroupMembersViewModel(private val selectedGroupId: String) : LoggedInViewModel() {
     // Hot flow containing UserInfo's belonging to the selectedGroup. Assumes selectedGroup does not
@@ -38,7 +36,7 @@ internal class GroupMembersViewModel(private val selectedGroupId: String) : Logg
 
     fun createGroupInvite(username: String) {
         _inviteResult.value = InviteResult.Pending
-        screenModelScope.launch {
+        launchJob {
             try {
                 userInfos.value.find { it.user.id == userObject.id }?.let { myUserInfo ->
                     apiServer.createGroupInvite(myUserInfo, username)

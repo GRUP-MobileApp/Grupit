@@ -3,9 +3,12 @@ package com.grup.ui.viewmodel
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.APIServer
+import com.grup.device.DeviceManager
+import com.grup.exceptions.APIException
 import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.platform.signin.AuthManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -14,8 +17,26 @@ import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
-internal class LoginViewModel : ScreenModel, KoinComponent {
-    val authManager: AuthManager by inject()
+internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenModel, KoinComponent {
+    private val deviceManager: DeviceManager by inject()
+
+    private var currentJob: Job? = null
+
+    private fun launchJob(block: suspend () -> Unit) {
+        if (currentJob?.isCompleted != false) {
+            currentJob = screenModelScope.launch {
+                block()
+            }
+        }
+    }
+
+    fun allowAuthProvider(authProvider: AuthManager.AuthProvider): Boolean = when(authProvider) {
+        AuthManager.AuthProvider.Apple -> deviceManager.authManager.appleSignInManager != null
+        AuthManager.AuthProvider.Google -> deviceManager.authManager.googleSignInManager != null
+        AuthManager.AuthProvider.EmailPassword -> isDebug
+        AuthManager.AuthProvider.EmailPasswordRegister -> isDebug
+        AuthManager.AuthProvider.None -> false
+    }
 
     sealed class LoginResult {
         data class SuccessLogin(val authProvider: AuthManager.AuthProvider) : LoginResult()
@@ -39,7 +60,7 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
     private val _loginResult = MutableStateFlow<LoginResult>(LoginResult.None)
     val loginResult: StateFlow<LoginResult> = _loginResult
 
-    fun loginEmailPassword(email: String, password: String) = screenModelScope.launch {
+    fun loginEmailPassword(email: String, password: String) = launchJob {
         _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.EmailPassword)
         try {
             APIServer.loginEmailAndPassword(email, password).let { apiServer ->
@@ -60,8 +81,7 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
         }
     }
 
-    fun registerEmailPassword(email: String, password: String) =
-        screenModelScope.launch {
+    fun registerEmailPassword(email: String, password: String) = launchJob {
             _loginResult.value = LoginResult.PendingLogin(
                 AuthManager.AuthProvider.EmailPasswordRegister
             )
@@ -84,22 +104,27 @@ internal class LoginViewModel : ScreenModel, KoinComponent {
             }
         }
 
-    fun loginGoogleAccount(googleAccountToken: String) = screenModelScope.launch {
-        _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Google)
+    fun loginGoogleAccount() = launchJob {
         try {
-            APIServer.loginGoogleAccountToken(googleAccountToken).let { apiServer ->
-                injectApiServer(apiServer)
-                try {
-                    apiServer.user
-                    _loginResult.value = LoginResult.SuccessLogin(AuthManager.AuthProvider.Google)
-                } catch (e: UserObjectNotFoundException) {
-                    _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
-                        AuthManager.AuthProvider.Google
-                    )
+            deviceManager.authManager.googleSignInManager?.signIn { token ->
+                _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Google)
+                screenModelScope.launch {
+                    APIServer.loginGoogleAccountToken(token).let { apiServer ->
+                        injectApiServer(apiServer)
+                        try {
+                            apiServer.user
+                            _loginResult.value =
+                                LoginResult.SuccessLogin(AuthManager.AuthProvider.Google)
+                        } catch (e: UserObjectNotFoundException) {
+                            _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
+                                AuthManager.AuthProvider.Google
+                            )
+                        }
+                    }
                 }
             }
         } catch (e: LoginException) {
-            _loginResult.value = LoginResult.Error(e)
+            _loginResult.value = LoginResult.None
         }
     }
 

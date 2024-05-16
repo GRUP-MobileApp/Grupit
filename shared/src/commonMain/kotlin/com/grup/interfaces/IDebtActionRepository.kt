@@ -1,9 +1,9 @@
 package com.grup.interfaces
 
-import com.grup.models.DebtAction
-import com.grup.models.UserInfo
 import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
+import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
+import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.Flow
 
 internal interface IDebtActionRepository : IRepository {

@@ -18,11 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,11 +46,10 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
-import com.grup.ui.compose.IndicatorTextField
 import com.grup.ui.compose.PagerArrowRow
+import com.grup.ui.compose.ProfileTextField
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.viewmodel.WelcomeViewModel
 import dev.icerock.moko.media.Bitmap
@@ -69,17 +66,13 @@ internal class WelcomeView : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        val welcomeViewModel= rememberScreenModel { WelcomeViewModel() }
+        val welcomeViewModel = rememberScreenModel { WelcomeViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            WelcomeLayout(
-                welcomeViewModel = welcomeViewModel,
-                navigator = navigator
-            )
-        }
+        WelcomeLayout(
+            welcomeViewModel = welcomeViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -112,143 +105,119 @@ private fun WelcomeLayout(
 
     var pfpBitmap: Bitmap? by remember { mutableStateOf(null) }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(AppTheme.colors.primary)
-            .padding(horizontal = AppTheme.dimensions.appPadding)
+            .padding(AppTheme.dimensions.appPadding)
     ) {
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().weight(1f),
             userScrollEnabled = false
         ) { page ->
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = AppTheme.dimensions.paddingExtraLarge,
-                        bottom = 100.dp,
+            when (page) {
+                0 -> WelcomePage()
+                1 ->
+                    ProfilePage(
+                        username = username,
+                        onUsernameChange = {
+                            username = it.substring(0, min(it.length, 14))
+                            welcomeViewModel.checkUsername(username)
+                        },
+                        usernameValidity = usernameValidity,
+                        firstName = firstName,
+                        onFirstNameChange = {
+                            firstName = it.substring(0, min(it.length, 14))
+                            welcomeViewModel.checkFirstNameValidity(firstName)
+                        },
+                        firstNameValidity = firstNameValidity,
+                        lastName = lastName,
+                        onLastNameChange = {
+                            lastName = it.substring(0, min(it.length, 14))
+                            welcomeViewModel.checkLastNameValidity(lastName)
+                        },
+                        lastNameValidity = lastNameValidity,
+                        venmoUsername = venmoUsername,
+                        onVenmoUsernameChange = {
+                            venmoUsername = it.substring(0, min(it.length, 30))
+                            welcomeViewModel.checkVenmoUsernameValidity(venmoUsername)
+                        },
+                        venmoUsernameValidity = venmoUsernameValidity
                     )
-            ) {
-                when (page) {
-                    0 -> WelcomePage()
-                    1 ->
-                        ProfilePage(
-                            username = username,
-                            onUsernameChange = {
-                                username = it.substring(0, min(it.length, 14))
-                                welcomeViewModel.checkUsername(username)
-                            },
-                            usernameValidity = usernameValidity,
-                            firstName = firstName,
-                            onFirstNameChange = {
-                                firstName = it.substring(0, min(it.length, 14))
-                                welcomeViewModel.checkFirstNameValidity(firstName)
-                            },
-                            firstNameValidity = firstNameValidity,
-                            lastName = lastName,
-                            onLastNameChange = {
-                                lastName = it.substring(0, min(it.length, 14))
-                                welcomeViewModel.checkLastNameValidity(lastName)
-                            },
-                            lastNameValidity = lastNameValidity,
-                            venmoUsername = venmoUsername,
-                            onVenmoUsernameChange = {
-                                venmoUsername = it.substring(0, min(it.length, 30))
-                                welcomeViewModel.checkVenmoUsernameValidity(venmoUsername)
-                            },
-                            venmoUsernameValidity = venmoUsernameValidity
-                        )
 
-                    2 ->
-                        SetProfilePicture(
-                            profilePictureBitmap = pfpBitmap,
-                            choosePhotoOnClick = {
-                                scope.launch {
-                                    try {
-                                        pfpBitmap = picker.pickImage(MediaSource.GALLERY)
-                                    } catch (exc: DeniedException) {
-                                        println("denied - $exc")
-                                    } catch (exc: CanceledException) {
-                                        println("cancelled - $exc")
-                                    }
+                2 ->
+                    SetProfilePicture(
+                        profilePictureBitmap = pfpBitmap,
+                        choosePhotoOnClick = {
+                            scope.launch {
+                                try {
+                                    pfpBitmap = picker.pickImage(MediaSource.GALLERY)
+                                } catch (exc: DeniedException) {
+                                    println("denied - $exc")
+                                } catch (exc: CanceledException) {
+                                    println("cancelled - $exc")
                                 }
                             }
-                        )
+                        }
+                    )
 
-                    3 -> FinalPage()
-                }
+                3 -> FinalPage()
             }
         }
-        Box(
-            contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = AppTheme.dimensions.paddingExtraLarge)
-        ) {
-            PagerArrowRow(
-                pagerState = pagerState,
-                onClickNext = { page ->
-                    when (page) {
-                        1 -> if (
-                            usernameValidity is WelcomeViewModel.NameValidity.Valid &&
-                            firstNameValidity is WelcomeViewModel.NameValidity.Valid &&
-                            (
+        PagerArrowRow(
+            pagerState = pagerState,
+            onClickNext = { page ->
+                when (page) {
+                    1 -> if (
+                        usernameValidity is WelcomeViewModel.NameValidity.Valid &&
+                        firstNameValidity is WelcomeViewModel.NameValidity.Valid &&
+                        (
                                 lastNameValidity is WelcomeViewModel.NameValidity.Valid ||
-                                lastNameValidity is WelcomeViewModel.NameValidity.None
-                            ) &&
-                            (
+                                        lastNameValidity is WelcomeViewModel.NameValidity.None
+                                ) &&
+                        (
                                 venmoUsernameValidity is WelcomeViewModel.NameValidity.Valid ||
-                                venmoUsernameValidity is WelcomeViewModel.NameValidity.None
-                            )
-                        ) {
-                            scope.launch { pagerState.scrollToPage(page + 1) }
-                        }
-                        pagerState.pageCount - 1 -> welcomeViewModel.registerUserObject(
-                            username = username,
-                            displayName = "$firstName $lastName".trim(),
-                            venmoUsername = venmoUsername,
-                            profilePictureBitmap = pfpBitmap,
-                            onSuccess = { navigator.pop() },
-                            onError = { }
-                        )
-                        else -> scope.launch { pagerState.scrollToPage(page + 1) }
+                                        venmoUsernameValidity is WelcomeViewModel.NameValidity.None
+                                )
+                    ) {
+                        scope.launch { pagerState.scrollToPage(page + 1) }
                     }
+                    pagerState.pageCount - 1 -> welcomeViewModel.registerUserObject(
+                        username = username,
+                        displayName = "$firstName $lastName".trim(),
+                        venmoUsername = venmoUsername,
+                        profilePictureBitmap = pfpBitmap,
+                        onSuccess = { navigator.pop() },
+                        onError = { }
+                    )
+                    else -> scope.launch { pagerState.scrollToPage(page + 1) }
                 }
-            )
-        }
+            }
+        )
     }
 }
 
 @Composable
 private fun WelcomePage() {
     Column(
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxWidth(0.8f)
-            .padding(
-                top = AppTheme.dimensions.paddingExtraLarge,
-                bottom = 100.dp,
-            )
+            .fillMaxHeight(0.3f)
+            .fillMaxWidth()
+            .padding(AppTheme.dimensions.appPadding)
     ) {
-        Column(
-            verticalArrangement = Arrangement.SpaceAround,
-        ) {
-            H1Text(
-                text = "Welcome!",
-                fontSize = 50.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = AppTheme.colors.onSecondary,
-            )
-            H1Text(
-                text = "Grupit records your person-to-person debts in a group and simplifies it " +
-                        "into one overall balance."
-            )
-        }
+        H1Text(
+            text = "Welcome!",
+            fontSize = 50.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = AppTheme.colors.onSecondary,
+        )
+        H1Text(
+            text = "Grupit records your person-to-person debts in a group and simplifies it " +
+                    "into one overall balance."
+        )
     }
 }
 
@@ -282,38 +251,63 @@ private fun ProfilePage(
             color = AppTheme.colors.onSecondary,
             modifier = Modifier.fillMaxWidth(0.8f)
         )
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingExtraLarge))
         Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingExtraLarge),
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
             ProfileTextField(
                 value = username,
                 onValueChange = onUsernameChange,
                 placeholder = "Username",
-                valueValidity = usernameValidity,
-                modifier = Modifier.align(Alignment.Start)
+                indicatorColor = when(usernameValidity) {
+                    is WelcomeViewModel.NameValidity.Valid -> AppTheme.colors.confirm
+                    else -> AppTheme.colors.primary
+                },
+                error = when(usernameValidity) {
+                    is WelcomeViewModel.NameValidity.Invalid -> usernameValidity.error
+                    else -> null
+                }
             )
             ProfileTextField(
                 value = firstName,
                 onValueChange = onFirstNameChange,
                 placeholder = "First Name",
-                valueValidity = firstNameValidity,
-                modifier = Modifier.align(Alignment.Start)
+                indicatorColor = when(firstNameValidity) {
+                    is WelcomeViewModel.NameValidity.Valid -> AppTheme.colors.confirm
+                    else -> AppTheme.colors.primary
+                },
+                error = when(firstNameValidity) {
+                    is WelcomeViewModel.NameValidity.Invalid -> firstNameValidity.error
+                    else -> null
+                }
             )
             ProfileTextField(
                 value = lastName,
                 onValueChange = onLastNameChange,
                 placeholder = "Last Name",
-                valueValidity = lastNameValidity,
-                modifier = Modifier.align(Alignment.Start)
+                indicatorColor = when(lastNameValidity) {
+                    is WelcomeViewModel.NameValidity.Valid -> AppTheme.colors.confirm
+                    else -> AppTheme.colors.primary
+                },
+                error = when(lastNameValidity) {
+                    is WelcomeViewModel.NameValidity.Invalid -> lastNameValidity.error
+                    else -> null
+                }
             )
             ProfileTextField(
                 value = venmoUsername,
                 onValueChange = onVenmoUsernameChange,
                 placeholder = "Venmo Username",
-                valueValidity = venmoUsernameValidity,
-                modifier = Modifier.align(Alignment.Start)
+                indicatorColor = when(venmoUsernameValidity) {
+                    is WelcomeViewModel.NameValidity.Valid -> AppTheme.colors.confirm
+                    else -> AppTheme.colors.primary
+                },
+                error = when(venmoUsernameValidity) {
+                    is WelcomeViewModel.NameValidity.Invalid -> venmoUsernameValidity.error
+                    else -> null
+                }
             )
         }
     }
@@ -337,7 +331,7 @@ private fun SetProfilePicture(
         H1Text(
             text = "Profile Picture",
             fontSize = 50.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             color = AppTheme.colors.onSecondary
         )
         Box(
@@ -422,39 +416,8 @@ private fun FinalPage() {
             modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
             items(textList) { text ->
-                H1Text(text = text)
+                H1Text(text = text, fontSize = AppTheme.typography.mediumFont)
             }
         }
-    }
-}
-
-@Composable
-private fun ProfileTextField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String = "",
-    valueValidity: WelcomeViewModel.NameValidity,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
-        modifier = modifier
-    ) {
-        IndicatorTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = placeholder,
-            indicatorColor = when(valueValidity) {
-                is WelcomeViewModel.NameValidity.Valid -> AppTheme.colors.confirm
-                is WelcomeViewModel.NameValidity.Invalid -> AppTheme.colors.error
-                else -> AppTheme.colors.primary
-            }
-        )
-        Caption(
-            text = when(valueValidity) {
-                is WelcomeViewModel.NameValidity.Invalid -> valueValidity.error
-                else -> ""
-            }
-        )
     }
 }

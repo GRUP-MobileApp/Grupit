@@ -12,9 +12,11 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.grup.android.ui.MainActivity
-import com.grup.other.NotificationPermissions
+import com.grup.device.DeviceManager
+import com.grup.device.SettingsManager
+import org.koin.core.component.KoinComponent
 
-class AndroidFirebaseMessagingService : FirebaseMessagingService() {
+class AndroidFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         // TODO
@@ -22,16 +24,23 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onMessageReceived(message: RemoteMessage) {
-        val notificationType = message.data["type"]!!
-
-        if (NotificationPermissions.isNotificationTypeToggled(notificationType)) {
+        if (allowNotification(message.data)) {
             sendNotification(message.data)
         }
     }
 
-    private fun sendNotification(
-        data: Map<String, String>
-    ) {
+    private fun allowNotification(data: Map<String, String>): Boolean {
+        val notificationType = data["type"] ?: return false
+
+        return DeviceManager.settingsManager.getGroupNotificationType(notificationType) &&
+            when(notificationType) {
+                SettingsManager.AccountSettings.GroupNotificationType.NewDebtAction.name ->
+                    DeviceManager.settingsManager.userId != data["userId"]
+                else -> true
+            }
+    }
+
+    private fun sendNotification(data: Map<String, String>) {
         val pendingIntent =
             PendingIntent.getActivity(
                 this,

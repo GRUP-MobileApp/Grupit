@@ -6,26 +6,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,8 +41,8 @@ import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
+import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
-import com.grup.ui.compose.LoadingSpinner
 import com.grup.ui.compose.ModalBottomSheetLayout
 import com.grup.ui.compose.SmallIcon
 import com.grup.ui.compose.UserInfoRowCard
@@ -61,16 +56,12 @@ internal class GroupMembersView(private val groupId: String) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
-        CompositionLocalProvider(
-            LocalContentColor provides AppTheme.colors.onSecondary
-        ) {
-            val groupMembersViewModel = rememberScreenModel { GroupMembersViewModel(groupId) }
-            val navigator = LocalNavigator.currentOrThrow
-            GroupMembersLayout(
-                groupMembersViewModel = groupMembersViewModel,
-                navigator = navigator
-            )
-        }
+        val groupMembersViewModel = rememberScreenModel { GroupMembersViewModel(groupId) }
+        val navigator = LocalNavigator.currentOrThrow
+        GroupMembersLayout(
+            groupMembersViewModel = groupMembersViewModel,
+            navigator = navigator
+        )
     }
 }
 
@@ -85,12 +76,17 @@ private fun GroupMembersLayout(
     val scope = rememberCoroutineScope()
 
     val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
+
     val inviteResult: GroupMembersViewModel.InviteResult by
         groupMembersViewModel.inviteResult.collectAsStateWithLifecycle()
 
     var usernameSearchQuery: String by remember { mutableStateOf("") }
     var addToGroupUsernameSearchQuery: String by remember { mutableStateOf("") }
     var selectedUserInfo: UserInfo? by remember { mutableStateOf(null) }
+
+    val filteredUserInfos: List<UserInfo> = userInfos.filter { userInfo ->
+        userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
+    }
 
     val userInfoOnClick: (UserInfo) -> Unit = { userInfo ->
         selectedUserInfo = userInfo
@@ -129,16 +125,9 @@ private fun GroupMembersLayout(
             onBackPress = { navigator.pop() },
             actions = { AddToGroupButton(addToGroupOnClick = openAddToGroupBottomSheet) }
         ) { padding ->
-            LazyColumn (
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(vertical = AppTheme.dimensions.cardPadding),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(AppTheme.dimensions.appPadding)
-                    .clip(AppTheme.shapes.large)
-                    .background(AppTheme.colors.secondary)
+            LazyColumn(
+                contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
+                modifier = Modifier.fillMaxSize().padding(padding)
             ) {
                 item {
                     UsernameSearchBar(
@@ -149,28 +138,25 @@ private fun GroupMembersLayout(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = AppTheme.dimensions.cardPadding)
+                            .padding(AppTheme.dimensions.cardPadding)
                     )
                     Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
                 }
-                items(
-                    userInfos.filter { userInfo ->
-                        userInfo.user.displayName.contains(usernameSearchQuery, ignoreCase = true)
-                    }
-                ) { userInfo ->
-                    UserInfoRowCard(
-                        userInfo = userInfo,
-                        mainContent = {
-                            H1Text(text = userInfo.user.displayName)
-                            Caption(text = "@${userInfo.user.venmoUsername}")
-                        },
+                itemsIndexed(filteredUserInfos) { i, userInfo ->
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
+                            .run {
+                                if (filteredUserInfos.size == 1) this.clip(AppTheme.shapes.large)
+                                else if (i == 0) this.clip(AppTheme.shapes.topLargeShape)
+                                else if (i == filteredUserInfos.size - 1)
+                                    this.clip(AppTheme.shapes.bottomLargeShape)
+                                else this
+                            }
                             .clickable { userInfoOnClick(userInfo) }
-                            .padding(
-                                horizontal = AppTheme.dimensions.cardPadding,
-                                vertical = AppTheme.dimensions.spacingSmall
-                            )
-                    )
+                            .background(AppTheme.colors.secondary)
+                            .padding(AppTheme.dimensions.cardPadding)
+                    ) { UserInfoRowCard(userInfo = userInfo) }
                 }
             }
         }
@@ -221,60 +207,46 @@ private fun AddToGroupButton(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun AddToGroupBottomSheetLayout(
+    state: ModalBottomSheetState,
     addToGroupUsernameSearchQuery: String,
     onQueryChange: (String) -> Unit,
     inviteUsernameToGroupOnClick: () -> Unit,
     inviteResult: GroupMembersViewModel.InviteResult,
-    state: ModalBottomSheetState,
-    textColor: Color = AppTheme.colors.onSecondary,
     content: @Composable () -> Unit
 ) {
-    val usernameSearchBarBorderColor: Color =
-        if (inviteResult is GroupMembersViewModel.InviteResult.Error) {
-            AppTheme.colors.error
-        } else {
-            Color.Transparent
-        }
-
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
             Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(AppTheme.dimensions.paddingMedium)
+                    .padding(AppTheme.dimensions.appPadding)
             ) {
-                UsernameSearchBar(
-                    usernameSearchQuery = addToGroupUsernameSearchQuery,
-                    labelText = "Search by username",
-                    onQueryChange = onQueryChange,
-                    border = usernameSearchBarBorderColor,
-                    modifier = Modifier.padding(top = AppTheme.dimensions.paddingSmall)
-                )
-                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (inviteResult is GroupMembersViewModel.InviteResult.Error) {
-                        H1Text(text = inviteResult.exception.message!!)
-                    } else if (inviteResult is GroupMembersViewModel.InviteResult.Sent) {
-                        H1Text(text = "Sent!")
-                    }
+                    UsernameSearchBar(
+                        usernameSearchQuery = addToGroupUsernameSearchQuery,
+                        labelText = "Search by username",
+                        onQueryChange = onQueryChange,
+                        border = when(inviteResult) {
+                            is GroupMembersViewModel.InviteResult.Error -> AppTheme.colors.error
+                            else -> Color.Transparent
+                        }
+                    )
+                    Caption(
+                        text = when(inviteResult) {
+                            is GroupMembersViewModel.InviteResult.Error ->
+                                inviteResult.exception.message ?: ""
+                            is GroupMembersViewModel.InviteResult.Sent -> "Sent!"
+                            else -> ""
+                        }
+                    )
                 }
-                Spacer(modifier = Modifier.height(AppTheme.dimensions.spacing))
-                Button(
-                    onClick = inviteUsernameToGroupOnClick,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.confirm),
-                    shape = AppTheme.shapes.circleShape
-                ) {
-                    if (inviteResult is GroupMembersViewModel.InviteResult.Pending) {
-                        LoadingSpinner()
-                    } else {
-                        H1Text(text = "Add to group", color = textColor)
-                    }
-                }
+                H1ConfirmTextButton(text = "Add to Group", onClick = inviteUsernameToGroupOnClick)
             }
         },
         content = content

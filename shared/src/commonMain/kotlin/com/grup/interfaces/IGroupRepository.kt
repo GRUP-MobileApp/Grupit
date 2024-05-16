@@ -1,8 +1,8 @@
 package com.grup.interfaces
 
+import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 import com.grup.models.Group
 import com.grup.models.User
-import com.grup.dbmanager.DatabaseManager.DatabaseWriteTransaction
 
 internal interface IGroupRepository : IRepository {
     fun createGroup(
