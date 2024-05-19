@@ -122,6 +122,10 @@ class APIServer private constructor(
         @Throws(LoginException::class, CancellationException::class)
         suspend fun loginGoogleAccountToken(googleAccountToken: String): APIServer =
             APIServer(ReleaseRealmManager.loginGoogle(googleAccountToken))
+
+        @Throws(LoginException::class, CancellationException::class)
+        suspend fun loginAppleAccountToken(appleAccountToken: String): APIServer =
+            APIServer(ReleaseRealmManager.loginApple(appleAccountToken))
     }
 
     suspend fun logOut() = dbManager.logOut()

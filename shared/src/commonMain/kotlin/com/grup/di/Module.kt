@@ -71,6 +71,7 @@ internal fun realmModules(realm: Realm, isDebug: Boolean = false) = module {
 
 fun initKoin() {
     startKoin {
+        allowOverride(false)
         modules(
             module {
                 single { httpClient }

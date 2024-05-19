@@ -2,7 +2,7 @@ package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.device.DeviceManager
-import com.grup.device.SettingsManager
+import com.grup.device.SettingsManager.AccountSettings
 import com.grup.exceptions.ValidationException
 import com.grup.models.User
 import com.grup.platform.image.cropCenterSquareImage
@@ -23,20 +23,20 @@ internal class AccountSettingsViewModel : LoggedInViewModel() {
 
     companion object {
         val groupNotificationEntries:
-                Map<String, Array<SettingsManager.AccountSettings.GroupNotificationType>> = mapOf(
+                Map<String, Array<AccountSettings.GroupNotificationType>> = mapOf(
             "Incoming money requests" to arrayOf(
-                SettingsManager.AccountSettings.GroupNotificationType.NewDebtAction,
-                SettingsManager.AccountSettings.GroupNotificationType.NewSettleActionTransaction
+                AccountSettings.GroupNotificationType.NewDebtAction,
+                AccountSettings.GroupNotificationType.NewSettleActionTransaction
             ),
             "Updates to your outgoing requests" to arrayOf(
-                SettingsManager.AccountSettings.GroupNotificationType.AcceptDebtAction,
-                SettingsManager.AccountSettings.GroupNotificationType.AcceptSettleActionTransaction
+                AccountSettings.GroupNotificationType.AcceptDebtAction,
+                AccountSettings.GroupNotificationType.AcceptSettleActionTransaction
             ),
             "Group requests" to arrayOf(
-                SettingsManager.AccountSettings.GroupNotificationType.NewSettleAction,
+                AccountSettings.GroupNotificationType.NewSettleAction,
             ),
             "Group invites" to arrayOf(
-                SettingsManager.AccountSettings.GroupNotificationType.NewGroupInvite
+                AccountSettings.GroupNotificationType.NewGroupInvite
             )
         )
 
@@ -48,14 +48,14 @@ internal class AccountSettingsViewModel : LoggedInViewModel() {
         get() = super.userObject
 
     fun getGroupNotificationType(
-        vararg notificationTypes: SettingsManager.AccountSettings.GroupNotificationType
+        vararg notificationTypes: AccountSettings.GroupNotificationType
     ): Boolean = notificationTypes.fold(true) { and, notificationType ->
-        and && DeviceManager.settingsManager.getGroupNotificationType(notificationType.name)
+        and && AccountSettings.getGroupNotificationType(notificationType.name)
     }
     fun toggleGroupNotificationType(
-        vararg notificationTypes: SettingsManager.AccountSettings.GroupNotificationType
+        vararg notificationTypes: AccountSettings.GroupNotificationType
     ): Boolean = notificationTypes.map { notificationType ->
-        DeviceManager.settingsManager.toggleGroupNotificationType(notificationType.name)
+        AccountSettings.toggleGroupNotificationType(notificationType.name)
     }.reduce { acc, isToggled ->
         acc && isToggled
     }

@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseMessaging
+import AuthenticationServices
 import shared
 
 @main
@@ -16,10 +17,23 @@ struct iOSApp: App {
             deviceManager: DeviceManager(
                 authManager: AuthManager(
                     googleSignInManager: GoogleSignInManager(),
-                    appleSignInManager: nil
+                    appleSignInManager: AppleSignInManager(
+                        getAuthorizationController: {
+                            let appleIdProvider = ASAuthorizationAppleIDProvider()
+                            let request = appleIdProvider.createRequest()
+                            request.requestedScopes = [.fullName, .email]
+
+                            let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+                            if let viewController = UIApplication.shared.windows.first?.rootViewController {
+                                authorizationController.delegate = viewController
+                                authorizationController.presentationContextProvider = viewController
+                            }
+                            return authorizationController
+                        }
+                    )
                 ),
                 notificationManager: NotificationManager(
-                    getMessaging: { Messaging.messaging() }
+                    getMessaging: { return Messaging.messaging() }
                 )
             )
         )

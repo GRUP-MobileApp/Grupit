@@ -87,11 +87,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
 private func allowNotification(data: [AnyHashable: Any]) -> Bool {
     let notificationType: String = data["type"] as! String
-    let isToggled: Bool = DeviceManager.Companion.shared.settingsManager.getGroupNotificationType(notificationType: notificationType)
+    let isToggled: Bool = SettingsManager.AccountSettings.shared.getGroupNotificationType(notificationType: notificationType)
     
     return switch(notificationType) {
         case SettingsManager.AccountSettingsGroupNotificationType.newsettleaction.name:
-            DeviceManager.Companion.shared.settingsManager.userId != (data["userId"] as! String) && isToggled
+            SettingsManager.LoginSettings.shared.userId != (data["userId"] as! String) && isToggled
         default: isToggled
     }
 }

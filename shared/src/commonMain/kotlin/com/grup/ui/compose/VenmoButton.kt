@@ -22,7 +22,7 @@ internal expect fun VenmoButton(
 @Composable
 internal fun VenmoIcon(onClick: () -> Unit) {
     Image(
-        painter = painterResource(MR.images.venmo_button),
+        painter = painterResource(MR.images.venmo_icon),
         contentDescription = "Venmo",
         modifier = Modifier
             .size(AppTheme.dimensions.smallIconSize)

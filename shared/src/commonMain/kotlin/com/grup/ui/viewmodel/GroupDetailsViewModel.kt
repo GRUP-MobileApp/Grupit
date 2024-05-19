@@ -1,6 +1,7 @@
 package com.grup.ui.viewmodel
 
 import com.grup.device.DeviceManager
+import com.grup.device.SettingsManager
 import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.DebtAction
 import com.grup.models.SettleAction
@@ -15,7 +16,7 @@ import kotlinx.coroutines.flow.map
 internal class GroupDetailsViewModel(
     val selectedGroupId: String
 ): LoggedInViewModel() {
-    var hasViewedTutorial: Boolean by DeviceManager.settingsManager::hasViewedTutorial
+    var hasViewedTutorial: Boolean by SettingsManager.InstanceSettings::hasViewedTutorial
 
     // Hot flow containing User's UserInfos
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()

@@ -35,6 +35,8 @@ internal data class AppDimensions(
     val textButtonWidth: Dp = 140.dp,
     val textButtonHeight: Dp = 42.dp,
 
+    val signInButtonHeight: Dp = 52.dp,
+
     val actionCardSize: Dp = 150.dp
 )
 

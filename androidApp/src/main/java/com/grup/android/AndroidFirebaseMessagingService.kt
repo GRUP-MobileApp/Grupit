@@ -12,7 +12,6 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.grup.android.ui.MainActivity
-import com.grup.device.DeviceManager
 import com.grup.device.SettingsManager
 import org.koin.core.component.KoinComponent
 
@@ -32,10 +31,10 @@ class AndroidFirebaseMessagingService : FirebaseMessagingService(), KoinComponen
     private fun allowNotification(data: Map<String, String>): Boolean {
         val notificationType = data["type"] ?: return false
 
-        return DeviceManager.settingsManager.getGroupNotificationType(notificationType) &&
+        return SettingsManager.AccountSettings.getGroupNotificationType(notificationType) &&
             when(notificationType) {
                 SettingsManager.AccountSettings.GroupNotificationType.NewDebtAction.name ->
-                    DeviceManager.settingsManager.userId != data["userId"]
+                    SettingsManager.LoginSettings.userId != data["userId"]
                 else -> true
             }
     }

@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
@@ -480,8 +479,6 @@ internal fun AcceptRejectRow(
     }
 }
 
-
-
 @Composable
 internal fun GoogleSignInButton(
     loginResult: LoginViewModel.LoginResult,
@@ -493,26 +490,65 @@ internal fun GoogleSignInButton(
                 signIn()
             }
         },
-        shape = RoundedCornerShape(6.dp),
+        shape = AppTheme.shapes.medium,
         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
             containerColor = Color(0xFF4285F4),
             contentColor = Color.White
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp),
+            .height(AppTheme.dimensions.signInButtonHeight)
+            .padding(horizontal = AppTheme.dimensions.paddingLarge),
     ) {
         if (loginResult.isSuccessOrPendingLoginAuthProvider(AuthManager.AuthProvider.Google)) {
             LoadingSpinner()
         } else {
             Image(
-                painter = painterResource(MR.images.ic_logo_google),
-                contentDescription = "Google Icon"
+                painter = painterResource(MR.images.google_icon),
+                contentDescription = "Google Sign In",
+                modifier = Modifier
+                    .size(AppTheme.dimensions.smallIconSize)
+                    .clip(AppTheme.shapes.circleShape)
             )
-            H1Text(
-                text = "Sign in with Google",
-                modifier = Modifier.padding(6.dp)
+            Spacer(modifier = Modifier.width(AppTheme.dimensions.spacing))
+            H1Text(text = "Sign in with Google")
+        }
+    }
+}
+
+@Composable
+internal fun AppleSignInButton(
+    loginResult: LoginViewModel.LoginResult,
+    signIn: () -> Unit
+) {
+    Button(
+        onClick = {
+            if (loginResult !is LoginViewModel.LoginResult.PendingLogin) {
+                signIn()
+            }
+        },
+        shape = AppTheme.shapes.medium,
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+            containerColor = Color.Black,
+            contentColor = Color.White
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(AppTheme.dimensions.signInButtonHeight)
+            .padding(horizontal = AppTheme.dimensions.paddingLarge),
+    ) {
+        if (loginResult.isSuccessOrPendingLoginAuthProvider(AuthManager.AuthProvider.Apple)) {
+            LoadingSpinner()
+        } else {
+
+            Image(
+                painter = painterResource(MR.images.apple_icon),
+                contentDescription = "Apple Sign In",
+                modifier = Modifier
+                    .size(AppTheme.dimensions.smallIconSize)
             )
+            Spacer(modifier = Modifier.width(AppTheme.dimensions.spacing))
+            H1Text(text = "Sign in with Apple")
         }
     }
 }

@@ -4,10 +4,12 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.APIServer
 import com.grup.device.DeviceManager
-import com.grup.exceptions.APIException
+import com.grup.exceptions.login.CancelledSignInException
 import com.grup.exceptions.login.LoginException
+import com.grup.exceptions.login.SignInException
 import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.platform.signin.AuthManager
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +24,7 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
 
     private var currentJob: Job? = null
 
-    private fun launchJob(block: suspend () -> Unit) {
+    private fun launchJob(block: suspend CoroutineScope.() -> Unit) {
         if (currentJob?.isCompleted != false) {
             currentJob = screenModelScope.launch {
                 block()
@@ -99,7 +101,9 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
                         )
                     }
                 }
-            } catch (e: LoginException) {
+            } catch (e: CancelledSignInException) {
+                _loginResult.value = LoginResult.None
+            } catch (e: SignInException) {
                 _loginResult.value = LoginResult.Error(e)
             }
         }
@@ -108,7 +112,7 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
         try {
             deviceManager.authManager.googleSignInManager?.signIn { token ->
                 _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Google)
-                screenModelScope.launch {
+                launch {
                     APIServer.loginGoogleAccountToken(token).let { apiServer ->
                         injectApiServer(apiServer)
                         try {
@@ -123,8 +127,36 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
                     }
                 }
             }
-        } catch (e: LoginException) {
+        } catch (e: CancelledSignInException) {
             _loginResult.value = LoginResult.None
+        } catch (e: SignInException) {
+            _loginResult.value = LoginResult.Error(e)
+        }
+    }
+
+    fun loginAppleAccount() = launchJob {
+        try {
+            deviceManager.authManager.appleSignInManager?.signIn { token ->
+                _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Apple)
+                launch {
+                    APIServer.loginAppleAccountToken(token).let { apiServer ->
+                        injectApiServer(apiServer)
+                        try {
+                            apiServer.user
+                            _loginResult.value =
+                                LoginResult.SuccessLogin(AuthManager.AuthProvider.Apple)
+                        } catch (e: UserObjectNotFoundException) {
+                            _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
+                                AuthManager.AuthProvider.Apple
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (e: CancelledSignInException) {
+            _loginResult.value = LoginResult.None
+        } catch (e: SignInException) {
+            _loginResult.value = LoginResult.Error(e)
         }
     }
 

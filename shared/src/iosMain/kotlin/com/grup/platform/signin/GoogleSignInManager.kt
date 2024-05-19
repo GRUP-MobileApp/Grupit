@@ -1,24 +1,32 @@
 package com.grup.platform.signin
 
 import cocoapods.GoogleSignIn.GIDSignIn
-import com.grup.exceptions.login.InvalidGoogleAccountException
+import com.grup.exceptions.login.CancelledSignInException
+import com.grup.exceptions.login.SignInException
 import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.NSError
 import platform.UIKit.UIApplication
 import platform.UIKit.UIWindow
 
 @OptIn(ExperimentalForeignApi::class)
 actual class GoogleSignInManager: SignInManager() {
     override suspend fun signIn(block: (String) -> Unit) {
+        var signInError: NSError? = null
         GIDSignIn.sharedInstance.signInWithPresentingViewController(
-            (UIApplication.sharedApplication.windows as List<UIWindow>)
-                .first().rootViewController ?: throw InvalidGoogleAccountException()
+            (UIApplication.sharedApplication.windows.first() as? UIWindow)
+                ?.rootViewController
+                ?: throw SignInException()
         ) { signInResult, error ->
             if (error != null) {
-                return@signInWithPresentingViewController
+                signInError = error
+            } else {
+                signInResult?.user?.idToken?.tokenString?.let { token ->
+                    block(token)
+                }
             }
-            signInResult?.user?.idToken?.tokenString?.let { token ->
-                block(token)
-            }
+        }
+        if (signInError != null) {
+            throw CancelledSignInException()
         }
     }
 
@@ -27,6 +35,6 @@ actual class GoogleSignInManager: SignInManager() {
     }
 
     override fun disconnect() {
-        GIDSignIn.sharedInstance.disconnectWithCompletion {  }
+        GIDSignIn.sharedInstance.disconnectWithCompletion { }
     }
 }

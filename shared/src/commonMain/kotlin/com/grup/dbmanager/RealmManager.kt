@@ -1,6 +1,7 @@
 package com.grup.dbmanager
 
 import com.grup.device.DeviceManager
+import com.grup.device.SettingsManager
 import com.grup.di.realmModules
 import com.grup.exceptions.login.NotLoggedInException
 import com.grup.models.BaseEntity
@@ -254,7 +255,7 @@ internal open class RealmManager protected constructor(
     suspend fun open() {
         app.currentUser?.let { realmUser ->
             deviceManager.notificationManager.subscribePersonalNotifications(realmUser.id)
-            DeviceManager.settingsManager.userId = realmUser.id
+            SettingsManager.LoginSettings.userId = realmUser.id
         } ?: throw NotLoggedInException()
         groupSubscriptionsJob.start()
         userSubscriptionsJob.start()

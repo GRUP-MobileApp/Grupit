@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.platform.signin.AuthManager
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.compose.AppleSignInButton
 import com.grup.ui.compose.GoogleSignInButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.collectAsStateWithLifecycle
@@ -60,29 +62,34 @@ private fun ReleaseLoginLayout(
         else -> {}
     }
 
-    Box(
-        contentAlignment = Alignment.Center,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .background(AppTheme.colors.primary)
             .padding(AppTheme.dimensions.appPadding)
     ) {
-        Column(
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            H1Text(
-                text = "Grupit",
-                fontSize = 70.sp,
-                color = AppTheme.colors.onSecondary
-            )
+        Spacer(modifier = Modifier.fillMaxHeight(0.25f))
 
-            Spacer(modifier = Modifier.height(50.dp))
+        H1Text(
+            text = "Grupit",
+            fontSize = 70.sp,
+            color = AppTheme.colors.onSecondary
+        )
 
+        Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingExtraLarge))
+
+        Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)) {
             if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Google)) {
                 GoogleSignInButton(
                     loginResult = loginResult,
                     signIn = { loginViewModel.loginGoogleAccount() }
+                )
+            }
+            if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Apple)) {
+                AppleSignInButton(
+                    loginResult = loginResult,
+                    signIn = { loginViewModel.loginAppleAccount() }
                 )
             }
         }

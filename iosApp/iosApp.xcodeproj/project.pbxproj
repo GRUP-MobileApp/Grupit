@@ -11,6 +11,7 @@
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
+		B53732272BF89B6B00211843 /* ASAuthorizationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53732262BF89B6B00211843 /* ASAuthorizationDelegate.swift */; };
 		B56303342A02314A00D55F5A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56303332A02314A00D55F5A /* ContentView.swift */; };
 		B565DE492B19799900B39B39 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B565DE482B19799900B39B39 /* UserNotifications.framework */; };
 		B57A9DA62A789C0E006ADA11 /* NotificationCenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */; };
@@ -29,6 +30,7 @@
 		876C88AB50C60B1C791EB9FE /* Pods-Grupit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grupit.debug.xcconfig"; path = "Target Support Files/Pods-Grupit/Pods-Grupit.debug.xcconfig"; sourceTree = "<group>"; };
 		A53D2BDB0F9261150EDFE7B6 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		B51E3B322AA2AE7900D64CF1 /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
+		B53732262BF89B6B00211843 /* ASAuthorizationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASAuthorizationDelegate.swift; sourceTree = "<group>"; };
 		B56303332A02314A00D55F5A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B565DE482B19799900B39B39 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterDelegate.swift; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 				B5F1AC6029E7CFB200664A05 /* Keys.swift */,
 				B56303332A02314A00D55F5A /* ContentView.swift */,
 				B57A9DA52A789C0E006ADA11 /* NotificationCenterDelegate.swift */,
+				B53732262BF89B6B00211843 /* ASAuthorizationDelegate.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -255,6 +258,7 @@
 			files = (
 				B56303342A02314A00D55F5A /* ContentView.swift in Sources */,
 				B5F1AC6129E7CFB200664A05 /* Keys.swift in Sources */,
+				B53732272BF89B6B00211843 /* ASAuthorizationDelegate.swift in Sources */,
 				B57A9DA62A789C0E006ADA11 /* NotificationCenterDelegate.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				B5F1AC5829E792EE00664A05 /* AppDelegate.swift in Sources */,

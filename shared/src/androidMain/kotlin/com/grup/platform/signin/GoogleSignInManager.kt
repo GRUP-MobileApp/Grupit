@@ -9,7 +9,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import com.grup.exceptions.login.InvalidGoogleAccountException
+import com.grup.exceptions.login.SignInException
 import com.grup.other.GOOGLE_SERVER_CLIENT_ID
 import java.security.MessageDigest
 import java.util.UUID
@@ -31,7 +31,6 @@ actual class GoogleSignInManager(private val context: Context): SignInManager() 
                     .build(),
                 context = context,
             )
-
             block(GoogleIdTokenCredential.createFrom(result.credential.data).idToken)
         } catch (e: GetCredentialException) {
             val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
@@ -49,7 +48,7 @@ actual class GoogleSignInManager(private val context: Context): SignInManager() 
 
             block(GoogleIdTokenCredential.createFrom(result.credential.data).idToken)
         } catch (e: GoogleIdTokenParsingException) {
-            throw InvalidGoogleAccountException()
+            throw SignInException()
         }
     }
 
