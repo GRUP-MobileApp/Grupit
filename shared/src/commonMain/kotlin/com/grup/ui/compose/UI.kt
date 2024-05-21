@@ -36,15 +36,18 @@ fun isoDate(date: Instant) = date.toLocalDT().let { localDate ->
     }
 fun isoFullDate(date: Instant) = "${isoDate(date)} ${date.toLocalDT().year}"
 
-fun isoTime(date: Instant) =
-    date.toLocalDT().time.let { localTime ->
-        localTime.hour.let { hour ->
-            localTime.minute.let { minute ->
-                "${hour % 12}:${if (minute < 10) 0 else ""}${minute} " +
-                        if (hour < 12) "AM" else "PM"
-            }
-        }
+fun isoTime(date: Instant): String {
+    val localTime = date.toLocalDT().time
+
+    val (hour, meridiem) = when(localTime.hour) {
+        0 -> Pair(12, "AM")
+        12 -> Pair(12, "PM")
+        else -> Pair(localTime.hour % 12, if (localTime.hour < 12) "AM" else "PM")
     }
+    val minute = localTime.minute.toString().padStart(2, '0')
+
+    return "$hour:$minute $meridiem"
+}
 
 @Composable
 internal expect fun <T> StateFlow<T>.collectAsStateWithLifecycle(): State<T>

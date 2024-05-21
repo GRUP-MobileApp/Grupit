@@ -19,10 +19,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,6 +55,7 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
+import com.grup.ui.compose.H1DenyTextButton
 import com.grup.ui.compose.H1ErrorTextButton
 import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
@@ -86,6 +91,9 @@ private fun AccountSettingsLayout(
     accountSettingsViewModel: AccountSettingsViewModel,
     navigator: Navigator
 ) {
+    val scope = rememberCoroutineScope()
+    val editProfilePageScaffoldState = rememberScaffoldState()
+
     var currentPage: Pages by remember { mutableStateOf(Pages.MAIN_SETTINGS_PAGE) }
 
     var error: String? by remember { mutableStateOf(null) }
@@ -120,13 +128,29 @@ private fun AccountSettingsLayout(
                 }
             )
             Pages.EDIT_PROFILE_PAGE -> EditProfilePage(
+                scaffoldState = editProfilePageScaffoldState,
                 user = accountSettingsViewModel.userObject,
                 onBackPress = { currentPage = Pages.MAIN_SETTINGS_PAGE },
                 updateProfilePicture = { pfpBitmap ->
                     accountSettingsViewModel.editProfilePicture(pfpBitmap)
                 },
                 changePageEditDisplayName = { currentPage = Pages.EDIT_DISPLAY_NAME_PAGE },
-                changePageEditVenmoUsername = { currentPage = Pages.EDIT_VENMO_USERNAME_PAGE }
+                changePageEditVenmoUsername = { currentPage = Pages.EDIT_VENMO_USERNAME_PAGE },
+                deleteAccount = {
+                    accountSettingsViewModel.deleteAccount(
+                        onSuccess = {
+                            navigator.popUntilRoot()
+                        },
+                        onFailure = {
+                            it?.let { message ->
+                                scope.launch {
+                                    editProfilePageScaffoldState.snackbarHostState
+                                        .showSnackbar(message)
+                                }
+                            }
+                        }
+                    )
+                }
             )
             Pages.EDIT_DISPLAY_NAME_PAGE -> EditDisplayNamePage(
                 displayName = accountSettingsViewModel.userObject.displayName,
@@ -305,11 +329,13 @@ private fun SettingSlider(
 
 @Composable
 private fun EditProfilePage(
+    scaffoldState: ScaffoldState,
     user: User,
     onBackPress: () -> Unit,
     updateProfilePicture: (Bitmap) -> Unit,
     changePageEditDisplayName: () -> Unit,
-    changePageEditVenmoUsername: () -> Unit
+    changePageEditVenmoUsername: () -> Unit,
+    deleteAccount: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val mediaFactory = rememberMediaPickerControllerFactory()
@@ -318,10 +344,34 @@ private fun EditProfilePage(
 
     val settingsMap: Map<String, Pair<String, () -> Unit>> = mapOf(
         "Display Name" to Pair(user.displayName, changePageEditDisplayName),
-        "Venmo Name" to Pair(user.venmoUsername, changePageEditVenmoUsername)
+        "Venmo Username" to Pair(user.venmoUsername, changePageEditVenmoUsername)
     )
 
+    var showDeleteAccountDialog: Boolean by remember { mutableStateOf(false) }
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAccountDialog = false },
+            title = { H1Text(text = "Account Deletion") },
+            text = @Composable { Caption(text = "Are you sure you want to delete this account?") },
+            backgroundColor = AppTheme.colors.secondary,
+            confirmButton = {
+                TextButton(onClick = { showDeleteAccountDialog = false }) {
+                    H1Text(text = "Cancel")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteAccountDialog = false
+                        deleteAccount()
+                    }
+                ) { H1Text(text = "Confirm") }
+            }
+        )
+    }
+
     BackPressScaffold(
+        scaffoldState = scaffoldState,
         title = "Edit Profile",
         onBackPress = onBackPress
     ) { padding ->
@@ -391,6 +441,7 @@ private fun EditProfilePage(
                     }
                 }
             }
+            H1DenyTextButton(text = "Delete Account", onClick = { showDeleteAccountDialog = true })
         }
     }
 }

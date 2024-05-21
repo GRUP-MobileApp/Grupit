@@ -1,5 +1,6 @@
 package com.grup.service
 
+import AlreadyExistsException
 import com.grup.dbmanager.DatabaseManager
 import com.grup.exceptions.NotCreatedException
 import com.grup.exceptions.NotFoundException
@@ -27,6 +28,12 @@ internal class GroupInviteService(private val dbManager: DatabaseManager): KoinC
 
         if (isUserInGroup(invitee, inviterUserInfo.group)) {
             throw UserAlreadyInGroupException()
+        } else if (
+            getAllGroupInvitesAsFlow().first().any {
+                it.inviter.id == inviterUserInfo.user.id && it.group.id == inviterUserInfo.group.id
+            }
+        ) {
+            throw AlreadyExistsException("You have already invited this user")
         }
 
         return dbManager.write {

@@ -16,7 +16,7 @@ import kotlinx.datetime.Instant
 @PersistedName("GroupInvite")
 internal class RealmGroupInvite() : GroupInvite(), RealmObject, NestedRealmObject {
     constructor(inviterUserInfo: RealmUserInfo, invitee: RealmUser): this() {
-        _inviter = inviterUserInfo.user
+        _inviter = inviterUserInfo.user as RealmUser
         _inviterId = inviterUserInfo.user.id
         _inviteeId = invitee.id
         _group = inviterUserInfo.group

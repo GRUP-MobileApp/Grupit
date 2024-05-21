@@ -5,6 +5,7 @@ import com.grup.models.realm.RealmDebtAction
 import com.grup.models.realm.RealmGroupInvite
 import com.grup.models.realm.RealmSettleAction
 import com.grup.models.realm.RealmTransactionRecord
+import com.grup.models.realm.RealmUser
 import com.grup.models.realm.RealmUserInfo
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.ext.isValid
@@ -110,7 +111,7 @@ private fun BaseRealmObject.resolve() {
             }
         }
         is RealmUserInfo -> {
-            user.resolve()
+            (user as? RealmUser)?.resolve()
             group.resolve()
         }
         is RealmTransactionRecord -> {

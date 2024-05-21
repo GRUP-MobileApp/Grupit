@@ -106,7 +106,7 @@ internal open class RealmManager protected constructor(
                         "IncomingGroupInvites"
                     )
                 }
-                .name("syncedRealm")
+                .name("syncedRealm_${realmUser.id}")
                 .schemaVersion(0)
                 .build()
         )
@@ -118,11 +118,14 @@ internal open class RealmManager protected constructor(
             is BaseRealmObject -> getLatest(obj)
             else -> null
         }
+
+        override fun cancelWrite() = mutableRealm.cancelWrite()
     }
 
     override suspend fun <T> write(transaction: DatabaseWriteTransaction.() -> T): T = realm.write {
         transaction(RealmWriteTransaction(this))
     }
+
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -266,15 +269,25 @@ internal open class RealmManager protected constructor(
     }
 
     override suspend fun logOut() {
-        app.currentUser?.apply { logOut() } ?: throw NotLoggedInException()
+        app.currentUser?.apply {
+            this.logOut()
+            closeRealmManager()
+        } ?: throw NotLoggedInException()
+    }
+
+    override suspend fun deleteUser() {
+        app.currentUser?.apply {
+            closeRealmManager()
+            realm.close()
+            this.delete()
+        } ?: throw NotLoggedInException()
+    }
+
+    private fun closeRealmManager() {
         userSubscriptionsJob.cancel()
         groupSubscriptionsJob.cancel()
         groupOnlySubscriptionJob.cancel()
         deviceManager.notificationManager.unsubscribeAllNotifications()
         unloadKoinModules(realmModules(realm, isDebug))
-    }
-
-    override suspend fun close() {
-        realm.close()
     }
 }

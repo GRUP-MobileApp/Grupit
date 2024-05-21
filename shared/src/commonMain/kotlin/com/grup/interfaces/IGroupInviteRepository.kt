@@ -16,4 +16,6 @@ internal interface IGroupInviteRepository : IRepository {
     fun findAllGroupInvitesAsFlow(): Flow<List<GroupInvite>>
 
     fun deleteGroupInvite(transaction: DatabaseWriteTransaction, groupInvite: GroupInvite)
+
+    fun deleteAllGroupInvites(transaction: DatabaseWriteTransaction)
 }

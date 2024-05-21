@@ -183,7 +183,7 @@ private fun GroupMemberInfoBottomSheet(
                         H1Text(text = user.displayName)
                         Caption(text = "@${user.venmoUsername}")
                         Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
-                        Caption(text = "Joined on ${isoFullDate(user.latestViewDate)}")
+                        Caption(text = "Joined on ${isoFullDate(joinDate)}")
                     }
                 }
             }

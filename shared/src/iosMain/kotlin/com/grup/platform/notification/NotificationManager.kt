@@ -7,24 +7,18 @@ import kotlinx.cinterop.ExperimentalForeignApi
 actual class NotificationManager(getMessaging: () -> FIRMessaging) {
     private val messaging by lazy { getMessaging() }
     actual fun subscribeGroupNotifications(groupId: String) {
-        messaging.subscribeToTopic("group_$groupId") { error ->
-            error?.let { println(it.localizedDescription) }
-        }
+        messaging.subscribeToTopic("group_$groupId") { }
     }
 
     actual fun unsubscribeGroupNotifications(groupId: String) {
-        messaging.unsubscribeFromTopic("group_$groupId") { error ->
-            error?.let { println(it.localizedDescription) }
-        }
+        messaging.unsubscribeFromTopic("group_$groupId") { }
     }
 
     actual fun subscribePersonalNotifications(userId: String) {
-        messaging.subscribeToTopic("user_$userId") { error ->
-            error?.let { println(it.localizedDescription) }
-        }
+        messaging.subscribeToTopic("user_$userId") { }
     }
 
     actual fun unsubscribeAllNotifications() {
-        messaging.deleteTokenWithCompletion {  }
+        messaging.deleteTokenWithCompletion { }
     }
 }

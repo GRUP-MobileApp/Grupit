@@ -13,7 +13,7 @@ internal interface IUserInfoRepository : IRepository {
         group: Group
     ): UserInfo?
 
-    fun findMyUserInfosAsFlow(): Flow<List<UserInfo>>
+    fun findMyUserInfosAsFlow(excludeInactive: Boolean = true): Flow<List<UserInfo>>
     fun findAllUserInfosAsFlow(): Flow<List<UserInfo>>
 
     fun updateUserInfo(

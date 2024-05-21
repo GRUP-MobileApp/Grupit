@@ -1,6 +1,7 @@
 package com.grup.models.realm
 
 import com.grup.exceptions.MissingFieldException
+import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.other.NestedRealmObject
 import com.grup.other.createId
@@ -24,8 +25,13 @@ internal class RealmUserInfo() : UserInfo(), RealmObject, NestedRealmObject {
 
     @PrimaryKey override var _id: String = createId()
 
-    override val user: RealmUser
-        get() = _user ?: throw MissingFieldException("UserInfo with id $_id missing User")
+    override val user: User
+        get() = _user
+            ?: if (isActive) {
+                throw MissingFieldException("UserInfo with id $_id missing User")
+            } else {
+                User.DeletedUser
+            }
     override val group: RealmGroup
         get() = _group ?: throw MissingFieldException("UserInfo with id $_id missing Group")
     override var userBalance: Double
@@ -33,6 +39,8 @@ internal class RealmUserInfo() : UserInfo(), RealmObject, NestedRealmObject {
         set(value) { _userBalance = value }
     override val joinDate: Instant
         get() = _joinDate.toInstant()
+    override val isActive: Boolean
+        get() = _isActive
 
     internal val userId: String
         get() = _userId ?: throw MissingFieldException("UserInfo with id $_id missing userId")
@@ -51,10 +59,23 @@ internal class RealmUserInfo() : UserInfo(), RealmObject, NestedRealmObject {
     private var _userBalance: Double = 0.0
     @PersistedName("joinDate")
     private var _joinDate: RealmInstant = RealmInstant.now()
+    @PersistedName("isActive")
+    private var _isActive: Boolean = true
+
+    override fun invalidateUserInfo(removeUser: Boolean) {
+        _isActive = false
+        if (removeUser) {
+            _user = null
+        }
+    }
 
     override fun getLatestFields(mutableRealm: MutableRealm) {
         with(mutableRealm) {
-            _user = getLatest(user)
+            if (_user != null && isActive) {
+                _user = getLatest(
+                    _user ?: throw MissingFieldException("UserInfo with id $_id missing User")
+                )
+            }
             _group = getLatest(group)
         }
     }

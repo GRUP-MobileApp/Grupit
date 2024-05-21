@@ -14,6 +14,7 @@ import com.grup.other.toResolvedListFlow
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.TRUE_PREDICATE
 import kotlinx.coroutines.flow.Flow
 
 internal abstract class RealmUserInfoRepository : IUserInfoRepository {
@@ -34,12 +35,15 @@ internal abstract class RealmUserInfoRepository : IUserInfoRepository {
         )
     }
 
-    override fun findMyUserInfosAsFlow(): Flow<List<RealmUserInfo>> =
-        realm.query<RealmUserInfo>().toResolvedListFlow()
+    override fun findMyUserInfosAsFlow(excludeInactive: Boolean): Flow<List<RealmUserInfo>> =
+        realm.query<RealmUserInfo>(
+            if (excludeInactive) "isActive == true"
+            else TRUE_PREDICATE
+        ).toResolvedListFlow()
 
 
     override fun findAllUserInfosAsFlow(): Flow<List<RealmUserInfo>> =
-        realm.query<RealmUserInfo>().toResolvedListFlow()
+        realm.query<RealmUserInfo>("isActive == true").toResolvedListFlow()
 
     override fun updateUserInfo(
         transaction: DatabaseWriteTransaction,

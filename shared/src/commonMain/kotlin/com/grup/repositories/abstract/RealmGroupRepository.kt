@@ -21,7 +21,7 @@ internal abstract class RealmGroupRepository : IGroupRepository {
         groupName: String
     ): RealmGroup? = with(transaction as RealmManager.RealmWriteTransaction) {
         copyToRealm(
-            RealmGroup(user = user as RealmUser).apply {
+            RealmGroup().apply {
                 this.groupName = groupName
             },
             UpdatePolicy.ERROR

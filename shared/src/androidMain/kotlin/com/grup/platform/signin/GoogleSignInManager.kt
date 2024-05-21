@@ -33,20 +33,24 @@ actual class GoogleSignInManager(private val context: Context): SignInManager() 
             )
             block(GoogleIdTokenCredential.createFrom(result.credential.data).idToken)
         } catch (e: GetCredentialException) {
-            val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)
-                .setServerClientId(GOOGLE_SERVER_CLIENT_ID)
-                .setNonce(generateNonce())
-                .build()
+            try {
+                val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(GOOGLE_SERVER_CLIENT_ID)
+                    .setNonce(generateNonce())
+                    .build()
 
-            val result: GetCredentialResponse = credentialManager.getCredential(
-                request = Builder()
-                    .addCredentialOption(googleIdOption)
-                    .build(),
-                context = context,
-            )
+                val result: GetCredentialResponse = credentialManager.getCredential(
+                    request = Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build(),
+                    context = context,
+                )
 
-            block(GoogleIdTokenCredential.createFrom(result.credential.data).idToken)
+                block(GoogleIdTokenCredential.createFrom(result.credential.data).idToken)
+            } catch (e: Exception) {
+                throw SignInException()
+            }
         } catch (e: GoogleIdTokenParsingException) {
             throw SignInException()
         }

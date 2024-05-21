@@ -49,4 +49,11 @@ internal abstract class RealmDebtActionRepository : IDebtActionRepository {
     override fun findAllDebtActionsAsFlow(): Flow<List<RealmDebtAction>> {
         return realm.query<RealmDebtAction>().toResolvedListFlow()
     }
+
+    override fun deleteDebtAction(
+        transaction: DatabaseWriteTransaction,
+        debtAction: DebtAction
+    ): DebtAction? = with(transaction as RealmManager.RealmWriteTransaction) {
+        findLatest(debtAction as RealmDebtAction)!!.apply { delete(this) }
+    }
 }

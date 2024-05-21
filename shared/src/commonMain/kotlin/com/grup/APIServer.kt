@@ -51,6 +51,8 @@ class APIServer private constructor(
     // Group
     suspend fun createGroup(groupName: String) = groupService.createGroup(user, groupName)
 
+    suspend fun leaveGroup(userInfo: UserInfo) = groupService.leaveGroup(userInfo)
+
     // UserInfo
     fun getMyUserInfosAsFlow() = userInfoService.getMyUserInfosAsFlow()
     fun getAllUserInfosAsFlow() = userInfoService.getAllUserInfosAsFlow()
@@ -128,5 +130,9 @@ class APIServer private constructor(
             APIServer(ReleaseRealmManager.loginApple(appleAccountToken))
     }
 
+    suspend fun deleteUser() {
+        userService.deleteUser(user)
+        dbManager.deleteUser()
+    }
     suspend fun logOut() = dbManager.logOut()
 }

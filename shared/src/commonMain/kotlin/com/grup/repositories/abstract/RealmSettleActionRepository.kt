@@ -47,6 +47,6 @@ internal abstract class RealmSettleActionRepository : ISettleActionRepository {
         transaction: DatabaseWriteTransaction,
         settleAction: SettleAction
     ): SettleAction? = with(transaction as RealmManager.RealmWriteTransaction) {
-        findObject(settleAction as RealmSettleAction)?.also { delete(it) }
+        findLatest(settleAction as RealmSettleAction)?.apply { delete(this) }
     }
 }

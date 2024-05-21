@@ -45,4 +45,9 @@ internal abstract class RealmGroupInviteRepository : IGroupInviteRepository {
     ) = with(transaction as RealmManager.RealmWriteTransaction) {
         delete(findLatest(groupInvite as RealmGroupInvite)!!)
     }
+
+    override fun deleteAllGroupInvites(transaction: DatabaseWriteTransaction) =
+        with(transaction as RealmManager.RealmWriteTransaction) {
+            delete(RealmGroupInvite::class)
+        }
 }

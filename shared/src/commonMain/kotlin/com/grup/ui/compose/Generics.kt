@@ -39,6 +39,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -49,6 +50,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -644,12 +646,14 @@ internal fun GroupIcon(
 
 @Composable
 internal fun BackPressScaffold(
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBackPress: () -> Unit,
     title: String? = null,
     actions: @Composable RowScope.() -> Unit = { },
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
                 title = {
@@ -697,23 +701,19 @@ internal fun PagerArrowRow(
             modifier = modifier.fillMaxWidth(0.9f)
         ) {
             if (pagerState.currentPage != 0) {
-                H1Text(
-                    text = "< Back",
-                    modifier = Modifier.clickable {
+                TextButton(
+                    onClick = {
                         scope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage - 1)
                         }
                     }
-                )
+                ) { H1Text(text = "< Back") }
             }
             Spacer(modifier = Modifier.weight(1f))
-            H1Text(
-                text = if (isFinalPage) "Finish >"
-                else "Next >",
-                modifier = Modifier.clickable {
-                    onClickNext(pagerState.currentPage)
-                }
-            )
+            TextButton(onClick = { onClickNext(pagerState.currentPage) }) {
+                H1Text(text = if (isFinalPage) "Finish >" else "Next >")
+            }
+
         }
         Row {
             repeat(pagerState.pageCount) { iteration ->

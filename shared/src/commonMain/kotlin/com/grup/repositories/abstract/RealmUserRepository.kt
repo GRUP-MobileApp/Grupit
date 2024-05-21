@@ -46,4 +46,9 @@ internal abstract class RealmUserRepository : IUserRepository {
     ): RealmUser = with(transaction as RealmManager.RealmWriteTransaction) {
         findLatest(user as RealmUser)!!.apply(block)
     }
+
+    override fun deleteUser(transaction: DatabaseWriteTransaction, user: User) =
+        with(transaction as RealmManager.RealmWriteTransaction) {
+            delete(findLatest(user as RealmUser)!!)
+        }
 }

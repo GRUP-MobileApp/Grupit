@@ -1,15 +1,14 @@
 package com.grup.ui.viewmodel
 
-import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.device.DeviceManager
 import com.grup.device.SettingsManager.AccountSettings
+import com.grup.exceptions.APIException
 import com.grup.exceptions.ValidationException
 import com.grup.models.User
 import com.grup.platform.image.cropCenterSquareImage
 import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.koin.core.component.inject
 
 
@@ -73,8 +72,20 @@ internal class AccountSettingsViewModel : LoggedInViewModel() {
         }
     }
 
-    fun editProfilePicture(pfpBitmap: Bitmap) = screenModelScope.launch {
+    fun editProfilePicture(pfpBitmap: Bitmap) = launchJob {
         apiServer.updateProfilePicture(cropCenterSquareImage(pfpBitmap))
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun deleteAccount(onSuccess: () -> Unit, onFailure: (String?) -> Unit) = launchJob(GlobalScope) {
+        try {
+            deviceManager.authManager.getSignInManagerFromProvider(apiServer.authProvider)
+                ?.disconnect()
+            apiServer.deleteUser()
+            onSuccess()
+        } catch (e: APIException) {
+            onFailure(e.message)
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)

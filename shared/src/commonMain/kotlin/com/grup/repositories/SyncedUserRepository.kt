@@ -63,7 +63,6 @@ internal class SyncedUserRepository(
             responseUser = try {
                 Json.decodeFromString(response.bodyAsText())
             } catch (e: Exception) {
-                println("RealmUser decode error: ${e.message}")
                 null
             }
         }
@@ -85,7 +84,6 @@ internal class SyncedUserRepository(
             responseUser = try {
                 Json.decodeFromString(response.bodyAsText())
             } catch (e: Exception) {
-                println("RealmUser decode error: ${e.message}")
                 null
             }
         }

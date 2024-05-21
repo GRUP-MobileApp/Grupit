@@ -8,8 +8,10 @@ internal sealed class DatabaseManager {
 
     abstract inner class DatabaseWriteTransaction {
         abstract fun <T: BaseEntity> findObject(obj: T): T?
+
+        abstract fun cancelWrite()
     }
     abstract suspend fun <T> write(transaction: DatabaseWriteTransaction.() -> T): T
     abstract suspend fun logOut()
-    abstract suspend fun close()
+    abstract suspend fun deleteUser()
 }

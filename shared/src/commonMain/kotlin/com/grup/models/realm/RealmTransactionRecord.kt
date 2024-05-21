@@ -8,6 +8,7 @@ import com.grup.other.getLatest
 import com.grup.other.toInstant
 import com.grup.other.toRealmInstant
 import io.realm.kotlin.MutableRealm
+import io.realm.kotlin.ext.parent
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.annotations.Ignore
@@ -27,7 +28,7 @@ internal class RealmTransactionRecord() :
 
     override val userInfo: RealmUserInfo
         get() = _userInfo
-            ?: throw MissingFieldException("TransactionRecord missing debtorUserInfo")
+            ?: throw MissingFieldException("TransactionRecord missing userInfo")
     override var balanceChange: Double
         get() = _balanceChange
             ?: throw MissingFieldException("TransactionRecord missing balanceChange")

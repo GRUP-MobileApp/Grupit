@@ -22,4 +22,9 @@ internal interface IDebtActionRepository : IRepository {
     ): DebtAction?
 
     fun findAllDebtActionsAsFlow(): Flow<List<DebtAction>>
+
+    fun deleteDebtAction(
+        transaction: DatabaseWriteTransaction,
+        debtAction: DebtAction
+    ): DebtAction?
 }

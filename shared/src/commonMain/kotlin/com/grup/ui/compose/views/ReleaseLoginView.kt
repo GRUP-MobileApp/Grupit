@@ -80,16 +80,16 @@ private fun ReleaseLoginLayout(
         Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingExtraLarge))
 
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)) {
-            if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Google)) {
-                GoogleSignInButton(
-                    loginResult = loginResult,
-                    signIn = { loginViewModel.loginGoogleAccount() }
-                )
-            }
             if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Apple)) {
                 AppleSignInButton(
                     loginResult = loginResult,
                     signIn = { loginViewModel.loginAppleAccount() }
+                )
+            }
+            if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Google)) {
+                GoogleSignInButton(
+                    loginResult = loginResult,
+                    signIn = { loginViewModel.loginGoogleAccount() }
                 )
             }
         }
