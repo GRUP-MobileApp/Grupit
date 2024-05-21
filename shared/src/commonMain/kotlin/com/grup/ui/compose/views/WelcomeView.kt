@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -173,13 +175,13 @@ private fun WelcomeLayout(
                         usernameValidity is WelcomeViewModel.NameValidity.Valid &&
                         firstNameValidity is WelcomeViewModel.NameValidity.Valid &&
                         (
-                                lastNameValidity is WelcomeViewModel.NameValidity.Valid ||
-                                        lastNameValidity is WelcomeViewModel.NameValidity.None
-                                ) &&
+                            lastNameValidity is WelcomeViewModel.NameValidity.Valid ||
+                                    lastNameValidity is WelcomeViewModel.NameValidity.None
+                        ) &&
                         (
-                                venmoUsernameValidity is WelcomeViewModel.NameValidity.Valid ||
-                                        venmoUsernameValidity is WelcomeViewModel.NameValidity.None
-                                )
+                            venmoUsernameValidity is WelcomeViewModel.NameValidity.Valid ||
+                                    venmoUsernameValidity is WelcomeViewModel.NameValidity.None
+                        )
                     ) {
                         scope.launch { pagerState.scrollToPage(page + 1) }
                     }
@@ -211,8 +213,7 @@ private fun WelcomePage() {
         H1Text(
             text = "Welcome!",
             fontSize = 50.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = AppTheme.colors.onSecondary,
+            fontWeight = FontWeight.Medium
         )
         H1Text(
             text = "Grupit records your person-to-person debts in a group and simplifies it " +
@@ -268,7 +269,13 @@ private fun ProfilePage(
                 error = when(usernameValidity) {
                     is WelcomeViewModel.NameValidity.Invalid -> usernameValidity.error
                     else -> null
-                }
+                },
+                modifier = Modifier
+                    .run {
+                        if (username.isNotEmpty())
+                            width(IntrinsicSize.Min)
+                        else this
+                    }
             )
             ProfileTextField(
                 value = firstName,
@@ -281,7 +288,13 @@ private fun ProfilePage(
                 error = when(firstNameValidity) {
                     is WelcomeViewModel.NameValidity.Invalid -> firstNameValidity.error
                     else -> null
-                }
+                },
+                modifier = Modifier
+                    .run {
+                        if (firstName.isNotEmpty())
+                            width(IntrinsicSize.Min)
+                        else this
+                    }
             )
             ProfileTextField(
                 value = lastName,
@@ -294,7 +307,13 @@ private fun ProfilePage(
                 error = when(lastNameValidity) {
                     is WelcomeViewModel.NameValidity.Invalid -> lastNameValidity.error
                     else -> null
-                }
+                },
+                modifier = Modifier
+                    .run {
+                        if (lastName.isNotEmpty())
+                            width(IntrinsicSize.Min)
+                        else this
+                    }
             )
             ProfileTextField(
                 value = venmoUsername,
@@ -307,7 +326,13 @@ private fun ProfilePage(
                 error = when(venmoUsernameValidity) {
                     is WelcomeViewModel.NameValidity.Invalid -> venmoUsernameValidity.error
                     else -> null
-                }
+                },
+                modifier = Modifier
+                    .run {
+                        if (venmoUsername.isNotEmpty())
+                            width(IntrinsicSize.Min)
+                        else this
+                    }
             )
         }
     }
@@ -331,12 +356,11 @@ private fun SetProfilePicture(
         H1Text(
             text = "Profile Picture",
             fontSize = 50.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = AppTheme.colors.onSecondary
+            fontWeight = FontWeight.Medium
         )
         Box(
             modifier = Modifier
-                .border(width = 5.dp, color = AppTheme.colors.secondary)
+                .border(width = 5.dp, color = AppTheme.colors.onSecondary)
                 .padding(AppTheme.dimensions.cardPadding)
         ) {
             profilePictureBitmap?.let { bitmap ->
@@ -402,22 +426,15 @@ private fun FinalPage() {
         }
     )
     Column(
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                top = AppTheme.dimensions.paddingExtraLarge,
-                bottom = 100.dp
-            )
+            .fillMaxHeight(0.5f)
+            .fillMaxWidth()
+            .padding(AppTheme.dimensions.appPadding)
     ) {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().weight(1f)
-        ) {
-            items(textList) { text ->
-                H1Text(text = text, fontSize = AppTheme.typography.mediumFont)
-            }
+        textList.forEach { text ->
+            H1Text(text = text, fontSize = AppTheme.typography.mediumFont)
         }
     }
 }

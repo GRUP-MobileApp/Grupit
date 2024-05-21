@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.PagerState
@@ -206,79 +207,60 @@ internal fun AutoSizingH1Text(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-internal fun IndicatorTextField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String = "",
-    fontSize: TextUnit = AppTheme.typography.textFieldFont,
-    indicatorColor: Color = AppTheme.colors.primary,
-    interactionSource: InteractionSource = remember { MutableInteractionSource() },
-) {
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .indicatorLine(
-                enabled = true,
-                isError = false,
-                interactionSource = interactionSource,
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = AppTheme.colors.primary,
-                    focusedIndicatorColor = indicatorColor,
-                    unfocusedIndicatorColor = indicatorColor,
-                )
-            ),
-        decorationBox = { innerTextField ->
-            Box(
-                modifier =
-                    Modifier.run {
-                        if (placeholder.isEmpty() || value.isNotEmpty())
-                            width(IntrinsicSize.Min)
-                        else this
-                    }
-            ) {
-                if (value.isEmpty() && placeholder.isNotEmpty()) {
-                    H1Text(
-                        text = placeholder,
-                        fontSize = fontSize,
-                        color = AppTheme.colors.onPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Visible
-                    )
-                }
-                innerTextField()
-            }
-        },
-        textStyle = TextStyle(
-            color = AppTheme.colors.onSecondary,
-            fontFamily = AppTheme.typography.h1.fontFamily,
-            fontSize = fontSize
-        ),
-        singleLine = true,
-        cursorBrush = SolidColor(Color.White)
-    )
-}
-
-@Composable
 internal fun ProfileTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String = "",
+    fontSize: TextUnit = AppTheme.typography.textFieldFont,
     error: String? = null,
-    indicatorColor: Color = AppTheme.colors.primary
+    indicatorColor: Color = AppTheme.colors.primary,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)) {
-        IndicatorTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = placeholder,
-            indicatorColor =
-                if (error == null) indicatorColor
-                else AppTheme.colors.error,
-            modifier = modifier
-        )
+        Row(modifier = Modifier.fillMaxWidth(0.5f)) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = modifier
+                    .indicatorLine(
+                        enabled = true,
+                        isError = false,
+                        interactionSource = interactionSource,
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = AppTheme.colors.primary,
+                            focusedIndicatorColor =
+                            if (error == null) indicatorColor
+                            else AppTheme.colors.error,
+                            unfocusedIndicatorColor =
+                            if (error == null) indicatorColor
+                            else AppTheme.colors.error,
+                        )
+                    ),
+                decorationBox = { innerTextField ->
+                    Box {
+                        if (value.isEmpty() && placeholder.isNotEmpty()) {
+                            H1Text(
+                                text = placeholder,
+                                fontSize = fontSize,
+                                color = AppTheme.colors.onPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Visible
+                            )
+                        }
+                        innerTextField()
+                    }
+                },
+                textStyle = TextStyle(
+                    color = AppTheme.colors.onSecondary,
+                    fontFamily = AppTheme.typography.h1.fontFamily,
+                    fontSize = fontSize
+                ),
+                singleLine = true,
+                cursorBrush = SolidColor(Color.White),
+                interactionSource = interactionSource
+            )
+        }
         Caption(text = error ?: "")
     }
 }
