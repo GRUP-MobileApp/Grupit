@@ -1,7 +1,5 @@
 package com.grup.interfaces
 
-import kotlinx.coroutines.flow.Flow
-
 internal interface ISettingsDataStore : IRepository {
     var userId: String
     fun putString(key: String, value: String)

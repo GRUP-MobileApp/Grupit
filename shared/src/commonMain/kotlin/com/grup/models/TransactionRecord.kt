@@ -19,7 +19,7 @@ abstract class TransactionRecord internal constructor() : BaseEntity() {
             override val status: String
                 get() = PENDING
         }
-        data object Rejected : Status() {
+        data class Rejected(val date: Instant = getCurrentTime()) : Status() {
             override val status: String
                 get() = REJECTED
         }

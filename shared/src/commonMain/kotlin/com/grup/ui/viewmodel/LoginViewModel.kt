@@ -41,41 +41,32 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
     }
 
     sealed class LoginResult {
-        data class SuccessLogin(val authProvider: AuthManager.AuthProvider) : LoginResult()
-        data class SuccessLoginWelcomeSlideshow(
-            val authProvider: AuthManager.AuthProvider
-        ) : LoginResult()
         data class PendingLogin(val authProvider: AuthManager.AuthProvider) : LoginResult()
         data class Error(val exception: Exception) : LoginResult()
         data object None : LoginResult()
 
-        private fun isSuccessLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
-            (this is SuccessLogin) && (this.authProvider == authProvider)
-
-        private fun isPendingLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
+        fun isPendingLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
             (this is PendingLogin) && (this.authProvider == authProvider)
-
-        fun isSuccessOrPendingLoginAuthProvider(authProvider: AuthManager.AuthProvider) =
-            isSuccessLoginAuthProvider(authProvider) || isPendingLoginAuthProvider(authProvider)
     }
 
     private val _loginResult = MutableStateFlow<LoginResult>(LoginResult.None)
     val loginResult: StateFlow<LoginResult> = _loginResult
 
-    fun loginEmailPassword(email: String, password: String) = launchJob {
+    fun loginEmailPassword(
+        email: String,
+        password: String,
+        onSuccessLogin: () -> Unit,
+        onSuccessRegister: () -> Unit
+    ) = launchJob {
         _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.EmailPassword)
         try {
             APIServer.loginEmailAndPassword(email, password).let { apiServer ->
                 injectApiServer(apiServer)
                 try {
                     apiServer.user
-                    _loginResult.value = LoginResult.SuccessLogin(
-                        AuthManager.AuthProvider.EmailPassword
-                    )
+                    onSuccessLogin()
                 } catch (e: UserObjectNotFoundException) {
-                    _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
-                        AuthManager.AuthProvider.EmailPassword
-                    )
+                    onSuccessRegister()
                 }
             }
         } catch (e: LoginException) {
@@ -83,23 +74,18 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
         }
     }
 
-    fun registerEmailPassword(email: String, password: String) = launchJob {
+    fun registerEmailPassword(
+        email: String,
+        password: String,
+        onSuccessRegister: () -> Unit
+    ) = launchJob {
             _loginResult.value = LoginResult.PendingLogin(
                 AuthManager.AuthProvider.EmailPasswordRegister
             )
             try {
                 APIServer.registerEmailAndPassword(email, password).let { apiServer ->
                     injectApiServer(apiServer)
-                    try {
-                        apiServer.user
-                        _loginResult.value = LoginResult.SuccessLogin(
-                            AuthManager.AuthProvider.EmailPasswordRegister
-                        )
-                    } catch (e: UserObjectNotFoundException) {
-                        _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
-                            AuthManager.AuthProvider.EmailPasswordRegister
-                        )
-                    }
+                    onSuccessRegister()
                 }
             } catch (e: CancelledSignInException) {
                 _loginResult.value = LoginResult.None
@@ -108,21 +94,21 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
             }
         }
 
-    fun loginGoogleAccount() = launchJob {
+    fun loginGoogleAccount(
+        onSuccessLogin: () -> Unit,
+        onSuccessRegister: (String?) -> Unit
+    ) = launchJob {
         try {
-            deviceManager.authManager.googleSignInManager?.signIn { token ->
+            deviceManager.authManager.googleSignInManager?.signIn { token, name ->
                 _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Google)
                 launch {
                     APIServer.loginGoogleAccountToken(token).let { apiServer ->
                         injectApiServer(apiServer)
                         try {
                             apiServer.user
-                            _loginResult.value =
-                                LoginResult.SuccessLogin(AuthManager.AuthProvider.Google)
+                            onSuccessLogin()
                         } catch (e: UserObjectNotFoundException) {
-                            _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
-                                AuthManager.AuthProvider.Google
-                            )
+                            onSuccessRegister(name)
                         }
                     }
                 }
@@ -134,21 +120,21 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
         }
     }
 
-    fun loginAppleAccount() = launchJob {
+    fun loginAppleAccount(
+        onSuccessLogin: () -> Unit,
+        onSuccessRegister: (String?) -> Unit
+    ) = launchJob {
         try {
-            deviceManager.authManager.appleSignInManager?.signIn { token ->
+            deviceManager.authManager.appleSignInManager?.signIn { token, name ->
                 _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Apple)
                 launch {
                     APIServer.loginAppleAccountToken(token).let { apiServer ->
                         injectApiServer(apiServer)
                         try {
                             apiServer.user
-                            _loginResult.value =
-                                LoginResult.SuccessLogin(AuthManager.AuthProvider.Apple)
+                            onSuccessLogin()
                         } catch (e: UserObjectNotFoundException) {
-                            _loginResult.value = LoginResult.SuccessLoginWelcomeSlideshow(
-                                AuthManager.AuthProvider.Apple
-                            )
+                            onSuccessRegister(name)
                         }
                     }
                 }

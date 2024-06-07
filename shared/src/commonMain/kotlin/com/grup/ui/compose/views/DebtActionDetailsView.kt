@@ -30,6 +30,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.apptheme.venmo
 import com.grup.ui.compose.AcceptRejectRow
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
@@ -113,10 +114,16 @@ private fun DebtActionDetailsLayout(
                                     modifier = Modifier
                                         .height(AppTheme.dimensions.spacingExtraSmall)
                                 )
-                                Caption(
-                                    text = debtAction.platform.name,
-                                    fontSize = AppTheme.typography.tinyFont
-                                )
+                                with(debtAction.platform) {
+                                    Caption(
+                                        text = name,
+                                        fontSize = AppTheme.typography.tinyFont,
+                                        color = when(this) {
+                                            DebtAction.Platform.Grupit -> AppTheme.colors.onPrimary
+                                            DebtAction.Platform.Venmo -> venmo
+                                        }
+                                    )
+                                }
                             },
                             iconSize = AppTheme.dimensions.largeIconSize
                         )

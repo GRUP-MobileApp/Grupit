@@ -56,9 +56,7 @@ private fun SettleActionLayout(
                 onClick = {
                     settleActionViewModel.createSettleAction(
                         settleActionAmount.toDouble(),
-                        onSuccess = {
-                            navigator.pop()
-                        },
+                        onSuccess = { navigator.pop() },
                         onError = { }
                     )
                 }

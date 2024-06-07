@@ -39,13 +39,14 @@ internal class RealmUserInfo() : UserInfo(), RealmObject, NestedRealmObject {
         set(value) { _userBalance = value }
     override val joinDate: Instant
         get() = _joinDate.toInstant()
-    override val isActive: Boolean
+    override var isActive: Boolean
         get() = _isActive
+        set(value) { _isActive = value }
 
-    internal val userId: String
-        get() = _userId ?: throw MissingFieldException("UserInfo with id $_id missing userId")
-    internal val groupId: String
-        get() = _groupId ?: throw MissingFieldException("UserInfo with id $_id missing groupId")
+    internal val userId: String?
+        get() = _userId
+    internal val groupId: String?
+        get() = _groupId
 
     @PersistedName("userId")
     private var _userId: String? = null
@@ -62,11 +63,9 @@ internal class RealmUserInfo() : UserInfo(), RealmObject, NestedRealmObject {
     @PersistedName("isActive")
     private var _isActive: Boolean = true
 
-    override fun invalidateUserInfo(removeUser: Boolean) {
-        _isActive = false
-        if (removeUser) {
-            _user = null
-        }
+    override fun removeUser() {
+        _user = null
+        _userId = null
     }
 
     override fun getLatestFields(mutableRealm: MutableRealm) {

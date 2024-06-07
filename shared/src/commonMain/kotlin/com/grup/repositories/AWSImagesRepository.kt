@@ -22,7 +22,7 @@ import org.koin.core.component.inject
 internal class AWSImagesRepository : KoinComponent, IImagesRepository {
     private val client: HttpClient by inject()
 
-    override suspend fun uploadProfilePicture(userId: String, pfp: ByteArray): String {
+    override suspend fun uploadProfilePicture(userId: String, pfp: ByteArray): String? {
         if (pfp.isNotEmpty()) {
             val pfpName = "pfp_$userId${getCurrentTime()}.png"
             val response: HttpResponse = client.put("$AWS_IMAGES_API_URL/$pfpName") {
@@ -41,7 +41,7 @@ internal class AWSImagesRepository : KoinComponent, IImagesRepository {
             return "https://$AWS_IMAGES_BUCKET_NAME.s3.amazonaws.com/" +
                     pfpName.replace(":", "%3A")
         }
-        return ""
+        return null
     }
 
     override suspend fun deleteProfilePicture(profilePictureURL: String) {

@@ -71,13 +71,13 @@ private fun SettleActionLayout(
     var settleActionTransactionStringAmount: String by remember { mutableStateOf("0") }
     val settleActionTransactionAmount: Double = settleActionTransactionStringAmount.toDouble()
 
-    val myUserInfo: UserInfo by
+    val myUserInfo: UserInfo? by
             settleActionTransactionViewModel.myUserInfo.collectAsStateWithLifecycle()
     val settleAction: SettleAction by
             settleActionTransactionViewModel.settleAction.collectAsStateWithLifecycle()
 
     val maxTransactionAmount: Double =
-        min(abs(min(myUserInfo.userBalance, 0.0)), settleAction.remainingAmount)
+        min(abs(min(myUserInfo?.userBalance ?: 0.0, 0.0)), settleAction.remainingAmount)
 
     ModalBottomSheetLayout(
         sheetState = venmoConfirmationBottomSheetState,

@@ -4,9 +4,9 @@ import com.grup.models.realm.RealmUserInfo
 import com.grup.other.toResolvedListFlow
 import com.grup.repositories.abstract.RealmUserInfoRepository
 import io.realm.kotlin.Realm
+import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.sync.asQuery
-import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.syncSession
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.component.KoinComponent
@@ -20,6 +20,7 @@ internal class SyncedUserInfoRepository: RealmUserInfoRepository(), KoinComponen
             realm.subscriptions.findByName("MyUserInfos")!!
                 .asQuery<RealmUserInfo>().toResolvedListFlow()
         } else {
-            realm.query<RealmUserInfo>("userId == ${realm.syncSession.user.id}").toResolvedListFlow()
+            realm.query<RealmUserInfo>("userId == $0", realm.syncSession.user.id)
+                .toResolvedListFlow()
         }
 }

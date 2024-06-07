@@ -1,10 +1,11 @@
 package com.grup.device
 
+import com.grup.exceptions.MissingFieldException
 import com.grup.interfaces.ISettingsDataStore
 import com.grup.repositories.SettingsDataStore
 
 object SettingsManager {
-    private val settingsDataStore: ISettingsDataStore = SettingsDataStore()
+    internal val settingsDataStore: ISettingsDataStore = SettingsDataStore()
 
     object AccountSettings {
         enum class GroupNotificationType {
@@ -26,28 +27,6 @@ object SettingsManager {
 
     object LoginSettings {
         var userId: String by settingsDataStore::userId
-
-
-        // Apple Sign-In
-        var isAppleSignInSuccess: Boolean?
-            get() = settingsDataStore.getBoolean("appleSignInStatus")
-            set(value) {
-                if (value != null) {
-                    settingsDataStore.putBoolean("appleSignInStatus", value)
-                } else {
-                    settingsDataStore.remove("appleSignInStatus")
-                }
-            }
-
-        var appleToken: String?
-            get() = settingsDataStore.getString("appleToken")
-            set(value) {
-                if (value != null) {
-                    settingsDataStore.putString("appleToken", value)
-                } else {
-                    settingsDataStore.remove("appleToken")
-                }
-            }
     }
 
     object InstanceSettings {

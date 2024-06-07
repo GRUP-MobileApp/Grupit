@@ -20,10 +20,10 @@ internal class SettleActionDetailsViewModel(private val actionId: String) : Logg
     }.asState()
 
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
-    val myUserInfo: StateFlow<UserInfo> = _myUserInfosFlow.map { userInfos ->
+    val myUserInfo: StateFlow<UserInfo?> = _myUserInfosFlow.map { userInfos ->
         userInfos.find {
             it.group.id == settleAction.value.userInfo.group.id
-        } ?: throw UserNotInGroupException()
+        }
     }.asState()
 
     fun acceptSettleActionTransactionRecord(

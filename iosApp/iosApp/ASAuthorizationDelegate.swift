@@ -11,17 +11,24 @@ import shared
 
 extension UIViewController: ASAuthorizationControllerDelegate {
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: any Error) {
-        SettingsManager.LoginSettings.shared.isAppleSignInSuccess = false
+        // Sign in failed, updating sign in status value in local settings
+        SettingsManager.LoginSettings.shared.appleSignInStatus = AppleSignInResult.Failed()
     }
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         switch authorization.credential {
             case let appleIDCredential as ASAuthorizationAppleIDCredential:
                 if let idToken = appleIDCredential.identityToken {
-                    SettingsManager.LoginSettings.shared.isAppleSignInSuccess = true
-                    SettingsManager.LoginSettings.shared.appleToken = String(data: idToken, encoding: .utf8)
+                    // Sign in succeeded, updating sign in status and appleToken values in local settings
+                    if #available(iOS 15.0, *) {
+                        SettingsManager.LoginSettings.shared.appleSignInStatus = AppleSignInResult.Success(
+                            appleToken: String(data: idToken, encoding: .utf8)!, fullName: appleIDCredential.fullName?.formatted())
+                    } else {
+                        SettingsManager.LoginSettings.shared.appleSignInStatus = AppleSignInResult.Success(
+                            appleToken: String(data: idToken, encoding: .utf8)!, fullName: appleIDCredential.fullName?.givenName)
+                    }
                 } else {
-                    SettingsManager.LoginSettings.shared.isAppleSignInSuccess = false
+                    SettingsManager.LoginSettings.shared.appleSignInStatus = AppleSignInResult.Failed()
                 }
             default:
                 break

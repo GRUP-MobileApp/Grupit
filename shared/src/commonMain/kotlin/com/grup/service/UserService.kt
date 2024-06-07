@@ -58,12 +58,7 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
     suspend fun updateUser(user: User, block: User.() -> Unit): User = dbManager.write {
         userRepository.updateUser(this, user) {
             apply(block)
-            displayName.split(" ", limit = 2).let {
-                validationService.validateName(it[0])
-                if (it.size == 2) {
-                    validationService.validateName(it[1])
-                }
-            }
+            validationService.validateName(displayName)
             validationService.validateVenmoUsername(venmoUsername)
         }
     }
@@ -77,7 +72,7 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
             imagesRepository.deleteProfilePicture(it)
         }
 
-        imagesRepository.uploadProfilePicture(user.id, profilePicture).let { pfpURL ->
+        imagesRepository.uploadProfilePicture(user.id, profilePicture)?.let { pfpURL ->
             dbManager.write {
                 userRepository.updateUser(this, user) {
                     this.profilePictureURL = pfpURL
@@ -86,10 +81,11 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
         }
     }
 
-    suspend fun deleteUser(user: User) {
-        val myUserInfos: List<UserInfo> = userInfoRepository.findMyUserInfosAsFlow().first()
+    suspend fun deleteUser(user: User, onSuccess: () -> Unit) {
+        val myUserInfos: List<UserInfo> =
+            userInfoRepository.findMyUserInfosAsFlow(false).first()
         // Check for all 0 balance
-        if (myUserInfos.any { it.userBalance != 0.0 }) {
+        if (myUserInfos.any { it.userBalance != 0.0 && it.isActive }) {
             throw AccountDeletionError("All groups must be at 0 balance")
         }
 
@@ -143,12 +139,13 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
             mySettleActions.forEach { settleAction ->
                 settleActionRepository.deleteSettleAction(this, settleAction)
             }
-            // Set outgoing Settle Transactions as REJECTED
+            // Delete outgoing Settle Transactions
             outgoingTransactionsPendingOnSettleAction.forEach { (settleAction, transactionRecord) ->
                 settleActionRepository.updateSettleAction(this, settleAction) {
-                    findObject(transactionRecord)?.apply {
-                        status = TransactionRecord.Status.Rejected
-                    } ?: throw AccountDeletionError("Internal error, try again later")
+                    transactionRecords.remove(
+                        findObject(transactionRecord)
+                            ?: throw AccountDeletionError("Internal error, try again later")
+                    )
                 }
             }
 
@@ -160,7 +157,7 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
             incomingTransactionsPendingOnDebtAction.forEach { (debtAction, transactionRecord) ->
                 debtActionRepository.updateDebtAction(this, debtAction) {
                     findObject(transactionRecord)?.apply {
-                        status = TransactionRecord.Status.Rejected
+                        status = TransactionRecord.Status.Rejected()
                     } ?: throw AccountDeletionError("Internal error, try again later")
                 }
             }
@@ -168,9 +165,12 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
             // Set all userInfo to not active
             myUserInfos.forEach { userInfo ->
                 userInfoRepository.updateUserInfo(this, userInfo) {
-                    invalidateUserInfo(true)
+                    isActive = false
+                    removeUser()
                 }
             }
+
+            onSuccess()
 
             // Delete User
             userRepository.deleteUser(this, user)

@@ -47,4 +47,17 @@ internal class GroupMembersViewModel(private val selectedGroupId: String) : Logg
             }
         }
     }
+
+    fun leaveGroup(onSuccess: () -> Unit, onError: (String?) -> Unit) = launchJob {
+        try {
+            userInfos.value.find { userInfo ->
+                userInfo.user.id == userObject.id
+            }?.let { userInfo ->
+                apiServer.leaveGroup(userInfo)
+                onSuccess()
+            } ?: onError("Internal error, try again later")
+        } catch (e: APIException) {
+            onError(e.message)
+        }
+    }
 }

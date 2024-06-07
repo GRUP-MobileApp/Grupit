@@ -8,7 +8,6 @@ import com.grup.other.getLatest
 import com.grup.other.toInstant
 import com.grup.other.toRealmInstant
 import io.realm.kotlin.MutableRealm
-import io.realm.kotlin.ext.parent
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.annotations.Ignore
@@ -42,13 +41,18 @@ internal class RealmTransactionRecord() :
                 _dateAccepted?.toInstant()
                     ?: throw MissingFieldException("TransactionRecord missing dateAccepted")
             )
-            Status.REJECTED -> Status.Rejected
+            Status.REJECTED -> Status.Rejected(
+                _dateAccepted?.toInstant()
+                    ?: throw MissingFieldException("TransactionRecord missing dateAccepted")
+            )
             Status.PENDING -> Status.Pending
             else -> throw InvalidTransactionRecordException("TransactionRecord has invalid status")
         }
         set(value) {
             _status = value.status
             if (value is Status.Accepted) {
+                _dateAccepted = value.date.toRealmInstant()
+            } else if (value is Status.Rejected) {
                 _dateAccepted = value.date.toRealmInstant()
             }
         }

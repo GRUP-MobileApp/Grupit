@@ -26,6 +26,16 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
             throw InvalidTransactionRecordException("Empty transaction records")
         }
 
+        // Accept user's own transaction if included
+        transactionRecords.find { it.userInfo.user.id == debtee.user.id }?.apply {
+            if (transactionRecords.size == 1) {
+                throw InvalidTransactionRecordException(
+                    "Can't create a debt request with only yourself"
+                )
+            }
+            status = TransactionRecord.Status.Accepted()
+        }
+
         debtActionRepository.createDebtAction(
             this,
             debtee,
@@ -74,7 +84,7 @@ internal class DebtActionService(private val dbManager: DatabaseManager) : KoinC
 
         debtActionRepository.updateDebtAction(this, debtAction) {
             findObject(transactionRecord)?.apply {
-                status = TransactionRecord.Status.Rejected
+                status = TransactionRecord.Status.Rejected()
             } ?: throw InvalidTransactionRecordException("Transaction record does not exist")
         } ?: throw NotFoundException("Debt Action doesn't exist")
     }

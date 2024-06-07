@@ -1,6 +1,5 @@
 package com.grup.ui.viewmodel
 
-import com.grup.device.DeviceManager
 import com.grup.device.SettingsManager
 import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.DebtAction
@@ -13,18 +12,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-internal class GroupDetailsViewModel(
-    val selectedGroupId: String
-): LoggedInViewModel() {
+internal class GroupDetailsViewModel(val selectedGroupId: String): LoggedInViewModel() {
     var hasViewedTutorial: Boolean by SettingsManager.InstanceSettings::hasViewedTutorial
 
     // Hot flow containing User's UserInfos
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()
-    val myUserInfo: StateFlow<UserInfo> =
+    val myUserInfo: StateFlow<UserInfo?> =
         _myUserInfosFlow.map { userInfos ->
             userInfos.find { userInfo ->
                 userInfo.group.id == selectedGroupId
-            } ?: throw UserNotInGroupException()
+            }
         }.asState()
 
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()

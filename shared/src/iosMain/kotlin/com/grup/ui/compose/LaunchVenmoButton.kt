@@ -21,7 +21,7 @@ internal actual fun VenmoButton(
     VenmoIcon {
         with(UIApplication.sharedApplication) {
             openURL(
-                if (canOpenURL(NSURL(string = "venmo://app"))) venmoUrl
+                if (canOpenURL(venmoUrl)) venmoUrl
                 else NSURL(string = "https://apps.apple.com/app/venmo/id351727428")
             )
         }

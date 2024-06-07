@@ -21,10 +21,10 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
         }
     val userInfos: StateFlow<List<UserInfo>> = _userInfosFlow.asState()
 
-    private val myUserInfo: StateFlow<UserInfo> = _userInfosFlow.map { userInfos ->
+    private val myUserInfo: StateFlow<UserInfo?> = _userInfosFlow.map { userInfos ->
         userInfos.find { userInfo ->
             userInfo.user.id == userObject.id
-        } ?: throw UserNotInGroupException()
+        }
     }.asState()
 
 
@@ -140,7 +140,7 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
         onSuccess: (DebtAction) -> Unit
     ) = launchJob {
         apiServer.createDebtAction(
-            myUserInfo.value,
+            myUserInfo.value ?: throw UserNotInGroupException(),
             debtActionAmounts.map { (userInfo, balanceChange) ->
                 TransactionRecord.Companion.DataTransactionRecord(userInfo, balanceChange)
             },
@@ -155,7 +155,7 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
         onSuccess: (DebtAction) -> Unit
     ) = launchJob {
         apiServer.createDebtAction(
-            myUserInfo.value,
+            myUserInfo.value ?: throw UserNotInGroupException(),
             debtActionAmounts.map { (userInfo, balanceChange) ->
                 TransactionRecord.Companion.DataTransactionRecord(userInfo, balanceChange)
             },

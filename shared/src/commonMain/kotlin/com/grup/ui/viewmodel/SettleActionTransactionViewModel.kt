@@ -1,6 +1,7 @@
 package com.grup.ui.viewmodel
 
 import com.grup.exceptions.APIException
+import com.grup.exceptions.NotFoundException
 import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
@@ -12,14 +13,14 @@ import kotlinx.coroutines.flow.map
 internal class SettleActionTransactionViewModel(private val actionId: String) : LoggedInViewModel() {
     private val _settleActionsFlow: Flow<List<SettleAction>> = apiServer.getAllSettleActionsAsFlow()
     val settleAction: StateFlow<SettleAction> = _settleActionsFlow.map { settleActions ->
-        settleActions.find { it.id == actionId }!!
+        settleActions.find { it.id == actionId } ?: throw NotFoundException("Settle not found")
     }.asState()
 
     private val _myUserInfosFlow: Flow<List<UserInfo>> = apiServer.getMyUserInfosAsFlow()
-    val myUserInfo: StateFlow<UserInfo> = _myUserInfosFlow.map { userInfos ->
+    val myUserInfo: StateFlow<UserInfo?> = _myUserInfosFlow.map { userInfos ->
         userInfos.find {
             it.group.id == settleAction.value.userInfo.group.id
-        } ?: throw UserNotInGroupException()
+        }
     }.asState()
 
     fun createSettleActionTransaction(
@@ -30,7 +31,10 @@ internal class SettleActionTransactionViewModel(private val actionId: String) : 
         try {
             apiServer.createSettleActionTransaction(
                 settleAction.value,
-                TransactionRecord.Companion.DataTransactionRecord(myUserInfo.value, amount)
+                TransactionRecord.Companion.DataTransactionRecord(
+                    myUserInfo.value ?: throw UserNotInGroupException(),
+                    amount
+                )
             )
             onSuccess()
         } catch (e: APIException) {

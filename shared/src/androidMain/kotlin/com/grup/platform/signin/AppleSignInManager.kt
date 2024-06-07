@@ -1,7 +1,7 @@
 package com.grup.platform.signin
 
 actual class AppleSignInManager : SignInManager() {
-    override suspend fun signIn(block: (String) -> Unit) {
+    override suspend fun signIn(block: (String, String?) -> Unit) {
         TODO("Not yet implemented")
     }
 

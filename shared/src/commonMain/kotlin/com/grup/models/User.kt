@@ -8,7 +8,7 @@ abstract class User internal constructor(): BaseEntity() {
             get() = "Deleted User"
         override var displayName: String
             get() = "Deleted Name"
-            set(value) { }
+            set(_) { }
         override var venmoUsername: String
             get() = "Deleted"
             set(_) { }

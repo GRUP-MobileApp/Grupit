@@ -13,13 +13,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -42,6 +46,8 @@ import com.grup.ui.apptheme.AppTheme
 import com.grup.ui.compose.BackPressScaffold
 import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
+import com.grup.ui.compose.H1DenyTextButton
+import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.ModalBottomSheetLayout
 import com.grup.ui.compose.SmallIcon
@@ -74,6 +80,13 @@ private fun GroupMembersLayout(
     val userInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
+
+    val showErrorMessage: (String) -> Unit = { message ->
+        scope.launch {
+            scaffoldState.snackbarHostState.showSnackbar(message)
+        }
+    }
 
     val userInfos: List<UserInfo> by groupMembersViewModel.userInfos.collectAsStateWithLifecycle()
 
@@ -96,6 +109,36 @@ private fun GroupMembersLayout(
         addToGroupUsernameSearchQuery = ""
         groupMembersViewModel.resetInviteResult()
         scope.launch { addToGroupBottomSheetState.show() }
+    }
+
+    var showLeaveGroupDialog: Boolean by remember { mutableStateOf(false) }
+    if (showLeaveGroupDialog) {
+        AlertDialog(
+            onDismissRequest = { showLeaveGroupDialog = false },
+            title = { H1Text(text = "Leave Group") },
+            text = @Composable { Caption(text = "Are you sure you want to leave this group?") },
+            backgroundColor = AppTheme.colors.secondary,
+            confirmButton = {
+                TextButton(onClick = { showLeaveGroupDialog = false }) {
+                    H1Text(text = "Cancel")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showLeaveGroupDialog = false
+                        groupMembersViewModel.leaveGroup(
+                            onSuccess = {
+                                navigator.popUntil { screen ->
+                                    screen is GroupsView
+                                }
+                            },
+                            onError = { it?.let(showErrorMessage) }
+                        )
+                    }
+                ) { H1Text(text = "Confirm") }
+            }
+        )
     }
 
     val modalSheets: @Composable (@Composable () -> Unit) -> Unit = { content ->
@@ -121,11 +164,13 @@ private fun GroupMembersLayout(
 
     modalSheets {
         BackPressScaffold(
-            title = "Members",
+            scaffoldState = scaffoldState,
+            title = { H1Header(text = "Members", fontWeight = FontWeight.SemiBold) },
             onBackPress = { navigator.pop() },
             actions = { AddToGroupButton(addToGroupOnClick = openAddToGroupBottomSheet) }
         ) { padding ->
             LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
                 modifier = Modifier.fillMaxSize().padding(padding)
             ) {
@@ -138,7 +183,7 @@ private fun GroupMembersLayout(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(AppTheme.dimensions.cardPadding)
+                            .padding(AppTheme.dimensions.appPadding)
                     )
                     Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
                 }
@@ -157,6 +202,12 @@ private fun GroupMembersLayout(
                             .background(AppTheme.colors.secondary)
                             .padding(AppTheme.dimensions.cardPadding)
                     ) { UserInfoRowCard(userInfo = userInfo) }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(AppTheme.dimensions.appPadding))
+                    H1DenyTextButton(text = "Leave Group") {
+                        showLeaveGroupDialog = true
+                    }
                 }
             }
         }

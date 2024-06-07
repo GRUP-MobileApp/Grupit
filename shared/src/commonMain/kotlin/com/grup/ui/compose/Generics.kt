@@ -8,7 +8,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.PagerState
@@ -37,7 +35,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
@@ -45,10 +42,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TextFieldDefaults.indicatorLine
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
@@ -205,7 +202,6 @@ internal fun AutoSizingH1Text(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ProfileTextField(
     modifier: Modifier = Modifier,
@@ -214,29 +210,16 @@ internal fun ProfileTextField(
     placeholder: String = "",
     fontSize: TextUnit = AppTheme.typography.textFieldFont,
     error: String? = null,
-    indicatorColor: Color = AppTheme.colors.primary,
+    showCheck: Boolean = false,
+    enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingSmall)) {
-        Row(modifier = Modifier.fillMaxWidth(0.5f)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = modifier
-                    .indicatorLine(
-                        enabled = true,
-                        isError = false,
-                        interactionSource = interactionSource,
-                        colors = TextFieldDefaults.textFieldColors(
-                            backgroundColor = AppTheme.colors.primary,
-                            focusedIndicatorColor =
-                            if (error == null) indicatorColor
-                            else AppTheme.colors.error,
-                            unfocusedIndicatorColor =
-                            if (error == null) indicatorColor
-                            else AppTheme.colors.error,
-                        )
-                    ),
+                modifier = modifier,
                 decorationBox = { innerTextField ->
                     Box {
                         if (value.isEmpty() && placeholder.isNotEmpty()) {
@@ -257,11 +240,21 @@ internal fun ProfileTextField(
                     fontSize = fontSize
                 ),
                 singleLine = true,
+                enabled = enabled,
                 cursorBrush = SolidColor(Color.White),
                 interactionSource = interactionSource
             )
+            if (showCheck) {
+                Spacer(modifier = Modifier.width(AppTheme.dimensions.spacingSmall))
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Check",
+                    tint = AppTheme.colors.confirm,
+                    modifier = Modifier.size(AppTheme.dimensions.tinyIconSize)
+                )
+            }
         }
-        Caption(text = error ?: "")
+        Caption(text = error ?: "", color = AppTheme.colors.deny)
     }
 }
 
@@ -484,7 +477,7 @@ internal fun GoogleSignInButton(
             .height(AppTheme.dimensions.signInButtonHeight)
             .padding(horizontal = AppTheme.dimensions.paddingLarge),
     ) {
-        if (loginResult.isSuccessOrPendingLoginAuthProvider(AuthManager.AuthProvider.Google)) {
+        if (loginResult.isPendingLoginAuthProvider(AuthManager.AuthProvider.Google)) {
             LoadingSpinner()
         } else {
             Image(
@@ -521,7 +514,7 @@ internal fun AppleSignInButton(
             .height(AppTheme.dimensions.signInButtonHeight)
             .padding(horizontal = AppTheme.dimensions.paddingLarge),
     ) {
-        if (loginResult.isSuccessOrPendingLoginAuthProvider(AuthManager.AuthProvider.Apple)) {
+        if (loginResult.isPendingLoginAuthProvider(AuthManager.AuthProvider.Apple)) {
             LoadingSpinner()
         } else {
 
@@ -630,7 +623,7 @@ internal fun GroupIcon(
 internal fun BackPressScaffold(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBackPress: () -> Unit,
-    title: String? = null,
+    title: @Composable () -> Unit = { },
     actions: @Composable RowScope.() -> Unit = { },
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -638,11 +631,7 @@ internal fun BackPressScaffold(
         scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
-                title = {
-                    title?.let { title ->
-                        H1Header(text = title, fontWeight = FontWeight.SemiBold)
-                    }
-                },
+                title = title,
                 actions = actions,
                 backgroundColor = AppTheme.colors.primary,
                 navigationIcon = {
@@ -1169,15 +1158,7 @@ internal fun TransparentTextField(
         textStyle = TextStyle(color = textColor, fontSize = fontSize),
         singleLine = true,
         decorationBox = { innerTextField ->
-            Box(
-                modifier = Modifier
-                    .run {
-                        if (placeholder.isEmpty() || value.isNotEmpty())
-                            width(IntrinsicSize.Min)
-                        else this
-                    }
-                    .background(AppTheme.colors.primary)
-            ) {
+            Box(modifier = Modifier.background(AppTheme.colors.primary)) {
                 if (value.isEmpty() && placeholder.isNotEmpty()) {
                     Caption(
                         text = placeholder,
@@ -1198,7 +1179,7 @@ internal fun TransparentTextField(
 internal fun ModalBottomSheetLayout(
     modifier: Modifier = Modifier.fillMaxSize(),
     sheetState: ModalBottomSheetState,
-    sheetShape: Shape = MaterialTheme.shapes.large,
+    sheetShape: Shape = AppTheme.shapes.topLargeShape,
     sheetBackgroundColor: Color = AppTheme.colors.primary,
     sheetContentColor: Color = AppTheme.colors.onSecondary,
     sheetContent: @Composable ColumnScope.() -> Unit,

@@ -133,7 +133,7 @@ kotlin {
                 // Import the Firebase BoM
                 implementation(project.dependencies.platform("com.google.firebase:firebase-bom:$firebaseBOMVersion"))
 
-                // Firebase Auth
+                // Google Credential Manager
                 implementation("androidx.credentials:credentials:1.2.2")
                 implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
                 implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")

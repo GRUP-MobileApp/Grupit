@@ -46,10 +46,15 @@ internal sealed class Notification {
         val transactionRecord: TransactionRecord
     ) : Notification() {
         override val date: Instant
-            get() = (transactionRecord.status as? TransactionRecord.Status.Accepted)?.date
-                ?: throw PendingTransactionRecordException(
-                    "TransactionRecord still pending for DebtAction  with id ${debtAction.id}"
+            get() = when(transactionRecord.status) {
+                is TransactionRecord.Status.Accepted ->
+                    (transactionRecord.status as TransactionRecord.Status.Accepted).date
+                is TransactionRecord.Status.Rejected ->
+                    (transactionRecord.status as TransactionRecord.Status.Rejected).date
+                else -> throw PendingTransactionRecordException(
+                    "TransactionRecord still pending for DebtAction with id ${debtAction.id}"
                 )
+            }
 
         override val group: Group
             get() = debtAction.userInfo.group
@@ -60,8 +65,8 @@ internal sealed class Notification {
             "${transactionRecord.userInfo.user.displayName} has " +
                     when(transactionRecord.status) {
                         is TransactionRecord.Status.Accepted -> "accepted"
-                        TransactionRecord.Status.Rejected -> "rejected"
-                        TransactionRecord.Status.Pending -> throw PendingTransactionRecordException(
+                        is TransactionRecord.Status.Rejected -> "rejected"
+                        is TransactionRecord.Status.Pending -> throw PendingTransactionRecordException(
                             "TransactionRecord still pending for DebtAction with id ${debtAction.id}"
                         )
                     } +
@@ -115,10 +120,15 @@ internal sealed class Notification {
         val transactionRecord: TransactionRecord
     ) : Notification() {
         override val date: Instant
-            get() = (transactionRecord.status as? TransactionRecord.Status.Accepted)?.date
-                ?: throw PendingTransactionRecordException(
+            get() = when(transactionRecord.status) {
+                is TransactionRecord.Status.Accepted ->
+                    (transactionRecord.status as TransactionRecord.Status.Accepted).date
+                is TransactionRecord.Status.Rejected ->
+                    (transactionRecord.status as TransactionRecord.Status.Rejected).date
+                else -> throw PendingTransactionRecordException(
                     "TransactionRecord still pending for SettleAction with id ${settleAction.id}"
                 )
+            }
 
         override val group: Group
             get() = settleAction.userInfo.group
@@ -129,8 +139,8 @@ internal sealed class Notification {
             "${user.displayName} " +
                     when(transactionRecord.status) {
                         is TransactionRecord.Status.Accepted -> "accepted"
-                        TransactionRecord.Status.Rejected -> "rejected"
-                        TransactionRecord.Status.Pending -> throw PendingTransactionRecordException(
+                        is TransactionRecord.Status.Rejected -> "rejected"
+                        is TransactionRecord.Status.Pending -> throw PendingTransactionRecordException(
                             "TransactionRecord still pending for SettleAction with id " +
                                     settleAction.id
                         )

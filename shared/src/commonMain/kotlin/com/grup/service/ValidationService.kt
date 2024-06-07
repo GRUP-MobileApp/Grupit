@@ -23,13 +23,13 @@ internal class ValidationService {
         }
     }
 
-    fun validateName(name: String, allowBlank: Boolean = false) {
-        if (name.isBlank() && !allowBlank) {
+    fun validateName(name: String) {
+        if (name.isBlank()) {
             throw ValidationException("Name cannot be blank")
         } else if (!name.matches(nameRegex)) {
             throw ValidationException("Contains invalid characters")
-        } else if (name.length > 12) {
-            throw ValidationException("Max 12 characters")
+        } else if (name.length > 35) {
+            throw ValidationException("Max 35 characters")
         }
     }
 
@@ -46,8 +46,8 @@ internal class ValidationService {
     fun validateGroupName(groupName: String) {
         if (groupName.isBlank()) {
             throw ValidationException("Group name cannot be blank")
-        } else if (groupName.length > 15) {
-            throw ValidationException("Max 15 characters")
+        } else if (groupName.length > 25) {
+            throw ValidationException("Max 25 characters")
         }
     }
 }

@@ -77,14 +77,13 @@ internal class AccountSettingsViewModel : LoggedInViewModel() {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun deleteAccount(onSuccess: () -> Unit, onFailure: (String?) -> Unit) = launchJob(GlobalScope) {
+    fun deleteAccount(onSuccess: () -> Unit, onError: (String?) -> Unit) = launchJob(GlobalScope) {
         try {
             deviceManager.authManager.getSignInManagerFromProvider(apiServer.authProvider)
                 ?.disconnect()
-            apiServer.deleteUser()
-            onSuccess()
+            apiServer.deleteUser(onSuccess)
         } catch (e: APIException) {
-            onFailure(e.message)
+            onError(e.message)
         }
     }
 

@@ -82,10 +82,10 @@ private fun DebtActionDetailsLayout(
     val settleAction: SettleAction by
         settleActionDetailsViewModel.settleAction.collectAsStateWithLifecycle()
 
-    val myUserInfo: UserInfo by
+    val myUserInfo: UserInfo? by
         settleActionDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
 
-    val isMySettleAction: Boolean = settleAction.userInfo.id == myUserInfo.id
+    val isMySettleAction: Boolean = settleAction.userInfo.id == myUserInfo?.id
 
     val (pendingTransactionRecords, completedTransactionRecords) =
         settleAction.transactionRecords.partition { it.status is TransactionRecord.Status.Pending }
@@ -333,15 +333,12 @@ private fun DebtActionDetailsLayout(
                                         }.sumOf { it.balanceChange }.asMoneyAmount()
                             )
                         } else if (settleAction.transactionRecords.isEmpty()) {
-                            Caption(
-                                text = "No transactions yet",
-                                modifier = Modifier.align(Alignment.Start)
-                            )
+                            Caption(text = "No transactions yet")
                         }
                     }
                 }
                 with(settleAction) {
-                    if (!isMySettleAction && myUserInfo.userBalance < 0) {
+                    if (!isMySettleAction && (myUserInfo?.userBalance ?: 0.0) < 0) {
                         H1ConfirmTextButton(
                             text = "Settle",
                             onClick = { navigator.push(SettleActionTransactionView(id)) },

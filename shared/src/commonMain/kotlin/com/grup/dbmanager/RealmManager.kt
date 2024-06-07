@@ -92,7 +92,7 @@ internal open class RealmManager protected constructor(
                     removeAll()
                     add(realm.query<RealmUser>("$idSerialName == $0", realmUser.id), "MyUser")
                     add(
-                        realm.query<RealmUserInfo>("userId == $0", realmUser.id),
+                        realm.query<RealmUserInfo>("userId == $0 AND isActive = true", realmUser.id),
                         "MyUserInfos")
                     add(
                         realm.query<RealmGroup>()
@@ -139,7 +139,7 @@ internal open class RealmManager protected constructor(
 
         // GroupIds
         val groupIdsFromUserInfos: Flow<List<String>> = userInfosFlow.map { userInfos ->
-            userInfos.map { it.groupId }
+            userInfos.mapNotNull { it.groupId }
         }
 
         var prevSubscribedGroupIds: Set<String> = emptySet()
@@ -192,7 +192,7 @@ internal open class RealmManager protected constructor(
                 .asQuery<RealmGroupInvite>().asFlow().map { it.list }
 
         val userIdsFromUserInfos: Flow<List<String>> = userInfosFlow.map { userInfos ->
-            userInfos.map { it.userId }
+            userInfos.mapNotNull { it.userId }
         }
         val userIdsFromGroupInvitesInviters: Flow<List<String>> =
             groupInvitesFlow.map { groupInvites ->

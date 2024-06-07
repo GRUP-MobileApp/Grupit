@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -141,7 +142,7 @@ private fun AccountSettingsLayout(
                         onSuccess = {
                             navigator.popUntilRoot()
                         },
-                        onFailure = {
+                        onError = {
                             it?.let { message ->
                                 scope.launch {
                                     editProfilePageScaffoldState.snackbarHostState
@@ -372,7 +373,7 @@ private fun EditProfilePage(
 
     BackPressScaffold(
         scaffoldState = scaffoldState,
-        title = "Edit Profile",
+        title = { H1Header(text = "Edit Profile", fontWeight = FontWeight.SemiBold) },
         onBackPress = onBackPress
     ) { padding ->
         Column(

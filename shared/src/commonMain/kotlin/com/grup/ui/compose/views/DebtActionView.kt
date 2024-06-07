@@ -113,6 +113,9 @@ private fun DebtActionLayout(
             debtActionAmount,
             rawSplitStrategyAmounts
         )
+    val isValid: Boolean =
+        splitStrategy.isValid(debtActionAmount, debtActionAmounts) &&
+                debtActionAmounts.keys.any { it.user.id != debtActionViewModel.userObject.id }
 
     AnimatedContent(
         targetState = currentPage,
@@ -142,17 +145,19 @@ private fun DebtActionLayout(
                     currentPage = 2
                 }
             )
-            1 -> EditDebtorMoneyAmountKeypadPage(
-                initialMoneyAmount = rawSplitStrategyAmounts[keyPadUserInfo!!] ?: 0.0,
-                debtActionMoneyAmount = debtActionAmount,
-                onClick = { debtAmount ->
-                    rawSplitStrategyAmounts[keyPadUserInfo!!] =
-                        if (debtAmount > 0.0) debtAmount else null
-                },
-                onBackPress = { currentPage = 2 }
-            )
+            1 -> keyPadUserInfo?.let { userInfo ->
+                EditDebtorMoneyAmountKeypadPage(
+                    initialMoneyAmount = rawSplitStrategyAmounts[userInfo] ?: 0.0,
+                    debtActionMoneyAmount = debtActionAmount,
+                    onClick = { debtAmount ->
+                        rawSplitStrategyAmounts[userInfo] =
+                            if (debtAmount > 0.0) debtAmount else null
+                    },
+                    onBackPress = { currentPage = 2 }
+                )
+            }
             2 -> AddDebtorBottomSheet(
-                userInfos = userInfos.filter { it.user.id != debtActionViewModel.userObject.id },
+                userInfos = userInfos.sortedBy { it.user.id != debtActionViewModel.userObject.id },
                 addDebtorsOnClick = { selectedUsers ->
                     rawSplitStrategyAmounts.keys.minus(selectedUsers).forEach { userInfo ->
                         rawSplitStrategyAmounts.remove(userInfo)
@@ -222,10 +227,7 @@ private fun DebtActionLayout(
                         ) {
                             H1ConfirmTextButton(
                                 text = "Grupit",
-                                enabled = splitStrategy.isValid(
-                                    debtActionAmount,
-                                    debtActionAmounts
-                                ),
+                                enabled = isValid,
                                 onClick = {
                                     debtActionViewModel.createDebtAction(
                                         splitStrategy.generateMoneyAmounts(
@@ -238,10 +240,7 @@ private fun DebtActionLayout(
                             )
                             H1ConfirmTextButton(
                                 text = "Venmo",
-                                enabled = splitStrategy.isValid(
-                                    debtActionAmount,
-                                    debtActionAmounts
-                                ),
+                                enabled = isValid,
                                 color = venmo,
                                 onClick = { currentPage = 3 }
                             )
@@ -251,7 +250,7 @@ private fun DebtActionLayout(
             }
             3 -> DebtActionVenmoConfirmationPage(
                 debtActionAmount = debtActionAmount,
-                userInfo = userInfos.find { it.user.id == debtActionViewModel.userObject.id }!!,
+                myUserInfo = userInfos.find { it.user.id == debtActionViewModel.userObject.id }!!,
                 debtActionAmounts = splitStrategy.generateMoneyAmounts(
                     debtActionAmount,
                     debtActionAmounts
@@ -482,7 +481,7 @@ private fun SelectDebtorsChecklist(
 @Composable
 private fun DebtActionVenmoConfirmationPage(
     debtActionAmount: Double,
-    userInfo: UserInfo,
+    myUserInfo: UserInfo,
     debtActionAmounts: Map<UserInfo, Double>,
     message: String,
     onBackPress: () -> Unit,
@@ -501,14 +500,14 @@ private fun DebtActionVenmoConfirmationPage(
             ) {
                 item {
                     UserRowCard(
-                        user = userInfo.user,
+                        user = myUserInfo.user,
                         mainContent = {
                             H1Text(
-                                text = userInfo.user.displayName,
+                                text = myUserInfo.user.displayName,
                                 fontSize = AppTheme.typography.extraLargeFont,
                                 maxLines = 2
                             )
-                            Caption(text = "@${userInfo.user.venmoUsername}")
+                            Caption(text = "@${myUserInfo.user.venmoUsername}")
                         },
                         sideContent = {
                             Caption(
@@ -552,14 +551,6 @@ private fun DebtActionVenmoConfirmationPage(
                             text = "Transactions",
                             fontSize = AppTheme.typography.mediumFont
                         )
-//                        if (platform == Platform.Android) {
-//                            VenmoButton(
-//                                venmoUsername = userInfo.user.venmoUsername,
-//                                amount = debtActionAmount,
-//                                note = message,
-//                                isRequest = true
-//                            )
-//                        }
                     }
                 }
                 items(debtActionAmounts.toList()) { (userInfo, balanceChange) ->
@@ -575,12 +566,14 @@ private fun DebtActionVenmoConfirmationPage(
                                     Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                VenmoButton(
-                                    venmoUsername = userInfo.user.venmoUsername,
-                                    amount = balanceChange,
-                                    note = message,
-                                    isRequest = true
-                                )
+                                if (userInfo.user.id != myUserInfo.user.id) {
+                                    VenmoButton(
+                                        venmoUsername = userInfo.user.venmoUsername,
+                                        amount = balanceChange,
+                                        note = message,
+                                        isRequest = true
+                                    )
+                                }
                                 MoneyAmount(
                                     moneyAmount = balanceChange,
                                     color = AppTheme.colors.onSecondary

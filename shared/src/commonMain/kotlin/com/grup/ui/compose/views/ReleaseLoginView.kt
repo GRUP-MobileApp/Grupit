@@ -2,7 +2,6 @@ package com.grup.ui.compose.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -52,14 +50,9 @@ private fun ReleaseLoginLayout(
     val loginResult:
             LoginViewModel.LoginResult by loginViewModel.loginResult.collectAsStateWithLifecycle()
 
-    when (loginResult) {
-        is LoginViewModel.LoginResult.SuccessLogin -> {
-            navigator.push(MainView())
-        }
-        is LoginViewModel.LoginResult.SuccessLoginWelcomeSlideshow -> {
-            navigator.push(listOf(MainView(), WelcomeView()))
-        }
-        else -> {}
+    val onSuccessLogin: () -> Unit = { navigator.push(MainView()) }
+    val onSuccessRegister: (String?) -> Unit = { name ->
+        navigator.push(listOf(MainView(), WelcomeView(name)))
     }
 
     Column(
@@ -83,13 +76,23 @@ private fun ReleaseLoginLayout(
             if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Apple)) {
                 AppleSignInButton(
                     loginResult = loginResult,
-                    signIn = { loginViewModel.loginAppleAccount() }
+                    signIn = {
+                        loginViewModel.loginAppleAccount(
+                            onSuccessLogin = onSuccessLogin,
+                            onSuccessRegister = onSuccessRegister
+                        )
+                    }
                 )
             }
             if (loginViewModel.allowAuthProvider(AuthManager.AuthProvider.Google)) {
                 GoogleSignInButton(
                     loginResult = loginResult,
-                    signIn = { loginViewModel.loginGoogleAccount() }
+                    signIn = {
+                        loginViewModel.loginGoogleAccount(
+                            onSuccessLogin = onSuccessLogin,
+                            onSuccessRegister = onSuccessRegister
+                        )
+                    }
                 )
             }
         }

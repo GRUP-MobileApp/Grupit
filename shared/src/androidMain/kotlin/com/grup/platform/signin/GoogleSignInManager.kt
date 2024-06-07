@@ -17,7 +17,7 @@ import java.util.UUID
 actual class GoogleSignInManager(private val context: Context): SignInManager() {
     private val credentialManager: CredentialManager = CredentialManager.create(context)
 
-    override suspend fun signIn(block: (String) -> Unit) {
+    override suspend fun signIn(block: (String, String?) -> Unit) {
         try {
             val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(true)
@@ -31,7 +31,9 @@ actual class GoogleSignInManager(private val context: Context): SignInManager() 
                     .build(),
                 context = context,
             )
-            block(GoogleIdTokenCredential.createFrom(result.credential.data).idToken)
+            with(GoogleIdTokenCredential.createFrom(result.credential.data)) {
+                block(idToken, displayName)
+            }
         } catch (e: GetCredentialException) {
             try {
                 val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
@@ -47,7 +49,9 @@ actual class GoogleSignInManager(private val context: Context): SignInManager() 
                     context = context,
                 )
 
-                block(GoogleIdTokenCredential.createFrom(result.credential.data).idToken)
+                with(GoogleIdTokenCredential.createFrom(result.credential.data)) {
+                    block(idToken, displayName)
+                }
             } catch (e: Exception) {
                 throw SignInException()
             }

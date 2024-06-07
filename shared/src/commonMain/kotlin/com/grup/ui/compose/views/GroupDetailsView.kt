@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
@@ -26,14 +27,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,7 +50,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.Action
 import com.grup.models.DebtAction
-import com.grup.models.Group
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
 import com.grup.models.UserInfo
@@ -109,7 +107,7 @@ private fun GroupDetailsLayout(
         }
     }
 
-    val myUserInfo: UserInfo by groupDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
+    val myUserInfo: UserInfo? by groupDetailsViewModel.myUserInfo.collectAsStateWithLifecycle()
     val groupActivity: List<TransactionActivity> by
         groupDetailsViewModel.groupActivity.collectAsStateWithLifecycle()
     val activeSettleActions: List<SettleAction> by
@@ -117,7 +115,6 @@ private fun GroupDetailsLayout(
     val incomingDebtActions: List<Pair<DebtAction, TransactionRecord>> by
         groupDetailsViewModel.incomingDebtActions.collectAsStateWithLifecycle()
 
-    val selectedGroup: Group = myUserInfo.group
     val selectAction: (Action) -> Unit = { action ->
         navigator.push(
             when(action) {
@@ -135,7 +132,11 @@ private fun GroupDetailsLayout(
         }
     ) {
         BackPressScaffold(
-            title = selectedGroup.groupName,
+            title = {
+                myUserInfo?.group?.groupName?.let { groupName ->
+                    H1Header(text = groupName, fontWeight = FontWeight.SemiBold)
+                }
+            },
             onBackPress = { navigator.pop() },
             actions = {
                 IconButton(
@@ -158,21 +159,23 @@ private fun GroupDetailsLayout(
                 contentPadding = PaddingValues(AppTheme.dimensions.appPadding),
                 modifier = Modifier.padding(padding)
             ) {
-                item {
-                    GroupBalanceCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        myUserInfo = myUserInfo,
-                        navigateDebtActionAmountOnClick = {
-                            navigator.push(DebtActionView(groupDetailsViewModel.selectedGroupId))
-                        },
-                        navigateSettleActionAmountOnClick = {
-                            if (myUserInfo.userBalance > 0) {
-                                navigator.push(
-                                    SettleActionView(groupDetailsViewModel.selectedGroupId)
-                                )
+                myUserInfo?.let { userInfo ->
+                    item {
+                        GroupBalanceCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            myUserInfo = userInfo,
+                            navigateDebtActionAmountOnClick = {
+                                navigator.push(DebtActionView(groupDetailsViewModel.selectedGroupId))
+                            },
+                            navigateSettleActionAmountOnClick = {
+                                if (userInfo.userBalance > 0) {
+                                    navigator.push(
+                                        SettleActionView(groupDetailsViewModel.selectedGroupId)
+                                    )
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
                 if (activeSettleActions.isNotEmpty()) {
                     item {
@@ -180,7 +183,7 @@ private fun GroupDetailsLayout(
                     }
                     item {
                         activeSettleActions.partition { settleAction ->
-                            settleAction.userInfo.user.id == myUserInfo.user.id
+                            settleAction.userInfo.user.id == myUserInfo?.user?.id
                         }.let { (myActiveSettleActions, activeSettleActions) ->
                             ActiveSettleActions(
                                 myActiveSettleActions = myActiveSettleActions,
@@ -204,11 +207,20 @@ private fun GroupDetailsLayout(
                     }
                 }
                 item {
-                    H1Header(
-                        text = "Recent Transactions",
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    if (groupActivity.isNotEmpty()) {
+                        H1Header(
+                            text = "Recent Transactions",
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Caption(
+                            text = "No transactions yet",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(align = Alignment.CenterHorizontally)
+                        )
+                    }
                 }
                 groupActivity.groupBy {
                     isoFullDate(it.date)

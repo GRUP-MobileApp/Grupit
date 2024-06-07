@@ -10,7 +10,7 @@ import platform.UIKit.UIWindow
 
 @OptIn(ExperimentalForeignApi::class)
 actual class GoogleSignInManager: SignInManager() {
-    override suspend fun signIn(block: (String) -> Unit) {
+    override suspend fun signIn(block: (String, String?) -> Unit) {
         var signInError: NSError? = null
         GIDSignIn.sharedInstance.signInWithPresentingViewController(
             (UIApplication.sharedApplication.windows.first() as? UIWindow)
@@ -21,7 +21,7 @@ actual class GoogleSignInManager: SignInManager() {
                 signInError = error
             } else {
                 signInResult?.user?.idToken?.tokenString?.let { token ->
-                    block(token)
+                    block(token, signInResult.user.profile?.name)
                 }
             }
         }

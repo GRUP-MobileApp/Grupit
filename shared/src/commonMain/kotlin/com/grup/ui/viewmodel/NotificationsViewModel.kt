@@ -1,5 +1,6 @@
 package com.grup.ui.viewmodel
 
+import com.grup.exceptions.APIException
 import com.grup.models.GroupInvite
 import com.grup.models.TransactionRecord
 import com.grup.ui.models.Notification
@@ -14,7 +15,9 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val _debtActionsFlow = apiServer.getAllDebtActionsAsFlow()
     private val incomingDebtActionsAsNotification: Flow<List<Notification>> =
         _debtActionsFlow.map { debtActions ->
-            debtActions.mapNotNull { debtAction ->
+            debtActions.filter { debtAction ->
+                debtAction.userInfo.user.id != userObject.id
+            }.mapNotNull { debtAction ->
                 debtAction.transactionRecords.find { transactionRecord ->
                     transactionRecord.userInfo.user.id == userObject.id &&
                             transactionRecord.status is TransactionRecord.Status.Pending
@@ -25,11 +28,10 @@ internal class NotificationsViewModel : LoggedInViewModel() {
         }
     private val debtorAcceptOutgoingDebtActionsAsNotification: Flow<List<Notification>> =
         _debtActionsFlow.map { debtActions ->
-            debtActions.filter { debtAction ->
-                debtAction.userInfo.user.id == userObject.id
-            }.flatMap { debtAction ->
+            debtActions.flatMap { debtAction ->
                 debtAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.status is TransactionRecord.Status.Accepted
+                    transactionRecord.status !is TransactionRecord.Status.Pending &&
+                            transactionRecord.userInfo.user.id != userObject.id
                 }.map { transactionRecord ->
                     Notification.DebtorAcceptOutgoingDebtAction(debtAction, transactionRecord)
                 }
@@ -52,7 +54,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
                 settleAction.userInfo.user.id == userObject.id
             }.flatMap { settleAction ->
                 settleAction.transactionRecords.filter { transactionRecord ->
-                    transactionRecord.status !is TransactionRecord.Status.Accepted
+                    transactionRecord.status is TransactionRecord.Status.Pending
                 }.map { transactionRecord ->
                     Notification.IncomingSettleActionTransaction(settleAction, transactionRecord)
                 }
@@ -63,7 +65,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
             settleActions.mapNotNull { settleAction ->
                 settleAction.transactionRecords.find { transactionRecord ->
                     transactionRecord.userInfo.user.id == userObject.id
-                            && transactionRecord.status is TransactionRecord.Status.Accepted
+                            && transactionRecord.status !is TransactionRecord.Status.Pending
                 }?.let { transactionRecord ->
                     Notification.DebteeAcceptOutgoingSettleActionTransaction(
                         settleAction,
@@ -105,10 +107,28 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     }
 
     // Group Invite
-    fun acceptGroupInvite(groupInvite: GroupInvite) = launchJob {
-        apiServer.acceptGroupInvite(groupInvite)
+    fun acceptGroupInvite(
+        groupInvite: GroupInvite,
+        onSuccess: () -> Unit,
+        onError: (String?) -> Unit
+    ) = launchJob {
+        try {
+            apiServer.acceptGroupInvite(groupInvite)
+            onSuccess()
+        } catch (e: APIException) {
+            onError(e.message)
+        }
     }
-    fun rejectGroupInvite(groupInvite: GroupInvite) = launchJob {
-        apiServer.rejectGroupInvite(groupInvite)
+    fun rejectGroupInvite(
+        groupInvite: GroupInvite,
+        onSuccess: () -> Unit,
+        onError: (String?) -> Unit
+    ) = launchJob {
+        try {
+            apiServer.rejectGroupInvite(groupInvite)
+            onSuccess()
+        } catch (e: APIException) {
+            onError(e.message)
+        }
     }
 }

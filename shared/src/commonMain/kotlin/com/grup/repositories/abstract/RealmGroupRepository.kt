@@ -6,7 +6,6 @@ import com.grup.interfaces.IGroupRepository
 import com.grup.models.Group
 import com.grup.models.User
 import com.grup.models.realm.RealmGroup
-import com.grup.models.realm.RealmUser
 import com.grup.other.idSerialName
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy

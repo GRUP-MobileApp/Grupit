@@ -8,7 +8,7 @@ abstract class UserInfo internal constructor(): BaseEntity() {
     abstract var userBalance: Double
     abstract val joinDate: Instant
 
-    abstract val isActive: Boolean
+    abstract var isActive: Boolean
 
-    abstract fun invalidateUserInfo(removeUser: Boolean = false)
+    abstract fun removeUser()
 }

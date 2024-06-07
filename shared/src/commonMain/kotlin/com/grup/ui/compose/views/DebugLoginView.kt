@@ -73,14 +73,11 @@ private fun DebugLoginLayout(
 
     val pendingLogin: Boolean = loginResult is LoginViewModel.LoginResult.PendingLogin
 
-    when(loginResult) {
-        is LoginViewModel.LoginResult.SuccessLogin -> {
-            navigator.push(MainView())
-        }
-        is LoginViewModel.LoginResult.SuccessLoginWelcomeSlideshow -> {
-            navigator.push(listOf(MainView(), WelcomeView()))
-        }
-        else -> {}
+    val onSuccessLogin: () -> Unit = {
+        navigator.push(MainView())
+    }
+    val onSuccessRegister: () -> Unit = {
+        navigator.push(listOf(MainView(), WelcomeView()))
     }
 
     Box(
@@ -177,7 +174,11 @@ private fun DebugLoginLayout(
                 Button(
                     onClick = {
                         if (!pendingLogin) {
-                            loginViewModel.registerEmailPassword(email.text, password.text)
+                            loginViewModel.registerEmailPassword(
+                                email.text,
+                                password.text,
+                                onSuccessRegister
+                            )
                         }
                     },
                     shape = AppTheme.shapes.circleShape,
@@ -189,7 +190,7 @@ private fun DebugLoginLayout(
                         .height(50.dp)
                 ) {
                     if (
-                        loginResult.isSuccessOrPendingLoginAuthProvider(
+                        loginResult.isPendingLoginAuthProvider(
                             AuthManager.AuthProvider.EmailPasswordRegister
                         )
                     ) {
@@ -204,7 +205,12 @@ private fun DebugLoginLayout(
                 Button(
                     onClick = {
                         if (!pendingLogin) {
-                            loginViewModel.loginEmailPassword(email.text, password.text)
+                            loginViewModel.loginEmailPassword(
+                                email.text,
+                                password.text,
+                                onSuccessLogin,
+                                onSuccessRegister
+                            )
                         }
                     },
                     shape = AppTheme.shapes.circleShape,
@@ -216,7 +222,7 @@ private fun DebugLoginLayout(
                         .height(50.dp)
                 ) {
                     if (
-                        loginResult.isSuccessOrPendingLoginAuthProvider(
+                        loginResult.isPendingLoginAuthProvider(
                             AuthManager.AuthProvider.EmailPassword
                         )
                     ) {
@@ -227,15 +233,5 @@ private fun DebugLoginLayout(
                 }
             }
         }
-
-//        authManager.googleSignInManager?.let { googleSignInManager ->
-//            GoogleSignInButton(
-//                loginResult = loginResult,
-//                googleSignInManager = googleSignInManager,
-//                signInCallback = { token ->
-//                    loginViewModel.loginGoogleAccount(token)
-//                }
-//            )
-//        }
     }
 }

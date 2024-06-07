@@ -8,7 +8,9 @@ import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal class WelcomeViewModel : LoggedInViewModel() {
+internal class WelcomeViewModel(
+    val name: String? = null
+) : LoggedInViewModel() {
     private val validationService: ValidationService = ValidationService()
 
     sealed class NameValidity {
@@ -21,11 +23,11 @@ internal class WelcomeViewModel : LoggedInViewModel() {
     private val _usernameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
     val usernameValidity: StateFlow<NameValidity> = _usernameValidity
 
-    private val _firstNameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
-    val firstNameValidity: StateFlow<NameValidity> = _firstNameValidity
-
-    private val _lastNameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
-    val lastNameValidity: StateFlow<NameValidity> = _lastNameValidity
+    private val _displayNameValidity = MutableStateFlow(
+        if (name != null) NameValidity.Valid
+        else NameValidity.None
+    )
+    val displayNameValidity: StateFlow<NameValidity> = _displayNameValidity
 
     private val _venmoUsernameValidity = MutableStateFlow<NameValidity>(NameValidity.None)
     val venmoUsernameValidity: StateFlow<NameValidity> = _venmoUsernameValidity
@@ -50,29 +52,16 @@ internal class WelcomeViewModel : LoggedInViewModel() {
         }
     }
 
-    fun checkFirstNameValidity(firstName: String) {
-        if (firstName.isEmpty()) {
-            _firstNameValidity.value = NameValidity.None
+    fun checkDisplayNameValidity(displayName: String) {
+        if (displayName.isEmpty()) {
+            _displayNameValidity.value = NameValidity.None
         } else {
-            _firstNameValidity.value = NameValidity.Pending
+            _displayNameValidity.value = NameValidity.Pending
             try {
-                validationService.validateName(firstName)
-                _firstNameValidity.value = NameValidity.Valid
+                validationService.validateName(displayName)
+                _displayNameValidity.value = NameValidity.Valid
             } catch (e: ValidationException) {
-                _firstNameValidity.value = NameValidity.Invalid(e.message ?: "")
-            }
-        }
-    }
-    fun checkLastNameValidity(lastName: String) {
-        if (lastName.isEmpty()) {
-            _lastNameValidity.value = NameValidity.None
-        } else {
-            _lastNameValidity.value = NameValidity.Pending
-            try {
-                validationService.validateName(name = lastName, allowBlank = true)
-                _lastNameValidity.value = NameValidity.Valid
-            } catch (e: ValidationException) {
-                _lastNameValidity.value = NameValidity.Invalid(e.message ?: "")
+                _displayNameValidity.value = NameValidity.Invalid(e.message ?: "")
             }
         }
     }

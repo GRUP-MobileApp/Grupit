@@ -20,9 +20,7 @@ import com.grup.service.UserInfoService
 import com.grup.service.UserService
 import kotlin.coroutines.cancellation.CancellationException
 
-class APIServer private constructor(
-    private val dbManager: DatabaseManager
-) {
+class APIServer private constructor(private val dbManager: DatabaseManager) {
     private val userService: UserService = UserService(dbManager)
     private val groupService: GroupService = GroupService(dbManager)
     private val userInfoService: UserInfoService = UserInfoService(dbManager)
@@ -130,8 +128,8 @@ class APIServer private constructor(
             APIServer(ReleaseRealmManager.loginApple(appleAccountToken))
     }
 
-    suspend fun deleteUser() {
-        userService.deleteUser(user)
+    suspend fun deleteUser(onSuccess: () -> Unit) {
+        userService.deleteUser(user, onSuccess)
         dbManager.deleteUser()
     }
     suspend fun logOut() = dbManager.logOut()
