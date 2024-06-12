@@ -88,6 +88,7 @@ import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.platform.signin.AuthManager
 import com.grup.ui.apptheme.AppTheme
+import com.grup.ui.apptheme.venmo
 import com.grup.ui.models.TransactionActivity
 import com.grup.ui.viewmodel.LoginViewModel
 import dev.icerock.moko.resources.compose.painterResource
@@ -604,6 +605,15 @@ internal fun ProfileIcon(
 }
 
 @Composable
+internal fun UserCaption(user: User) {
+    if (user.venmoUsername != null) {
+        Caption(text = "@${user.venmoUsername}", color = venmo)
+    } else {
+        Caption(text = user.username)
+    }
+}
+
+@Composable
 internal fun GroupIcon(
     modifier: Modifier = Modifier,
     group: Group,
@@ -737,7 +747,7 @@ internal fun UserInfoRowCard(
     coloredMoneyAmount: Boolean = true,
     mainContent: @Composable ColumnScope.() -> Unit = {
         H1Text(text = userInfo.user.displayName)
-        Caption(text = "@${userInfo.user.venmoUsername}")
+        UserCaption(user = userInfo.user)
     }
 ) {
     UserRowCard(
@@ -942,9 +952,7 @@ internal fun KeyPadScreenLayout(
                 TransparentTextField(
                     value = message,
                     placeholder = "What is this for?",
-                    onValueChange = {
-                        onMessageChange!!(it.take(50))
-                    },
+                    onValueChange = { onMessageChange?.invoke(it.take(50)) },
                     modifier = Modifier.height(IntrinsicSize.Max)
                 )
             }
@@ -1090,7 +1098,7 @@ internal fun UserInfoAmountsList(
                 user = userInfo.user,
                 mainContent = {
                     H1Text(text = userInfo.user.displayName)
-                    Caption(text = userInfo.user.venmoUsername)
+                    UserCaption(user = userInfo.user)
                 },
                 sideContent = {
                     MoneyAmount(

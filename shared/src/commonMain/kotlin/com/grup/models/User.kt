@@ -9,8 +9,8 @@ abstract class User internal constructor(): BaseEntity() {
         override var displayName: String
             get() = "Deleted Name"
             set(_) { }
-        override var venmoUsername: String
-            get() = "Deleted"
+        override var venmoUsername: String?
+            get() = null
             set(_) { }
         override var profilePictureURL: String?
             get() = null
@@ -25,7 +25,7 @@ abstract class User internal constructor(): BaseEntity() {
     }
     abstract val username: String
     abstract var displayName: String
-    abstract var venmoUsername: String
+    abstract var venmoUsername: String?
     abstract var profilePictureURL: String?
 
     abstract var latestViewDate: Instant

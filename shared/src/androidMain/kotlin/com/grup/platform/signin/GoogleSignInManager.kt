@@ -17,7 +17,7 @@ import java.util.UUID
 actual class GoogleSignInManager(private val context: Context): SignInManager() {
     private val credentialManager: CredentialManager = CredentialManager.create(context)
 
-    override suspend fun signIn(block: (String, String?) -> Unit) {
+    override suspend fun signIn(block: suspend (String, String?) -> Unit) {
         try {
             val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(true)

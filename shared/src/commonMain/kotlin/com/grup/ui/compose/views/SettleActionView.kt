@@ -26,26 +26,31 @@ internal class SettleActionView(private val groupId: String) : Screen {
         val settleActionViewModel = rememberScreenModel { SettleActionViewModel(groupId) }
         val navigator = LocalNavigator.currentOrThrow
 
-        SettleActionLayout(settleActionViewModel = settleActionViewModel, navigator = navigator)
+        SettleActionTransactionLayout(
+            settleActionViewModel = settleActionViewModel,
+            navigator = navigator
+        )
     }
 }
 
 @Composable
-private fun SettleActionLayout(
+private fun SettleActionTransactionLayout(
     settleActionViewModel: SettleActionViewModel,
     navigator: Navigator
 ) {
     var settleActionAmount: String by remember { mutableStateOf("0") }
 
-    val myUserInfo: UserInfo by settleActionViewModel.myUserInfo.collectAsStateWithLifecycle()
+    val myUserInfo: UserInfo? by settleActionViewModel.myUserInfo.collectAsStateWithLifecycle()
 
     KeyPadScreenLayout(
         moneyAmount = settleActionAmount,
         onMoneyAmountChange = { moneyAmount ->
-            settleActionAmount = if (moneyAmount.toDouble() > myUserInfo.userBalance) {
-                myUserInfo.userBalance.asPureMoneyAmount()
-            } else {
-                moneyAmount
+            myUserInfo?.userBalance?.let { userBalance ->
+                settleActionAmount = if (moneyAmount.toDouble() > userBalance) {
+                    userBalance.asPureMoneyAmount()
+                } else {
+                    moneyAmount
+                }
             }
         },
         onBackPress = { navigator.pop() },

@@ -16,10 +16,10 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val incomingDebtActionsAsNotification: Flow<List<Notification>> =
         _debtActionsFlow.map { debtActions ->
             debtActions.filter { debtAction ->
-                debtAction.userInfo.user.id != userObject.id
+                debtAction.userInfo.user.id != userId
             }.mapNotNull { debtAction ->
                 debtAction.transactionRecords.find { transactionRecord ->
-                    transactionRecord.userInfo.user.id == userObject.id &&
+                    transactionRecord.userInfo.user.id == userId &&
                             transactionRecord.status is TransactionRecord.Status.Pending
                 }?.let { transactionRecord ->
                     Notification.IncomingDebtAction(debtAction, transactionRecord)
@@ -31,7 +31,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
             debtActions.flatMap { debtAction ->
                 debtAction.transactionRecords.filter { transactionRecord ->
                     transactionRecord.status !is TransactionRecord.Status.Pending &&
-                            transactionRecord.userInfo.user.id != userObject.id
+                            transactionRecord.userInfo.user.id != userId
                 }.map { transactionRecord ->
                     Notification.DebtorAcceptOutgoingDebtAction(debtAction, transactionRecord)
                 }
@@ -43,7 +43,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val newSettleActionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                settleAction.userInfo.user.id != userObject.id && !settleAction.isCompleted
+                settleAction.userInfo.user.id != userId && !settleAction.isCompleted
             }.map { settleAction ->
                 Notification.NewSettleAction(settleAction)
             }
@@ -51,7 +51,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val incomingSettleActionTransactionsAsNotification: Flow<List<Notification>> =
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
-                settleAction.userInfo.user.id == userObject.id
+                settleAction.userInfo.user.id == userId
             }.flatMap { settleAction ->
                 settleAction.transactionRecords.filter { transactionRecord ->
                     transactionRecord.status is TransactionRecord.Status.Pending
@@ -64,7 +64,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
         _settleActionsFlow.map { settleActions ->
             settleActions.mapNotNull { settleAction ->
                 settleAction.transactionRecords.find { transactionRecord ->
-                    transactionRecord.userInfo.user.id == userObject.id
+                    transactionRecord.userInfo.user.id == userId
                             && transactionRecord.status !is TransactionRecord.Status.Pending
                 }?.let { transactionRecord ->
                     Notification.DebteeAcceptOutgoingSettleActionTransaction(
@@ -79,7 +79,7 @@ internal class NotificationsViewModel : LoggedInViewModel() {
     private val incomingGroupInvites: Flow<List<Notification>> =
         _groupInvitesFlow.map { groupInvites ->
             groupInvites.filter { groupInvite ->
-                groupInvite.inviteeId == userObject.id
+                groupInvite.inviteeId == userId
             }.map { groupInvite ->
                 Notification.IncomingGroupInvite(groupInvite)
             }

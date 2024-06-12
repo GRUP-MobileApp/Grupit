@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -51,6 +52,7 @@ import com.grup.ui.compose.H1Header
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.ModalBottomSheetLayout
 import com.grup.ui.compose.SmallIcon
+import com.grup.ui.compose.UserCaption
 import com.grup.ui.compose.UserInfoRowCard
 import com.grup.ui.compose.UsernameSearchBar
 import com.grup.ui.compose.collectAsStateWithLifecycle
@@ -64,21 +66,30 @@ internal class GroupMembersView(private val groupId: String) : Screen {
     override fun Content() {
         val groupMembersViewModel = rememberScreenModel { GroupMembersViewModel(groupId) }
         val navigator = LocalNavigator.currentOrThrow
-        GroupMembersLayout(
-            groupMembersViewModel = groupMembersViewModel,
-            navigator = navigator
-        )
+
+        GroupMembersLayout(groupMembersViewModel = groupMembersViewModel, navigator = navigator)
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun GroupMembersLayout(
-    groupMembersViewModel: GroupMembersViewModel,
-    navigator: Navigator
-) {
-    val userInfoBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val addToGroupBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+private fun GroupMembersLayout(groupMembersViewModel: GroupMembersViewModel, navigator: Navigator) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    val userInfoBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmValueChange = {
+            keyboard?.hide()
+            true
+        }
+    )
+    val addToGroupBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmValueChange = {
+            keyboard?.hide()
+            true
+        }
+    )
+
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 
@@ -232,7 +243,7 @@ private fun GroupMemberInfoBottomSheet(
                 with(selectedUserInfo) {
                     UserInfoRowCard(userInfo = this) {
                         H1Text(text = user.displayName)
-                        Caption(text = "@${user.venmoUsername}")
+                        UserCaption(user = user)
                         Spacer(modifier = Modifier.height(AppTheme.dimensions.spacingSmall))
                         Caption(text = "Joined on ${isoFullDate(joinDate)}")
                     }

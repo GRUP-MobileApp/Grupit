@@ -3,7 +3,7 @@ package com.grup.ui.viewmodel
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.APIServer
-import com.grup.models.User
+import com.grup.exceptions.login.NotLoggedInException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -12,18 +12,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-internal abstract class LoggedInViewModel : KoinComponent, ScreenModel {
-    private companion object {
+internal abstract class LoggedInViewModel : ScreenModel {
+    internal companion object {
         private const val STOP_TIMEOUT_MILLIS: Long = 5000
+
+        var apiServerInstance: APIServer? = null
     }
 
-    protected val apiServer: APIServer by inject()
+    protected val apiServer: APIServer
+        get() = apiServerInstance ?: throw NotLoggedInException()
 
-    protected open val userObject: User
-        get() = apiServer.user
+    val userId: String by apiServer::userId
 
     private var currentJob: Job? = null
 

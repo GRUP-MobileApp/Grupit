@@ -23,7 +23,7 @@ internal abstract class RealmUserRepository : IUserRepository {
             getLatest(
                 RealmUser(username = username).apply {
                     this.displayName = displayName
-                    this.venmoUsername = venmoUsername ?: "None"
+                    this.venmoUsername = venmoUsername
                 }
             ),
             UpdatePolicy.ERROR
@@ -31,7 +31,7 @@ internal abstract class RealmUserRepository : IUserRepository {
     }
 
 
-    override fun findMyUser(): User? {
+    override fun findMyUser(checkDB: Boolean): User? {
         return realm.query<RealmUser>().first().find()
     }
 

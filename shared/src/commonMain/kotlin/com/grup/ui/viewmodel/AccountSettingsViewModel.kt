@@ -9,10 +9,11 @@ import com.grup.platform.image.cropCenterSquareImage
 import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 
-internal class AccountSettingsViewModel : LoggedInViewModel() {
+internal class AccountSettingsViewModel : LoggedInViewModel(), KoinComponent {
     enum class Pages(val pageNumber: Int) {
         MAIN_SETTINGS_PAGE(0),
         EDIT_PROFILE_PAGE(1),
@@ -43,8 +44,8 @@ internal class AccountSettingsViewModel : LoggedInViewModel() {
 
     private val deviceManager: DeviceManager by inject()
 
-    public override val userObject: User
-        get() = super.userObject
+    val user: User?
+        get() = apiServer.getMyUser()
 
     fun getGroupNotificationType(
         vararg notificationTypes: AccountSettings.GroupNotificationType
@@ -81,7 +82,9 @@ internal class AccountSettingsViewModel : LoggedInViewModel() {
         try {
             deviceManager.authManager.getSignInManagerFromProvider(apiServer.authProvider)
                 ?.disconnect()
-            apiServer.deleteUser(onSuccess)
+            apiServer.deleteUser()
+            apiServerInstance = null
+            onSuccess()
         } catch (e: APIException) {
             onError(e.message)
         }
@@ -92,5 +95,6 @@ internal class AccountSettingsViewModel : LoggedInViewModel() {
         deviceManager.authManager.getSignInManagerFromProvider(apiServer.authProvider)?.signOut()
         apiServer.logOut()
         onSuccess()
+        apiServerInstance = null
     }
 }

@@ -28,12 +28,18 @@ class APIServer private constructor(private val dbManager: DatabaseManager) {
     private val debtActionService: DebtActionService = DebtActionService(dbManager)
     private val settleActionService: SettleActionService = SettleActionService(dbManager)
 
-    // User
-    val user: User
-        get() = userService.getMyUser()
-            ?: throw UserObjectNotFoundException()
+
     val authProvider: AuthManager.AuthProvider
         get() = dbManager.authProvider
+
+    // User
+    private val user: User
+        get() = userService.getMyUser()
+            ?: throw UserObjectNotFoundException()
+    val userId: String
+        get() = dbManager.userId
+
+    fun getMyUser(checkDB: Boolean = false) = userService.getMyUser(checkDB)
     suspend fun registerUser(
         username: String,
         displayName: String,
@@ -128,8 +134,8 @@ class APIServer private constructor(private val dbManager: DatabaseManager) {
             APIServer(ReleaseRealmManager.loginApple(appleAccountToken))
     }
 
-    suspend fun deleteUser(onSuccess: () -> Unit) {
-        userService.deleteUser(user, onSuccess)
+    suspend fun deleteUser() {
+        userService.deleteUser(user)
         dbManager.deleteUser()
     }
     suspend fun logOut() = dbManager.logOut()

@@ -47,6 +47,7 @@ import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.ModalBottomSheetLayout
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.SmallIcon
+import com.grup.ui.compose.UserCaption
 import com.grup.ui.compose.UserRowCard
 import com.grup.ui.compose.asMoneyAmount
 import com.grup.ui.compose.collectAsStateWithLifecycle
@@ -184,7 +185,7 @@ private fun DebtActionDetailsLayout(
                                         fontSize = AppTheme.typography.extraLargeFont,
                                         maxLines = 2
                                     )
-                                    Caption(text = "@${userInfo.user.venmoUsername}")
+                                    UserCaption(user = userInfo.user)
                                 },
                                 sideContent = {
                                     Caption(
@@ -257,7 +258,7 @@ private fun DebtActionDetailsLayout(
                             completedTransactionRecords
                         }.sortedWith(
                             compareBy<TransactionRecord> {
-                                it.userInfo.user.id == settleActionDetailsViewModel.userObject.id
+                                it.userInfo.user.id == settleActionDetailsViewModel.userId
                             }.thenBy {
                                 it.status !is TransactionRecord.Status.Rejected
                             }.thenByDescending {
@@ -363,7 +364,7 @@ private fun TransactionRecordRowCard(
         user = transactionRecord.userInfo.user,
         mainContent = {
             H1Text(text = transactionRecord.userInfo.user.displayName)
-            Caption(text = "@${transactionRecord.userInfo.user.venmoUsername}")
+            UserCaption(user = transactionRecord.userInfo.user)
             additionalMainContent()
         },
         sideContent = {

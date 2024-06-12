@@ -1,7 +1,6 @@
 package com.grup.ui.viewmodel
 
 import com.grup.device.SettingsManager
-import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.DebtAction
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
@@ -44,10 +43,10 @@ internal class GroupDetailsViewModel(val selectedGroupId: String): LoggedInViewM
         _settleActionsFlow.map { settleActions ->
             settleActions.filter { settleAction ->
                 !settleAction.isCompleted &&
-                (settleAction.remainingAmount > 0 || settleAction.userInfo.user.id == userObject.id)
+                (settleAction.remainingAmount > 0 || settleAction.userInfo.user.id == userId)
             }.sortedWith(
                 compareByDescending<SettleAction> { settleAction ->
-                    settleAction.userInfo.user.id == userObject.id
+                    settleAction.userInfo.user.id == userId
                 }.thenBy { settleAction ->
                     settleAction.date
                 }
@@ -59,7 +58,7 @@ internal class GroupDetailsViewModel(val selectedGroupId: String): LoggedInViewM
         _debtActionsFlow.map { debtActions ->
             debtActions.mapNotNull { debtAction ->
                 debtAction.transactionRecords.find { transactionRecord ->
-                    transactionRecord.userInfo.user.id == userObject.id &&
+                    transactionRecord.userInfo.user.id == userId &&
                             transactionRecord.status is TransactionRecord.Status.Pending
                 }?.let { transactionRecord ->
                     Pair(debtAction, transactionRecord)

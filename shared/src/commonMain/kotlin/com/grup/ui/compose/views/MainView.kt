@@ -1,8 +1,13 @@
 package com.grup.ui.compose.views
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
@@ -39,12 +44,14 @@ internal class MainView : Screen {
             Scaffold(
                 backgroundColor = AppTheme.colors.primary,
                 bottomBar = {
-                    BottomNavigation(
-                        backgroundColor = AppTheme.colors.secondary
-                    ) {
+                    BottomNavigation(backgroundColor = AppTheme.colors.secondary) {
                         tabs.indices.forEach { TabNavigationItem(it) }
                     }
-                }
+                },
+                contentWindowInsets = WindowInsets.systemBars,
+                modifier = Modifier
+                    .background(AppTheme.colors.secondary)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
             ) { padding ->
                 Box(modifier = Modifier.padding(padding)) {
                     CurrentTab()
@@ -59,7 +66,7 @@ internal class MainView : Screen {
         val tab = tabs[index]
 
         BottomNavigationItem(
-            label = { H1Text(text = tab.options.title, fontSize = AppTheme.typography.tinyFont) },
+            label = { H1Text(text = tab.options.title, fontSize = AppTheme.typography.smallFont) },
             selected = tabNavigator.current.key == tab.key,
             onClick = {
                 if (tabNavigator.current is GroupsTab && tab is GroupsTab) {
@@ -69,7 +76,11 @@ internal class MainView : Screen {
                     tabNavigator.current = tab
                 }
             },
-            icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) },
+            icon = {
+                tab.options.icon?.let {
+                    Icon(painter = it, contentDescription = tab.options.title)
+                }
+            },
             selectedContentColor = AppTheme.colors.confirm,
             unselectedContentColor = AppTheme.colors.onPrimary
         )

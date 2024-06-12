@@ -4,29 +4,44 @@ import cocoapods.GoogleSignIn.GIDSignIn
 import com.grup.exceptions.login.CancelledSignInException
 import com.grup.exceptions.login.SignInException
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.delay
 import platform.Foundation.NSError
 import platform.UIKit.UIApplication
 import platform.UIKit.UIWindow
 
 @OptIn(ExperimentalForeignApi::class)
 actual class GoogleSignInManager: SignInManager() {
-    override suspend fun signIn(block: (String, String?) -> Unit) {
-        var signInError: NSError? = null
+    override suspend fun signIn(block: suspend (String, String?) -> Unit) {
+        var token: String? = null
+        var name: String? = null
+        var error: NSError? = null
+
+        var isComplete = false
         GIDSignIn.sharedInstance.signInWithPresentingViewController(
-            (UIApplication.sharedApplication.windows.first() as? UIWindow)
+            (UIApplication.sharedApplication.windows().first() as? UIWindow)
                 ?.rootViewController
                 ?: throw SignInException()
-        ) { signInResult, error ->
-            if (error != null) {
-                signInError = error
+        ) { signInResult, err ->
+            if (err != null) {
+                error = err
             } else {
-                signInResult?.user?.idToken?.tokenString?.let { token ->
-                    block(token, signInResult.user.profile?.name)
-                }
+                token = signInResult?.user?.idToken?.tokenString
+                name = signInResult?.user?.profile?.name
             }
+            isComplete = true
         }
-        if (signInError != null) {
-            throw CancelledSignInException()
+
+        repeat(4 * 60 * 3) {
+            if (isComplete) {
+                if (error != null) {
+                    throw CancelledSignInException()
+                }
+
+                token?.let { block(it, name) } ?: throw SignInException()
+
+                return
+            }
+            delay(250)
         }
     }
 

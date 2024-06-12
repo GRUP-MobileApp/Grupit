@@ -1,18 +1,18 @@
 package com.grup.ui.viewmodel
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
 import com.grup.APIServer
-import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.platform.signin.AuthManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.context.loadKoinModules
-import org.koin.dsl.module
 
-class StartViewModel(private val isDebug: Boolean = false) : ScreenModel, KoinComponent {
+class StartViewModel(val isDebug: Boolean = false) : ScreenModel, KoinComponent {
     sealed class SilentSignInResult {
         data class SignedIn(val authProvider: AuthManager.AuthProvider) : SilentSignInResult()
         data class SignedInWelcomeSlideshow(
@@ -26,18 +26,19 @@ class StartViewModel(private val isDebug: Boolean = false) : ScreenModel, KoinCo
     private val _silentSignInResult = MutableStateFlow<SilentSignInResult>(SilentSignInResult.None)
     val silentSignInResult: StateFlow<SilentSignInResult> = _silentSignInResult
 
-    fun silentSignIn() = screenModelScope.launch {
+    fun silentSignIn() = CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
         try {
             if (isDebug) {
                 APIServer.debugSilentSignIn()
             } else {
                 APIServer.releaseSilentSignIn()
-            } ?.let { apiServer ->
-                injectApiServer(apiServer)
-                try {
-                    apiServer.user
-                    _silentSignInResult.value = SilentSignInResult.SignedIn(apiServer.authProvider)
-                } catch (e: UserObjectNotFoundException) {
+            }?.let { apiServer ->
+                LoggedInViewModel.apiServerInstance = apiServer
+                val userResult = apiServer.getMyUser(checkDB = true)
+                if (userResult != null) {
+                    _silentSignInResult.value =
+                        SilentSignInResult.SignedIn(apiServer.authProvider)
+                } else {
                     _silentSignInResult.value =
                         SilentSignInResult.SignedInWelcomeSlideshow(apiServer.authProvider)
                 }
@@ -49,13 +50,5 @@ class StartViewModel(private val isDebug: Boolean = false) : ScreenModel, KoinCo
 
     fun consumeSilentSignInResult() {
         _silentSignInResult.value = SilentSignInResult.None
-    }
-
-    private fun injectApiServer(apiServer: APIServer) {
-        loadKoinModules(
-            module {
-                single { apiServer }
-            }
-        )
     }
 }

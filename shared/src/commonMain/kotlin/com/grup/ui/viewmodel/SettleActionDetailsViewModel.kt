@@ -1,22 +1,19 @@
 package com.grup.ui.viewmodel
 
 import com.grup.exceptions.APIException
-import com.grup.exceptions.UserNotInGroupException
+import com.grup.exceptions.NotFoundException
 import com.grup.models.SettleAction
 import com.grup.models.TransactionRecord
-import com.grup.models.User
 import com.grup.models.UserInfo
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 internal class SettleActionDetailsViewModel(private val actionId: String) : LoggedInViewModel() {
-    public override val userObject: User
-        get() = super.userObject
 
     private val _settleActionsFlow = apiServer.getAllSettleActionsAsFlow()
 
     val settleAction: StateFlow<SettleAction> = _settleActionsFlow.map { settleActions ->
-        settleActions.find { it.id == actionId }!!
+        settleActions.find { it.id == actionId } ?: throw NotFoundException()
     }.asState()
 
     private val _myUserInfosFlow = apiServer.getMyUserInfosAsFlow()

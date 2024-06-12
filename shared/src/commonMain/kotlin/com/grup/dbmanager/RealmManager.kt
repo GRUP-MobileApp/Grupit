@@ -67,6 +67,9 @@ internal open class RealmManager protected constructor(
     private val app: App
         get() = if (isDebug) debugApp else releaseApp
 
+    override val userId: String
+        get() = app.currentUser?.id ?: throw NotLoggedInException()
+
     override val authProvider: AuthManager.AuthProvider
         get() = app.currentUser?.let { user ->
             when (user.identities.first().provider) {
@@ -269,18 +272,14 @@ internal open class RealmManager protected constructor(
     }
 
     override suspend fun logOut() {
-        app.currentUser?.apply {
-            this.logOut()
-            closeRealmManager()
-        } ?: throw NotLoggedInException()
+        app.currentUser?.apply { logOut() }
+        closeRealmManager()
     }
 
     override suspend fun deleteUser() {
-        app.currentUser?.apply {
-            closeRealmManager()
-            realm.close()
-            this.delete()
-        } ?: throw NotLoggedInException()
+        app.currentUser?.apply { delete() } ?: NotLoggedInException()
+        closeRealmManager()
+        realm.close()
     }
 
     private fun closeRealmManager() {

@@ -3,16 +3,12 @@ package com.grup.ui.viewmodel
 import com.grup.exceptions.UserNotInGroupException
 import com.grup.models.DebtAction
 import com.grup.models.TransactionRecord
-import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.ui.compose.roundTwoDecimalPlaces
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 internal class DebtActionViewModel(private val selectedGroupId: String) : LoggedInViewModel() {
-    public override val userObject: User
-        get() = super.userObject
-
     private val _userInfosFlow = apiServer.getAllUserInfosAsFlow()
         .map { userInfos ->
             userInfos.filter { userInfo ->
@@ -23,7 +19,7 @@ internal class DebtActionViewModel(private val selectedGroupId: String) : Logged
 
     private val myUserInfo: StateFlow<UserInfo?> = _userInfosFlow.map { userInfos ->
         userInfos.find { userInfo ->
-            userInfo.user.id == userObject.id
+            userInfo.user.id == userId
         }
     }.asState()
 

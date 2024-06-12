@@ -3,11 +3,11 @@ package com.grup.android.ui
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.grup.android.ExceptionHandler
 import com.grup.device.DeviceManager
 import com.grup.di.initDeviceManager
 import com.grup.platform.notification.NotificationManager
@@ -18,6 +18,7 @@ import com.grup.ui.compose.Application
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 //        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
 
         AppUpdateManagerFactory.create(applicationContext).let { appUpdateManager ->

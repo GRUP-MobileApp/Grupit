@@ -104,86 +104,101 @@ private fun AccountSettingsLayout(
         error = null
     }
 
-    AnimatedContent(
-        targetState = currentPage,
-        transitionSpec = {
-            if (targetState.pageNumber > initialState.pageNumber) {
-                (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
-                    slideOutHorizontally { height -> -height } + fadeOut())
-            } else {
-                (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(
-                    slideOutHorizontally { height -> height } + fadeOut())
-            }.using(
-                SizeTransform(clip = false)
-            )
-        }
-    ) { page ->
-        when(page) {
-            Pages.MAIN_SETTINGS_PAGE -> MainSettingsPage(
-                accountSettingsViewModel = accountSettingsViewModel,
-                changePageEditProfilePage = { currentPage = Pages.EDIT_PROFILE_PAGE },
-                logOutOnClick = {
-                    accountSettingsViewModel.logOut {
-                        navigator.popUntilRoot()
-                    }
-                }
-            )
-            Pages.EDIT_PROFILE_PAGE -> EditProfilePage(
-                scaffoldState = editProfilePageScaffoldState,
-                user = accountSettingsViewModel.userObject,
-                onBackPress = { currentPage = Pages.MAIN_SETTINGS_PAGE },
-                updateProfilePicture = { pfpBitmap ->
-                    accountSettingsViewModel.editProfilePicture(pfpBitmap)
-                },
-                changePageEditDisplayName = { currentPage = Pages.EDIT_DISPLAY_NAME_PAGE },
-                changePageEditVenmoUsername = { currentPage = Pages.EDIT_VENMO_USERNAME_PAGE },
-                deleteAccount = {
-                    accountSettingsViewModel.deleteAccount(
-                        onSuccess = {
-                            navigator.popUntilRoot()
-                        },
-                        onError = {
-                            it?.let { message ->
-                                scope.launch {
-                                    editProfilePageScaffoldState.snackbarHostState
-                                        .showSnackbar(message)
-                                }
-                            }
-                        }
-                    )
-                }
-            )
-            Pages.EDIT_DISPLAY_NAME_PAGE -> EditDisplayNamePage(
-                displayName = accountSettingsViewModel.userObject.displayName,
-                error = error,
-                onBackPress = returnEditProfilePage,
-                editDisplayName = { displayName ->
-                    accountSettingsViewModel.editUser(
-                        onSuccess = returnEditProfilePage,
-                        onError = { error = it }
-                    ) { this.displayName = displayName }
-                }
-            )
-            Pages.EDIT_VENMO_USERNAME_PAGE -> EditVenmoUsernamePage(
-                venmoUsername = accountSettingsViewModel.userObject.venmoUsername,
-                error = error,
-                onBackPress = returnEditProfilePage,
-                editVenmoUserName = { venmoUsername ->
-                    accountSettingsViewModel.editUser(
-                        onSuccess = returnEditProfilePage,
-                        onError = { error = it }
-                    ) { this.venmoUsername = venmoUsername }
-                }
-            )
+    val logOut: () -> Unit = {
+        accountSettingsViewModel.logOut {
+            navigator.popUntilRoot()
         }
     }
+
+    accountSettingsViewModel.user?.let { user ->
+        AnimatedContent(
+            targetState = currentPage,
+            transitionSpec = {
+                if (targetState.pageNumber > initialState.pageNumber) {
+                    (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
+                        slideOutHorizontally { height -> -height } + fadeOut())
+                } else {
+                    (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(
+                        slideOutHorizontally { height -> height } + fadeOut())
+                }.using(
+                    SizeTransform(clip = false)
+                )
+            }
+        ) { page ->
+            when (page) {
+                Pages.MAIN_SETTINGS_PAGE -> MainSettingsPage(
+                    accountSettingsViewModel = accountSettingsViewModel,
+                    changePageEditProfilePage = { currentPage = Pages.EDIT_PROFILE_PAGE },
+                    logOut = logOut
+                )
+
+                Pages.EDIT_PROFILE_PAGE -> EditProfilePage(
+                    scaffoldState = editProfilePageScaffoldState,
+                    user = user,
+                    onBackPress = { currentPage = Pages.MAIN_SETTINGS_PAGE },
+                    updateProfilePicture = { pfpBitmap ->
+                        accountSettingsViewModel.editProfilePicture(pfpBitmap)
+                    },
+                    changePageEditDisplayName = { currentPage = Pages.EDIT_DISPLAY_NAME_PAGE },
+                    changePageEditVenmoUsername = {
+                        currentPage = Pages.EDIT_VENMO_USERNAME_PAGE
+                    },
+                    deleteAccount = {
+                        accountSettingsViewModel.deleteAccount(
+                            onSuccess = {
+                                navigator.popUntilRoot()
+                            },
+                            onError = {
+                                it?.let { message ->
+                                    scope.launch {
+                                        editProfilePageScaffoldState.snackbarHostState
+                                            .showSnackbar(message)
+                                    }
+                                }
+                            }
+                        )
+                    }
+                )
+
+                Pages.EDIT_DISPLAY_NAME_PAGE -> EditDisplayNamePage(
+                    displayName = user.displayName,
+                    error = error,
+                    onBackPress = returnEditProfilePage,
+                    editDisplayName = { displayName ->
+                        accountSettingsViewModel.editUser(
+                            onSuccess = returnEditProfilePage,
+                            onError = { error = it }
+                        ) { this.displayName = displayName }
+                    }
+                )
+
+                Pages.EDIT_VENMO_USERNAME_PAGE -> EditVenmoUsernamePage(
+                    venmoUsername = user.venmoUsername ?: "",
+                    error = error,
+                    onBackPress = returnEditProfilePage,
+                    editVenmoUserName = { venmoUsername ->
+                        accountSettingsViewModel.editUser(
+                            onSuccess = returnEditProfilePage,
+                            onError = { error = it }
+                        ) {
+                            if (venmoUsername.isBlank()) {
+                                this.venmoUsername = null
+                            } else {
+                                this.venmoUsername = venmoUsername
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    } ?: run(logOut)
 }
 
 @Composable
 private fun MainSettingsPage(
     accountSettingsViewModel: AccountSettingsViewModel,
     changePageEditProfilePage: () -> Unit,
-    logOutOnClick: () -> Unit
+    logOut: () -> Unit
 ) {
     val groupNotificationEntries: SnapshotStateMap<String, Boolean> = remember {
         mutableStateMapOf<String, Boolean>().apply {
@@ -210,11 +225,13 @@ private fun MainSettingsPage(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        item {
-            ProfileSettings(
-                user = accountSettingsViewModel.userObject,
-                onEditProfile = changePageEditProfilePage
-            )
+        accountSettingsViewModel.user?.let { user ->
+            item {
+                ProfileSettings(
+                    user = user,
+                    onEditProfile = changePageEditProfilePage
+                )
+            }
         }
         item {
             Caption(
@@ -226,17 +243,17 @@ private fun MainSettingsPage(
             NotificationSettings(
                 groupNotificationEntries = groupNotificationEntries,
                 toggleGroupNotification = { notificationName ->
-                    groupNotificationEntries[notificationName] =
-                        accountSettingsViewModel.toggleGroupNotificationType(
-                            *AccountSettingsViewModel.groupNotificationEntries[notificationName]!!
-                        )
+                    AccountSettingsViewModel.groupNotificationEntries[notificationName]?.let {
+                        groupNotificationEntries[notificationName] =
+                            accountSettingsViewModel.toggleGroupNotificationType(*it)
+                    }
                 }
             )
         }
         item {
             H1ErrorTextButton(
                 text = "Log Out",
-                onClick = logOutOnClick,
+                onClick = logOut,
                 scale = 0.9f
             )
         }
@@ -345,7 +362,7 @@ private fun EditProfilePage(
 
     val settingsMap: Map<String, Pair<String, () -> Unit>> = mapOf(
         "Display Name" to Pair(user.displayName, changePageEditDisplayName),
-        "Venmo Username" to Pair(user.venmoUsername, changePageEditVenmoUsername)
+        "Venmo Username" to Pair(user.venmoUsername ?: "Not set", changePageEditVenmoUsername)
     )
 
     var showDeleteAccountDialog: Boolean by remember { mutableStateOf(false) }
@@ -494,7 +511,7 @@ private fun EditVenmoUsernamePage(
     onBackPress: () -> Unit,
     editVenmoUserName: (String) -> Unit
 ) {
-    var username: String by remember { mutableStateOf(venmoUsername) }
+    var username: String by remember { mutableStateOf(venmoUsername ?: "") }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {

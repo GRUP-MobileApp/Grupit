@@ -12,7 +12,7 @@ actual class AppleSignInManager(
     private val authorizationController: ASAuthorizationController by
         lazy { getAuthorizationController() }
 
-    override suspend fun signIn(block: (String, String?) -> Unit) {
+    override suspend fun signIn(block: suspend (String, String?) -> Unit) {
         try {
             SettingsManager.LoginSettings.appleSignInStatus = null
             authorizationController.performRequests()
@@ -21,7 +21,7 @@ actual class AppleSignInManager(
         }
 
         // Check local settings for updates to sign in status
-        repeat(4 * 60 * 5) {
+        repeat( 4 * 60 * 3) {
             with(SettingsManager.LoginSettings.appleSignInStatus) {
                 if (this != null) {
                     (this as? AppleSignInResult.Success)
@@ -30,6 +30,7 @@ actual class AppleSignInManager(
                     if (this is AppleSignInResult.Failed) {
                         throw CancelledSignInException()
                     }
+                    return
                 }
             }
             delay(250)

@@ -1,6 +1,5 @@
 package com.grup.device
 
-import com.grup.exceptions.MissingFieldException
 import com.grup.interfaces.ISettingsDataStore
 import com.grup.repositories.SettingsDataStore
 

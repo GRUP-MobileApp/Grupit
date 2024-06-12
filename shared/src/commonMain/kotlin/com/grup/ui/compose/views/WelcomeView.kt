@@ -7,20 +7,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -72,19 +71,13 @@ internal class WelcomeView(private val name: String? = null) : Screen {
         val welcomeViewModel = rememberScreenModel { WelcomeViewModel(name) }
         val navigator = LocalNavigator.currentOrThrow
 
-        WelcomeLayout(
-            welcomeViewModel = welcomeViewModel,
-            navigator = navigator
-        )
+        WelcomeLayout(welcomeViewModel = welcomeViewModel, navigator = navigator)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun WelcomeLayout(
-    welcomeViewModel: WelcomeViewModel,
-    navigator: Navigator
-) {
+private fun WelcomeLayout(welcomeViewModel: WelcomeViewModel, navigator: Navigator) {
     val mediaFactory = rememberMediaPickerControllerFactory()
     val picker = remember(mediaFactory) { mediaFactory.createMediaPickerController() }
     BindMediaPickerEffect(picker)
@@ -109,6 +102,7 @@ private fun WelcomeLayout(
         modifier = Modifier
             .fillMaxSize()
             .background(AppTheme.colors.primary)
+            .windowInsetsPadding(WindowInsets.systemBars)
             .padding(AppTheme.dimensions.appPadding)
     ) {
         HorizontalPager(
@@ -167,7 +161,10 @@ private fun WelcomeLayout(
                     1 -> if (
                         usernameValidity is WelcomeViewModel.NameValidity.Valid &&
                         displayNameValidity is WelcomeViewModel.NameValidity.Valid &&
-                        venmoUsernameValidity is WelcomeViewModel.NameValidity.Valid
+                        (
+                            venmoUsernameValidity is WelcomeViewModel.NameValidity.Valid ||
+                            venmoUsernameValidity is WelcomeViewModel.NameValidity.None
+                        )
                     ) {
                         scope.launch { pagerState.scrollToPage(page + 1) }
                     }

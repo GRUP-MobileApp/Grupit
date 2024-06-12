@@ -4,6 +4,7 @@ import com.grup.models.BaseEntity
 import com.grup.platform.signin.AuthManager
 
 internal sealed class DatabaseManager {
+    abstract val userId: String
     abstract val authProvider: AuthManager.AuthProvider
 
     abstract inner class DatabaseWriteTransaction {

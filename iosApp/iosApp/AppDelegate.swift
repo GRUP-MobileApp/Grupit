@@ -38,6 +38,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         )
         application.registerForRemoteNotifications()
         
+        if let window = UIApplication.shared.windows.first {
+            window.isOpaque = false
+            window.backgroundColor = .clear
+        }
+        
         return true
     }
     

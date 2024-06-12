@@ -8,9 +8,7 @@ import dev.icerock.moko.media.Bitmap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal class WelcomeViewModel(
-    val name: String? = null
-) : LoggedInViewModel() {
+internal class WelcomeViewModel(val name: String? = null) : LoggedInViewModel() {
     private val validationService: ValidationService = ValidationService()
 
     sealed class NameValidity {
@@ -24,7 +22,7 @@ internal class WelcomeViewModel(
     val usernameValidity: StateFlow<NameValidity> = _usernameValidity
 
     private val _displayNameValidity = MutableStateFlow(
-        if (name != null) NameValidity.Valid
+        if (!name.isNullOrBlank()) NameValidity.Valid
         else NameValidity.None
     )
     val displayNameValidity: StateFlow<NameValidity> = _displayNameValidity

@@ -37,15 +37,19 @@ internal class SyncedUserRepository(
         copyToRealm(
             RealmUser(realm.syncSession.user, username).apply {
                 this.displayName = displayName
-                this.venmoUsername = venmoUsername ?: "None"
+                this.venmoUsername = venmoUsername
             },
             UpdatePolicy.ERROR
         )
     }
 
-    override fun findMyUser(): RealmUser? {
+    override fun findMyUser(checkDB: Boolean): RealmUser? {
         return realm.subscriptions.findByName("MyUser")!!.asQuery<RealmUser>().first().find()
-            ?: runBlocking { findMyUser(realm.syncSession.user.id) }
+            ?: if (checkDB) {
+                runBlocking { findMyUser(realm.syncSession.user.id) }
+            } else {
+                null
+            }
     }
 
     override suspend fun findUserByUsername(username: String): RealmUser? {

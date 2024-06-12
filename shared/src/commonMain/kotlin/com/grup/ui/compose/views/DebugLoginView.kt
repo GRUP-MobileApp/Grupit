@@ -53,18 +53,12 @@ internal class DebugLoginView : Screen {
         val loginViewModel = rememberScreenModel { LoginViewModel(true) }
         val navigator = LocalNavigator.currentOrThrow
 
-        DebugLoginLayout(
-            loginViewModel = loginViewModel,
-            navigator = navigator
-        )
+        DebugLoginLayout(loginViewModel = loginViewModel, navigator = navigator)
     }
 }
 
 @Composable
-private fun DebugLoginLayout(
-    loginViewModel: LoginViewModel,
-    navigator: Navigator
-) {
+private fun DebugLoginLayout(loginViewModel: LoginViewModel, navigator: Navigator) {
     var email: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
     var password: TextFieldValue by remember { mutableStateOf(TextFieldValue()) }
 
@@ -97,7 +91,6 @@ private fun DebugLoginLayout(
                 color = AppTheme.colors.onSecondary
             )
         )
-
     }
     Column(
         modifier = Modifier

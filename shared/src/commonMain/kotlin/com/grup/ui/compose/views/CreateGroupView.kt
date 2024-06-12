@@ -37,18 +37,12 @@ internal class CreateGroupView : Screen {
         val createGroupViewModel = rememberScreenModel { CreateGroupViewModel() }
         val navigator = LocalNavigator.currentOrThrow
 
-        CreateGroupLayout(
-            createGroupViewModel = createGroupViewModel,
-            navigator = navigator
-        )
+        CreateGroupLayout(createGroupViewModel = createGroupViewModel, navigator = navigator)
     }
 }
 
 @Composable
-private fun CreateGroupLayout(
-    createGroupViewModel: CreateGroupViewModel,
-    navigator: Navigator
-) {
+private fun CreateGroupLayout(createGroupViewModel: CreateGroupViewModel, navigator: Navigator) {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 

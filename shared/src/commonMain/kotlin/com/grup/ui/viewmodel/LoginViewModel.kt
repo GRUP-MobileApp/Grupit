@@ -7,7 +7,6 @@ import com.grup.device.DeviceManager
 import com.grup.exceptions.login.CancelledSignInException
 import com.grup.exceptions.login.LoginException
 import com.grup.exceptions.login.SignInException
-import com.grup.exceptions.login.UserObjectNotFoundException
 import com.grup.platform.signin.AuthManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -16,8 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.context.loadKoinModules
-import org.koin.dsl.module
 
 internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenModel, KoinComponent {
     private val deviceManager: DeviceManager by inject()
@@ -26,9 +23,7 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
 
     private fun launchJob(block: suspend CoroutineScope.() -> Unit) {
         if (currentJob?.isCompleted != false) {
-            currentJob = screenModelScope.launch {
-                block()
-            }
+            currentJob = screenModelScope.launch(block = block)
         }
     }
 
@@ -62,10 +57,9 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
         try {
             APIServer.loginEmailAndPassword(email, password).let { apiServer ->
                 injectApiServer(apiServer)
-                try {
-                    apiServer.user
+                if (apiServer.getMyUser(checkDB = true) != null) {
                     onSuccessLogin()
-                } catch (e: UserObjectNotFoundException) {
+                } else {
                     onSuccessRegister()
                 }
             }
@@ -79,20 +73,20 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
         password: String,
         onSuccessRegister: () -> Unit
     ) = launchJob {
-            _loginResult.value = LoginResult.PendingLogin(
-                AuthManager.AuthProvider.EmailPasswordRegister
-            )
-            try {
-                APIServer.registerEmailAndPassword(email, password).let { apiServer ->
-                    injectApiServer(apiServer)
-                    onSuccessRegister()
-                }
-            } catch (e: CancelledSignInException) {
-                _loginResult.value = LoginResult.None
-            } catch (e: SignInException) {
-                _loginResult.value = LoginResult.Error(e)
+        _loginResult.value = LoginResult.PendingLogin(
+            AuthManager.AuthProvider.EmailPasswordRegister
+        )
+        try {
+            APIServer.registerEmailAndPassword(email, password).let { apiServer ->
+                injectApiServer(apiServer)
+                onSuccessRegister()
             }
+        } catch (e: CancelledSignInException) {
+            _loginResult.value = LoginResult.None
+        } catch (e: SignInException) {
+            _loginResult.value = LoginResult.Error(e)
         }
+    }
 
     fun loginGoogleAccount(
         onSuccessLogin: () -> Unit,
@@ -101,15 +95,12 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
         try {
             deviceManager.authManager.googleSignInManager?.signIn { token, name ->
                 _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Google)
-                launch {
-                    APIServer.loginGoogleAccountToken(token).let { apiServer ->
-                        injectApiServer(apiServer)
-                        try {
-                            apiServer.user
-                            onSuccessLogin()
-                        } catch (e: UserObjectNotFoundException) {
-                            onSuccessRegister(name)
-                        }
+                APIServer.loginGoogleAccountToken(token).let { apiServer ->
+                    injectApiServer(apiServer)
+                    if (apiServer.getMyUser(checkDB = true) != null) {
+                        onSuccessLogin()
+                    } else {
+                        onSuccessRegister(name)
                     }
                 }
             }
@@ -127,15 +118,12 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
         try {
             deviceManager.authManager.appleSignInManager?.signIn { token, name ->
                 _loginResult.value = LoginResult.PendingLogin(AuthManager.AuthProvider.Apple)
-                launch {
-                    APIServer.loginAppleAccountToken(token).let { apiServer ->
-                        injectApiServer(apiServer)
-                        try {
-                            apiServer.user
-                            onSuccessLogin()
-                        } catch (e: UserObjectNotFoundException) {
-                            onSuccessRegister(name)
-                        }
+                APIServer.loginAppleAccountToken(token).let { apiServer ->
+                    injectApiServer(apiServer)
+                    if (apiServer.getMyUser(checkDB = true) != null) {
+                        onSuccessLogin()
+                    } else {
+                        onSuccessRegister(name)
                     }
                 }
             }
@@ -147,10 +135,6 @@ internal class LoginViewModel(private val isDebug: Boolean = false) : ScreenMode
     }
 
     private fun injectApiServer(apiServer: APIServer) {
-        loadKoinModules(
-            module {
-                single { apiServer }
-            }
-        )
+        LoggedInViewModel.apiServerInstance = apiServer
     }
 }

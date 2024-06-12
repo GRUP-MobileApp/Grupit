@@ -66,6 +66,7 @@ import com.grup.ui.compose.PagerArrowRow
 import com.grup.ui.compose.ProfileIcon
 import com.grup.ui.compose.SmallIcon
 import com.grup.ui.compose.TransactionActivityRowCard
+import com.grup.ui.compose.UserCaption
 import com.grup.ui.compose.collectAsStateWithLifecycle
 import com.grup.ui.compose.isoFullDate
 import com.grup.ui.models.TransactionActivity
@@ -79,19 +80,13 @@ internal class GroupDetailsView(private val groupId: String) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val groupDetailsViewModel = rememberScreenModel { GroupDetailsViewModel(groupId) }
 
-        GroupDetailsLayout(
-            groupDetailsViewModel = groupDetailsViewModel,
-            navigator = navigator
-        )
+        GroupDetailsLayout(groupDetailsViewModel = groupDetailsViewModel, navigator = navigator)
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun GroupDetailsLayout(
-    groupDetailsViewModel: GroupDetailsViewModel,
-    navigator: Navigator
-) {
+private fun GroupDetailsLayout(groupDetailsViewModel: GroupDetailsViewModel, navigator: Navigator) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val tutorialBottomSheetState =
@@ -100,7 +95,7 @@ private fun GroupDetailsLayout(
             confirmValueChange = { false }
         )
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         if (!groupDetailsViewModel.hasViewedTutorial) {
             scope.launch { tutorialBottomSheetState.show() }
             groupDetailsViewModel.hasViewedTutorial = true
@@ -361,7 +356,7 @@ private fun SettleActionCard(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacing)) {
             ProfileIcon(user = settleAction.userInfo.user)
-            Caption(text = "@${settleAction.userInfo.user.venmoUsername}")
+            UserCaption(user = settleAction.userInfo.user)
             MoneyAmount(moneyAmount = settleAction.remainingAmount)
         }
     }

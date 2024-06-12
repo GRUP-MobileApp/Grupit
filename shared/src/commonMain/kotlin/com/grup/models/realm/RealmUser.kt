@@ -32,8 +32,8 @@ internal class RealmUser() : User(), RealmObject {
     override var displayName: String
         get() = _displayName ?: throw MissingFieldException("User with id $_id missing displayName")
         set(value) { _displayName = value }
-    override var venmoUsername: String
-        get() = _venmoUsername ?: "None"
+    override var venmoUsername: String?
+        get() = _venmoUsername
         set(value) { _venmoUsername = value }
     override var profilePictureURL: String?
         get() = _profilePictureURL

@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -60,6 +61,7 @@ import com.grup.ui.compose.KeyPadScreenLayout
 import com.grup.ui.compose.ModalBottomSheetLayout
 import com.grup.ui.compose.MoneyAmount
 import com.grup.ui.compose.SmallIcon
+import com.grup.ui.compose.UserCaption
 import com.grup.ui.compose.UserInfoAmountsList
 import com.grup.ui.compose.UserInfoRowCard
 import com.grup.ui.compose.UserRowCard
@@ -78,21 +80,24 @@ internal class DebtActionView(private val groupId: String) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val debtActionViewModel = rememberScreenModel { DebtActionViewModel(groupId) }
 
-        DebtActionLayout(
-            debtActionViewModel = debtActionViewModel,
-            navigator = navigator
-        )
+        DebtActionLayout(debtActionViewModel = debtActionViewModel, navigator = navigator)
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun DebtActionLayout(
-    debtActionViewModel: DebtActionViewModel,
-    navigator: Navigator
-) {
+private fun DebtActionLayout(debtActionViewModel: DebtActionViewModel, navigator: Navigator) {
+    val keyboard = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
-    val addDebtorBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val addDebtorBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmValueChange = {
+            if (it == ModalBottomSheetValue.Hidden) {
+                keyboard?.hide()
+            }
+            true
+        }
+    )
 
     var currentPage: Int by remember { mutableStateOf(0) }
 
@@ -115,7 +120,7 @@ private fun DebtActionLayout(
         )
     val isValid: Boolean =
         splitStrategy.isValid(debtActionAmount, debtActionAmounts) &&
-                debtActionAmounts.keys.any { it.user.id != debtActionViewModel.userObject.id }
+                debtActionAmounts.keys.any { it.user.id != debtActionViewModel.userId }
 
     AnimatedContent(
         targetState = currentPage,
@@ -145,6 +150,7 @@ private fun DebtActionLayout(
                     currentPage = 2
                 }
             )
+
             1 -> keyPadUserInfo?.let { userInfo ->
                 EditDebtorMoneyAmountKeypadPage(
                     initialMoneyAmount = rawSplitStrategyAmounts[userInfo] ?: 0.0,
@@ -156,8 +162,9 @@ private fun DebtActionLayout(
                     onBackPress = { currentPage = 2 }
                 )
             }
+
             2 -> AddDebtorBottomSheet(
-                userInfos = userInfos.sortedBy { it.user.id != debtActionViewModel.userObject.id },
+                userInfos = userInfos.sortedBy { it.user.id != debtActionViewModel.userId },
                 addDebtorsOnClick = { selectedUsers ->
                     rawSplitStrategyAmounts.keys.minus(selectedUsers).forEach { userInfo ->
                         rawSplitStrategyAmounts.remove(userInfo)
@@ -248,25 +255,30 @@ private fun DebtActionLayout(
                     }
                 }
             }
-            3 -> DebtActionVenmoConfirmationPage(
-                debtActionAmount = debtActionAmount,
-                myUserInfo = userInfos.find { it.user.id == debtActionViewModel.userObject.id }!!,
-                debtActionAmounts = splitStrategy.generateMoneyAmounts(
-                    debtActionAmount,
-                    debtActionAmounts
-                ),
-                message = message,
-                onBackPress = { currentPage = 2 },
-                createDebtActionWithVenmo = {
-                    debtActionViewModel.createDebtActionVenmo(
-                        splitStrategy.generateMoneyAmounts(
-                            debtActionAmount,
-                            debtActionAmounts
-                        ),
-                        message
-                    ) { navigator.pop() }
-                }
-            )
+
+            3 -> userInfos.find { userInfo ->
+                userInfo.user.id == debtActionViewModel.userId
+            }?.let { userInfo ->
+                DebtActionVenmoConfirmationPage(
+                    debtActionAmount = debtActionAmount,
+                    myUserInfo = userInfo,
+                    debtActionAmounts = splitStrategy.generateMoneyAmounts(
+                        debtActionAmount,
+                        debtActionAmounts
+                    ),
+                    message = message,
+                    onBackPress = { currentPage = 2 },
+                    createDebtActionWithVenmo = {
+                        debtActionViewModel.createDebtActionVenmo(
+                            splitStrategy.generateMoneyAmounts(
+                                debtActionAmount,
+                                debtActionAmounts
+                            ),
+                            message
+                        ) { navigator.pop() }
+                    }
+                )
+            }
         }
     }
 
@@ -507,7 +519,7 @@ private fun DebtActionVenmoConfirmationPage(
                                 fontSize = AppTheme.typography.extraLargeFont,
                                 maxLines = 2
                             )
-                            Caption(text = "@${myUserInfo.user.venmoUsername}")
+                            UserCaption(user = myUserInfo.user)
                         },
                         sideContent = {
                             Caption(
@@ -520,6 +532,7 @@ private fun DebtActionVenmoConfirmationPage(
                             )
                             Caption(
                                 text = "Venmo",
+                                color = venmo,
                                 fontSize = AppTheme.typography.tinyFont
                             )
                         },
@@ -553,12 +566,16 @@ private fun DebtActionVenmoConfirmationPage(
                         )
                     }
                 }
-                items(debtActionAmounts.toList()) { (userInfo, balanceChange) ->
+                items(
+                    debtActionAmounts.toList().sortedByDescending { (userInfo, _) ->
+                        userInfo.user.id == myUserInfo.user.id
+                    }
+                ) { (userInfo, balanceChange) ->
                     UserRowCard(
                         user = userInfo.user,
                         mainContent = {
                             H1Text(text = userInfo.user.displayName)
-                            Caption(text = "@${userInfo.user.venmoUsername}")
+                            UserCaption(user = userInfo.user)
                         },
                         sideContent = {
                             Row(
@@ -567,12 +584,14 @@ private fun DebtActionVenmoConfirmationPage(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 if (userInfo.user.id != myUserInfo.user.id) {
-                                    VenmoButton(
-                                        venmoUsername = userInfo.user.venmoUsername,
-                                        amount = balanceChange,
-                                        note = message,
-                                        isRequest = true
-                                    )
+                                    userInfo.user.venmoUsername?.let { venmoUsername ->
+                                        VenmoButton(
+                                            venmoUsername = venmoUsername,
+                                            amount = balanceChange,
+                                            note = message,
+                                            isRequest = true
+                                        )
+                                    }
                                 }
                                 MoneyAmount(
                                     moneyAmount = balanceChange,

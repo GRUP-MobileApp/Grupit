@@ -52,14 +52,11 @@ internal class GroupsView: Screen {
 }
 
 @Composable
-private fun GroupsLayout(
-    groupsViewModel: GroupsViewModel,
-    navigator: Navigator
-) {
+private fun GroupsLayout(groupsViewModel: GroupsViewModel, navigator: Navigator) {
     val userInfos: List<UserInfo> by groupsViewModel.userInfosFlow.collectAsStateWithLifecycle()
 
     val myUserInfos: List<UserInfo> = userInfos.filter { userInfo ->
-        userInfo.user.id == groupsViewModel.userObject.id
+        userInfo.user.id == groupsViewModel.userId
     }
 
     Scaffold(

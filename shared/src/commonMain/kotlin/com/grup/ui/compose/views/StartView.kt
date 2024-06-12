@@ -3,8 +3,11 @@ package com.grup.ui.compose.views
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,31 +30,21 @@ internal class StartView(private val isDebug: Boolean) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val startViewModel = rememberScreenModel { StartViewModel(isDebug) }
 
-        LaunchedEffect(true) {
-            startViewModel.silentSignIn()
-        }
-
-        StartLayout(
-            startViewModel = startViewModel,
-            navigator = navigator,
-            isDebug = isDebug
-        )
+        StartLayout(startViewModel = startViewModel, navigator = navigator)
     }
 }
 
 @Composable
-private fun StartLayout(
-    startViewModel: StartViewModel,
-    navigator: Navigator,
-    isDebug: Boolean
-) {
+private fun StartLayout(startViewModel: StartViewModel, navigator: Navigator) {
     val silentSignInResult: StartViewModel.SilentSignInResult
         by startViewModel.silentSignInResult.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) { startViewModel.silentSignIn() }
 
     when(silentSignInResult) {
         is StartViewModel.SilentSignInResult.NotSignedIn -> {
             navigator.push(
-                if (isDebug) {
+                if (startViewModel.isDebug) {
                     DebugLoginView()
                 } else {
                     ReleaseLoginView()
@@ -68,9 +61,8 @@ private fun StartLayout(
             startViewModel.consumeSilentSignInResult()
         }
         is StartViewModel.SilentSignInResult.Error -> {
-            // TODO: Handle error
             navigator.push(
-                if (isDebug) {
+                if (startViewModel.isDebug) {
                     DebugLoginView()
                 } else {
                     ReleaseLoginView()
@@ -83,7 +75,10 @@ private fun StartLayout(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize().background(AppTheme.colors.primary)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppTheme.colors.primary)
+            .windowInsetsPadding(WindowInsets.systemBars)
     ) {
         Image(
             painter = painterResource(MR.images.grup_logo),

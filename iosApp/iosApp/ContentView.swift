@@ -12,7 +12,7 @@ import shared
 struct ContentView: View {
     private struct ComposeView: UIViewControllerRepresentable {
         func makeUIViewController(context: Context) -> UIViewController {
-            return ApplicationControllerKt.ReleaseApplicationController()
+            return ApplicationControllerKt.ApplicationController(isDebug: false)
         }
         
         func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
@@ -21,8 +21,8 @@ struct ContentView: View {
     var body: some View {
         ComposeView()
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-            .preferredColorScheme(.dark)
-            .edgesIgnoringSafeArea(.bottom)
+            .edgesIgnoringSafeArea(.all)
+            .ignoresSafeArea(.keyboard)
     }
 }
 

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.text.NumberFormat
 
 internal actual fun getCurrencySymbol(): String =
-    NumberFormat.getCurrencyInstance().currency!!.symbol
+    NumberFormat.getCurrencyInstance().currency?.symbol ?: "$"
 
 internal actual fun Double.asMoneyAmount(): String =
     NumberFormat

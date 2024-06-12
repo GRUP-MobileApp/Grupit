@@ -44,8 +44,8 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
         }
     }
 
-    fun getMyUser(): User? {
-        return userRepository.findMyUser()
+    fun getMyUser(checkDB: Boolean = false): User? {
+        return userRepository.findMyUser(checkDB)
     }
 
     suspend fun getUserByUsername(username: String): User? {
@@ -58,8 +58,11 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
     suspend fun updateUser(user: User, block: User.() -> Unit): User = dbManager.write {
         userRepository.updateUser(this, user) {
             apply(block)
+            if (venmoUsername?.isEmpty() == true) {
+                venmoUsername = null
+            }
             validationService.validateName(displayName)
-            validationService.validateVenmoUsername(venmoUsername)
+            venmoUsername?.let { validationService.validateVenmoUsername(it) }
         }
     }
 
@@ -81,7 +84,7 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
         }
     }
 
-    suspend fun deleteUser(user: User, onSuccess: () -> Unit) {
+    suspend fun deleteUser(user: User) {
         val myUserInfos: List<UserInfo> =
             userInfoRepository.findMyUserInfosAsFlow(false).first()
         // Check for all 0 balance
@@ -169,8 +172,6 @@ internal class UserService(private val dbManager: DatabaseManager) : KoinCompone
                     removeUser()
                 }
             }
-
-            onSuccess()
 
             // Delete User
             userRepository.deleteUser(this, user)

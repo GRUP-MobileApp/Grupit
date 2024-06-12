@@ -11,7 +11,7 @@ internal interface IUserRepository : IRepository {
         venmoUsername: String? = null
     ): User?
 
-    fun findMyUser(): User?
+    fun findMyUser(checkDB: Boolean): User?
 
     suspend fun findUserByUsername(username: String): User?
 

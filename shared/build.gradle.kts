@@ -81,7 +81,6 @@ kotlin {
                 implementation("dev.icerock.moko:resources-compose:$mokoResourcesVersion")
                 implementation("dev.icerock.moko:media:0.11.0")
                 implementation("dev.icerock.moko:media-compose:0.11.0")
-                implementation("dev.icerock.moko:permissions-compose:0.16.0")
 
                 // Kamel
                 implementation("media.kamel:kamel-image:$kamelVersion")

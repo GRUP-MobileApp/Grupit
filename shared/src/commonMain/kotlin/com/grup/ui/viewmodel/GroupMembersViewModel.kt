@@ -16,7 +16,7 @@ internal class GroupMembersViewModel(private val selectedGroupId: String) : Logg
             userInfos.filter { userInfo ->
                 userInfo.group.id == selectedGroupId
             }.sortedBy { userInfo ->
-                if (userInfo.user.id == userObject.id) "" else userInfo.user.displayName
+                if (userInfo.user.id == userId) "" else userInfo.user.displayName
             }
         }.asState()
 
@@ -38,7 +38,7 @@ internal class GroupMembersViewModel(private val selectedGroupId: String) : Logg
         _inviteResult.value = InviteResult.Pending
         launchJob {
             try {
-                userInfos.value.find { it.user.id == userObject.id }?.let { myUserInfo ->
+                userInfos.value.find { it.user.id == userId}?.let { myUserInfo ->
                     apiServer.createGroupInvite(myUserInfo, username)
                     _inviteResult.value = InviteResult.Sent
                 } ?: throw UserNotInGroupException()
@@ -51,7 +51,7 @@ internal class GroupMembersViewModel(private val selectedGroupId: String) : Logg
     fun leaveGroup(onSuccess: () -> Unit, onError: (String?) -> Unit) = launchJob {
         try {
             userInfos.value.find { userInfo ->
-                userInfo.user.id == userObject.id
+                userInfo.user.id == userId
             }?.let { userInfo ->
                 apiServer.leaveGroup(userInfo)
                 onSuccess()

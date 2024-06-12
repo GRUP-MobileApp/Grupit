@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -25,14 +26,15 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.grup.models.SettleAction
+import com.grup.models.User
 import com.grup.models.UserInfo
 import com.grup.ui.apptheme.AppTheme
-import com.grup.ui.compose.Caption
 import com.grup.ui.compose.H1ConfirmTextButton
 import com.grup.ui.compose.H1Text
 import com.grup.ui.compose.KeyPadScreenLayout
 import com.grup.ui.compose.ModalBottomSheetLayout
 import com.grup.ui.compose.MoneyAmount
+import com.grup.ui.compose.UserCaption
 import com.grup.ui.compose.UserRowCard
 import com.grup.ui.compose.VenmoButton
 import com.grup.ui.compose.asPureMoneyAmount
@@ -51,7 +53,7 @@ internal class SettleActionTransactionView(private val actionId: String) : Scree
             rememberScreenModel { SettleActionTransactionViewModel(actionId) }
         val navigator = LocalNavigator.currentOrThrow
 
-        SettleActionLayout(
+        SettleActionTransactionLayout(
             settleActionTransactionViewModel = settleActionTransactionViewModel,
             navigator = navigator
         )
@@ -60,7 +62,7 @@ internal class SettleActionTransactionView(private val actionId: String) : Scree
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun SettleActionLayout(
+private fun SettleActionTransactionLayout(
     settleActionTransactionViewModel: SettleActionTransactionViewModel,
     navigator: Navigator
 ) {
@@ -79,60 +81,16 @@ private fun SettleActionLayout(
     val maxTransactionAmount: Double =
         min(abs(min(myUserInfo?.userBalance ?: 0.0, 0.0)), settleAction.remainingAmount)
 
-    ModalBottomSheetLayout(
+    VenmoConfirmationBottomSheet(
         sheetState = venmoConfirmationBottomSheetState,
-        sheetContent = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppTheme.dimensions.appPadding)
-            ) {
-                H1Text(text = "Settle Transaction")
-                with(settleAction.userInfo) {
-                    UserRowCard(
-                        user = user,
-                        mainContent = {
-                            H1Text(text = user.displayName)
-                            Caption(text = "@${user.venmoUsername}")
-                        },
-                        sideContent = {
-                            Row(
-                                horizontalArrangement =
-                                Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                VenmoButton(
-                                    venmoUsername = user.venmoUsername,
-                                    amount = settleActionTransactionAmount.toDouble(),
-                                    note = "Grupit Settlement",
-                                    isRequest = true
-                                )
-                                MoneyAmount(
-                                    moneyAmount = settleActionTransactionAmount.toDouble(),
-                                    color = AppTheme.colors.onSecondary
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(AppTheme.dimensions.itemRowCardHeight)
-                    )
-                    H1ConfirmTextButton(
-                        text = "Confirm",
-                        onClick = {
-                            settleActionTransactionViewModel.createSettleActionTransaction(
-                                amount = settleActionTransactionAmount.toDouble(),
-                                onSuccess = {
-                                    navigator.popUntil { it is GroupDetailsView }
-                                },
-                                onError = { }
-                            )
-                        }
-                    )
-                }
-            }
+        settleActionTransactionAmount = settleActionTransactionAmount,
+        user = settleAction.userInfo.user,
+        createSettleActionTransaction = {
+            settleActionTransactionViewModel.createSettleActionTransaction(
+                amount = settleActionTransactionAmount,
+                onSuccess = { navigator.popUntil { it is GroupDetailsView } },
+                onError = { }
+            )
         }
     ) {
         KeyPadScreenLayout(
@@ -155,4 +113,64 @@ private fun SettleActionLayout(
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun VenmoConfirmationBottomSheet(
+    sheetState: ModalBottomSheetState,
+    user: User,
+    settleActionTransactionAmount: Double,
+    createSettleActionTransaction: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimensions.spacingLarge),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppTheme.dimensions.appPadding)
+            ) {
+                H1Text(text = "Settle Transaction")
+                UserRowCard(
+                    user = user,
+                    mainContent = {
+                        H1Text(text = user.displayName)
+                        UserCaption(user = user)
+                    },
+                    sideContent = {
+                        Row(
+                            horizontalArrangement =
+                            Arrangement.spacedBy(AppTheme.dimensions.spacingMedium),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            user.venmoUsername?.let { venmoUsername ->
+                                VenmoButton(
+                                    venmoUsername = venmoUsername,
+                                    amount = settleActionTransactionAmount,
+                                    note = "Grupit Settlement",
+                                    isRequest = true
+                                )
+                            }
+                            MoneyAmount(
+                                moneyAmount = settleActionTransactionAmount,
+                                color = AppTheme.colors.onSecondary
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(AppTheme.dimensions.itemRowCardHeight)
+                )
+                H1ConfirmTextButton(
+                    text = "Confirm",
+                    onClick = createSettleActionTransaction
+                )
+            }
+        },
+        content = content
+    )
 }

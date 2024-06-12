@@ -15,7 +15,9 @@ internal class ValidationService {
         if (username.isBlank()) {
             throw ValidationException("Username cannot be blank")
         } else if (!username.matches(usernameRegex)) {
-            throw ValidationException("Only alphanumeric characters, \' . \', \' - \', and \' _ \' are allowed")
+            throw ValidationException(
+                "Only alphanumeric characters, \' . \', \' - \', and \' _ \' are allowed"
+            )
         } else if (username.length > 12) {
             throw ValidationException("Max 12 characters")
         } else if (username.length < 5) {
@@ -37,7 +39,9 @@ internal class ValidationService {
         if (venmoUsername.isBlank() && !allowBlank) {
             throw ValidationException("Name cannot be blank")
         } else if (!venmoUsername.matches(usernameRegex)) {
-            throw ValidationException("Contains invalid characters")
+            throw ValidationException(
+                "Only alphanumeric characters, \' . \', \' - \', and \' _ \' are allowed"
+            )
         } else if (venmoUsername.length > 30) {
             throw ValidationException("Max 30 characters")
         }
